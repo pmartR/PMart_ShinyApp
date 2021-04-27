@@ -1,0 +1,210 @@
+list(
+
+output$edata_UI <- renderUI({
+  if(two_lipids()){
+    tagList(
+      HTML("<p style = 'font-weight:bold'>Upload CSV Data Files for Positive and Negative Lipids</p>"),
+      splitLayout(cellArgs = list(style = 'overflow-x:hidden'),
+                  div(id = 'js_file_edata',
+                      fileInput('file_edata', label = NULL,
+                                multiple = FALSE,
+                                accept = c('text/csv',
+                                           'text/comma-separated-values,text/plain',
+                                           '.csv'))
+                  ),
+                  div(id = 'js_file_edata_2',
+                      fileInput('file_edata_2', label = NULL,
+                                multiple = FALSE,
+                                accept = c('text/csv',
+                                           'text/comma-separated-values,text/plain',
+                                           '.csv'))
+                  )
+      )
+    )
+  }
+  else{
+    div(id = 'js_file_edata',
+        fileInput('file_edata', 'Upload CSV Data File',
+                  multiple = FALSE,
+                  accept = c('text/csv',
+                             'text/comma-separated-values,text/plain',
+                             '.csv'))
+    )
+  }
+}),
+
+# mass id column identifiers
+output$id_col <- renderUI({
+  if(two_lipids()){
+    choices_1 = colnames(e_data())
+    choices_2 = colnames(e_data_2())
+    tagList(
+      HTML("<p style = 'font-weight:bold'>What columns in each dataset specify unique biomolecules?</p>"),
+      fluidRow(
+        column(6, pickerInput('id_col', choices = choices_1)),
+        column(6, pickerInput('id_col_2', choices = choices_2))
+      )
+    )
+  }
+  else{
+    choices = colnames(e_data())
+    pickerInput('id_col', "What column identifies unique molecules?", choices = choices)
+  }
+}),
+
+# select data scale
+output$datascale_UI <- renderUI({
+  pickerInput('data_scale', 'On what scale is your data?', 
+              choices = list('Raw intensity'='abundance', 'Log base 2' = 'log2', 'Log base 10'='log10', 'Natural log'='log'),
+              selected = 'abundance')
+}),
+
+# transform to what scale?
+output$transform <- renderUI({
+  choices = list('Raw intensity'='abundance', 'Log base 2' = 'log2', 'Log base 10'='log10', 'Natural log'='log')
+  pickerInput('transform', 'Transform data to:', choices = c('Select one', choices))
+}),
+
+# normalized or not?
+output$normalized_UI <- renderUI({
+  radioGroupButtons('normalized_yn', 'Has your data been normalized?', 
+                    choices = c('Yes'=1, 'No'=0), 
+                    selected = 0)
+}),
+
+# select which column contains protein ID
+# if not protein data or there is no e_meta, then simply pass a random column or NULL
+output$promap_UI <- renderUI({
+  req(input$id_col %in% colnames(revals$e_meta))
+  
+  if(input$datatype == 'pep' & input$proteins_yn == 'TRUE'){
+    choices = colnames(revals$e_meta)[-which(colnames(revals$e_meta) == input$id_col)]
+    pickerInput('protein_column', 'Which column in your biomolecule file contains protein identifiers?', 
+                choices = c('Select a column', choices), selected = 'Select a column')
+  }
+  else{
+    choices = colnames(revals$e_meta)
+    hidden(pickerInput('protein_column', 'Which column in your biomolecule file contains protein identifiers?', 
+                       choices = choices, selected = choices[1]))
+  }
+}),
+
+# emeta upload sub-panel
+output$emeta_UI <- renderUI({
+  if(two_lipids()){
+    tagList(
+      HTML("<p style = 'font-weight:bold'>Upload CSV Biomolecule Information Files for Positive and Negative Lipids</p>"),
+      splitLayout(cellArgs = list(style = 'overflow-x:hidden'),
+                  div(id = 'js_file_emeta',
+                      fileInput('file_emeta', label = NULL,
+                                multiple = FALSE,
+                                accept = c('text/csv',
+                                           'text/comma-separated-values,text/plain',
+                                           '.csv'))
+                  ),
+                  div(id = 'js_file_emeta_2',
+                      fileInput('file_emeta_2', label = NULL,
+                                multiple = FALSE,
+                                accept = c('text/csv',
+                                           'text/comma-separated-values,text/plain',
+                                           '.csv'))
+                  )
+      )
+    )
+  }
+  else{
+    div(id = 'js_file_emeta',
+        fileInput('file_emeta', 'Upload CSV Biomolecule Information File',
+                  multiple = FALSE,
+                  accept = c('text/csv',
+                             'text/comma-separated-values,text/plain',
+                             '.csv'))
+    )
+  }
+}),
+
+# boxplots collapse panel UI elements
+output$omicsData_upload_boxplot <- renderPlot({
+  req(!is.null(objects$uploaded_omicsData))
+  p <- plot(objects$uploaded_omicsData, bw_theme = TRUE) + theme(axis.text.x = element_blank())
+  plots$last_plot <- p
+  return(p)
+}),
+
+output$omicsData_2_upload_boxplot <- renderPlot({
+  req(!is.null(objects$uploaded_omicsData_2))
+  p <- plot(objects$uploaded_omicsData_2, bw_theme = TRUE) + theme(axis.text.x = element_blank())
+  plots$last_plot_2 <- p
+  return(p)
+}),
+#
+
+# uploaded data summaries
+output$omicsData_upload_summary <- renderDT(revals$upload_summary, rownames = T, options = list(dom = 't')),
+output$omicsData_upload_summary_2 <- renderDT(revals$upload_summary_2, rownames = T, options = list(dom = 't')),
+
+# conditionally display one or two elements for...
+
+#...boxplots...
+output$upload_boxplots <- renderUI({
+  if(two_lipids()){
+    tagList(
+      div(id = 'upload_boxplots_1', style = 'border-style:solid;border-width:1px;', plotOutput('omicsData_upload_boxplot')),
+      div(id = 'upload_boxplots_2', style = 'border-style:solid;border-width:1px;', plotOutput('omicsData_2_upload_boxplot'))
+    )
+  }
+  else div(id = 'upload_boxplots_1', style = 'border-style:solid;border-width:1px;', plotOutput('omicsData_upload_boxplot'))
+}),
+#...summary tables
+output$uploaded_data_summary <- renderUI({
+  req(!is.null(revals$upload_summary), cancelOutput = TRUE)
+  wellPanel(
+    tagList(
+      tags$b('Data Summary'),
+      if(two_lipids()){
+        req(!is.null(revals$upload_summary_2), cancelOutput = TRUE)
+        splitLayout(
+          div(id = 'upload_summary_1', DTOutput('omicsData_upload_summary')),
+          div(id = 'upload_summary_2', DTOutput('omicsData_upload_summary_2'))
+        )
+      }
+      else div(id = 'upload_summary_1', DTOutput('omicsData_upload_summary'))
+    )
+  )
+}),
+#    
+  
+# collect warnings
+output$warnings_upload <- renderUI({
+  HTML(paste(revals$warnings_upload, collapse = ""))
+}),
+
+# e_data display
+output$head_edata <- DT::renderDT({
+  if(two_lipids() & input$which_table == 2){
+    tmp <- e_data_2()
+  }
+  else tmp <- e_data()
+  
+  tmp <- tmp %>% mutate_each(as.character)
+  tmp
+},
+options = list(scrollX = TRUE)),
+
+# e_meta display
+output$head_emeta <- DT::renderDT({
+  if(two_lipids() & input$which_table == 2){
+    req(!is.null(revals$e_meta_2))
+    tmp <- revals$e_meta
+  }
+  else{
+    req(!is.null(revals$e_meta))
+    tmp <- revals$e_meta
+  }
+  
+  tmp <- tmp %>% mutate_each(as.character)
+  tmp
+},
+options = list(scrollX = TRUE))
+
+)

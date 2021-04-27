@@ -1,0 +1,7 @@
+attribute,text
+cvFilt,Coefficient of Variation (CV) Filter
+imdanovaFilt,IMD-ANOVA Filter
+rmdFilt,RMD Filter
+moleculeFilt,Molecule Filter
+proteomicsFilt,Proteomics Filter
+customFilt, Custom Filter
