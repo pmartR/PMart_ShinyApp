@@ -19,25 +19,24 @@ RUN apt-get update && apt-get install -y \
     libzmq3-dev \
     libxml2-dev
     
-WORKDIR /srv/shiny-server/pmart
+WORKDIR /srv/shiny-server/
 
-# only need these three to restore
-COPY --chown=shiny:shiny renv ./renv
-COPY --chown=shiny:shiny renv.lock .
+# only need this to restore
+COPY renv.lock .
 
-# everything must be done as shiny, otherwise shiny server will get permission denied
-USER shiny
-
-# call restore()
+# pre-install renv
 RUN R -e "install.packages('renv', repos = 'https://cran.rstudio.com')"
+
+# install all packages listed in renv.lock
 RUN R -e 'renv::restore()'
 
-# renv attempts to make a directory at root on startup as user shiny.  
-# pre-make the directory and give the shiny user ownership.
-USER root
-RUN mkdir /Library
-RUN chown shiny:shiny /Library
+COPY . .
 
-COPY --chown=shiny:shiny . .
+# Make this shiny app available at port 8300
+EXPOSE 8300
+
+# Launch App
+CMD ["R", "-e", "shiny::runApp('/srv/shiny-server/', host = '0.0.0.0', port = 8300, launch.browser = FALSE)"]
+
 
 
