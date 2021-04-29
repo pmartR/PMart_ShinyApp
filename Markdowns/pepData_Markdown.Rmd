@@ -1,0 +1,20 @@
+---
+title: "Peptide Data Template"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr); library(pmartR)
+
+# This data will be passed to the markdown through shiny
+rootdir <- "/Users/degn400/Desktop/Git_Repos/pmart_standalone/Markdowns"
+pepData <- readRDS(file.path(rootdir, "pepData_upload.RDS"))
+pmart_inputs <- readRDS(file.path(rootdir, "pmart_inputs_upload.RDS"))
+```
+
+## Upload Data 
+
+
+

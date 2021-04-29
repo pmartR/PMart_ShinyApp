@@ -68,6 +68,7 @@ ui <- function(request){
                                           )
                                         )
                                       ),
+                                      actionButton("BROWSER", "Activate Browser?"),
                                       div(id = 'donebutton', style = 'float:right', actionButton('done_idcols', div("I'm done specifying values", icon('ok-sign', lib='glyphicon'))))
                                     ),
                         # upload e_meta and specify protein column sub-collapse div
