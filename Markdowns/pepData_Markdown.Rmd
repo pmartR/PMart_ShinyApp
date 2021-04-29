@@ -5,8 +5,8 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-library(dplyr); library(pmartR)
+knitr::opts_chunk$set(echo = FALSE)
+library(dplyr); library(pmartR); library(knitr); library(DT); library(ggplot2)
 
 # This data will be passed to the markdown through shiny
 rootdir <- "/Users/degn400/Desktop/Git_Repos/pmart_standalone/Markdowns"
@@ -15,6 +15,38 @@ pmart_inputs <- readRDS(file.path(rootdir, "pmart_inputs_upload.RDS"))
 ```
 
 ## Upload Data 
+
+### *Expression Data*
+
+An **`r ifelse(pmart_inputs$labeled_yn, "labelled", "unlabelled")`** peptide expression 
+data file called **"`r pmart_inputs$file_edata$name`"** was uploaded to pmart. The column 
+that designates unique molecules was marked as **"`r pmart_inputs$id_col`"**. The original
+scale of the data was **`r ifelse(pmart_inputs$data_scale == "abundance", "raw intensity", pmart_inputs$data_scale)`**
+`r ifelse(pmart_inputs$transform == "Select one", ".", paste0("and was transformed to <B>", ifelse(pmart_inputs$transform == "abundance", "raw intensity", pmart_inputs$transform), "</B>"))`. The value to denote 
+missing data was **"`r pmart_inputs$na_symbol`"** and the expression data
+**`r ifelse(pmart_inputs$normalized_yn == "0", "was not", "was")`** normalized. 
+
+```{r Upload Data: Expression Data}
+plot(pepData, bw_theme = TRUE)
+```
+
+### *Biomolecule Information*
+
+An associated biomolecule information file was also uploaded called 
+**`r pmart_inputs$file_emeta$name`** and the protein identifier column was
+designated as **"`r pmart_inputs$protein_column`"**.
+
+```{r Upload Data: Biomolecule Information}
+data.frame("Data" = summary(pepData)) %>% kable()
+```
+
+## Group Samples
+
+*Sample Information:*
+
+This metadata file **`r ifelse(pmart_inputs$proteins_yn == "FALSE", "does not", "does")`**
+contain peptide to protein mappings. 
+
 
 
 
