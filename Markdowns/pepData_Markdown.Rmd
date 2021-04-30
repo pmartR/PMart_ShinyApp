@@ -11,8 +11,8 @@ library(data.table); library(patchwork); library(purrr)
 
 # This data will be passed to the markdown through shiny
 rootdir <- "/Users/degn400/Desktop/Git_Repos/pmart_standalone/Markdowns"
-pepData <- readRDS(file.path(rootdir, "pepData_groupsamples.RDS"))
-pmart_inputs <- readRDS(file.path(rootdir, "pmart_inputs_groupsamples.RDS"))
+pepData <- readRDS(file.path(rootdir, "pepData_filter.RDS"))
+pmart_inputs <- readRDS(file.path(rootdir, "pmart_inputs_filter.RDS"))
 ```
 
 ## Upload Data 
@@ -57,7 +57,7 @@ resetNULL <- function(x) {ifelse(is.null(x), "None", x)}
 data.table("Effect or Covariate" = c("First Main Effect", "Second Main Effect",
   "First Covariate", "Second Covariate"), "Set Value" = c(resetNULL(pmart_inputs$gcol1),
   resetNULL(pmart_inputs$gcol2), resetNULL(pmart_inputs$cvcol1), 
-  resetNULL(pmart_inputs$cvcol2))) #%>% kable()
+  resetNULL(pmart_inputs$cvcol2))) %>% kable()
 ```
 
 ### *Number of Samples per Main Effects*
@@ -95,7 +95,7 @@ if (is.null(pmart_inputs$gcol2) == FALSE && pmart_inputs$gcol2 != "None") {
 ### *Summary Table*
 
 ```{r Data Summary: Main Table}
-data.frame("Data" = summary(pepData)) #%>% kable()
+data.frame("Data" = summary(pepData)) %>% kable()
 ```
 
 ### *Missing Value Table*
@@ -110,13 +110,29 @@ pepData$e_data %>%
   setNames("Missing Observations") %>%
   mutate(
     "Proportion Missing" = round(`Missing Observations` / nrow(pepData$e_data), 3),
-  ) #%>% kable()
+  ) %>% kable()
 
 ```
 
 ## Filter
 
-The following filters were applied: 
+The following filters were applied with these parameters: 
+
+```{r Filter: Table Summarizing Applied Filters}
+# List the filter names to check
+filters <- c("add_molfilt", "add_cvfilt", "add_imdanovafilt", "add_profilt",
+  "add_rmdfilt", "add_customfilt")
+
+getAppliedFilter <- function(addObject) {
+  ifelse(addObject[1] == 1, "Applied", "")
+}
+
+
+`Filter Type` <- c(rep("Biomolecule", 4), rep("Sample", 2))
+#`Filter Applied` <- 
+```
+
+
 
 
 
