@@ -7,7 +7,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 library(dplyr); library(pmartR); library(knitr); library(DT); library(ggplot2);
-library(data.table); library(patchwork)
+library(data.table); library(patchwork); library(purrr)
 
 # This data will be passed to the markdown through shiny
 rootdir <- "/Users/degn400/Desktop/Git_Repos/pmart_standalone/Markdowns"
@@ -99,6 +99,25 @@ data.frame("Data" = summary(pepData)) #%>% kable()
 ```
 
 ### *Missing Value Table*
+
+```{r Data Summary: Missing Value Table}
+pepData$e_data %>%
+  select(-pmart_inputs$id_col) %>%
+  map(~sum(is.na(.))) %>%
+  data.frame() %>%
+  t() %>%
+  data.frame() %>%
+  setNames("Missing Observations") %>%
+  mutate(
+    "Proportion Missing" = round(`Missing Observations` / nrow(pepData$e_data), 3),
+  ) #%>% kable()
+
+```
+
+## Filter
+
+The following filters were applied: 
+
 
 
 
