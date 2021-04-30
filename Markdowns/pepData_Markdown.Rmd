@@ -6,12 +6,13 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
-library(dplyr); library(pmartR); library(knitr); library(DT); library(ggplot2)
+library(dplyr); library(pmartR); library(knitr); library(DT); library(ggplot2);
+library(data.table); library(patchwork)
 
 # This data will be passed to the markdown through shiny
 rootdir <- "/Users/degn400/Desktop/Git_Repos/pmart_standalone/Markdowns"
-pepData <- readRDS(file.path(rootdir, "pepData_upload.RDS"))
-pmart_inputs <- readRDS(file.path(rootdir, "pmart_inputs_upload.RDS"))
+pepData <- readRDS(file.path(rootdir, "pepData_groupsamples.RDS"))
+pmart_inputs <- readRDS(file.path(rootdir, "pmart_inputs_groupsamples.RDS"))
 ```
 
 ## Upload Data 
@@ -22,8 +23,8 @@ An **`r ifelse(pmart_inputs$labeled_yn, "labelled", "unlabelled")`** peptide exp
 data file called **"`r pmart_inputs$file_edata$name`"** was uploaded to pmart. The column 
 that designates unique molecules was marked as **"`r pmart_inputs$id_col`"**. The original
 scale of the data was **`r ifelse(pmart_inputs$data_scale == "abundance", "raw intensity", pmart_inputs$data_scale)`**
-`r ifelse(pmart_inputs$transform == "Select one", ".", paste0("and was transformed to <B>", ifelse(pmart_inputs$transform == "abundance", "raw intensity", pmart_inputs$transform), "</B>"))`. The value to denote 
-missing data was **"`r pmart_inputs$na_symbol`"** and the expression data
+`r ifelse(pmart_inputs$transform == "Select one", ".", paste0("and was transformed to <B>", ifelse(pmart_inputs$transform == "abundance", "raw intensity", pmart_inputs$transform), "</B>"))`. 
+The value to denote missing data was **"`r pmart_inputs$na_symbol`"** and the expression data
 **`r ifelse(pmart_inputs$normalized_yn == "0", "was not", "was")`** normalized. 
 
 ```{r Upload Data: Expression Data}
@@ -33,19 +34,71 @@ plot(pepData, bw_theme = TRUE)
 ### *Biomolecule Information*
 
 An associated biomolecule information file was also uploaded called 
-**`r pmart_inputs$file_emeta$name`** and the protein identifier column was
+**"`r pmart_inputs$file_emeta$name`"** and the protein identifier column was
 designated as **"`r pmart_inputs$protein_column`"**.
-
-```{r Upload Data: Biomolecule Information}
-data.frame("Data" = summary(pepData)) %>% kable()
-```
 
 ## Group Samples
 
-*Sample Information:*
+### *Sample Information*
 
-This metadata file **`r ifelse(pmart_inputs$proteins_yn == "FALSE", "does not", "does")`**
-contain peptide to protein mappings. 
+An associated sample information file was also uploaded called 
+**"`r pmart_inputs$file_fdata$name`"**. This metadata file 
+**`r ifelse(pmart_inputs$proteins_yn == "FALSE", "does not", "does")`**
+contain peptide to protein mappings. Trimmed sample names
+**`r ifelse(pmart_inputs$usevizsampnames == "No", "were not", "were")`** used. The 
+column in the sample information file which indicates sample names was 
+designated as **"`r pmart_inputs$fdata_id_col`"**.
+
+### *Grouping Information*
+
+```{r Grouping Information: Main Effects and Covariates}
+resetNULL <- function(x) {ifelse(is.null(x), "None", x)}
+
+data.table("Effect or Covariate" = c("First Main Effect", "Second Main Effect",
+  "First Covariate", "Second Covariate"), "Set Value" = c(resetNULL(pmart_inputs$gcol1),
+  resetNULL(pmart_inputs$gcol2), resetNULL(pmart_inputs$cvcol1), 
+  resetNULL(pmart_inputs$cvcol2))) #%>% kable()
+```
+
+### *Number of Samples per Main Effects*
+
+```{r Grouping Information: Bar Chart, fig.height = 10}
+# Generate plots for main effects 
+plotForMainEffects <- function(effect) {
+  count <- pepData$f_data %>%
+    select(all_of(effect)) %>%
+    table() %>%
+    as.data.table() 
+  colnames(count) <- c("Group", "Number of samples")
+  ggplot(count, aes(x = Group, y = `Number of samples`, fill = Group)) +
+    geom_bar(stat = "identity") + theme_bw() + 
+    geom_text(aes(label = `Number of samples`), 
+              position = position_dodge(width = 1), vjust = -0.25)
+}
+
+if (is.null(pmart_inputs$gcol1) == FALSE && pmart_inputs$gcol1 != "None") {
+  (plot(pepData, bw_theme = TRUE, order_by = pmart_inputs$gcol1, color_by = 
+       pmart_inputs$gcol1)) /
+  (plotForMainEffects(pmart_inputs$gcol1) + 
+    ggtitle(paste("First Main Effect:", pmart_inputs$gcol1))) 
+}
+if (is.null(pmart_inputs$gcol2) == FALSE && pmart_inputs$gcol2 != "None") {
+  (plot(pepData, bw_theme = TRUE, order_by = pmart_inputs$gcol2, color_by = 
+       pmart_inputs$gcol2)) /
+  (plotForMainEffects(pmart_inputs$gcol2) + 
+    ggtitle(paste("Second Main Effect:", pmart_inputs$gcol2))) 
+}
+```
+
+## Data Summary
+
+### *Summary Table*
+
+```{r Data Summary: Main Table}
+data.frame("Data" = summary(pepData)) #%>% kable()
+```
+
+### *Missing Value Table*
 
 
 
