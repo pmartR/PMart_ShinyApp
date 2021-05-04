@@ -5,14 +5,19 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, error = FALSE)
 library(dplyr); library(pmartR); library(knitr); library(DT); library(ggplot2);
 library(data.table); library(patchwork); library(purrr)
 
 # This data will be passed to the markdown through shiny
 rootdir <- "/Users/degn400/Desktop/Git_Repos/pmart_standalone/Markdowns"
-pepData <- readRDS(file.path(rootdir, "pepData_filter.RDS"))
-pmart_inputs <- readRDS(file.path(rootdir, "pmart_inputs_filter.RDS"))
+pepData <- readRDS(file.path(rootdir, "pepData_normalize.RDS"))
+pmart_inputs <- readRDS(file.path(rootdir, "pmart_inputs_normalize.RDS"))
+
+# Universal functions
+getAppliedFilter <- function(filterName) {
+  ifelse(pmart_inputs[[filterName]][1] == 1, "Yes", "No")
+}
 ```
 
 ## Upload Data 
@@ -59,6 +64,9 @@ data.table("Effect or Covariate" = c("First Main Effect", "Second Main Effect",
   resetNULL(pmart_inputs$gcol2), resetNULL(pmart_inputs$cvcol1), 
   resetNULL(pmart_inputs$cvcol2))) %>% kable()
 ```
+
+This table summarizes all the user specified main effects or covariates in pmart. The "Set Value"
+column denotes the name of the column in the "Sample Information" file. 
 
 ### *Number of Samples per Main Effects*
 
@@ -110,27 +118,85 @@ pepData$e_data %>%
   setNames("Missing Observations") %>%
   mutate(
     "Proportion Missing" = round(`Missing Observations` / nrow(pepData$e_data), 3),
-  ) %>% kable()
-
+  ) #%>% kable()
 ```
+
+The second column denotes the number of missing observations per sample (column 1).
+This value is also represented as a proportion of the total number of observations
+per sample (column 3).
 
 ## Filter
 
-The following filters were applied with these parameters: 
-
-```{r Filter: Table Summarizing Applied Filters}
+```{r Filter: List Filters}
 # List the filter names to check
 filters <- c("add_molfilt", "add_cvfilt", "add_imdanovafilt", "add_profilt",
   "add_rmdfilt", "add_customfilt")
+```
 
-getAppliedFilter <- function(addObject) {
-  ifelse(addObject[1] == 1, "Applied", "")
+Filters **`r ifelse("Yes" %in% lapply(filters, getAppliedFilter) %>% unlist() %>% unique(), "were", "were not")`**
+applied. 
+
+### *Summary of Applied Filters*
+
+```{r Filter: Table Summarizing Applied Filters}
+# List a table of filters 
+FilterTable <- data.table(
+  "Filter" = c("Molecule Filter", "CV Filter", "imd-ANOVA Filter", 
+               "Proteomics Filter", "rMD Filter", "Custom Filter"),
+  "Type" = c(rep("Biomolecule", 4), rep("Sample", 2)),
+  "Applied" = lapply(filters, getAppliedFilter) %>% unlist(),
+  "Parameters" = c(
+    paste0("Molecule Number Min: ", pmart_inputs$mol_min_num),
+    paste0("Max CV: ", pmart_inputs$cv_threshold),
+    paste0("ANOVA Min: ", pmart_inputs$min_nonmiss_anova, " & ",
+           "G-test Min: ", pmart_inputs$min_nonmiss_gtest),
+    paste0("Peptide Number Min: ", pmart_inputs$min_num_peps, " & ",
+           "Remove Degenerates: ", ifelse(pmart_inputs$degen_peps, "Yes", "No")),
+    paste0("P-Value Threshold: ", pmart_inputs$pvalue_threshold, " & ",
+           "Outlier Metrics: ", pmart_inputs$rmd_metrics %>% paste(collapse = ", ")),
+    paste0("Samples with ", paste(c(pmart_inputs$fdata_customfilt_choices, 
+           pmart_inputs$fdata_customfilt_regex), collapse = " "), "were ",
+           ifelse(pmart_inputs$remove_or_keep == "Remove", "removed.", "kept."))
+  )
+)
+
+FilterTable <- FilterTable[FilterTable$Applied == "Yes",] %>% kable()
+```
+
+### *Molecule Filter*
+
+A molecule filter **`r ifelse("Molecule Filter" %in% FilterTable$Filter, "was", "was not")`**
+applied.
+
+```{r Filter: Molecule Filter}
+if ("Molecule Filter" %in% FilterTable$Filter) {
+  molecule_filter(pepData) %>% plot(bw_theme = T, min_num = pmart_inputs$mol_min_num %>% as.numeric())
+}
+```
+
+
+
+
+## Normalization
+
+### *Manual*
+
+Manual normalization **`r ifelse(pmart_inputs$spans_or_manual == "manual", "was", "was not")`**
+used to normalize the data. 
+
+```{r Normalization: Summary of Manual Normalization}
+if (pmart_inputs$spans_or_manual == "manual") {
+  
 }
 
-
-`Filter Type` <- c(rep("Biomolecule", 4), rep("Sample", 2))
-#`Filter Applied` <- 
 ```
+
+
+
+### *SPANS*
+
+SPANS normalization **`r ifelse(pmart_inputs$spans_or_manual == "spans", "was", "was not")`**
+used to normalize the data.
 
 
 
