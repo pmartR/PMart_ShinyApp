@@ -11,8 +11,10 @@ library(data.table); library(patchwork); library(purrr)
 
 # This data will be passed to the markdown through shiny
 rootdir <- "/Users/degn400/Desktop/Git_Repos/pmart_standalone/Markdowns"
-pepData <- readRDS(file.path(rootdir, "pepData.RDS"))
-pepData <- applyFilt(custom_filter(pepData, f_data_remove = "Infection2"), pepData)
+pepData <- readRDS(file.path(rootdir, "pepData_filters.RDS"))
+
+
+
 pepDataAttr <- attributes(pepData)
 pmart_inputs <- readRDS(file.path(rootdir, "pmart_inputs_normalize.RDS"))
 
@@ -208,15 +210,35 @@ applied. `r ifelse("Custom Filter" %in% FilterTable$Filter, pepDataAttr$filters$
 
 ## Normalization
 
+Peptide data **`r ifelse(pepDataAttr$data_info$norm_info$is_normalized, "was", "was not")`**
+normalized.
+
 ### *Manual*
 
-Manual normalization **`r ifelse(pmart_inputs$spans_or_manual == "manual", "was", "was not")`**
+Manual normalization **`r ifelse(is.null(pepDataAttr$data_info$norm_info$norm_type) == FALSE && pepDataAttr$data_info$norm_info$norm_type == "global", "was", "was not")`**
 used to normalize the data. 
+
+```{r Normalization: Manual}
+if (is.null(pepDataAttr$data_info$norm_info$norm_type) == FALSE 
+    && pepDataAttr$data_info$norm_info$norm_type == "global") {
+  
+  SubsetParameters <- ifelse(is.null(pepDataAttr$data_info$norm_info$subset_params), "",
+    paste(lapply(names(pepDataAttr$data_info$norm_info$subset_params), function(name) {
+      paste0(name, ": ", pepDataAttr$data_info$norm_info$subset_params[[name]])}), collapse = " & "))
+  
+  data.table("Attribute" = c("Subset Function", "Subset Parameters", "Normalization Function"),
+             "Value" = c(pepDataAttr$data_info$norm_info$subset_fn, 
+                         SubsetParameters, 
+                         pepDataAttr$data_info$norm_info$norm_fn)) %>% kable()
+}
+```
 
 ### *SPANS*
 
-SPANS normalization **`r ifelse(pmart_inputs$spans_or_manual == "spans", "was", "was not")`**
+SPANS normalization **`r ifelse(is.null(pepDataAttr$data_info$norm_info$norm_type) == FALSE && pepDataAtrr$data_info$norm_info$norm_type == "spans", "was", "was not")`**
 used to normalize the data.
+
+## Protein Rollup
 
 
 
