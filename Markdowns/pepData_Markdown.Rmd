@@ -14,9 +14,22 @@ rootdir <- "/Users/degn400/Desktop/Git_Repos/pmart_standalone/Markdowns"
 pepData <- readRDS(file.path(rootdir, "pepData_normalize.RDS"))
 pmart_inputs <- readRDS(file.path(rootdir, "pmart_inputs_normalize.RDS"))
 
-# Universal functions
+#########################
+## UNIVERSAL FUNCTIONS ##
+#########################
+
+# Get whether a filter was applied or not
 getAppliedFilter <- function(filterName) {
   ifelse(pmart_inputs[[filterName]][1] == 1, "Yes", "No")
+}
+
+# Extract data from the rdb files within a package 
+extract_help <- function(pkg, fn = NULL) {
+  rdbfile <- file.path(find.package(pkg), "help", pkg)
+  rdb <- tools:::fetchRdDB(rdbfile, key = fn)
+  
+  f <- function(x) capture.output(tools::Rd2HTML(x))
+  if(is.null(fn)) lapply(rdb, f) else f(rdb)
 }
 ```
 
@@ -66,7 +79,8 @@ data.table("Effect or Covariate" = c("First Main Effect", "Second Main Effect",
 ```
 
 This table summarizes all the user specified main effects or covariates in pmart. The "Set Value"
-column denotes the name of the column in the "Sample Information" file. 
+column denotes the name of the column in the "Sample Information" file assigned as a main
+effect or covariate. 
 
 ### *Number of Samples per Main Effects*
 
@@ -103,8 +117,12 @@ if (is.null(pmart_inputs$gcol2) == FALSE && pmart_inputs$gcol2 != "None") {
 ### *Summary Table*
 
 ```{r Data Summary: Main Table}
-data.frame("Data" = summary(pepData)) %>% kable()
+pepDataSum <- data.frame("Data" = summary(pepData))
+pepDataSum %>% kable()
 ```
+
+The first column denotes a property of the peptide data, and the "Data" column
+reveals that properties' value.
 
 ### *Missing Value Table*
 
@@ -118,12 +136,12 @@ pepData$e_data %>%
   setNames("Missing Observations") %>%
   mutate(
     "Proportion Missing" = round(`Missing Observations` / nrow(pepData$e_data), 3),
-  ) #%>% kable()
+  ) %>% kable()
 ```
 
-The second column denotes the number of missing observations per sample (column 1).
-This value is also represented as a proportion of the total number of observations
-per sample (column 3).
+The first column denotes the sample and the second is the missing number of observations.
+The third column represents the second as a percentage of the total number of observations
+for that sample. 
 
 ## Filter
 
@@ -160,22 +178,95 @@ FilterTable <- data.table(
   )
 )
 
-FilterTable <- FilterTable[FilterTable$Applied == "Yes",] %>% kable()
+FilterTable <- FilterTable[FilterTable$Applied == "Yes",]
+FilterTable %>% kable()
 ```
 
 ### *Molecule Filter*
 
-A molecule filter **`r ifelse("Molecule Filter" %in% FilterTable$Filter, "was", "was not")`**
-applied.
-
 ```{r Filter: Molecule Filter}
 if ("Molecule Filter" %in% FilterTable$Filter) {
-  molecule_filter(pepData) %>% plot(bw_theme = T, min_num = pmart_inputs$mol_min_num %>% as.numeric())
+  
+  # Set up what the molecular filter was (either an attr or build from raw data)
+  mole_filt <- molecule_filter(pepData) 
+  
+  # Set the number of observations
+  min_num_observations <- pmart_inputs$mol_min_num %>% as.numeric()
+  
+  # Get the original count 
+  originalCount_mole <- pepData$e_data %>% nrow()
+  
+  # Apply filter
+  pepData <- applyFilt(mole_filt, pepData, min_num = min_num_observations)
+    
+  # Get the filtered count 
+  filteredCount_mole <- pepData$e_data %>% nrow()
+  
+  # Write text
+  MoleculeFilterText <- paste("This means that", originalCount_mole - filteredCount_mole, 
+    "biomolecules were filtered at a minimum of", min_num_observations, 
+    "observations of a unique biomolecule per sample.")
+  
 }
 ```
 
+A molecule filter **`r ifelse("Molecule Filter" %in% FilterTable$Filter, "was", "was not")`**
+applied. `r ifelse("Molecule Filter" %in% FilterTable$Filter, MoleculeFilterText, "")`
 
+```{r Filter: Molecule Filter Table and Plot}
+if ("Molecule Filter" %in% FilterTable$Filter) {
+  plot(mole_filt, min_num = min_num_observations, bw_theme = TRUE) + 
+    xlim(c(0, min_num_observations + 3))
+}
+if ("Molecule Filter" %in% FilterTable$Filter) {
+  data.table("Count Before Filter" = originalCount_mole, 
+               "Number Filtered" = originalCount_mole - filteredCount_mole,
+               "Remaining" = filteredCount_mole) %>% kable()
+}
+```
 
+### *CV Filter*
+
+```{r Filter: CV Filter}
+if ("CV Filter" %in% FilterTable$Filter) {
+  
+  # Set up what the molecular filter was (either an attr or build from raw data)
+  cv_filt <- cv_filter(pepData) 
+  
+  # Set the number of observations
+  cv_thresh <- pmart_inputs$cv_threshold
+  
+  # Get the original count 
+  originalCount_cv <- pepData$e_data %>% nrow()
+  
+  # Apply filter
+  pepData <- applyFilt(cv_filt, pepData, cv_threshold = cv_thresh)
+    
+  # Get the filtered count 
+  filteredCount_cv <- pepData$e_data %>% nrow()
+  
+  # Write text
+  MoleculeFilterText <- paste("This means that", originalCount_cv - filteredCount_cv, 
+    "biomolecules were filtered, since their coefficient of variation was greater than", 
+    paste0(cv_thresh, "."), extract_help("pmartR", "cv_filter")[35] %>% gsub(pattern = "<p>", replacement = "", fixed = T))
+  
+}
+```
+
+A CV filter **`r ifelse("CV Filter" %in% FilterTable$Filter, "was", "was not")`**
+applied. `r ifelse("CV Filter" %in% FilterTable$Filter, MoleculeFilterText, "")`
+
+```{r Filter: CV Filter Table and Plot}
+if ("CV Filter" %in% FilterTable$Filter) {
+  plot(cv_filt, cv_threshold = cv_thresh, bw_theme = TRUE) + 
+    xlim(c(0, cv_thresh + 25))
+}
+if ("CV Filter" %in% FilterTable$Filter) {
+  data.table("Count Before Filter" = originalCount_cv, 
+               "Number Filtered" = originalCount_cv - filteredCount_cv,
+               "Remaining" = filteredCount_cv) %>% kable()
+}
+```
 
 ## Normalization
 
@@ -183,15 +274,6 @@ if ("Molecule Filter" %in% FilterTable$Filter) {
 
 Manual normalization **`r ifelse(pmart_inputs$spans_or_manual == "manual", "was", "was not")`**
 used to normalize the data. 
-
-```{r Normalization: Summary of Manual Normalization}
-if (pmart_inputs$spans_or_manual == "manual") {
-  
-}
-
-```
-
-
 
 ### *SPANS*
 
