@@ -11,7 +11,9 @@ library(data.table); library(patchwork); library(purrr)
 
 # This data will be passed to the markdown through shiny
 rootdir <- "/Users/degn400/Desktop/Git_Repos/pmart_standalone/Markdowns"
-pepData <- readRDS(file.path(rootdir, "pepData_normalize.RDS"))
+pepData <- readRDS(file.path(rootdir, "pepData.RDS"))
+pepData <- applyFilt(custom_filter(pepData, f_data_remove = "Infection2"), pepData)
+pepDataAttr <- attributes(pepData)
 pmart_inputs <- readRDS(file.path(rootdir, "pmart_inputs_normalize.RDS"))
 
 #########################
@@ -20,16 +22,7 @@ pmart_inputs <- readRDS(file.path(rootdir, "pmart_inputs_normalize.RDS"))
 
 # Get whether a filter was applied or not
 getAppliedFilter <- function(filterName) {
-  ifelse(pmart_inputs[[filterName]][1] == 1, "Yes", "No")
-}
-
-# Extract data from the rdb files within a package 
-extract_help <- function(pkg, fn = NULL) {
-  rdbfile <- file.path(find.package(pkg), "help", pkg)
-  rdb <- tools:::fetchRdDB(rdbfile, key = fn)
-  
-  f <- function(x) capture.output(tools::Rd2HTML(x))
-  if(is.null(fn)) lapply(rdb, f) else f(rdb)
+  ifelse(is.null(pepDataAttr$filters[[filterName]]), "No", "Yes")
 }
 ```
 
@@ -147,8 +140,8 @@ for that sample.
 
 ```{r Filter: List Filters}
 # List the filter names to check
-filters <- c("add_molfilt", "add_cvfilt", "add_imdanovafilt", "add_profilt",
-  "add_rmdfilt", "add_customfilt")
+filters <- c("moleculeFilt", "cvFilt", "imdanovaFilt", "proteomicsFilt",
+  "rmdFilt", "customFilt")
 ```
 
 Filters **`r ifelse("Yes" %in% lapply(filters, getAppliedFilter) %>% unlist() %>% unique(), "were", "were not")`**
@@ -164,13 +157,14 @@ FilterTable <- data.table(
   "Type" = c(rep("Biomolecule", 4), rep("Sample", 2)),
   "Applied" = lapply(filters, getAppliedFilter) %>% unlist(),
   "Parameters" = c(
-    paste0("Molecule Number Min: ", pmart_inputs$mol_min_num),
-    paste0("Max CV: ", pmart_inputs$cv_threshold),
-    paste0("ANOVA Min: ", pmart_inputs$min_nonmiss_anova, " & ",
-           "G-test Min: ", pmart_inputs$min_nonmiss_gtest),
-    paste0("Peptide Number Min: ", pmart_inputs$min_num_peps, " & ",
-           "Remove Degenerates: ", ifelse(pmart_inputs$degen_peps, "Yes", "No")),
-    paste0("P-Value Threshold: ", pmart_inputs$pvalue_threshold, " & ",
+    paste0("Molecule Number Min: ", pepDataAttr$filters$moleculeFilt$threshold),
+    paste0("Max CV: ", pepDataAttr$filters$cvFilt$threshold),
+    paste0("ANOVA Min: ", pepDataAttr$filters$imdanovaFilt$threshold$min_nonmiss_anova, " & ",
+           "G-test Min: ", pepDataAttr$filters$imdanovaFilt$threshold$min_nonmiss_gtest),
+    paste0("Peptide Number Min: ",  pepDataAttr$filters$proteomicsFilt$threshold$min_num_peps, " & ",
+           "Remove Degenerates: ", ifelse(pepDataAttr$filters$proteomicsFilt$threshold$degen_peps %>% as.logical(), 
+              "Yes", "No")),
+    paste0("P-Value Threshold: ", pepDataAttr$filters$rmdFilt$threshold, " & ",
            "Outlier Metrics: ", pmart_inputs$rmd_metrics %>% paste(collapse = ", ")),
     paste0("Samples with ", paste(c(pmart_inputs$fdata_customfilt_choices, 
            pmart_inputs$fdata_customfilt_regex), collapse = " "), "were ",
@@ -179,94 +173,38 @@ FilterTable <- data.table(
 )
 
 FilterTable <- FilterTable[FilterTable$Applied == "Yes",]
-FilterTable %>% kable()
+FilterTable %>% select(-Applied) %>% kable()
 ```
 
 ### *Molecule Filter*
 
-```{r Filter: Molecule Filter}
-if ("Molecule Filter" %in% FilterTable$Filter) {
-  
-  # Set up what the molecular filter was (either an attr or build from raw data)
-  mole_filt <- molecule_filter(pepData) 
-  
-  # Set the number of observations
-  min_num_observations <- pmart_inputs$mol_min_num %>% as.numeric()
-  
-  # Get the original count 
-  originalCount_mole <- pepData$e_data %>% nrow()
-  
-  # Apply filter
-  pepData <- applyFilt(mole_filt, pepData, min_num = min_num_observations)
-    
-  # Get the filtered count 
-  filteredCount_mole <- pepData$e_data %>% nrow()
-  
-  # Write text
-  MoleculeFilterText <- paste("This means that", originalCount_mole - filteredCount_mole, 
-    "biomolecules were filtered at a minimum of", min_num_observations, 
-    "observations of a unique biomolecule per sample.")
-  
-}
-```
-
 A molecule filter **`r ifelse("Molecule Filter" %in% FilterTable$Filter, "was", "was not")`**
-applied. `r ifelse("Molecule Filter" %in% FilterTable$Filter, MoleculeFilterText, "")`
-
-```{r Filter: Molecule Filter Table and Plot}
-if ("Molecule Filter" %in% FilterTable$Filter) {
-  plot(mole_filt, min_num = min_num_observations, bw_theme = TRUE) + 
-    xlim(c(0, min_num_observations + 3))
-}
-if ("Molecule Filter" %in% FilterTable$Filter) {
-  data.table("Count Before Filter" = originalCount_mole, 
-               "Number Filtered" = originalCount_mole - filteredCount_mole,
-               "Remaining" = filteredCount_mole) %>% kable()
-}
-```
+applied. `r ifelse("Molecule Filter" %in% FilterTable$Filter, pepDataAttr$filters$moleculeFilt$report_text , "")`
 
 ### *CV Filter*
 
-```{r Filter: CV Filter}
-if ("CV Filter" %in% FilterTable$Filter) {
-  
-  # Set up what the molecular filter was (either an attr or build from raw data)
-  cv_filt <- cv_filter(pepData) 
-  
-  # Set the number of observations
-  cv_thresh <- pmart_inputs$cv_threshold
-  
-  # Get the original count 
-  originalCount_cv <- pepData$e_data %>% nrow()
-  
-  # Apply filter
-  pepData <- applyFilt(cv_filt, pepData, cv_threshold = cv_thresh)
-    
-  # Get the filtered count 
-  filteredCount_cv <- pepData$e_data %>% nrow()
-  
-  # Write text
-  MoleculeFilterText <- paste("This means that", originalCount_cv - filteredCount_cv, 
-    "biomolecules were filtered, since their coefficient of variation was greater than", 
-    paste0(cv_thresh, "."), extract_help("pmartR", "cv_filter")[35] %>% gsub(pattern = "<p>", replacement = "", fixed = T))
-  
-}
-```
-
 A CV filter **`r ifelse("CV Filter" %in% FilterTable$Filter, "was", "was not")`**
-applied. `r ifelse("CV Filter" %in% FilterTable$Filter, MoleculeFilterText, "")`
+applied. `r ifelse("CV Filter" %in% FilterTable$Filter, pepDataAttr$filters$cvFilt$report_text, "")`
 
-```{r Filter: CV Filter Table and Plot}
-if ("CV Filter" %in% FilterTable$Filter) {
-  plot(cv_filt, cv_threshold = cv_thresh, bw_theme = TRUE) + 
-    xlim(c(0, cv_thresh + 25))
-}
-if ("CV Filter" %in% FilterTable$Filter) {
-  data.table("Count Before Filter" = originalCount_cv, 
-               "Number Filtered" = originalCount_cv - filteredCount_cv,
-               "Remaining" = filteredCount_cv) %>% kable()
-}
-```
+### *imd-ANOVA Filter*
+
+A imd-ANOVA filter **`r ifelse("imd-ANOVA Filter" %in% FilterTable$Filter, "was", "was not")`**
+applied. `r ifelse("imd-ANOVA Filter" %in% FilterTable$Filter, pepDataAttr$filters$imdanovaFilt$report_text, "")`
+
+### *Proteomics Filter*
+
+A proteomics filter **`r ifelse("Proteomics Filter" %in% FilterTable$Filter, "was", "was not")`**
+applied. `r ifelse("Proteomics Filter" %in% FilterTable$Filter, pepDataAttr$filters$proteomicsFilt$report_text, "")`
+
+### *rMD Filter*
+
+A rMD filter **`r ifelse("rMD Filter" %in% FilterTable$Filter, "was", "was not")`**
+applied. `r ifelse("rMD Filter" %in% FilterTable$Filter, pepDataAttr$filters$rmdFilt$report_text, "")`
+
+### *Custom Filter*
+
+A custom filter **`r ifelse("Custom Filter" %in% FilterTable$Filter, "was", "was not")`**
+applied. `r ifelse("Custom Filter" %in% FilterTable$Filter, pepDataAttr$filters$customFilt$report_text, "")`
 
 ## Normalization
 
