@@ -30,3 +30,11 @@ Filter: rmd filter,report text,pepData object attributes
 Filter: custom filter,selected samples,pmart input
 Filter: custom filter,kept or removed,pmart input
 Filter: custom filter,report text,pepData object attributes
+Normalization,normalization applied,pepData object attributes
+Normalization: Manual,manual normaliziation applied ,pepData object attributes
+Normalization: Manual,subset function,pepData object attributes
+Normalization: Manual,subset parameters,pepData object attributes
+Normalization: Manual,normalization function,pepData object attributes
+Analysis,test method,pepStats object attributes
+Analysis,multiple comparison adjustment,pepStats object attributes
+Analysis,significance threshold,pepStats object attributes

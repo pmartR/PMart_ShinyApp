@@ -11,11 +11,10 @@ library(data.table); library(patchwork); library(purrr)
 
 # This data will be passed to the markdown through shiny
 rootdir <- "/Users/degn400/Desktop/Git_Repos/pmart_standalone/Markdowns"
-pepData <- readRDS(file.path(rootdir, "pepData_filters.RDS"))
-
-
-
+pepData <- readRDS(file.path(rootdir, "pepData_global.RDS"))
 pepDataAttr <- attributes(pepData)
+pepStats <- readRDS(file.path(rootdir, "pepStats.RDS"))
+pepStatsAttr <- attributes(pepStats)
 pmart_inputs <- readRDS(file.path(rootdir, "pmart_inputs_normalize.RDS"))
 
 #########################
@@ -235,10 +234,22 @@ if (is.null(pepDataAttr$data_info$norm_info$norm_type) == FALSE
 
 ### *SPANS*
 
-SPANS normalization **`r ifelse(is.null(pepDataAttr$data_info$norm_info$norm_type) == FALSE && pepDataAtrr$data_info$norm_info$norm_type == "spans", "was", "was not")`**
-used to normalize the data.
+Could not get SPANS to run without error. Error in makePSOCKcluster(names = spec, ...) : 
+  Cluster setup failed. 8 of 8 workers failed to connect.
 
 ## Protein Rollup
+
+Could not get Protein Rollup to run without error. Error in makePSOCKcluster(names = spec, ...): 
+  Cluster setup failed. 7 of 7 workers failed to connect.
+
+## Analysis
+
+```{r Analysis}
+data.table("Attribute" = c("Test Method", "Multiple Comparison Adjustment", "Significance Threshold"),
+           "Value" = c(pepStatsAttr$statistical_test, pepStatsAttr$adjustment_method,
+                       pepStatsAttr$pval_thresh)) %>% kable()
+```
+
 
 
 
