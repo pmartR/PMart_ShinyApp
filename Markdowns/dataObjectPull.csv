@@ -1,40 +1,35 @@
-﻿Section,Data ,Object
-Upload Data: Expression,peptide label,pmart input
-Upload Data: Expression,edata file name,pmart input
-Upload Data: Expression,edata cname ,pmart input
-Upload Data: Expression,original scale,pmart input
-Upload Data: Expression,scale,pmart input
-Upload Data: Expression,na symbol,pmart input
-Upload Data: Expression,normalized,pmart input
-Upload Data: Biomolecule Info,emeta file name,pmart input
-Upload Data: Biomolecule Info,emeta cnam,pmart input
-Group Samples: Sample Information,fdata name,pmart input
-Group Samples: Sample Information,peptide to protein mappings,pmart input
-Group Samples: Sample Information,trimmed sample names,pmart input
-Group Samples: Sample Information,fdata cname,pmart input
-Group Samples: Grouping Information,main effects and covariates,pmart input
-Data Summary: Summary Table,all tables,pepData object
-Filter: Molecule Filter,threshold,pepData object attributes
-Filter: Molecule Filter,report text,pepData object attributes
-Filter: CV Filter,threshold,pepData object attributes
-Filter: CV Filter,report text,pepData object attributes
-Filter: imd-ANOVA Filter,anova threshold,pepData object attributes
-Filter: imd-ANOVA Filter,gtest threshold,pepData object attributes
-Filter: imd-ANOVA Filter,report text,pepData object attributes
-Filter: Proteomics Filter,threshold,pepData object attributes
-Filter: Proteomics Filter,remove degenerates,pepData object attributes
-Filter: Proteomics Filter,report text,pepData object attributes
-Filter: rmd filter,p-value threshold ,pepData object attributes
-Filter: rmd filter,outlier metrics,pmart input
-Filter: rmd filter,report text,pepData object attributes
-Filter: custom filter,selected samples,pmart input
-Filter: custom filter,kept or removed,pmart input
-Filter: custom filter,report text,pepData object attributes
-Normalization,normalization applied,pepData object attributes
-Normalization: Manual,manual normaliziation applied ,pepData object attributes
-Normalization: Manual,subset function,pepData object attributes
-Normalization: Manual,subset parameters,pepData object attributes
-Normalization: Manual,normalization function,pepData object attributes
-Analysis,test method,pepStats object attributes
-Analysis,multiple comparison adjustment,pepStats object attributes
-Analysis,significance threshold,pepStats object attributes
+﻿Section,Data ,Object,Notes
+Upload Data: Expression,peptide label,pmart input,
+Upload Data: Expression,edata file name,pmart input,
+Upload Data: Expression,edata cname ,pepData object attributes,
+Upload Data: Expression,original scale,pmart input,Soon to be included in pepData objects 
+Upload Data: Expression,scale,pepData object attributes,
+Upload Data: Expression,na symbol,pmart input,
+Upload Data: Expression,normalized,pmart input,This normalization is whether it was normalized when uploaded. 
+Upload Data: Biomolecule Info,emeta file name,pmart input,
+Upload Data: Biomolecule Info,emeta cname,pepData object attributes,
+Group Samples: Sample Information,fdata name,pmart input,
+Group Samples: Sample Information,trimmed sample names,pmart input,
+Group Samples: Sample Information,fdata cname,pepData object attributes,
+Group Samples: Grouping Information,main effects and covariates,pmart input,
+Data Summary: Summary Table,all tables,pepData object,
+Filter: Molecule Filter,threshold,pepData object attributes,
+Filter: CV Filter,threshold,pepData object attributes,
+Filter: imd-ANOVA Filter,anova threshold,pepData object attributes,
+Filter: imd-ANOVA Filter,gtest threshold,pepData object attributes,
+Filter: Proteomics Filter,threshold,pepData object attributes,
+Filter: Proteomics Filter,remove degenerates,pepData object attributes,
+Filter: rmd filter,p-value threshold ,pepData object attributes,
+Filter: rmd filter,outlier metrics,pmart input,
+Filter: custom filter,selected samples,pmart input,
+Filter: custom filter,kept or removed,pmart input,
+Normalization,normalization applied,pepData object attributes,
+Normalization: SPANS,spans results,spans result object (data frame),
+Normalization: Manual,manual normaliziation applied ,pepData object attributes,
+Normalization: Manual,subset function,pepData object attributes,
+Normalization: Manual,subset parameters,pepData object attributes,
+Normalization: Manual,normalization function,pepData object attributes,
+Analysis,test method,pepStats object attributes,
+Analysis,multiple comparison adjustment,pepStats object attributes,
+Analysis,significance threshold,pepStats object attributes,
+Analysis,numnber significant,pepStats object attributes,

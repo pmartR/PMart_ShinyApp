@@ -16,6 +16,7 @@ pepDataAttr <- attributes(pepData)
 pepStats <- readRDS(file.path(rootdir, "pepStats.RDS"))
 pepStatsAttr <- attributes(pepStats)
 pmart_inputs <- readRDS(file.path(rootdir, "pmart_inputs_normalize.RDS"))
+spans_results <- readRDS(file.path(rootdir, "spans_res.RDS"))
 
 #########################
 ## UNIVERSAL FUNCTIONS ##
@@ -33,52 +34,46 @@ getAppliedFilter <- function(filterName) {
 
 An **`r ifelse(pmart_inputs$labeled_yn, "labelled", "unlabelled")`** peptide expression 
 data file called **"`r pmart_inputs$file_edata$name`"** was uploaded to pmart. The column 
-that designates unique molecules was marked as **"`r pmart_inputs$id_col`"**. The original
+that designates unique molecules was marked as **"`r pepDataAttr$cnames$edata_cname`"**. The original
 scale of the data was **`r ifelse(pmart_inputs$data_scale == "abundance", "raw intensity", pmart_inputs$data_scale)`**
-`r ifelse(pmart_inputs$transform == "Select one", ".", paste0("and was transformed to <B>", ifelse(pmart_inputs$transform == "abundance", "raw intensity", pmart_inputs$transform), "</B>"))`. 
+and was changed to **`r pepDataAttr$data_info$data_scale`.** 
 The value to denote missing data was **"`r pmart_inputs$na_symbol`"** and the expression data
-**`r ifelse(pmart_inputs$normalized_yn == "0", "was not", "was")`** normalized. 
-
-```{r Upload Data: Expression Data}
-plot(pepData, bw_theme = TRUE)
-```
+**`r ifelse(pmart_inputs$normalized_yn == "0", "was not already", "was already")`** normalized. 
 
 ### *Biomolecule Information*
 
 An associated biomolecule information file was also uploaded called 
 **"`r pmart_inputs$file_emeta$name`"** and the protein identifier column was
-designated as **"`r pmart_inputs$protein_column`"**.
-
-## Group Samples
+designated as **"`r pepDataAttr$cnames$emeta_cname`"**.
 
 ### *Sample Information*
 
 An associated sample information file was also uploaded called 
-**"`r pmart_inputs$file_fdata$name`"**. This metadata file 
-**`r ifelse(pmart_inputs$proteins_yn == "FALSE", "does not", "does")`**
-contain peptide to protein mappings. Trimmed sample names
+**"`r pmart_inputs$file_fdata$name`"**. Trimmed sample names
 **`r ifelse(pmart_inputs$usevizsampnames == "No", "were not", "were")`** used. The 
 column in the sample information file which indicates sample names was 
-designated as **"`r pmart_inputs$fdata_id_col`"**.
+designated as **"`r pepDataAttr$cnames$fdata_cname`"**.
+
+## Group Samples
 
 ### *Grouping Information*
 
-```{r Grouping Information: Main Effects and Covariates}
-resetNULL <- function(x) {ifelse(is.null(x), "None", x)}
+This table summarizes all the user specified main effects or covariates in pmart. The 
+"Selected Column Name" denotes the name of the column in the sample information 
+file assigned as a main effect or covariate. 
 
-data.table("Effect or Covariate" = c("First Main Effect", "Second Main Effect",
-  "First Covariate", "Second Covariate"), "Set Value" = c(resetNULL(pmart_inputs$gcol1),
+```{r Grouping Information: Main Effects and Covariates}
+resetNULL <- function(x) {ifelse(x == "None", "None selected", x)}
+
+data.table("Main Effect or Covariate" = c("First Main Effect", "Second Main Effect",
+  "First Covariate", "Second Covariate"), "Selected Column Name" = c(resetNULL(pmart_inputs$gcol1),
   resetNULL(pmart_inputs$gcol2), resetNULL(pmart_inputs$cvcol1), 
   resetNULL(pmart_inputs$cvcol2))) %>% kable()
 ```
 
-This table summarizes all the user specified main effects or covariates in pmart. The "Set Value"
-column denotes the name of the column in the "Sample Information" file assigned as a main
-effect or covariate. 
-
 ### *Number of Samples per Main Effects*
 
-```{r Grouping Information: Bar Chart, fig.height = 10}
+```{r Grouping Information: Bar Chart}
 # Generate plots for main effects 
 plotForMainEffects <- function(effect) {
   count <- pepData$f_data %>%
@@ -89,20 +84,17 @@ plotForMainEffects <- function(effect) {
   ggplot(count, aes(x = Group, y = `Number of samples`, fill = Group)) +
     geom_bar(stat = "identity") + theme_bw() + 
     geom_text(aes(label = `Number of samples`), 
-              position = position_dodge(width = 1), vjust = -0.25)
+              position = position_dodge(width = 1), vjust = -0.25) +
+    ylim(c(0, max(count$`Number of samples`) * 1.1))
 }
 
 if (is.null(pmart_inputs$gcol1) == FALSE && pmart_inputs$gcol1 != "None") {
-  (plot(pepData, bw_theme = TRUE, order_by = pmart_inputs$gcol1, color_by = 
-       pmart_inputs$gcol1)) /
-  (plotForMainEffects(pmart_inputs$gcol1) + 
-    ggtitle(paste("First Main Effect:", pmart_inputs$gcol1))) 
+  plotForMainEffects(pmart_inputs$gcol1) + 
+    ggtitle(paste("First Main Effect:", pmart_inputs$gcol1))
 }
 if (is.null(pmart_inputs$gcol2) == FALSE && pmart_inputs$gcol2 != "None") {
-  (plot(pepData, bw_theme = TRUE, order_by = pmart_inputs$gcol2, color_by = 
-       pmart_inputs$gcol2)) /
-  (plotForMainEffects(pmart_inputs$gcol2) + 
-    ggtitle(paste("Second Main Effect:", pmart_inputs$gcol2))) 
+  plotForMainEffects(pmart_inputs$gcol2) + 
+    ggtitle(paste("Second Main Effect:", pmart_inputs$gcol2))
 }
 ```
 
@@ -110,15 +102,19 @@ if (is.null(pmart_inputs$gcol2) == FALSE && pmart_inputs$gcol2 != "None") {
 
 ### *Summary Table*
 
+The first column in the table below denotes a property of the peptide data, and the "Data" column
+states that property's value.
+
 ```{r Data Summary: Main Table}
 pepDataSum <- data.frame("Data" = summary(pepData))
 pepDataSum %>% kable()
 ```
 
-The first column denotes a property of the peptide data, and the "Data" column
-reveals that properties' value.
-
 ### *Missing Value Table*
+
+In the table below, the first column denotes the sample and the second is the missing number of observations.
+The third column represents the second as a percentage of the total number of observations
+for that sample. 
 
 ```{r Data Summary: Missing Value Table}
 pepData$e_data %>%
@@ -132,10 +128,6 @@ pepData$e_data %>%
     "Proportion Missing" = round(`Missing Observations` / nrow(pepData$e_data), 3),
   ) %>% kable()
 ```
-
-The first column denotes the sample and the second is the missing number of observations.
-The third column represents the second as a percentage of the total number of observations
-for that sample. 
 
 ## Filter
 
@@ -167,9 +159,8 @@ FilterTable <- data.table(
               "Yes", "No")),
     paste0("P-Value Threshold: ", pepDataAttr$filters$rmdFilt$threshold, " & ",
            "Outlier Metrics: ", pmart_inputs$rmd_metrics %>% paste(collapse = ", ")),
-    paste0("Samples with ", paste(c(pmart_inputs$fdata_customfilt_choices, 
-           pmart_inputs$fdata_customfilt_regex), collapse = " "), "were ",
-           ifelse(pmart_inputs$remove_or_keep == "Remove", "removed.", "kept."))
+    paste0("The custom filter ", ifelse(pmart_inputs$remove_or_keep == "Remove", "removed", "kept"),
+           "the following sample(s): ", pmart_inputs$fdata_customfilt_choices)
   )
 )
 
@@ -177,40 +168,108 @@ FilterTable <- FilterTable[FilterTable$Applied == "Yes",]
 FilterTable %>% select(-Applied) %>% kable()
 ```
 
+```{r Create Filter Text}
+# Molecule Filter 
+MoleculeFilterText <- "A molecule filter was not applied to the data."
+
+if ("Molecule Filter" %in% FilterTable$Filter) {
+  MoleculeFilterText <- paste("A molecule filter was applied to the data, removing",
+    paste0(pepDataAttr$cnames$edata_cname, "s"), "not having at least", 
+    pepDataAttr$filters$moleculeFilt$threshold, "samples.")
+}
+
+# CV Filter
+CVFilterText <- "A CV filter was not applied to the data."
+
+if ("CV Filter" %in% FilterTable$Filter) {
+  CVFilterText <- paste("A coefficient of variation (CV) filter was applied to the data",
+    "removing", paste0(pepDataAttr$cnames$edata_cname, "s"), "with a CV greater than",
+    pepDataAttr$filters$cvFilt$threshold)
+}
+
+# imd-ANOVA Filter
+imdAnovFilterText <- "An imd-ANOVA filter was not applied to the data."
+
+if ("imd-ANOVA Filter" %in% FilterTable$Filter) {
+  imdAnovFilterText <- paste("An ANOVA filter was applied to the data, removing",
+    paste0(pepDataAttr$cnames$edata_cname, "s"), "not having at least",
+    pepDataAttr$filters$imdanovaFilt$threshold$min_nonmiss_anova, "non-missing values",
+    "per group. Additionaly, an IMD (independence of missing data) filter was applied",
+    "to the data, removing", paste0(pepDataAttr$cnames$edata_cname, "s"), "not having",
+    "at least", pepDataAttr$filter$imdanovaFilt$threshold$min_nonmiss_gtest,
+    "non-missing values in at least one of the groups.")
+}
+
+# Proteomics Filter
+ProteomicsFilterText <- "A proteomics filter was not applied to the data."
+
+if ("Proteomics Filter" %in% FilterTable$Filter) {
+  ProteomicsFilterText <- paste("A degenerate peptide filter",
+    ifelse(pepDataAttr$filters$proteomicsFilt$threshold$degen_peps %>% as.logical(), "was", "was not"), 
+    "applied to the data, identifying", paste0(pepDataAttr$cnames$edata_cname, "s"), "mapping to more than",
+    "one protein. Additionally, a protein filter was applied to the data, identifying proteins",
+    "not having at least", pepDataAttr$filters$proteomicsFilt$threshold$min_num_peps,
+    paste0(pepDataAttr$cnames$edata_cname, "s"), "mapping to them.")
+}
+
+
+# rMD Filter
+rMDFilterText <- "A rMD filter was not applied to the data."
+
+if ("rMD Filter" %in% FilterTable$Filter) {
+  rMDFilterText <- paste("A robust Mahalanobis distance (rMD) filter was applied to the",
+    "data, removing", paste0(pepDataAttr$cnames$fdata_cname, "s"), "with an associated",
+    "rMD-associated p-value less than", paste0(pepDataAttr$filters$rmdFilt$threshold, ".")
+  )
+}
+
+# Custom Filter
+CustomFilterText <- "A custom filter was not applied to the data."
+
+if ("Custom Filter" %in% FilterTable$Filter) {
+  CustomFilterText <- FilterTable[FilterTable$Filter == "Custom Filter", "Parameters"] %>% unlist()
+}
+```
+
 ### *Molecule Filter*
 
-A molecule filter **`r ifelse("Molecule Filter" %in% FilterTable$Filter, "was", "was not")`**
-applied. `r ifelse("Molecule Filter" %in% FilterTable$Filter, pepDataAttr$filters$moleculeFilt$report_text , "")`
+`r MoleculeFilterText`
 
 ### *CV Filter*
 
-A CV filter **`r ifelse("CV Filter" %in% FilterTable$Filter, "was", "was not")`**
-applied. `r ifelse("CV Filter" %in% FilterTable$Filter, pepDataAttr$filters$cvFilt$report_text, "")`
+`r CVFilterText`
 
 ### *imd-ANOVA Filter*
 
-A imd-ANOVA filter **`r ifelse("imd-ANOVA Filter" %in% FilterTable$Filter, "was", "was not")`**
-applied. `r ifelse("imd-ANOVA Filter" %in% FilterTable$Filter, pepDataAttr$filters$imdanovaFilt$report_text, "")`
+`r imdAnovFilterText`
 
 ### *Proteomics Filter*
 
-A proteomics filter **`r ifelse("Proteomics Filter" %in% FilterTable$Filter, "was", "was not")`**
-applied. `r ifelse("Proteomics Filter" %in% FilterTable$Filter, pepDataAttr$filters$proteomicsFilt$report_text, "")`
+`r ProteomicsFilterText`
 
 ### *rMD Filter*
 
-A rMD filter **`r ifelse("rMD Filter" %in% FilterTable$Filter, "was", "was not")`**
-applied. `r ifelse("rMD Filter" %in% FilterTable$Filter, pepDataAttr$filters$rmdFilt$report_text, "")`
+`r rMDFilterText`
 
 ### *Custom Filter*
 
-A custom filter **`r ifelse("Custom Filter" %in% FilterTable$Filter, "was", "was not")`**
-applied. `r ifelse("Custom Filter" %in% FilterTable$Filter, pepDataAttr$filters$customFilt$report_text, "")`
+`r CustomFilterText`
 
 ## Normalization
 
 Peptide data **`r ifelse(pepDataAttr$data_info$norm_info$is_normalized, "was", "was not")`**
 normalized.
+
+### *SPANS*
+
+SPANS **`r ifelse(is.null(spans_results), "was not", "was")`** run to determine optimum
+normalization parameters. 
+
+```{r SPANS Plot}
+if (is.null(spans_results) == FALSE) {
+  plot(spans_results)
+}
+``` 
 
 ### *Manual*
 
@@ -230,29 +289,41 @@ if (is.null(pepDataAttr$data_info$norm_info$norm_type) == FALSE
                          SubsetParameters, 
                          pepDataAttr$data_info$norm_info$norm_fn)) %>% kable()
 }
+
+plot(pepData, bw_theme = TRUE)
 ```
 
-### *SPANS*
+## Statistical Analysis
 
-Could not get SPANS to run without error. Error in makePSOCKcluster(names = spec, ...) : 
-  Cluster setup failed. 8 of 8 workers failed to connect.
+The analysis step **`r ifelse(is.null(pepStats), "was not", "was")`** run.
 
-## Protein Rollup
+```{r Analysis: Comparison Text}
+ComparisonsText <- ""
 
-Could not get Protein Rollup to run without error. Error in makePSOCKcluster(names = spec, ...): 
-  Cluster setup failed. 7 of 7 workers failed to connect.
-
-## Analysis
-
-```{r Analysis}
-data.table("Attribute" = c("Test Method", "Multiple Comparison Adjustment", "Significance Threshold"),
-           "Value" = c(pepStatsAttr$statistical_test, pepStatsAttr$adjustment_method,
-                       pepStatsAttr$pval_thresh)) %>% kable()
+if (is.null(pepStats) == FALSE) {
+  ComparisonsText <- paste("The following groups were compared:", paste0(paste(pepStatsAttr$comparisons, sep = ","), 
+    "."), "Reported below are the parameters used in the statistical analysis,",
+    "followed by the number of siginificant biomolecules for each comparison.")
+}
 ```
 
+`r ComparisonsText`
 
+```{r Analysis: Input Parameters}
+if (is.null(pepStats) == FALSE) {
+  data.table("Attribute" = c("Test Method", "Multiple Comparison Adjustment", 
+      "Significance Threshold"), "Value" = c(pepStatsAttr$statistical_test, pepStatsAttr$adjustment_method,
+      pepStatsAttr$pval_thresh)) %>% kable()
+}
 
+if (is.null(pepStats) == FALSE) {
+  pepStatsAttr$number_significant %>% kable()
+}
 
+if (is.null(pepStats) == FALSE) {
+  plot(pepStats, bw_theme = TRUE)
+}
+```
 
 
 
