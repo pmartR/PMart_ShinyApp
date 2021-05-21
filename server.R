@@ -89,37 +89,14 @@ shinyServer(function(session, input, output) {
     browser()
   })
   
-  # global observers, modal UI elements, helper functions
-  source('UI_helper_functions.R', local = TRUE)
-  source('helper_functions.R', local = TRUE)
-  source('./observers/global_observers.R', local = TRUE)
-  source('./UI_elements/plot_modal_UI.R', local = TRUE)
+  # source all UI elements
+  for (res_folder in c("reactive_variables", "observers", "UI_elements")) {
+    for (f in Sys.glob(sprintf("./%s/*.R", res_folder))){
+      source(f, local = TRUE)
+    }
+  }
   
-  ###### UPLOAD DATA TAB ########
-  
-  ### Upload reactive values ###
-  # e_data/e_data_2:  uploaded abundance data file, and (in the case of lipids) a second data file for pos/neg ionization
-    # NOTE: e_meta/e_meta_2 are contained in revals$e_meta and revals$e_meta_2
-  # (emeta/edata)_cnames, (emeta/edata)_cnames_2:  column names of the data and metadata files
-  # sample_names:  sample names, which are usually just the column names of the e_data file minus the mass ID column
-  # f_data_upload:  fake f_data just used so that the call to as.objects$omicsData will run without error
-  # two_lipids: logical indicating whether the user has selected lipids AND that they have 2 files.  for coding cleanliness
-  
-  source('./reactive_variables/upload_revals.R', local = TRUE)
-  source('./observers/upload_observers.R', local = TRUE)
-  source('./UI_elements/upload_UI.R', local = TRUE)
-  
-  ###### GROUPS TAB #######
-  
-  ### Groups reactive values: ###
-  # f_data/f_data_2 the tables uploaded by the user for each f_data
-  # main_effects/main_effects_2 the possible main effects for each dataset
-  # covariates/covariates_2 the possible covariates for each dataset
-  
-  source('./observers/groups_observers.R', local=TRUE)
-  source('./reactive_variables/groups_revals.R', local=TRUE)
-  source('./UI_elements/groups_UI.R', local=TRUE)
-  
+  # 
   output$download_fdata<- downloadHandler(
     filename = "f_data_template.csv",
     # This function should write data to a file given to it by
@@ -135,38 +112,6 @@ shinyServer(function(session, input, output) {
     contentType = "text/csv"
   )
   
-  ### QC TAB ###
-  source('UI_elements/qc_UI.R', local = TRUE)
-  source('observers/qc_observers.R', local = TRUE)
-  source('reactive_variables/qc_revals.R', local = TRUE)
-  
-  #### FILTER TAB ####
-  source('./observers/filter_observers.R', local = TRUE)
-  source('./UI_elements/filter_UI.R', local = TRUE)
-  
-  ###### NORMALIZATION TAB #######
-  
-  source('./observers/normalization_observers.R', local = TRUE)
-  source('./UI_elements/normalization_UI.R', local = TRUE)
-  
-  ###### PROTEIN ROLLUP TAB ######
-  
-  source('./observers/protein_rollup_observers.R', local = TRUE)
-  source('./UI_elements/protein_rollup_UI.R', local = TRUE)
-
-  ###### ANALYSIS TAB ########
-  
-  source('./observers/analysis_observers.R', local = TRUE)
-  source('./UI_elements/analysis_UI.R', local = TRUE)
-  
-  ###### TRELLISCOPE TAB ######
-  #source('./observers/trelliscope_observers.R', local = TRUE)
-  #source('./UI_elements/trelliscope_UI.R', local = TRUE)
-  
-  ###### DOWNLOAD TAB ########
-  
-  source('./observers/download_observers.R', local = TRUE)
-  source('./UI_elements/download_UI.R', local = TRUE)
   
   output$download_processed_data <- downloadHandler(
     filename = paste("pmartR_output_",proc.time()[1],".zip", sep = ""),
