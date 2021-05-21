@@ -540,5 +540,6 @@ ui <- function(request){
             column(6, bsButton("saveplot", "Save Last Plot", style = "info"))
           )
         )
-  )
+  ),
+  uiOutput("developer_buttons")
 )}# shinyUI + tagList
