@@ -11,21 +11,12 @@ library(data.table); library(patchwork); library(purrr)
 
 # This data will be passed to the markdown through shiny
 rootdir <- "/Users/degn400/Desktop/Git_Repos/pmart_standalone/Markdowns"
-pepData <- readRDS(file.path(rootdir, "pepData_global.RDS"))
+pepData <- readRDS(file.path(rootdir, "pepData_Evan.RDS"))
 pepDataAttr <- attributes(pepData)
 pepStats <- readRDS(file.path(rootdir, "pepStats.RDS"))
 pepStatsAttr <- attributes(pepStats)
 pmart_inputs <- readRDS(file.path(rootdir, "pmart_inputs_normalize.RDS"))
 spans_results <- readRDS(file.path(rootdir, "spans_res.RDS"))
-
-#########################
-## UNIVERSAL FUNCTIONS ##
-#########################
-
-# Get whether a filter was applied or not
-getAppliedFilter <- function(filterName) {
-  ifelse(is.null(pepDataAttr$filters[[filterName]]), "No", "Yes")
-}
 ```
 
 ## Upload Data 
@@ -35,9 +26,9 @@ getAppliedFilter <- function(filterName) {
 An **`r ifelse(pmart_inputs$labeled_yn, "labelled", "unlabelled")`** peptide expression 
 data file called **"`r pmart_inputs$file_edata$name`"** was uploaded to pmart. The column 
 that designates unique molecules was marked as **"`r pepDataAttr$cnames$edata_cname`"**. The original
-scale of the data was **`r ifelse(pmart_inputs$data_scale == "abundance", "raw intensity", pmart_inputs$data_scale)`**
-and was changed to **`r pepDataAttr$data_info$data_scale`.** 
-The value to denote missing data was **"`r pmart_inputs$na_symbol`"** and the expression data
+scale of the data was **`r pepDataAttr$data_info$data_scale_orig`** and was changed to 
+**`r pepDataAttr$data_info$data_scale`.** The value to denote missing data was 
+**"`r pmart_inputs$na_symbol`"** and the expression data
 **`r ifelse(pmart_inputs$normalized_yn == "0", "was not already", "was already")`** normalized. 
 
 ### *Biomolecule Information*
@@ -131,19 +122,66 @@ pepData$e_data %>%
 
 ## Filter
 
-```{r Filter: List Filters}
-# List the filter names to check
-filters <- c("moleculeFilt", "cvFilt", "imdanovaFilt", "proteomicsFilt",
-  "rmdFilt", "customFilt")
-```
-
-Filters **`r ifelse("Yes" %in% lapply(filters, getAppliedFilter) %>% unlist() %>% unique(), "were", "were not")`**
-applied. 
+Filters **`r ifelse(length(pepDataAttr$filters) == 0, "were not", "were")`** applied.
+`ifelse(length(pepDataAttr$filters) == 0, "", paste("A total of", length(pepDataAttr$filters), "filters were applied. See the table below for a description of the order."))`
 
 ### *Summary of Applied Filters*
 
 ```{r Filter: Table Summarizing Applied Filters}
-# List a table of filters 
+#  Put applied filters in a table
+FilterTable <- NULL
+
+if (length(pepDataAttr$filters) != 0) {
+  
+  # Iterate through all the filters for the table, apply different logic for each filter type
+  FilterTable <- do.call(rbind, lapply(pepDataAttr$filters[1:2], function(filter) {
+    
+    # Molecule Filter
+    if (filter$type == "moleculeFilt") {
+      return(c("Filter" = "Molecule Filter", "Type" = "Biomolecule", "Parameters" = 
+               paste0("Min Number Molecules: ", filter$threshold), 
+               "Summary" = paste0(filter$filtered %>% length(), " biomolecules were filtered.")))
+    } else
+    
+    # Proteomics Filter
+    if (filter$type == "proteomicsFilt") {
+      return(c("Filter" = "Proteomics Filter", "Type" = "Biomolecule", "Parameters" = 
+               paste0("Min Number of Peptides: ", filter$threshold$min_num_peps,
+                      " & Degenerate Peptides Removed: ", ifelse(filter$threshold$degen_peps, "Yes", "No")),
+               "Summary" = paste0(filter$filtered$e_data_remove %>% length(), " biomolecules were filtered and ",
+                                  filter$filtered$e_meta_remove %>% length(), " proteins were filtered.")))
+    } else
+      
+    # CV Filter
+    if (filter$type == "cvFilter") {
+      return(c("Filter" = "CV Filter", "Type" = "Biomolecule", "Parameters" = 
+               paste0("Max CV: ", filter$threshold),
+               "Summary" = paste0(filter$filtered %>% length(), " biomolecules were filtered.")))
+    } else
+      
+    # imd-ANOVA filter
+    if (filter$type == "imdanovaFilt") {
+      return(c("Filter" = "imd-ANOVA Filter", "Type" = "Biomolecule", "Parameters" = 
+               paste0("Min ANOVA: ", filter$threshold$min_nonmiss_anova,
+                      " & Min G-Test: ", filter$threshold$min_nonmiss_gtest),
+               "Summary" = paste0(filter$filtered %>% length(), " biomolecules were filtered.")))
+    } else 
+      
+    # rmd Filter
+    if (filter$type)
+  
+  })) %>% data.table()
+  
+  
+  
+}
+
+
+
+
+
+
+
 FilterTable <- data.table(
   "Filter" = c("Molecule Filter", "CV Filter", "imd-ANOVA Filter", 
                "Proteomics Filter", "rMD Filter", "Custom Filter"),
