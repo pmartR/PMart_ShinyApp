@@ -7,8 +7,7 @@ shinyServer(function(session, input, output) {
     "Data File (e_data)" = list("objects", "omicsData", "e_data"),
     "Sample Info (f_data)" = list("objects", "omicsData", "f_data"),
     "Biomolecule Information (e_meta)" = list("objects", "omicsData", "e_meta"),
-    "iMd-Anova Table" = list("objects", "imdanova_res", "Full_results"),
-    "Trelliscope Displays" = paste0("Trelliscope_", session$token)
+    "iMd-Anova Table" = list("objects", "imdanova_res", "Full_results")
   )
 
   # misc reactive values
@@ -129,7 +128,7 @@ shinyServer(function(session, input, output) {
     filename = paste("pmartR_output_", proc.time()[1], ".zip", sep = ""),
     content = function(fname) {
 
-      # this is necessary to zip up the entire trelliscope directory
+      # this is necessary to zip up nested directories
       # specifically, we dont want to have to use the -j flag to get non-directory files..
       # .. so, we navigate to where everything is (tempdir()) and download with just -r
       orig_wd <- getwd()

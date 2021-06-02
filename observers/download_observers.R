@@ -83,24 +83,6 @@ observeEvent(input$makezipfile, {
           write_csv(resource, file.path(tempdir(), fname))
           incProgress(1 / total_files, detail = sprintf("%s done..", table_name))
         }
-        else if (table_name == "Trelliscope Displays" & file.exists(file.path("www", resloc))) {
-          fs <- c(fs, resources_locations[[table_name]])
-          file.copy(file.path("www", resloc), tempdir(), recursive = TRUE)
-
-          # config_info in the html header is set for being rendered within shiny, need to edit it if we want the downloadable version to work...
-          # ...specifically '/<trelliscope_name>/appfiles/config.jsonp' -> 'appfiles/config.jsonp'.  We are directly editing the html file.
-          index_path <- file.path(tempdir(), paste0("Trelliscope_", session$token), "index.html")
-          temp_index <- readLines(index_path)
-          # leading slashes mess things up, so included [/|\\]* regex, please change if there is a better way to do this substitution
-          temp_index <- gsub(file.path(paste0("[/|\\]*Trelliscope_", session$token), "appfiles"), "appfiles", temp_index)
-
-          fileConn <- file(index_path)
-          writeLines(temp_index, fileConn)
-          close(fileConn)
-
-          # rewrite index file here
-          incProgress(1 / total_files, detail = sprintf("%s done..", table_name))
-        }
       }
     }
     print(fs)
