@@ -192,12 +192,12 @@ list(
   }),
   # ...summary tables
   output$uploaded_data_summary <- renderUI({
-    req(!is.null(revals$upload_summary), cancelOutput = TRUE)
+    req(!is.null(revals$upload_summary))
     wellPanel(
       tagList(
         tags$b("Data Summary"),
         if (two_lipids()) {
-          req(!is.null(revals$upload_summary_2), cancelOutput = TRUE)
+          req(!is.null(revals$upload_summary_2))
           splitLayout(
             div(id = "upload_summary_1", DTOutput("omicsData_upload_summary")),
             div(id = "upload_summary_2", DTOutput("omicsData_upload_summary_2"))

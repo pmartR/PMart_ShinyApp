@@ -206,7 +206,7 @@ list(
   #'@details Condition UI for rmd metric selection.  We deselect Proportion_Missing
   #' by default in the case of lipid data or metabolite data.
   output$rmd_metrics_out <- renderUI({
-    req(!is.null(objects$uploaded_omicsData), cancelOutput = TRUE)
+    req(!is.null(objects$uploaded_omicsData))
     if(class(objects$uploaded_omicsData) %in% c("lipidData", "metabData")){
       selected = c("MAD", "Kurtosis", "Skewness", "Correlation")
     }
@@ -224,7 +224,7 @@ list(
   #'@details warning icon that appears when we select proportion missing as
   #'a metric for lipidomics or metabolomics data.
   output$rmd_propmis_warn_icon <- renderUI({
-    req(!is.null(objects$uploaded_omicsData), input$rmd_metrics, cancelOutput = TRUE)
+    req(!is.null(objects$uploaded_omicsData), input$rmd_metrics)
     if(
       class(objects$uploaded_omicsData) %in% c("lipidData", "metabData") &
       "Proportion_Missing" %in% input$rmd_metrics
@@ -241,7 +241,7 @@ list(
   
   # Conditional UI for rmd filter, depends on the sample names in the file(s)
   output$rmdfilt_plot_type <- renderUI({
-    req(!is.null(objects$uploaded_omicsData), cancelOutput = TRUE)
+    req(!is.null(objects$uploaded_omicsData))
     if (input$rmdfilt_plot_type == "all") {
       NULL
     }

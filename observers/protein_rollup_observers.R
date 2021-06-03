@@ -36,9 +36,3 @@ observeEvent(input$apply_rollup, {
     }
   )
 })
-
-# hide ugly empty wellpanel when there is no summary
-observe({
-  cond <- !is.null(revals$rollup_summary)
-  toggle("rollup_data_summary_parent", condition = cond)
-})

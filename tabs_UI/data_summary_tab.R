@@ -58,7 +58,7 @@ data_summary_UI <- function() {
           ),
           bsCollapsePanel("Summaries",
             value = "summaries",
-            wellPanel(uiOutput("qc_data_summary"))
+            uiOutput("qc_data_summary")
           )
         )
       ) # column 8
