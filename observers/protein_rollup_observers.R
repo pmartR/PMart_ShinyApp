@@ -9,7 +9,7 @@ observeEvent(c(objects$omicsData, input$top_page), {
 
 # apply rollup
 observeEvent(input$apply_rollup, {
-  show("rollup_busy")
+  shinyjs::show("rollup_busy")
   on.exit(hide("rollup_busy"))
 
   tryCatch(

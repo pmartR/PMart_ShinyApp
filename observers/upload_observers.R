@@ -34,7 +34,7 @@ observeEvent(c(input$file_edata, input$file_edata_2), {
 # user manually specifies they are done selecting columns, closes the collapsible bar
 observeEvent(input$done_idcols, {
   updateCollapse(session, "upload_collapse_left", close = "columnids", open = "meta_collapse")
-  show("ok_columnids")
+  shinyjs::show("ok_columnids")
 })
 
 # when they select e_meta files, check that all columns are in order and close the collapsebar if everything looks ok
