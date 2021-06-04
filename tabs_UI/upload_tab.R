@@ -5,7 +5,7 @@ upload_UI <- function() {
       column(
         4, # sidebarpanel
         bsCollapse(
-          id = "upload_collapse_left", open = "datselect", multiple = TRUE, # parent collapse div
+          id = "upload_collapse_left", open = c("datselect"), multiple = TRUE, # parent collapse div
           # upload edata sub-collapse div
           bsCollapsePanel(div(
             "Specify data type and upload data file",
@@ -52,8 +52,13 @@ upload_UI <- function() {
             uiOutput("transform")
           )),
           hidden(div(
+            class = "inline-wrapper-1",
             id = "js_na_symbol",
-            textInput("na_symbol", "What value denotes missing data?", value = NA)
+            textInput("na_symbol", "What value denotes missing data?", value = NA),
+            tipify(
+              div(style="color:deepskyblue", icon("question-sign", lib = "glyphicon")),
+              title = gsub("\n", " ", infotext_[["MISSING_DATA_REPLACE"]])
+            )
           )),
           conditionalPanel(
             "input.labeled_yn == 'FALSE'",

@@ -21,6 +21,17 @@ ttext_ <- list(
   "RMD_PROP_MISSING_WARNING" = "We advise against using proportion missing as a metric in lipidomics/metabolomics data, as they often have a very low proportion missing."
 ) 
 
+infotext_ <- list(
+  "LOG_TRANSFORM_ZEROS" = "You have selected to log transform abundance values, 
+  and %s to indicate missing values.  However there are zeros in your data
+  which would cause some values to be transformed to -infinity.  Either specify
+  that zeros indicate missing values or replace them with NA's or the missing value
+  indicator.",
+  "MISSING_DATA_REPLACE" = "The value specified here will be replaced by NA in
+  the data file.  If missing values are already NA in your data, then you do not 
+  have to specify this field."
+) 
+
 global_input_choices = list(
   "RMD_FILTER_CHOICES" = list("Median Absolute Distance"="MAD", 
                               "Kurtosis", 

@@ -37,6 +37,29 @@ observeEvent(input$done_idcols, {
   shinyjs::show("ok_columnids")
 })
 
+# disable if they try to log transform data with zeros
+observe({
+  isolate(revals$warnings_upload$bad_transform <- NULL)
+  
+  cond <- e_data_has_zeros() & 
+    input$na_symbol != "0" &
+    grepl("^log", input$transform) & 
+    !grepl("^log", input$data_scale)
+  
+  isolate(
+    revals$warnings_upload$bad_transform <- if(isTRUE(cond)) {
+      sprintf("<div style = 'color:red'>%s</div>",
+        sprintf(
+          infotext_[["LOG_TRANSFORM_ZEROS"]], 
+          ifelse(trimws(input$na_symbol) == "", "-no selection-", input$na_symbol)
+        )
+      )
+    } else NULL
+  )
+  
+  toggleState("makeobject", condition = !cond)
+})
+
 # when they select e_meta files, check that all columns are in order and close the collapsebar if everything looks ok
 observe({
   # 2 file lipid conditions:
