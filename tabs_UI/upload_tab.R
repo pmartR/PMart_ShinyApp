@@ -70,6 +70,7 @@ upload_UI <- function() {
             hidden(div(id = "ok_metadata", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
           ),
           value = "meta_collapse",
+          uiOutput("emeta_yn"),
           hidden(div(
             id = "js_emeta_UI",
             uiOutput("emeta_UI")
@@ -97,7 +98,7 @@ upload_UI <- function() {
               radioGroupButtons("which_table", choices = c("1" = 1, "2" = 2))
             )),
             DTOutput("head_edata"),
-            DTOutput("head_emeta")
+            uiOutput("head_emeta_wrapper")
           ),
           bsCollapsePanel("Boxplot Preview",
             value = "summary_boxplots",

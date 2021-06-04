@@ -88,6 +88,25 @@ list(
     )
   }),
 
+  # do they have an emeta file to upload?
+  output$emeta_yn <- renderUI({
+    req(input$datatype, input$datatype != "none")
+    if (input$datatype != "pep") {
+      radioGroupButtons("emeta_yn",
+        "Do you have a file containing extra biomolecule information?",
+        choices = c("Yes" = T, "No" = F)
+      )
+    }
+    else {
+      hidden(
+        radioGroupButtons("emeta_yn",
+          "Do you have a file containing extra biomolecule information?",
+          choices = c("Yes" = T, "No" = F), selected = "Yes"
+        )
+      )
+    }
+  }),
+
   # select which column contains protein ID
   # if not protein data or there is no e_meta, then simply pass a random column or NULL
   output$promap_UI <- renderUI({
@@ -109,6 +128,18 @@ list(
 
   # emeta upload sub-panel
   output$emeta_UI <- renderUI({
+    title_upload_div <- div(
+      id = "js_file_emeta",
+      fileInput("file_emeta", "Upload CSV Biomolecule Information File",
+        multiple = FALSE,
+        accept = c(
+          "text/csv",
+          "text/comma-separated-values,text/plain",
+          ".csv"
+        )
+      )
+    )
+
     if (two_lipids()) {
       tagList(
         HTML("<p style = 'font-weight:bold'>Upload CSV Biomolecule Information Files for Positive and Negative Lipids</p>"),
@@ -141,18 +172,12 @@ list(
         )
       )
     }
+    else if (input$datatype == "pep" & isTRUE(input$proteins_yn == "TRUE")) {
+      title_upload_div
+    }
     else {
-      div(
-        id = "js_file_emeta",
-        fileInput("file_emeta", "Upload CSV Biomolecule Information File",
-          multiple = FALSE,
-          accept = c(
-            "text/csv",
-            "text/comma-separated-values,text/plain",
-            ".csv"
-          )
-        )
-      )
+      req(as.logical(input$emeta_yn))
+      title_upload_div
     }
   }),
 
@@ -248,5 +273,11 @@ list(
       tmp
     },
     options = list(scrollX = TRUE)
-  )
+  ),
+
+  # head_emeta wrapper to remove whitespace
+  output$head_emeta_wrapper <- renderUI({
+    req(isTruthy(as.logical(input$emeta_yn)) | input$datatype == "pep")
+    DTOutput("head_emeta")
+  })
 )
