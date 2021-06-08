@@ -175,7 +175,7 @@ observeEvent(input$group_designation, {
 
   if (!cond1 & !cond2) {
     updateCollapse(session, "groups_collapse_left", close = c("fdata_upload", "fdata_columns"))
-    show("ok_fdata_idcols")
+    shinyjs::show("ok_fdata_idcols")
 
     revals$warnings_groups$failed_groupdes <- NULL
     revals$warnings_groups$obj_1 <- NULL

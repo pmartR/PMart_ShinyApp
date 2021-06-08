@@ -16,14 +16,19 @@ list(
     apply_style_UI("rollup", FALSE, FALSE)
   }),
 
-  output$rollup_data_summary <- renderDT(
-    {
-      req(!is.null(revals$rollup_summary), cancelOutput = TRUE)
-      revals$rollup_summary[1:6, ]
-    },
-    rownames = T,
-    options = list(dom = "t")
-  ),
+  output$rollup_data_summary <- renderUI({
+    req(!is.null(revals$rollup_summary))
+    output$rollup_data_summary_table <- renderDT(
+      {
+        revals$rollup_summary[1:6, ]
+      },
+      rownames = T,
+      options = list(dom = "t") 
+    )
+    
+    wellPanel(DTOutput("rollup_data_summary_table"))
+    
+  }),
 
   output$warnings_rollup <- renderUI({
     HTML(paste(revals$warnings_rollup, collapse = ""))

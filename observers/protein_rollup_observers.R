@@ -9,7 +9,7 @@ observeEvent(c(objects$omicsData, input$top_page), {
 
 # apply rollup
 observeEvent(input$apply_rollup, {
-  show("rollup_busy")
+  shinyjs::show("rollup_busy")
   on.exit(hide("rollup_busy"))
 
   tryCatch(
@@ -35,10 +35,4 @@ observeEvent(input$apply_rollup, {
       plots$rollup_plot <- NULL
     }
   )
-})
-
-# hide ugly empty wellpanel when there is no summary
-observe({
-  cond <- !is.null(revals$rollup_summary)
-  toggle("rollup_data_summary_parent", condition = cond)
 })

@@ -59,16 +59,18 @@ list(
 
   output$qc_data_summary <- renderUI({
     req(!is.null(revals$groups_summary), cancelOutput = TRUE)
-    if (two_lipids()) {
-      req(!is.null(revals$groups_summary_2), cancelOutput = TRUE)
-      splitLayout(
-        DTOutput("qc_summary"),
-        DTOutput("qc_summary_2")
-      )
-    }
-    else {
-      DTOutput("qc_summary")
-    }
+    wellPanel(
+      if (two_lipids()) {
+        req(!is.null(revals$groups_summary_2), cancelOutput = TRUE)
+        splitLayout(
+          DTOutput("qc_summary"),
+          DTOutput("qc_summary_2")
+        )
+      }
+      else {
+        DTOutput("qc_summary")
+      }
+    )
   }),
 
   #### MAIN PANEL, BOTH PLOTS ####

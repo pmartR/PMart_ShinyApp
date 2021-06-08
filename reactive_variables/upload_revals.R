@@ -20,6 +20,15 @@ e_data_2 <- reactive({
   read.csv(filename, stringsAsFactors = FALSE)
 })
 
+# indicator to check whether there are zeros in the data
+e_data_has_zeros <- reactive({
+  if(two_lipids()){
+    any(e_data() == 0, na.rm = T) | any(e_data_2() == 0, na.rm = T) 
+  }
+  else{
+    any(e_data() == 0, na.rm = T)
+  }
+})
 
 # Object: Emeta column names
 # Note: created when emeta is loaded/updated

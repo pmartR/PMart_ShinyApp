@@ -29,7 +29,10 @@ groups_UI <- function() {
           # ID column collapse sub-div
           bsCollapsePanel(div(
             "Specify Main Effects and Covariates",
-            tipify(span(style = "color:rgb(0,191,255)", icon("question-sign", lib = "glyphicon")), title = main_effects_text),
+            tipify(
+              span(style = "color:rgb(0,191,255)", icon("question-sign", lib = "glyphicon")), 
+              title = ttext_[["MAIN_EFFECTS_INFO"]]
+            ),
             hidden(div(id = "ok_fdata_idcols", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
           ),
           value = "fdata_columns",

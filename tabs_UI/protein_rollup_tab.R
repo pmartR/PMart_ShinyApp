@@ -18,7 +18,7 @@ protein_rollup_UI <- function() {
           ))
         )
       ),
-      wellPanel(DTOutput("rollup_data_summary")),
+      uiOutput("rollup_data_summary"),
       uiOutput("warnings_rollup")
     ),
     column(

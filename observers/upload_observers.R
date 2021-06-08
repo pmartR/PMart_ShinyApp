@@ -34,7 +34,30 @@ observeEvent(c(input$file_edata, input$file_edata_2), {
 # user manually specifies they are done selecting columns, closes the collapsible bar
 observeEvent(input$done_idcols, {
   updateCollapse(session, "upload_collapse_left", close = "columnids", open = "meta_collapse")
-  show("ok_columnids")
+  shinyjs::show("ok_columnids")
+})
+
+# disable if they try to log transform data with zeros
+observe({
+  isolate(revals$warnings_upload$bad_transform <- NULL)
+  
+  cond <- e_data_has_zeros() & 
+    input$na_symbol != "0" &
+    grepl("^log", input$transform) & 
+    !grepl("^log", input$data_scale)
+  
+  isolate(
+    revals$warnings_upload$bad_transform <- if(isTRUE(cond)) {
+      sprintf("<div style = 'color:red'>%s</div>",
+        sprintf(
+          infotext_[["LOG_TRANSFORM_ZEROS"]], 
+          ifelse(trimws(input$na_symbol) == "", "-no selection-", input$na_symbol)
+        )
+      )
+    } else NULL
+  )
+  
+  toggleState("makeobject", condition = !cond)
 })
 
 # when they select e_meta files, check that all columns are in order and close the collapsebar if everything looks ok
@@ -44,7 +67,7 @@ observe({
   # all 4 files contain the id column
   if (two_lipids()) {
     req(!is.null(input$id_col) & !is.null(input$id_col_2))
-    cond_files <- !is.null(input$file_emeta) & !is.null(input$file_emeta_2)
+    cond_files <- (!is.null(input$file_emeta) & !is.null(input$file_emeta_2))
     cond_idcol_edata <- all(sapply(
       list(e_data(), e_data_2()),
       function(df) {
@@ -56,10 +79,10 @@ observe({
       function(df) {
         isTRUE(input$id_col %in% colnames(df)) | is.null(df)
       }
-    ))
+    )) | !isTruthy(input$emeta_yn)
     cond_nasymbol <- !is.null(input$na_symbol)
     cond_shared_ids <- all(e_data()[[input$id_col]] %in% revals$e_meta[[input$id_col]]) & all(e_data_2()[[input$id_col_2]] %in% revals$e_meta_2[[input$id_col_2]])
-    cond <- all(cond_idcol_edata, cond_idcol_emeta, cond_nasymbol, cond_shared_ids)
+    cond <- all(cond_idcol_edata, cond_idcol_emeta, cond_nasymbol, cond_shared_ids) | isTruthy(!as.logical(input$emeta_yn))
   }
   # peptide with protein id col conditions:
   # emeta is uploaded
@@ -83,10 +106,10 @@ observe({
     req(!is.null(input$id_col))
     cond_files <- !is.null(input$file_emeta)
     cond_idcol_edata <- isTRUE(input$id_col %in% colnames(e_data()))
-    cond_idcol_emeta <- isTRUE(input$id_col %in% colnames(revals$e_meta)) | is.null(revals$e_meta)
+    cond_idcol_emeta <- isTRUE(input$id_col %in% colnames(revals$e_meta)) | is.null(revals$e_meta) | !isTruthy(input$emeta_yn)
     cond_nasymbol <- !is.null(input$na_symbol)
-    cond_shared_ids <- all(e_data()[[input$id_col]] %in% revals$e_meta[[input$id_col]])
-    cond <- all(cond_idcol_edata, cond_idcol_emeta, cond_nasymbol, cond_shared_ids)
+    cond_shared_ids <- all(e_data()[[input$id_col]] %in% revals$e_meta[[input$id_col]]) 
+    cond <- all(cond_idcol_edata, cond_idcol_emeta, cond_nasymbol, cond_shared_ids) | isTruthy(!as.logical(input$emeta_yn))
   }
 
   # if all conditions met, wait a moment, close the panel
@@ -97,7 +120,7 @@ observe({
 
   # toggle css and display warnings
   toggleCssClass("js_id_col", "error-textcolor", condition = any(!cond_idcol_edata, !cond_idcol_emeta, !cond_shared_ids) & cond_files)
-  revals$warnings_upload$bad_identifier <- if (any(!cond_idcol_edata, !cond_idcol_emeta, !cond_shared_ids) & cond_files) "<p style = 'color:red'>One or more of your identifier columns are not found in or have inconsistent values across the e_data and e_meta files.</p>"
+  revals$warnings_upload$bad_identifier <- if (any(!cond_idcol_edata, !cond_idcol_emeta, !cond_shared_ids) & cond_files & isTruthy(as.logical(input$emeta_yn))) "<p style = 'color:red'>One or more of your identifier columns are not found in or have inconsistent values across the e_data and e_meta files.</p>" else NULL
 
   # condition debugger
   # print(c(cond_files, cond_idcol_edata, cond_idcol_emeta, cond_nasymbol, cond_shared_ids))
@@ -239,7 +262,11 @@ observe({
 
 ## store null values in e_meta if no file chosen since it is not required to make object
 observe({
-  if (is.null(input$file_emeta$datapath)) {
+  if(!isTruthy(as.logical(input$emeta_yn)) & input$datatype != "pep") {
+    revals$e_meta <- NULL
+    shinyjs::reset("file_emeta")
+  }
+  else if (is.null(input$file_emeta$datapath)) {
     revals$e_meta <- NULL
   }
   else {
@@ -249,7 +276,11 @@ observe({
 })
 
 observe({
-  if (is.null(input$file_emeta_2$datapath)) {
+  if(!isTruthy(as.logical(input$emeta_yn))) {
+    revals$e_meta_2 <- NULL
+    shinyjs::reset("file_emeta_2")
+  }
+  else if (is.null(input$file_emeta_2$datapath)) {
     revals$e_meta_2 <- NULL
   }
   else {

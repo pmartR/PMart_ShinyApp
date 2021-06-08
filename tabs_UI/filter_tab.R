@@ -109,11 +109,12 @@ filter_UI <- function() {
           column(
             7,
             numericInput("pvalue_threshold", "P-value threshold:", 0.001, step = 0.001),
-            div(id = "rmd_metrics_js", style = "color:grey", pickerInput("rmd_metrics", "Metrics to determine outliers",
-              choices = c("MAD", "Kurtosis", "Skewness", "Correlation"),
-              selected = c("MAD", "Kurtosis", "Skewness", "Correlation"),
-              multiple = TRUE
-            )),
+            div(
+              id = "rmd_metrics_js", 
+              class = "inline-wrapper-1",
+              uiOutput("rmd_metrics_out"),
+              uiOutput("rmd_propmis_warn_icon")
+            ),
             pickerInput("rmdfilt_plot_type", "Plot everything or inspect certain samples?", choices = c("Plot all samples" = "all", "Select from all samples" = "subset", "Select from outliers" = "outliers")),
             uiOutput("rmdfilt_plot_type")
           )
