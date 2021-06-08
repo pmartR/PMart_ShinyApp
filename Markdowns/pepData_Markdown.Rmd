@@ -123,7 +123,7 @@ pepData$e_data %>%
 ## Filter
 
 Filters **`r ifelse(length(pepDataAttr$filters) == 0, "were not", "were")`** applied.
-`ifelse(length(pepDataAttr$filters) == 0, "", paste("A total of", length(pepDataAttr$filters), "filters were applied. See the table below for a description of the order."))`
+`r ifelse(length(pepDataAttr$filters) == 0, "", paste("A total of", length(pepDataAttr$filters), "filters were applied. See the table below for a descriptions of the filters and the order."))`
 
 ### *Summary of Applied Filters*
 
@@ -134,13 +134,13 @@ FilterTable <- NULL
 if (length(pepDataAttr$filters) != 0) {
   
   # Iterate through all the filters for the table, apply different logic for each filter type
-  FilterTable <- do.call(rbind, lapply(pepDataAttr$filters[1:2], function(filter) {
+  FilterTable <- do.call(rbind, lapply(pepDataAttr$filters, function(filter) {
     
     # Molecule Filter
     if (filter$type == "moleculeFilt") {
       return(c("Filter" = "Molecule Filter", "Type" = "Biomolecule", "Parameters" = 
                paste0("Min Number Molecules: ", filter$threshold), 
-               "Summary" = paste0(filter$filtered %>% length(), " biomolecules were filtered.")))
+               "Summary" = paste0(filter$filtered %>% length(), " biomolecule(s) were filtered.")))
     } else
     
     # Proteomics Filter
@@ -148,15 +148,15 @@ if (length(pepDataAttr$filters) != 0) {
       return(c("Filter" = "Proteomics Filter", "Type" = "Biomolecule", "Parameters" = 
                paste0("Min Number of Peptides: ", filter$threshold$min_num_peps,
                       " & Degenerate Peptides Removed: ", ifelse(filter$threshold$degen_peps, "Yes", "No")),
-               "Summary" = paste0(filter$filtered$e_data_remove %>% length(), " biomolecules were filtered and ",
-                                  filter$filtered$e_meta_remove %>% length(), " proteins were filtered.")))
+               "Summary" = paste0(filter$filtered$e_data_remove %>% length(), " biomolecule(s) were filtered and ",
+                                  filter$filtered$e_meta_remove %>% length(), " protein(s) were filtered.")))
     } else
       
     # CV Filter
-    if (filter$type == "cvFilter") {
+    if (filter$type == "cvFilt") {
       return(c("Filter" = "CV Filter", "Type" = "Biomolecule", "Parameters" = 
                paste0("Max CV: ", filter$threshold),
-               "Summary" = paste0(filter$filtered %>% length(), " biomolecules were filtered.")))
+               "Summary" = paste0(filter$filtered %>% length(), " biomolecule(s) were filtered.")))
     } else
       
     # imd-ANOVA filter
@@ -164,108 +164,90 @@ if (length(pepDataAttr$filters) != 0) {
       return(c("Filter" = "imd-ANOVA Filter", "Type" = "Biomolecule", "Parameters" = 
                paste0("Min ANOVA: ", filter$threshold$min_nonmiss_anova,
                       " & Min G-Test: ", filter$threshold$min_nonmiss_gtest),
-               "Summary" = paste0(filter$filtered %>% length(), " biomolecules were filtered.")))
+               "Summary" = paste0(filter$filtered %>% length(), " biomolecule(s) were filtered.")))
     } else 
       
     # rmd Filter
-    if (filter$type)
+    if (filter$type == "rmdFilt") {
+      return(c("Filter" = "rMD Filter", "Type" = "Sample", "Parameters" = 
+                 paste0("P-Value Threshold: ", filter$threshold, " & Metrics Used: ",
+                        pmart_inputs$rmd_metrics %>% paste(collapse = ", ")),
+               "Summary" = paste0(filter$filtered %>% length(), " sample(s) were filtered.")))
+    } else 
+      
+    # Custom filter
+    if (filter$type == "customFilt") {
+      return(c("Filter" = "Custom Filter", "Type" = "Sample or Biomolecule", "Parameters" = "",
+               "Summary" = paste0(filter$filtered$f_data_remove %>% length(), " sample(s) were filtered. ",
+                           filter$filtered$e_data_remove %>% length(), " biomolecule(s) were filtered. ", 
+                           filter$filtered$e_meta_remove %>% length(), " protein(s) were filtered.")))
+      
+    } else {stop(paste0(filter$type, " is not a recognized filter type."))}
   
   })) %>% data.table()
   
-  
+  cbind("Order" = 1:nrow(FilterTable), FilterTable) %>% kable()
   
 }
-
-
-
-
-
-
-
-FilterTable <- data.table(
-  "Filter" = c("Molecule Filter", "CV Filter", "imd-ANOVA Filter", 
-               "Proteomics Filter", "rMD Filter", "Custom Filter"),
-  "Type" = c(rep("Biomolecule", 4), rep("Sample", 2)),
-  "Applied" = lapply(filters, getAppliedFilter) %>% unlist(),
-  "Parameters" = c(
-    paste0("Molecule Number Min: ", pepDataAttr$filters$moleculeFilt$threshold),
-    paste0("Max CV: ", pepDataAttr$filters$cvFilt$threshold),
-    paste0("ANOVA Min: ", pepDataAttr$filters$imdanovaFilt$threshold$min_nonmiss_anova, " & ",
-           "G-test Min: ", pepDataAttr$filters$imdanovaFilt$threshold$min_nonmiss_gtest),
-    paste0("Peptide Number Min: ",  pepDataAttr$filters$proteomicsFilt$threshold$min_num_peps, " & ",
-           "Remove Degenerates: ", ifelse(pepDataAttr$filters$proteomicsFilt$threshold$degen_peps %>% as.logical(), 
-              "Yes", "No")),
-    paste0("P-Value Threshold: ", pepDataAttr$filters$rmdFilt$threshold, " & ",
-           "Outlier Metrics: ", pmart_inputs$rmd_metrics %>% paste(collapse = ", ")),
-    paste0("The custom filter ", ifelse(pmart_inputs$remove_or_keep == "Remove", "removed", "kept"),
-           "the following sample(s): ", pmart_inputs$fdata_customfilt_choices)
-  )
-)
-
-FilterTable <- FilterTable[FilterTable$Applied == "Yes",]
-FilterTable %>% select(-Applied) %>% kable()
 ```
 
 ```{r Create Filter Text}
 # Molecule Filter 
-MoleculeFilterText <- "A molecule filter was not applied to the data."
+MoleculeFilterText <- "Molecule filters were not applied to the data."
 
 if ("Molecule Filter" %in% FilterTable$Filter) {
-  MoleculeFilterText <- paste("A molecule filter was applied to the data, removing",
-    paste0(pepDataAttr$cnames$edata_cname, "s"), "not having at least", 
-    pepDataAttr$filters$moleculeFilt$threshold, "samples.")
+  MoleculeFilterText <- paste0("A molecule filter was applied to the data, which removes 
+    biomolecule(s) (", paste0(pepDataAttr$cnames$edata_cname, "s"), ") not having at least", 
+    " the minimum number of samples (Min Number Molecules).")
 }
 
 # CV Filter
-CVFilterText <- "A CV filter was not applied to the data."
+CVFilterText <- "CV filters were not applied to the data."
 
 if ("CV Filter" %in% FilterTable$Filter) {
-  CVFilterText <- paste("A coefficient of variation (CV) filter was applied to the data",
-    "removing", paste0(pepDataAttr$cnames$edata_cname, "s"), "with a CV greater than",
-    pepDataAttr$filters$cvFilt$threshold)
+  CVFilterText <- paste0("A coefficient of variation (CV) filter was applied to the data ",
+    "which removes biomolecule(s) (", paste0(pepDataAttr$cnames$edata_cname, "s"), ") with a CV greater than ",
+    "the threshold (Max CV).")
 }
 
 # imd-ANOVA Filter
-imdAnovFilterText <- "An imd-ANOVA filter was not applied to the data."
+imdAnovFilterText <- "imd-ANOVA filters were not applied to the data."
 
 if ("imd-ANOVA Filter" %in% FilterTable$Filter) {
-  imdAnovFilterText <- paste("An ANOVA filter was applied to the data, removing",
-    paste0(pepDataAttr$cnames$edata_cname, "s"), "not having at least",
-    pepDataAttr$filters$imdanovaFilt$threshold$min_nonmiss_anova, "non-missing values",
-    "per group. Additionaly, an IMD (independence of missing data) filter was applied",
-    "to the data, removing", paste0(pepDataAttr$cnames$edata_cname, "s"), "not having",
-    "at least", pepDataAttr$filter$imdanovaFilt$threshold$min_nonmiss_gtest,
-    "non-missing values in at least one of the groups.")
+  imdAnovFilterText <- paste0("An ANOVA filter can be applied to the data which removes biomolecule(s) (",
+    paste0(pepDataAttr$cnames$edata_cname, "s"), ") not having at least a minimum number ",
+    "of non-missing values per group (Min ANOVA). Additionaly, an IMD (independence of missing data) filter can",
+    " be applied to the data, removing biomolecules not having at least a minimum number of non-missing ",
+    "values (Min G-Test) in at least one of the groups.")
 }
 
 # Proteomics Filter
-ProteomicsFilterText <- "A proteomics filter was not applied to the data."
+ProteomicsFilterText <- "Proteomics filters were not applied to the data."
 
 if ("Proteomics Filter" %in% FilterTable$Filter) {
-  ProteomicsFilterText <- paste("A degenerate peptide filter",
-    ifelse(pepDataAttr$filters$proteomicsFilt$threshold$degen_peps %>% as.logical(), "was", "was not"), 
-    "applied to the data, identifying", paste0(pepDataAttr$cnames$edata_cname, "s"), "mapping to more than",
-    "one protein. Additionally, a protein filter was applied to the data, identifying proteins",
-    "not having at least", pepDataAttr$filters$proteomicsFilt$threshold$min_num_peps,
-    paste0(pepDataAttr$cnames$edata_cname, "s"), "mapping to them.")
+  ProteomicsFilterText <- paste0("A degenerate peptide filter (Degenerate Peptides Removed)",
+    " can be applied to the data, ", 
+    "which identifies biomolecule(s) (", paste0(pepDataAttr$cnames$edata_cname, "s"), ") not belonging ",
+    "to one protein. Additionally, a protein filter can be applied to the data which identifies proteins ",
+    "not having at least a minimum number of peptides (Min Number of Peptides) mapping to them.")
 }
 
 
 # rMD Filter
-rMDFilterText <- "A rMD filter was not applied to the data."
+rMDFilterText <- "rMD filters were not applied to the data."
 
 if ("rMD Filter" %in% FilterTable$Filter) {
-  rMDFilterText <- paste("A robust Mahalanobis distance (rMD) filter was applied to the",
-    "data, removing", paste0(pepDataAttr$cnames$fdata_cname, "s"), "with an associated",
-    "rMD-associated p-value less than", paste0(pepDataAttr$filters$rmdFilt$threshold, ".")
-  )
+  rMDFilterText <- paste0("A robust Mahalanobis distance (rMD) filter was applied to the",
+    " data, removing sample(s) (", paste0(pepDataAttr$cnames$fdata_cname, "s"), ") with an associated ",
+    "rMD-associated p-value less than the threshold (P-Value Threshold). Metrics ",
+    "used to calculate the p-value are also included (Metrics Used).")
 }
 
-# Custom Filter
-CustomFilterText <- "A custom filter was not applied to the data."
+# Custom filter
+customFilterText <- "Custom filters were not applied to the data."
 
 if ("Custom Filter" %in% FilterTable$Filter) {
-  CustomFilterText <- FilterTable[FilterTable$Filter == "Custom Filter", "Parameters"] %>% unlist()
+  customFilterText <- "Custom filters can be used to remove samples, biomolecules, or proteins."
 }
 ```
 
@@ -291,7 +273,7 @@ if ("Custom Filter" %in% FilterTable$Filter) {
 
 ### *Custom Filter*
 
-`r CustomFilterText`
+`r customFilterText`
 
 ## Normalization
 
