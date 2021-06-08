@@ -142,4 +142,9 @@ shinyServer(function(session, input, output) {
     },
     contentType = "application/zip"
   )
+  
+  observeEvent(input$BROWSER, {
+    browser()
+  })
+  
 })
