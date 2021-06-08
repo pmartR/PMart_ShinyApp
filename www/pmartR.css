@@ -33,6 +33,14 @@
   vertical-align:top;
 }
 
+.inline-wrapper-1 {
+  width:100%;
+}
+
+.inline-wrapper-1 > div {
+  display:inline-block;
+}
+
 .collapse_page .panel-heading{
   font-weight:bold;
   text-align:center;

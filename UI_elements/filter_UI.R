@@ -3,304 +3,354 @@ list(
   output$filter_review <- renderUI({
     # store text as a list of HTML elements
     divs <- list()
-    
+
     fdata_cname <- attributes(objects$uploaded_omicsData)$cnames$fdata_cname
     fdata_cname_2 <- attributes(objects$uploaded_omicsData_2)$cnames$fdata_cname
-    
+
     # indices of which filters/HTML elements belong to each object
-    obj2_inds <- which(grepl('_2', names(objects$filters)))
+    obj2_inds <- which(grepl("_2", names(objects$filters)))
     obj1_inds <- setdiff(1:length(objects$filters), obj2_inds)
-    
+
     # text for first filter object
-    for(i in 1:length(objects$filters)){
+    for (i in 1:length(objects$filters)) {
       # rmd filter
-      if(grepl('rmdfilt', names(objects$filters)[i])){
-        rmd_removed_samps <- attr(objects$filters[[i]], 'sample_names')[which(objects$filters[[i]]$pvalue < input$pvalue_threshold)]
+      if (grepl("rmdfilt", names(objects$filters)[i])) {
+        rmd_removed_samps <- attr(objects$filters[[i]], "sample_names")[which(objects$filters[[i]]$pvalue < input$pvalue_threshold)]
         divs[[i]] <- tagList(
-          tags$b('rMd Filter:'),
-          tags$p(sprintf('p-value threshold: %s', input$pvalue_threshold)),
-          tags$p(sprintf('Removed Samples: %s', ifelse(length(rmd_removed_samps > 0), paste(rmd_removed_samps, collapse = '&nbsp|&nbsp'), 'None'))),
+          tags$b("rMd Filter:"),
+          tags$p(sprintf("p-value threshold: %s", input$pvalue_threshold)),
+          tags$p(sprintf("Removed Samples: %s", ifelse(length(rmd_removed_samps > 0), paste(rmd_removed_samps, collapse = "&nbsp|&nbsp"), "None"))),
           hr()
         )
       }
       # custom filter
-      else if(grepl('customfilt', names(objects$filters)[i])){
+      else if (grepl("customfilt", names(objects$filters)[i])) {
         # get samples and check whether we are removing or keeping
         filter_samples <- unlist(objects$filters[[i]])
-        object_samples <- attr(objects$filters[[i]], 'omicsData')$f_data[,get_fdata_cname(attr(objects$filters[[i]], 'omicsData'))]
-        
-        if('f_data_keep' %in% names(objects$filters[[i]])){
+        object_samples <- attr(objects$filters[[i]], "omicsData")$f_data[, get_fdata_cname(attr(objects$filters[[i]], "omicsData"))]
+
+        if ("f_data_keep" %in% names(objects$filters[[i]])) {
           f_data_keep <- filter_samples
           f_data_remove <- setdiff(object_samples, f_data_keep) %>% union(rmd_removed_samps) # ** include samples removed by rmd filter
         }
-        else if('f_data_remove' %in% names(objects$filters[[i]])){
-          f_data_remove <- filter_samples 
+        else if ("f_data_remove" %in% names(objects$filters[[i]])) {
+          f_data_remove <- filter_samples
           f_data_keep <- setdiff(object_samples, union(f_data_remove, rmd_removed_samps)) # **
         }
-        
+
         divs[[i]] <- tagList(
-          tags$b('Custom Filter:'),
-          tags$p('Samples Removed: ', div(style = 'overflow-x:auto', paste(f_data_remove, collapse = ' | '))),
-          tags$p('Remaining Samples:', div(style = 'overflow-x:auto', paste(f_data_keep, collapse = ' | '))),
+          tags$b("Custom Filter:"),
+          tags$p("Samples Removed: ", div(style = "overflow-x:auto", paste(f_data_remove, collapse = " | "))),
+          tags$p("Remaining Samples:", div(style = "overflow-x:auto", paste(f_data_keep, collapse = " | "))),
           hr()
         )
-      # cv filter
-      }else if(grepl('cvfilt', names(objects$filters)[i])){
+        # cv filter
+      } else if (grepl("cvfilt", names(objects$filters)[i])) {
         n_removed <- summary(objects$filters[[i]], cv_threshold = input$cv_threshold)$filtered_biomolecules
         divs[[i]] <- tagList(
-          tags$b('Coefficient of Variation (CV) Filter:'),
-          tags$p('CV threshold: ', input$cv_threshold, '| Biomolecules removed: ', n_removed),
+          tags$b("Coefficient of Variation (CV) Filter:"),
+          tags$p("CV threshold: ", input$cv_threshold, "| Biomolecules removed: ", n_removed),
           hr()
         )
-      # imd filter
-      }else if(grepl('imdanovafilt', names(objects$filters)[i])){
-         foo <- summary(objects$filters[[i]], min_nonmiss_anova = input$min_nonmiss_anova, min_nonmiss_gtest = input$min_nonmiss_gtest)
-         divs[[i]] <- tagList(
-           tags$b('iMd-ANOVA Filter:'),
-           tags$p('Minimum observed (G-test, ANOVA):', sprintf('(%s, %s)', input$min_nonmiss_anova, input$min_nonmiss_gtest), 
-                  '| Biomolecules removed: ', foo$num_filtered),
-           hr()
-         )
+        # imd filter
+      } else if (grepl("imdanovafilt", names(objects$filters)[i])) {
+        foo <- summary(objects$filters[[i]], min_nonmiss_anova = input$min_nonmiss_anova, min_nonmiss_gtest = input$min_nonmiss_gtest)
+        divs[[i]] <- tagList(
+          tags$b("iMd-ANOVA Filter:"),
+          tags$p(
+            "Minimum observed (G-test, ANOVA):", sprintf("(%s, %s)", input$min_nonmiss_anova, input$min_nonmiss_gtest),
+            "| Biomolecules removed: ", foo$num_filtered
+          ),
+          hr()
+        )
       }
       # molecule filter
-      else if(grepl('molfilt', names(objects$filters)[i])){
+      else if (grepl("molfilt", names(objects$filters)[i])) {
         foo <- summary(objects$filters[[i]], min_num = input$mol_min_num)
         divs[[i]] <- tagList(
-          tags$b('Molecule Filter:'),
-          tags$p('Minimum observed:', input$mol_min_num, 
-                 '| Biomolecules removed: ', foo$num_filtered),
+          tags$b("Molecule Filter:"),
+          tags$p(
+            "Minimum observed:", input$mol_min_num,
+            "| Biomolecules removed: ", foo$num_filtered
+          ),
           hr()
         )
       }
       # proteomics filter
-      else if(grepl('profilt', names(objects$filters)[i])){
+      else if (grepl("profilt", names(objects$filters)[i])) {
         foo <- summary(objects$filters[[i]], min_num_peps = input$min_num_peps, degen_peps = input$degen_peps)
         divs[[i]] <- tagList(
-          tags$b('Proteomics Filter:'),
-          tags$p('Minimum Peptides Mapping to a Protein:', input$min_num_peps, '| Remove degenerate peptides?: ', ifelse(input$degen_peps, 'Yes', 'No')),
-          tags$p('Peptides removed: ', foo$num_pep_filtered, ' | Proteins Removed: ', foo$num_pro_filtered),
+          tags$b("Proteomics Filter:"),
+          tags$p("Minimum Peptides Mapping to a Protein:", input$min_num_peps, "| Remove degenerate peptides?: ", ifelse(input$degen_peps, "Yes", "No")),
+          tags$p("Peptides removed: ", foo$num_pep_filtered, " | Proteins Removed: ", foo$num_pro_filtered),
           hr()
         )
       }
     }
-    
+
     # Display two summary sections if there are two omicsData objects
-    if(length(obj2_inds) > 0){
+    if (length(obj2_inds) > 0) {
       tagList(
-        h3(tags$b('Filters to be applied to Object 1:  ')),
+        h3(tags$b("Filters to be applied to Object 1:  ")),
         hr(),
         divs[obj1_inds],
-        h3(tags$b('Filters to be applied to Object 2:  ')),
+        h3(tags$b("Filters to be applied to Object 2:  ")),
         hr(),
         divs[obj2_inds]
       )
     }
-    else{
+    else {
       tagList(
-        h3(tags$b('Filters to be applied:  ')),
+        h3(tags$b("Filters to be applied:  ")),
         divs
       )
     }
-    
   }),
 
   # Top filter plot
   output$filter_mainplot <- renderPlot({
-    if(inherits(plots$filter_mainplot, 'list')){
-      p <- gridExtra::arrangeGrob(plots$filter_mainplot[[1]], plots$filter_mainplot[[2]], ncol = 2) 
+    if (inherits(plots$filter_mainplot, "list")) {
+      p <- gridExtra::arrangeGrob(plots$filter_mainplot[[1]], plots$filter_mainplot[[2]], ncol = 2)
       plots$last_plot <- p
       grid::grid.draw(p)
     }
-    else{
-      plots$last_plot <- plots$filter_mainplot 
+    else {
+      plots$last_plot <- plots$filter_mainplot
       return(plots$filter_mainplot)
     }
   }),
-  
+
   # other filter plot for lipid data
   output$filter_mainplot_2 <- renderPlot({
-    if(inherits(plots$filter_mainplot_2, 'list')){
-      p <- gridExtra::arrangeGrob(plots$filter_mainplot_2[[1]], plots$filter_mainplot_2[[2]], ncol = 2) 
+    if (inherits(plots$filter_mainplot_2, "list")) {
+      p <- gridExtra::arrangeGrob(plots$filter_mainplot_2[[1]], plots$filter_mainplot_2[[2]], ncol = 2)
       plots$last_plot_2 <- p
       grid::grid.draw(p)
     }
-    else{
+    else {
       plots$last_plot_2 <- plots$filter_mainplot_2
       return(plots$filter_mainplot_2)
     }
   }),
-  
+
   # plot one or both UI elements
   output$filter_dynamic_mainplot <- renderUI({
-    if(!is.null(objects$uploaded_omicsData) & is.null(objects$uploaded_omicsData_2)){
-      plotOutput('filter_mainplot')
+    if (!is.null(objects$uploaded_omicsData) & is.null(objects$uploaded_omicsData_2)) {
+      plotOutput("filter_mainplot")
     }
-    else if(any(!is.null(objects$uploaded_omicsData), !is.null(objects$uploaded_omicsData_2))){
+    else if (any(!is.null(objects$uploaded_omicsData), !is.null(objects$uploaded_omicsData_2))) {
       tagList(
-        plotOutput('filter_mainplot'),
-        plotOutput('filter_mainplot_2')
-      ) 
+        plotOutput("filter_mainplot"),
+        plotOutput("filter_mainplot_2")
+      )
     }
   }),
-  
+
   # Sample (fdata) filter
   output$fdata_customfilt <- renderUI({
     req(!is.null(objects$uploaded_omicsData))
-    fdata_IDS = objects$uploaded_omicsData$f_data %>% purrr::pluck(get_fdata_cname(objects$uploaded_omicsData))
-    if(!(isTRUE(input$fdata_customfilt_regex == '') | is.null(input$fdata_customfilt_regex))){
+    fdata_IDS <- objects$uploaded_omicsData$f_data %>% purrr::pluck(get_fdata_cname(objects$uploaded_omicsData))
+    if (!(isTRUE(input$fdata_customfilt_regex == "") | is.null(input$fdata_customfilt_regex))) {
       fdata_IDS <- fdata_IDS[grepl(input$fdata_customfilt_regex, fdata_IDS)]
     }
-    if(two_lipids()){
+    if (two_lipids()) {
       req(!is.null(objects$uploaded_omicsData_2))
-      fdata_IDS_2 = objects$uploaded_omicsData_2$f_data %>% purrr::pluck(get_fdata_cname(objects$uploaded_omicsData_2))
-      if(!(isTRUE(input$fdata_customfilt_regex_2 == '') | is.null(input$fdata_customfilt_regex_2))){
+      fdata_IDS_2 <- objects$uploaded_omicsData_2$f_data %>% purrr::pluck(get_fdata_cname(objects$uploaded_omicsData_2))
+      if (!(isTRUE(input$fdata_customfilt_regex_2 == "") | is.null(input$fdata_customfilt_regex_2))) {
         fdata_IDS_2 <- fdata_IDS_2[grepl(input$fdata_customfilt_regex_2, fdata_IDS_2)]
       }
-      
+
       fluidRow(
-        column(6, 
-               div(pickerInput('fdata_customfilt_choices', 'Select Manually (dataset 1)', choices = fdata_IDS, multiple = TRUE))
-               
+        column(
+          6,
+          div(pickerInput("fdata_customfilt_choices", "Select Manually (dataset 1)", choices = fdata_IDS, multiple = TRUE))
         ),
-        column(6,
-               div(pickerInput('fdata_customfilt_choices_2', 'Select Manually (dataset 2)', choices = fdata_IDS_2, multiple = TRUE)))
+        column(
+          6,
+          div(pickerInput("fdata_customfilt_choices_2", "Select Manually (dataset 2)", choices = fdata_IDS_2, multiple = TRUE))
+        )
       )
     }
-    else{
-      div(style = 'display:flex',
-          div(pickerInput('fdata_customfilt_choices', 'Select Manually', choices = fdata_IDS, multiple = TRUE), style = 'width:50%')
+    else {
+      div(
+        style = "display:flex",
+        div(pickerInput("fdata_customfilt_choices", "Select Manually", choices = fdata_IDS, multiple = TRUE), style = "width:50%")
       )
     }
   }),
-  
+
   # regex filter for custom filter
   output$fdata_regex <- renderUI({
     req(!is.null(objects$uploaded_omicsData))
-    if(two_lipids()){
+    if (two_lipids()) {
       req(!is.null(objects$uploaded_omicsData_2))
       tagList(
-        tags$b('Filter choices by regex string'),
+        tags$b("Filter choices by regex string"),
         fluidRow(
-          column(6,
-                 div(textInput('fdata_customfilt_regex', '(dataset 1)'))
+          column(
+            6,
+            div(textInput("fdata_customfilt_regex", "(dataset 1)"))
           ),
-          column(6, 
-                 div(textInput('fdata_customfilt_regex_2', '(dataset 2)'))
+          column(
+            6,
+            div(textInput("fdata_customfilt_regex_2", "(dataset 2)"))
           )
         )
       )
     }
-    else{
-      div(textInput('fdata_customfilt_regex', 'Filter choices by regex string'))
+    else {
+      div(textInput("fdata_customfilt_regex", "Filter choices by regex string"))
+    }
+  }),
+  
+  #'@details Condition UI for rmd metric selection.  We deselect Proportion_Missing
+  #' by default in the case of lipid data or metabolite data.
+  output$rmd_metrics_out <- renderUI({
+    req(!is.null(objects$uploaded_omicsData))
+    if(class(objects$uploaded_omicsData) %in% c("lipidData", "metabData")){
+      selected = c("MAD", "Kurtosis", "Skewness", "Correlation")
+    }
+    else {
+      selected = c("MAD", "Kurtosis", "Skewness", "Correlation", "Proportion_Missing")
+    }
+
+    pickerInput("rmd_metrics", "Metrics to determine outliers",
+                choices = global_input_choices[['RMD_FILTER_CHOICES']],
+                selected = selected,
+                multiple = TRUE
+    )
+  }),
+  
+  #'@details warning icon that appears when we select proportion missing as
+  #'a metric for lipidomics or metabolomics data.
+  output$rmd_propmis_warn_icon <- renderUI({
+    req(!is.null(objects$uploaded_omicsData), input$rmd_metrics)
+    if(
+      class(objects$uploaded_omicsData) %in% c("lipidData", "metabData") &
+      "Proportion_Missing" %in% input$rmd_metrics
+      ){
+      return(tipify(
+          icon("exclamation-sign", lib = "glyphicon", style="color:deepskyblue;display:inline-block"), 
+          title = ttext_[["RMD_PROP_MISSING_WARNING"]]
+        )
+      )
+    } else {
+      return(NULL)
     }
   }),
   
   # Conditional UI for rmd filter, depends on the sample names in the file(s)
   output$rmdfilt_plot_type <- renderUI({
-    req(!is.null(objects$uploaded_omicsData), cancelOutput = TRUE)
-    if(input$rmdfilt_plot_type == 'all'){
+    req(!is.null(objects$uploaded_omicsData))
+    if (input$rmdfilt_plot_type == "all") {
       NULL
     }
-    else if(input$rmdfilt_plot_type == 'subset'){
-      if(two_lipids()){
+    else if (input$rmdfilt_plot_type == "subset") {
+      if (two_lipids()) {
         req(!is.null(objects$uploaded_omicsData_2))
-        choices1 = objects$uploaded_omicsData$f_data[,get_fdata_cname(objects$uploaded_omicsData)]
-        choices2 = objects$uploaded_omicsData_2$f_data[,get_fdata_cname(objects$uploaded_omicsData_2)]
-        
+        choices1 <- objects$uploaded_omicsData$f_data[, get_fdata_cname(objects$uploaded_omicsData)]
+        choices2 <- objects$uploaded_omicsData_2$f_data[, get_fdata_cname(objects$uploaded_omicsData_2)]
+
         tagList(
-          tags$p('Select samples to inspect:'),
+          tags$p("Select samples to inspect:"),
           fluidRow(
-            column(6, pickerInput('rmd_sample', NULL, choices = choices1, multiple = FALSE)),
-            column(6, pickerInput('rmd_sample_2', NULL, choices = choices2, multiple = FALSE))
+            column(6, pickerInput("rmd_sample", NULL, choices = choices1, multiple = FALSE)),
+            column(6, pickerInput("rmd_sample_2", NULL, choices = choices2, multiple = FALSE))
           )
         )
       }
-      else{
-        choices1 = objects$uploaded_omicsData$f_data[,get_fdata_cname(objects$uploaded_omicsData)]
-        pickerInput('rmd_sample', 'Select samples to inspect:', choices = choices1, multiple = FALSE)
+      else {
+        choices1 <- objects$uploaded_omicsData$f_data[, get_fdata_cname(objects$uploaded_omicsData)]
+        pickerInput("rmd_sample", "Select samples to inspect:", choices = choices1, multiple = FALSE)
       }
     }
-    else if(input$rmdfilt_plot_type == 'outliers'){
+    else if (input$rmdfilt_plot_type == "outliers") {
       temp_rmd_filter1 <- rmd_filter(objects$uploaded_omicsData, metrics = input$rmd_metrics)
-      if(two_lipids()){
+      if (two_lipids()) {
         req(!is.null(objects$uploaded_omicsData_2))
         temp_rmd_filter2 <- rmd_filter(objects$uploaded_omicsData_2, metrics = input$rmd_metrics)
-        choices1 = objects$uploaded_omicsData$f_data[which(temp_rmd_filter1$pvalue < input$pvalue_threshold), get_fdata_cname(objects$uploaded_omicsData)]
-        choices2 = objects$uploaded_omicsData_2$f_data[which(temp_rmd_filter2$pvalue < input$pvalue_threshold), get_fdata_cname(objects$uploaded_omicsData_2)]
-        
+        choices1 <- objects$uploaded_omicsData$f_data[which(temp_rmd_filter1$pvalue < input$pvalue_threshold), get_fdata_cname(objects$uploaded_omicsData)]
+        choices2 <- objects$uploaded_omicsData_2$f_data[which(temp_rmd_filter2$pvalue < input$pvalue_threshold), get_fdata_cname(objects$uploaded_omicsData_2)]
+
         tagList(
-          tags$p('Select samples to inspect:'),
+          tags$p("Select samples to inspect:"),
           fluidRow(
-            column(6, pickerInput('rmd_sample', NULL, choices = choices1, multiple = FALSE)),
-            column(6, pickerInput('rmd_sample_2', NULL, choices = choices2, multiple = FALSE))
+            column(6, pickerInput("rmd_sample", NULL, choices = choices1, multiple = FALSE)),
+            column(6, pickerInput("rmd_sample_2", NULL, choices = choices2, multiple = FALSE))
           )
         )
       }
-      else{
-        choices1 = objects$uploaded_omicsData$f_data[which(temp_rmd_filter1$pvalue < input$pvalue_threshold), get_fdata_cname(objects$uploaded_omicsData)]
-        pickerInput('rmd_sample', 'Select samples to inspect', choices = choices1, multiple = FALSE)
+      else {
+        choices1 <- objects$uploaded_omicsData$f_data[which(temp_rmd_filter1$pvalue < input$pvalue_threshold), get_fdata_cname(objects$uploaded_omicsData)]
+        pickerInput("rmd_sample", "Select samples to inspect", choices = choices1, multiple = FALSE)
       }
     }
   }),
-  
+
   # Conditional UI for proteomics filter, invisible if the object is not pepData with protein column
   output$profilt_UI <- renderUI({
-    if(class(objects$uploaded_omicsData) == 'pepData'){
+    if (class(objects$uploaded_omicsData) == "pepData") {
       tagList(
         fluidRow(
-          column(6,
-                 actionButton('add_profilt', 
-                              label = div('add/remove proteomics filter', hidden(div(id = 'profilt_exists', style = 'color:orange;float:right', icon('ok', lib='glyphicon')))), 
-                              width = '100%'),
-                 actionButton('plot_profilt', 'Plot this filter', width = '100%'),
-                 actionButton('remove_profilt', 'Remove proteomics filter', width = '100%')
+          column(
+            6,
+            actionButton("add_profilt",
+              label = div("add/remove proteomics filter", hidden(div(id = "profilt_exists", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))),
+              width = "100%"
+            ),
+            actionButton("plot_profilt", "Plot this filter", width = "100%"),
+            actionButton("remove_profilt", "Remove proteomics filter", width = "100%")
           ),
-          column(6,
-                 numericInput('min_num_peps', 'Minimum number of peptides mapped to each protein:', 2, step = 1),
-                 checkboxInput('degen_peps', 'Remove Degenerate Peptides?', TRUE)
+          column(
+            6,
+            numericInput("min_num_peps", "Minimum number of peptides mapped to each protein:", 2, step = 1),
+            checkboxInput("degen_peps", "Remove Degenerate Peptides?", TRUE)
           )
         ),
         hr()
       )
     }
-    else NULL
+    else {
+      NULL
+    }
   }),
-  
+
   # inputs for axes labels and sizes
   output$filter_plot_options <- renderUI({
-    style_UI('filter')
+    style_UI("filter")
   }),
-  
+
   # apply filter plot style options
   output$filter_apply_style <- renderUI({
-    apply_style_UI('filter', two_lipids(), inherits(plots$filter_mainplot, 'list'))
+    apply_style_UI("filter", two_lipids(), inherits(plots$filter_mainplot, "list"))
   }),
-  
+
   # summary tables
-  output$filter_summary <- renderDT(revals$filter_summary, rownames = T, options = list(dom = 'p', pageLength = 8)),
-  output$filter_summary_2 <- renderDT(revals$filter_summary_2, rownames = T, options = list(dom = 'p', pageLength = 8)),
-  
+  output$filter_summary <- renderDT(revals$filter_summary, rownames = T, options = list(dom = "p", pageLength = 8)),
+  output$filter_summary_2 <- renderDT(revals$filter_summary_2, rownames = T, options = list(dom = "p", pageLength = 8)),
+
   output$filter_data_summary <- renderUI({
     req(!is.null(revals$filter_summary), cancelOutput = TRUE)
     wellPanel(
-      if(two_lipids()){
+      if (two_lipids()) {
         req(!is.null(revals$filter_summary_2), cancelOutput = TRUE)
         splitLayout(
-          DTOutput('filter_summary'),
-          DTOutput('filter_summary_2')
+          DTOutput("filter_summary"),
+          DTOutput("filter_summary_2")
         )
       }
-      else DTOutput('filter_summary')
+      else {
+        DTOutput("filter_summary")
+      }
     )
   }),
-  
-  # 
+
+  #
   output$warnings_filter <- renderUI({
     HTML(paste(revals$warnings_filter, collapse = ""))
   }),
-  
+
   output$warnings_filter_modal <- renderUI({
     HTML(paste(revals$warnings_filter, collapse = ""))
   })
-
 )

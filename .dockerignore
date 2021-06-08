@@ -1,0 +1,15 @@
+*
+
+!global.R
+!helper_functions.R
+!filter_names.csv
+!renv.lock
+!server.R
+!ui.R
+!UI_helper_functions.R
+
+!observers
+!reactive_variables
+!UI_elements
+!tabs_UI
+!www
