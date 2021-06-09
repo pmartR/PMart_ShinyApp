@@ -1,15 +1,3 @@
-# limit adjustment options depending on test method
-output$pval_adjust <- renderUI({
-  req(input$test_method)
-  if (input$test_method == "anova") {
-    choices <- c("Holm" = "holm", "Bonferroni" = "bonferroni", "Tukey" = "tukey", "Dunnet" = "dunnett", "None" = "none")
-  }
-  else {
-    choices <- c("Holm" = "holm", "Bonferroni" = "bonferroni", "None" = "none")
-  }
-  pickerInput("pval_adjust", "Multiple comparisons adjustment", choices = choices)
-})
-
 # main plot display which takes in the plot object that is created immediately after imd_anova() is run
 output$analysis_mainplot <- renderPlot({
   req(!is.null(plots$analysis_mainplot))
@@ -23,6 +11,209 @@ output$analysis_mainplot <- renderPlot({
     plots$last_plot <- p
     return(p)
   }
+})
+
+#'@details returns a different sidepanel of options depending on what stats
+#'analysis was selected.
+output$analysis_tab_sidepanel <- renderUI({
+  req(input$stats_select_method != NULLSELECT_)
+  
+  if (input$stats_select_method == "imdanova"){
+    bsCollapse(
+      id = "imdanova-sidepanel-options", multiple = TRUE, 
+      open = c("imdanova-specify-comparisons"), 
+      #
+      bsCollapsePanel(
+        subsection_header(
+          "Group comparisons",
+          "imdanova_groups_ok",
+          "color:orange;float:right",
+          icon("ok", lib = "glyphicon")
+        ),
+        value = "imdanova-specify-comparisons",
+        pickerInput(
+          "imdanova_comparison_method",
+          "Select comparisons to use (singleton groups excluded):",
+          c(
+            "All pairwise comparisons",
+            "Control to test condition comparisons",
+            "Custom comparisons"
+          ),
+          selected = character(0),
+          options = pickerOptions(maxOptions = 1),
+          multiple = TRUE
+        ),
+        
+        uiOutput("pairwise_comp_selector"),
+        
+        hr(),
+        
+        DTOutput("pairwise_comp_display"),
+        
+        tags$script('Shiny.addCustomMessageHandler("unbind-DT-RR", function(x) {
+                      Shiny.unbindAll($(document.getElementById(x)).find(".dataTable"));
+                      });')
+      ),
+      bsCollapsePanel(
+        subsection_header(
+          "iMd-ANOVA test settings",
+          "imdanova_settings_ok",
+          "color:orange;float:right",
+          icon("ok", lib = "glyphicon")
+        ),
+        value = "imdanova-select-settings",
+        uiOutput("imdanova_test_method_UI"),
+        uiOutput("imdanova_pval_adjust_UI"),
+        numericInput("pval_thresh", "Significance threshold", value = 0.05, step = 0.01),
+        bsButton("apply_imdanova", "Perform iMd-ANOVA")
+      )
+    )
+  }
+})
+
+#'@details Give options for comparisons depending on what user selected as the
+#' method to perform comparisons (All comparisons, control vs treatment, custom)
+output$pairwise_comp_selector <- renderUI({
+  req(input$imdanova_comparison_method)
+  
+  if (input$imdanova_comparison_method == "All pairwise comparisons") {
+    return()
+  } else if (input$imdanova_comparison_method == "Control to test condition comparisons") {
+    groups <- objects$omicsData %>%
+      pmartR:::get_group_table()
+    groups <- groups[groups > 1] %>% names()
+    
+    return(
+      div(
+        pickerInput("imdanova_control_group",
+                    "Select control group:",
+                    groups,
+                    selected = input$imdanova_control_group,
+                    options = pickerOptions(maxOptions = 1),
+                    multiple = TRUE
+        ),
+        uiOutput("non_control_groups")
+      )
+    )
+  } else {
+    groups <- objects$omicsData %>%
+      pmartR:::get_group_table() %>%
+      names()
+    combos <- apply(combn(groups, 2), 2, toString)
+    
+    return(
+      pickerInput("imdanova_custom_comps",
+                  "Select group comparisons of interest:",
+                  combos,
+                  selected = isolate(input$imdanova_custom_comps),
+                  multiple = TRUE
+      )
+    )
+  }
+})
+
+#'@details Select the 'treatment' groups to compare to the selected control.
+#'The control selection will be disabled.
+output$non_control_groups <- renderUI({
+  req(input$imdanova_control_group)
+  groups <- objects$omicsData %>%
+    pmartR:::get_group_table()
+  groups <- groups[groups > 1] %>% names()
+  
+  pickerInput("imdanova_non_control_groups",
+              "Select group(s) to compare to control:",
+              groups,
+              selected = input$imdanova_non_control_groups,
+              choicesOpt = list(
+                disabled = groups %in% input$imdanova_control_group
+              ),
+              multiple = TRUE
+  )
+})
+
+#'@details display the data-table of possible comparisons.
+output$pairwise_comp_display <- renderDT(
+  {
+    req(!is.null(comp_df_holder$comp_df))
+    session$sendCustomMessage("unbind-DT-RR", "pairwise_comp_display")
+    comp_df_holder$comp_df
+  },
+  options = list(
+    dom = "t", scrollX = TRUE,
+    preDrawCallback = JS("function() { Shiny.unbindAll(this.api().table().node()); }"),
+    drawCallback = JS("function() { Shiny.bindAll(this.api().table().node()); } ")
+  ),
+  selection = "none",
+  escape = FALSE
+)
+
+#'@details Picker for which type of statistical test to use in imd-anova
+output$imdanova_test_method_UI <- renderUI({
+  req(objects$omicsData)
+  
+  filt_method <- attributes(objects$omicsData)$filters$imdanovaFilt$filter_method
+  
+  if (is.null(filt_method) || length(filt_method) == 2) {
+    groupsizes <- pmartR:::get_group_table(objects$omicsData)
+    groupsizes <- groupsizes[groupsizes > 1]
+    groupsizes <- groupsizes[names(groupsizes) %in% unlist(comp_df_holder$comp_df[1:2])]
+    
+    if (any(groupsizes < 3)) {
+      disabler <- c(
+        "ANOVA" = "anova",
+        "G-Test" = "gtest",
+        "Combined" = "combined"
+      ) %in% c("gtest", "combined")
+    } else {
+      disabler <- NULL
+    }
+  } else {
+    disabler <- !(c(
+      "ANOVA" = "anova",
+      "G-Test" = "gtest",
+      "Combined" = "combined"
+    ) %in% filt_method)
+  }
+  
+  choicesOpt <-  list(subtext = c(
+    "Requires 2+ members per group",
+    "Requires 3+ members per group",
+    "Requires 3+ members per group"
+  ))
+  
+  if (is.null(disabler)) {
+    invisible()
+  } else {
+    choicesOpt[['disabled']] = disabler
+  }
+  
+  return(
+    pickerInput("imdanova_test_method",
+                "Test method:",
+                c(
+                  "ANOVA" = "anova",
+                  "G-Test" = "gtest",
+                  "Combined" = "combined"
+                ),
+                selected = input$imdanova_test_method,
+                options = pickerOptions(maxOptions = 1),
+                multiple = TRUE,
+                choicesOpt = choicesOpt
+    )
+  )
+  
+})
+
+# limit adjustment options depending on test method
+output$imdanova_pval_adjust_UI <- renderUI({
+  req(input$imdanova_test_method)
+  if (input$imdanova_test_method == "anova") {
+    choices <- c("Holm" = "holm", "Bonferroni" = "bonferroni", "Tukey" = "tukey", "Dunnet" = "dunnett", "None" = "none")
+  }
+  else {
+    choices <- c("Holm" = "holm", "Bonferroni" = "bonferroni", "None" = "none")
+  }
+  pickerInput("pval_adjust", "Multiple comparisons adjustment", choices = choices)
 })
 
 # display table output from imd_anova

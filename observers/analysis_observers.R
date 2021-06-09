@@ -1,10 +1,79 @@
+#'@details depending on the type of comparison the user wants to do, edit the 
+#' table that presents the group comparisons
+observe({
+  req(input$imdanova_comparison_method, objects$omicsData)
+  
+  if (input$imdanova_comparison_method == "Control to test condition comparisons") {
+    control <- input$imdanova_control_group
+    noncontrol <- input$imdanova_non_control_groups
+    
+    req(!is.null(control) && !is.null(noncontrol))
+    
+    combos <- t(combn(c(control, noncontrol), 2))
+    if (nrow(combos) > 1) {
+      combos <- as.matrix(combos[combos[, 1] == control, ], ncol = 2)
+    }
+  } else if (input$imdanova_comparison_method == "Custom comparisons") {
+    combos <- input$imdanova_custom_comps
+    
+    req(!is.null(combos))
+    
+    combos <- str_split(combos, ", ", simplify = TRUE)
+  } else {
+    groups <- isolate(objects$omicsData) %>%
+      pmartR:::get_group_table()
+    groups <- groups[groups > 1] %>% names()
+    combos <- t(combn(groups, 2))
+  }
+  
+  isolate(comp_df_holder$comp_df <- data.frame(
+    `Comparison` = as.character(combos[, 2]),
+    `Control` = as.character(combos[, 1]),
+    ` ` = buttonInput(
+      FUN = actionButton,
+      len = nrow(combos),
+      id = "imd_comparison_button_",
+      onclick = 'Shiny.onInputChange(\"lastClick\",  this.id)',
+      label = "Swap",
+      style = "padding:4px; font-size:80%"
+    ),
+    check.names = FALSE,
+    stringsAsFactors = FALSE
+  ))
+  
+  isolate(row.names(comp_df_holder$comp_df) <- NULL)
+})
+
+#'@details Swaps the comparison for a particular row in comp_df_holder.
+#' The value of the clicked 'swap' button inside the datatable temporarily 
+#' changes to 1 before resetting when the UI is redrawn.  The row where that
+#' clicked button lives has its columns swapped.
+observeEvent(get_swap_vals(), {
+  res <- get_swap_vals()
+  req(any(res > 0))
+  
+  row <- as.numeric(names(which(res > 0)))
+  a <- comp_df_holder$comp_df[row, 1]
+  b <- comp_df_holder$comp_df[row, 2]
+  comp_df_holder$comp_df[row, 1] <- b
+  comp_df_holder$comp_df[row, 2] <- a
+})
+
 # make statres object
 observeEvent(input$apply_imdanova, {
   req(!is.null(objects$omicsData), input$top_page == "Analysis")
-
+  
   tryCatch(
     {
-      objects$imdanova_res <- imd_anova(objects$omicsData, test_method = input$test_method, pval_adjust = input$pval_adjust, pval_thresh = input$pval_thresh)
+      comps <- as.data.frame(comp_df_holder$comp_df)[1:2]
+      colnames(comps) <- c("Control", "Test")
+      objects$imdanova_res <- imd_anova(
+        objects$omicsData, 
+        comparisons = comps,
+        test_method = input$imdanova_test_method, 
+        pval_adjust = input$pval_adjust, 
+        pval_thresh = input$pval_thresh
+      )
     },
     error = function(e) {
       msg <- paste0("Something went wrong running the analysis.  \n System error:  ", e)
