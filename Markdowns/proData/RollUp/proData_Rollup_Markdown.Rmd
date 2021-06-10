@@ -1,0 +1,383 @@
+---
+title: "Protein Data Template: Rollup"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, error = FALSE)
+library(dplyr); library(pmartR); library(knitr); library(DT); library(ggplot2);
+library(data.table); library(patchwork); library(purrr)
+
+# This data will be passed to the markdown through shiny
+rootdir <- "/Users/degn400/Desktop/Git_Repos/pmart_standalone/Markdowns/proData/RollUp/"
+proData <- readRDS(file.path(rootdir, "proData_rollup.RDS"))
+proDataAttr <- attributes(proData)
+proStats <- readRDS(file.path(rootdir, "proStats_rollup.RDS"))
+proStatsAttr <- attributes(proStats)
+pmart_inputs <- readRDS(file.path(rootdir, "pmart_inputs_rollup.RDS"))
+spans_results <- readRDS(file.path(rootdir, "spans_res_rollup.RDS"))
+
+# Create sentence for scale data change
+if (proDataAttr$data_info$data_scale_orig == proDataAttr$data_info$data_scale) {
+  ScaleData <- paste0("The original scale of the data was ", proDataAttr$data_info$data_scale_orig,
+    " and remained unchanged.")
+} else {
+  ScaleData <- paste0("The original scale of the data was ", proDataAttr$data_info$data_scale_orig,
+    " and was changed to ", proDataAttr$data_info$data_scale, ".")
+}
+
+# Change whether the expression is protein or peptide depending on whether roll-up occurred
+rollup <- "was"
+molecule <- "peptide"
+```
+
+## Upload Data
+
+### *Expression Data*
+
+An **`r ifelse(pmart_inputs$labeled_yn, "labelled", "unlabelled")`** `r molecule` expression 
+data file called **"`r pmart_inputs$file_edata$name`"** was uploaded to pmart. The 
+protein data **`r rollup`** rolled-up from peptide data. The column 
+that designates unique molecules was marked as **"`r proDataAttr$cnames$edata_cname`"**. 
+`r ScaleData` The value to denote missing data was 
+**"`r pmart_inputs$na_symbol`"** and the expression data
+**`r ifelse(pmart_inputs$normalized_yn == "0", "was not already", "was already")`** normalized. 
+
+### *Biomolecule Information*
+
+```{r}
+# Set the biomolecule information text 
+BiomoleculeText <- "No biomolecule information was uploaded."
+
+# If an e_meta file is included, create the text for it
+if (is.null(proDataAttr$cnames$emeta_cname) == FALSE) {
+  BiomoleculeText <- paste("An associated biomolecule information file was also",
+    "uploaded called", pmart_inputs$file_emeta$name, "and the protein identifier column",
+    "was designated as", paste0(proDataAttr$cnames$emeta_cname, "."))
+}
+```
+
+`r BiomoleculeText`
+
+### *Sample Information*
+
+An associated sample information file was also uploaded called 
+**"`r pmart_inputs$file_fdata$name`"**. Trimmed sample names
+**`r ifelse(pmart_inputs$usevizsampnames == "No", "were not", "were")`** used. The 
+column in the sample information file which indicates sample names was 
+designated as **"`r proDataAttr$cnames$fdata_cname`"**.
+
+## Group Samples
+
+### *Grouping Information*
+
+This table summarizes all the user specified main effects or covariates in pmart. The 
+"Selected Column Name" denotes the name of the column in the sample information 
+file assigned as a main effect or covariate. 
+
+```{r Grouping Information: Main Effects and Covariates}
+resetNULL <- function(x) {ifelse(x == "None", "None selected", x)}
+
+data.table("Main Effect or Covariate" = c("First Main Effect", "Second Main Effect",
+  "First Covariate", "Second Covariate"), "Selected Column Name" = c(resetNULL(pmart_inputs$gcol1),
+  resetNULL(pmart_inputs$gcol2), resetNULL(pmart_inputs$cvcol1), 
+  resetNULL(pmart_inputs$cvcol2))) %>% kable()
+```
+
+### *Number of Samples per Main Effects*
+
+```{r Grouping Information: Bar Chart}
+# Generate plots for main effects 
+plotForMainEffects <- function(effect) {
+  count <- proData$f_data %>%
+    select(all_of(effect)) %>%
+    table() %>%
+    as.data.table() 
+  colnames(count) <- c("Group", "Number of samples")
+  ggplot(count, aes(x = Group, y = `Number of samples`, fill = Group)) +
+    geom_bar(stat = "identity") + theme_bw() + 
+    geom_text(aes(label = `Number of samples`), 
+              position = position_dodge(width = 1), vjust = -0.25) +
+    ylim(c(0, max(count$`Number of samples`) * 1.1))
+}
+
+if (is.null(pmart_inputs$gcol1) == FALSE && pmart_inputs$gcol1 != "None") {
+  plotForMainEffects(pmart_inputs$gcol1) + 
+    ggtitle(paste("First Main Effect:", pmart_inputs$gcol1))
+}
+if (is.null(pmart_inputs$gcol2) == FALSE && pmart_inputs$gcol2 != "None") {
+  plotForMainEffects(pmart_inputs$gcol2) + 
+    ggtitle(paste("Second Main Effect:", pmart_inputs$gcol2))
+}
+```
+
+## Data Summary
+
+### *Summary Table*
+
+The first column in the table below denotes a property of the peptide data, and the "Data" column
+states that property's value.
+
+```{r Data Summary: Main Table}
+proDataSum <- data.frame("Data" = summary(proData))
+proDataSum %>% kable()
+```
+
+### *Missing Value Table*
+
+In the table below, the first column denotes the sample and the second is the missing number of observations.
+The third column represents the second as a percentage of the total number of observations
+for that sample. 
+
+```{r Data Summary: Missing Value Table}
+proData$e_data %>%
+  select(-proDataAttr$cnames$edata_cname) %>%
+  map(~sum(is.na(.))) %>%
+  data.frame() %>%
+  t() %>%
+  data.frame() %>%
+  setNames("Missing Observations") %>%
+  mutate(
+    "Proportion Missing" = round(`Missing Observations` / nrow(proData$e_data), 3),
+  ) %>% kable()
+```
+
+Filters **`r ifelse(length(proDataAttr$filters) == 0, "were not", "were")`** applied.
+`r ifelse(length(proDataAttr$filters) == 0, "", paste("A total of", length(proDataAttr$filters), "filters were applied. See the table below for a descriptions of the filters and the order."))`
+
+### *Summary of Applied Filters*
+
+```{r Filter: Table Summarizing Applied Filters}
+#  Put applied filters in a table
+FilterTable <- NULL
+
+if (length(proDataAttr$filters) != 0) {
+  
+  # Iterate through all the filters for the table, apply different logic for each filter type
+  FilterTable <- do.call(rbind, lapply(proDataAttr$filters, function(filter) {
+    
+    # Molecule Filter
+    if (filter$type == "moleculeFilt") {
+      return(c("Filter" = "Molecule Filter", "Type" = "Biomolecule", "Parameters" = 
+               paste0("Min Number Molecules: ", filter$threshold), 
+               "Summary" = paste0(filter$filtered %>% length(), " biomolecule(s) were filtered.")))
+    } else
+    
+    # Proteomics Filter
+    if (filter$type == "proteomicsFilt") {
+      return(c("Filter" = "Proteomics Filter", "Type" = "Biomolecule", "Parameters" = 
+               paste0("Min Number of Peptides: ", filter$threshold$min_num_peps,
+                      " & Degenerate Peptides Removed: ", ifelse(filter$threshold$degen_peps, "Yes", "No")),
+               "Summary" = paste0(filter$filtered$e_data_remove %>% length(), " biomolecule(s) were filtered and ",
+                                  filter$filtered$e_meta_remove %>% length(), " protein(s) were filtered.")))
+    } else
+      
+    # CV Filter
+    if (filter$type == "cvFilt") {
+      return(c("Filter" = "CV Filter", "Type" = "Biomolecule", "Parameters" = 
+               paste0("Max CV: ", filter$threshold),
+               "Summary" = paste0(filter$filtered %>% length(), " biomolecule(s) were filtered.")))
+    } else
+      
+    # imd-ANOVA filter
+    if (filter$type == "imdanovaFilt") {
+      return(c("Filter" = "imd-ANOVA Filter", "Type" = "Biomolecule", "Parameters" = 
+               paste0("Min ANOVA: ", filter$threshold$min_nonmiss_anova,
+                      " & Min G-Test: ", filter$threshold$min_nonmiss_gtest),
+               "Summary" = paste0(filter$filtered %>% length(), " biomolecule(s) were filtered.")))
+    } else 
+      
+    # rmd Filter
+    if (filter$type == "rmdFilt") {
+      return(c("Filter" = "rMD Filter", "Type" = "Sample", "Parameters" = 
+                 paste0("P-Value Threshold: ", filter$threshold, " & Metrics Used: ",
+                        pmart_inputs$rmd_metrics %>% paste(collapse = ", ")),
+               "Summary" = paste0(filter$filtered %>% length(), " sample(s) were filtered.")))
+    } else 
+      
+    # Custom filter
+    if (filter$type == "customFilt") {
+      return(c("Filter" = "Custom Filter", "Type" = "Sample or Biomolecule", "Parameters" = "",
+               "Summary" = paste0(filter$filtered$f_data_remove %>% length(), " sample(s) were filtered. ",
+                           filter$filtered$e_data_remove %>% length(), " biomolecule(s) were filtered. ", 
+                           filter$filtered$e_meta_remove %>% length(), " protein(s) were filtered.")))
+      
+    } else {stop(paste0(filter$type, " is not a recognized filter type."))}
+  
+  })) %>% data.table()
+  
+  cbind("Order" = 1:nrow(FilterTable), FilterTable) %>% kable()
+  
+}
+```
+
+```{r Create Filter Text}
+# Molecule Filter 
+MoleculeFilterText <- "Molecule filters were not applied to the data."
+
+if ("Molecule Filter" %in% FilterTable$Filter) {
+  MoleculeFilterText <- paste0("A molecule filter was applied to the data, which removes 
+    biomolecule(s) (", paste0(proDataAttr$cnames$edata_cname, "s"), ") not having at least", 
+    " the minimum number of samples (Min Number Molecules).")
+}
+
+# CV Filter
+CVFilterText <- "CV filters were not applied to the data."
+
+if ("CV Filter" %in% FilterTable$Filter) {
+  CVFilterText <- paste0("A coefficient of variation (CV) filter was applied to the data ",
+    "which removes biomolecule(s) (", paste0(proDataAttr$cnames$edata_cname, "s"), ") with a CV greater than ",
+    "the threshold (Max CV).")
+}
+
+# imd-ANOVA Filter
+imdAnovFilterText <- "imd-ANOVA filters were not applied to the data."
+
+if ("imd-ANOVA Filter" %in% FilterTable$Filter) {
+  imdAnovFilterText <- paste0("An ANOVA filter can be applied to the data which removes biomolecule(s) (",
+    paste0(proDataAttr$cnames$edata_cname, "s"), ") not having at least a minimum number ",
+    "of non-missing values per group (Min ANOVA). Additionaly, an IMD (independence of missing data) filter can",
+    " be applied to the data, removing biomolecules not having at least a minimum number of non-missing ",
+    "values (Min G-Test) in at least one of the groups.")
+}
+
+# Proteomics Filter
+ProteomicsFilterText <- "Proteomics filters were not applied to the data."
+
+if ("Proteomics Filter" %in% FilterTable$Filter) {
+  ProteomicsFilterText <- paste0("A degenerate peptide filter (Degenerate Peptides Removed)",
+    " can be applied to the data, ", 
+    "which identifies biomolecule(s) (", paste0(proDataAttr$cnames$edata_cname, "s"), ") not belonging ",
+    "to one protein. Additionally, a protein filter can be applied to the data which identifies proteins ",
+    "not having at least a minimum number of peptides (Min Number of Peptides) mapping to them.")
+}
+
+
+# rMD Filter
+rMDFilterText <- "rMD filters were not applied to the data."
+
+if ("rMD Filter" %in% FilterTable$Filter) {
+  rMDFilterText <- paste0("A robust Mahalanobis distance (rMD) filter was applied to the",
+    " data, removing sample(s) (", paste0(proDataAttr$cnames$fdata_cname, "s"), ") with an associated ",
+    "rMD-associated p-value less than the threshold (P-Value Threshold). Metrics ",
+    "used to calculate the p-value are also included (Metrics Used).")
+}
+
+# Custom filter
+customFilterText <- "Custom filters were not applied to the data."
+
+if ("Custom Filter" %in% FilterTable$Filter) {
+  customFilterText <- "Custom filters can be used to remove samples, biomolecules, or proteins."
+}
+```
+
+### *Molecule Filter*
+
+`r MoleculeFilterText`
+
+### *CV Filter*
+
+`r CVFilterText`
+
+### *imd-ANOVA Filter*
+
+`r imdAnovFilterText`
+
+### *Proteomics Filter*
+
+`r ProteomicsFilterText`
+
+### *rMD Filter*
+
+`r rMDFilterText`
+
+### *Custom Filter*
+
+`r customFilterText`
+
+## Normalization
+
+Peptide data **`r ifelse(proDataAttr$data_info$norm_info$is_normalized, "was", "was not")`**
+normalized.
+
+### *SPANS*
+
+SPANS **`r ifelse(is.null(spans_results), "was not", "was")`** run to determine optimum
+normalization parameters. 
+
+```{r SPANS Plot}
+if (is.null(spans_results) == FALSE) {
+  plot(spans_results)
+}
+``` 
+
+### *Manual*
+
+Manual normalization **`r ifelse(is.null(proDataAttr$data_info$norm_info$norm_type) == FALSE && proDataAttr$data_info$norm_info$norm_type == "global", "was", "was not")`**
+used to normalize the data. 
+
+```{r Normalization: Manual}
+if (is.null(proDataAttr$data_info$norm_info$norm_type) == FALSE 
+    && proDataAttr$data_info$norm_info$norm_type == "global") {
+  
+  SubsetParameters <- ifelse(is.null(proDataAttr$data_info$norm_info$subset_params), "",
+    paste(lapply(names(proDataAttr$data_info$norm_info$subset_params), function(name) {
+      paste0(name, ": ", proDataAttr$data_info$norm_info$subset_params[[name]])}), collapse = " & "))
+  
+  data.table("Attribute" = c("Subset Function", "Subset Parameters", "Normalization Function"),
+             "Value" = c(proDataAttr$data_info$norm_info$subset_fn, 
+                         SubsetParameters, 
+                         proDataAttr$data_info$norm_info$norm_fn)) %>% kable()
+}
+
+plot(proData, bw_theme = TRUE)
+```
+
+## Protein Roll-Up
+
+Protein Roll-Up **`r rollup`** conducted.
+
+```{r Protein Rollup}
+RollupText <- ""
+if (rollup == "was") {
+  RollupText <- paste0("Protein quantification was conducted with the ", 
+    pmart_inputs$which_rollup, " method and was centered with the ", pmart_inputs$which_combine_fn,
+    ". The quantile cutoff was restricted to ", pmart_inputs$qrollup_thresh, ".")
+}
+```
+
+`r RollupText`
+
+## Statistical Analysis
+
+The statistical analysis step **`r ifelse(is.null(proStats), "was not", "was")`** run.
+
+```{r Analysis: Comparison Text}
+ComparisonsText <- ""
+
+if (is.null(proStats) == FALSE) {
+  ComparisonsText <- paste("The following groups were compared:", paste0(paste(proStatsAttr$comparisons, sep = ","), 
+    "."), "Reported below are the parameters used in the statistical analysis,",
+    "followed by the number of siginificant biomolecules for each comparison.")
+}
+```
+
+`r ComparisonsText`
+
+```{r Analysis: Input Parameters}
+if (is.null(proStats) == FALSE) {
+  data.table("Attribute" = c("Test Method", "Multiple Comparison Adjustment", 
+      "Significance Threshold"), "Value" = c(proStatsAttr$statistical_test, proStatsAttr$adjustment_method,
+      proStatsAttr$pval_thresh)) %>% kable()
+}
+
+if (is.null(proStats) == FALSE) {
+  proStatsAttr$number_significant %>% kable()
+}
+
+if (is.null(proStats) == FALSE) {
+  plot(proStats, bw_theme = TRUE)
+}
+```
+

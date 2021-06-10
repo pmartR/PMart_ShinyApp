@@ -9,10 +9,10 @@ upload_UI <- function() {
           # upload edata sub-collapse div
           bsCollapsePanel(div(
             "Specify data type and upload data file",
+            actionButton("BROWSER", "Launch browser?"),
             hidden(div(id = "ok_datselect", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
           ),
           value = "datselect",
-
           div(id = "js_datatype", pickerInput("datatype", "Specify molecule type",
             choices = c("None" = "none", "Peptides" = "pep", "Proteins" = "pro", "Metabolites" = "metab", "Lipids" = "lip")
           )),
