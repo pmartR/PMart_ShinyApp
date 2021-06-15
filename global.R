@@ -4,6 +4,7 @@ library(readr)
 library(shiny)
 library(shinyBS)
 library(shinyWidgets)
+library(stringr)
 library(DT)
 library(pmartR)
 library(dplyr)
@@ -39,6 +40,8 @@ global_input_choices = list(
                               "Correlation", 
                               "Proportion Missing" = "Proportion_Missing")
 )
+
+NULLSELECT_ = "__nullselect__"
 
 # global observers, modal UI elements, helper functions
 source("UI_helper_functions.R", local = TRUE)

@@ -55,3 +55,27 @@ apply_style_UI <- function(pagename, two_lipids, two_plots, flip_button = FALSE)
     )
   }
 }
+
+#'@description Helper to create a text div with an icon next to it, possibly
+#'hidden and with css styling applied.
+subsection_header <- function(titletext, id, style, icon, hidden = T, tooltip_text = NULL) {
+  if (!is.null(tooltip_text)) {
+    icon <- tipify(icon, tooltip_text)
+  }
+  if (hidden == T) {
+    div(titletext, hidden(div(id = id, style = style, icon)))
+  }
+  else {
+    div(titletext, div(id = id, style = style, icon))
+  }
+}
+
+#'@description Creates a vector of shiny inputs as strings, usually to be passed
+#'to a column of a display dataframe.
+buttonInput <- function(FUN, len, id, ...) {
+  inputs <- character(len)
+  for (i in seq_len(len)) {
+    inputs[i] <- as.character(FUN(paste0(id, i), ...))
+  }
+  inputs
+}

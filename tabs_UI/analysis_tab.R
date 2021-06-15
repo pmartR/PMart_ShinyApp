@@ -4,23 +4,33 @@ analysis_UI <- function() {
     column(
       4,
       bsCollapse(
-        id = "analysis_collapse_left", multiple = TRUE, open = "imdanova_options",
-        bsCollapsePanel(div(
-          "iMd-ANOVA",
-          hidden(div(id = "ok_imdanova", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
-        ),
-        value = "imdanova_options",
-
-        radioGroupButtons("test_method", "Test method:", c("ANOVA" = "anova", "G-Test" = "gtest", "Combined" = "combined")),
-        pickerInput("pval_adjust", "Multiple comparisons adjustment", choices = c("Holm" = "holm", "Bonferroni" = "bonferroni", "Tukey" = "tukey", "Dunnet" = "dunnett", "None" = "none")),
-        numericInput("pval_thresh", "Significance threshold", value = 0.05, step = 0.01),
-        hr(),
-        bsButton("apply_imdanova", "Perform iMd-ANOVA")
+        id = "analysis_collapse_left", multiple = TRUE, open = "stats-analysis-options",
+        bsCollapsePanel(
+          subsection_header(
+            "Specify Statistical Analysis",
+            "stats-analysis-ok",
+            "color:orange;float:right",
+            icon("ok", lib = "glyphicon")
+          ),
+          value = "stats-analysis-options",
+          pickerInput(
+            "stats_select_method",
+            "Select analysis method:",
+            choices = c(
+              "Select one" = NULLSELECT_,
+              "iMd-ANOVA" = "imdanova"
+            ),
+            multiple = TRUE,
+            options = pickerOptions(maxOptions = 1)
+          )
         )
-      )
+      ),
+      uiOutput("analysis_tab_sidepanel")
     ),
     column(
       8,
+      # TODO replace with either contitional UI or tabpanel that displays the 
+      # appropriate plot for whatever statistical analysis we did
       bsCollapse(
         id = "analysis_collapse_main", multiple = TRUE,
         bsCollapsePanel("Plots",
