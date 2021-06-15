@@ -12,10 +12,12 @@ observeEvent(input$apply_rollup, {
   shinyjs::show("rollup_busy")
   on.exit(hide("rollup_busy"))
 
+  objects$omicsData_pre_rollup <- objects$omicsData
+  
   tryCatch(
     {
       func <- get(input$which_rollup, envir = asNamespace("pmartR"), mode = "function")
-
+      
       if (input$which_rollup == "qrollup") {
         objects$omicsData <- func(objects$omicsData, input$qrollup_thresh, combine_fn = input$which_combine_fn)
       }
@@ -31,6 +33,8 @@ observeEvent(input$apply_rollup, {
       msg <- paste0("Something went wrong rollup up your pepdata:  \n System error:  ", e)
       message(msg)
       revals$warnings_rollup$bad_rollup <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+      objects$omicsData <- objects$omicsData_pre_rollup
+      objects$omicsData_pre_rollup <- NULL
       revals$rollup_summary <- NULL
       plots$rollup_plot <- NULL
     }
