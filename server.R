@@ -143,6 +143,9 @@ shinyServer(function(session, input, output) {
     contentType = "application/zip"
   )
   
+  # Source the markdown script
+  source(file.path("markdowns", "generate_markdown.R"), local = T)$value
+  
   observeEvent(input$BROWSER, {
     browser()
   })

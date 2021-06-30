@@ -18,31 +18,29 @@ ui <- function(request) {
       upload_UI(),
 
       ###### GROUPS TAB #######
-
       groups_UI(),
 
       #### DATA SUMMARY TAB #####
-
       data_summary_UI(),
 
       #### FILTER TAB ####
-
       filter_UI(),
 
       #### NORMALIZATION TAB ####
-
       normalization_UI(),
 
-      #### Protein Rollup ####
+      #### PROTEIN ROLLUP TAB ####
       protein_rollup_UI(),
 
       #### ANALYSIS TAB ####
-
       analysis_UI(),
 
       #### DOWNLOAD TAB ####
-
-      download_UI()
+      download_UI(),
+      
+      #### GENERATE REPORT TAB ####
+      generate_report_UI()
+      
     ), # end Navbarpage
 
     ## Plot saving buttons
