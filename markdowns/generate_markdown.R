@@ -17,27 +17,54 @@ list(
     
     content = function(file) {
       
-      # Determine which file type to use
-      browser()
+      # If no omics object has been created, trigger a warning and return NULL
+      if (is.null(objects$omicsData)) {
+        sendSweetAlert(session, "Markdown Report Error", 
+          "Reports can only be built if the 'Upload Data' tab has been completed.", "error")
+        return(NULL)
+      }
       
+      # There are 5 report styles: 1. peptide data, 2. rolled up protein data, 
+      # 3. protein data, 4. metabolite data, 5. lipid data
       
+      # Generate the peptide data report if the input data is peptides and roll-up did NOT happen
+      if (input$datatype == "pep") {
+        
+        # Check for peptide roll-up into protein data
+        if (class(objects$omicData) != "proData") {
+          
+          browser()
+          
+          
+        } else {
+        
+          browser()
+          
+          # objects$omicsData_pre_rollup
+          
+        }
+        
+  
+      } else
       
-      # Create a temporary directory and copy report there
-      tempReport <- file.path(tempdir(), "Metabolite_Template.Rmd")
-      file.copy(file.path("markdowns", "Metabolite_Template.Rmd"), tempReport, overwrite = TRUE)
+      # Generate the metabolite data report if the input data is metabolites
+      if (input$datatype == "metab") {
+        
+        # Create a temporary directory and copy the report there 
+        report <- file.path(tempdir(), "Metabolite_Template.Rmd")
+        file.copy(file.path("markdowns", "Metabolite_Template.Rmd"), report, overwrite = TRUE)
+        
+        # Set up specific parameters needed by the metabolite data markdown
+        params <- list(titleName = input$ReportName,
+                       metabData = objects$omicsData,
+                       metabStats = objects$imdanova_res, 
+                       pmart_inputs = reactiveValuesToList(input))
+        
+      }
       
-      # Set up parameters to pass to Rmd document
-      params <- list(titleName = input$ReportName,
-                     metabData = objects$omicsData,
-                     metabStats = objects$imdanova_res, 
-                     pmart_inputs = reactiveValuesToList(input))
+      # This general function passes the parameters and the correct report to the render function 
+      rmarkdown::render(report, output_file = file, params = params, envir = new.env(parent = globalenv()))
       
-      # Knit the document, passing in the `params` list, and eval it in a
-      # child of the global environment (this isolates the code in the document
-      # from the code in this app).
-      rmarkdown::render(tempReport, output_file = file,
-                        params = params,
-                        envir = new.env(parent = globalenv()))
       }
     
   )
