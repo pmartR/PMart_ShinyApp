@@ -1,0 +1,9 @@
+---
+params:
+  titleName: "something went wrong"
+  testPhrase: "This is a test phrase"
+title: "`r params$titleName`"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+---
+
+`r params$testPhrase`
