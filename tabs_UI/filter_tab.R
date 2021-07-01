@@ -101,7 +101,14 @@ filter_UI <- function() {
             5,
             actionButton(
               inputId = "add_rmdfilt",
-              label = div("Add/Remove rMd filter", hidden(div(id = "rmdfilt_exists", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))),
+              label = div(class="flex-inline",
+                "Add/Remove rMd filter", 
+                tipify(
+                  icon("question-sign", lib = "glyphicon", class = "info-right"),
+                  title = ttext_[["RMD_CUSTOM_FILTER_INFO"]]
+                ),
+                hidden(div(id = "rmdfilt_exists", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
+              ),
               width = "100%"
             ),
             actionButton("plot_rmdfilt", "Plot this filter", width = "100%")
@@ -126,7 +133,9 @@ filter_UI <- function() {
             6,
             actionButton(
               inputId = "add_customfilt",
-              label = div("Add/Remove custom filter", hidden(div(id = "customfilt_exists", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))),
+              label = div("Add/Remove custom filter", hidden(
+                div(id = "customfilt_exists", style = "color:orange;float:right", icon("ok", lib = "glyphicon"))
+              )), 
               width = "100%"
             )
           ),

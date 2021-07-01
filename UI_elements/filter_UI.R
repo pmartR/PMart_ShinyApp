@@ -10,7 +10,6 @@ list(
     # indices of which filters/HTML elements belong to each object
     obj2_inds <- which(grepl("_2", names(objects$filters)))
     obj1_inds <- setdiff(1:length(objects$filters), obj2_inds)
-
     
     if(length(objects$filters) == 0) return(
       div(
@@ -18,13 +17,20 @@ list(
         strong("No filters will be applied"),
         br()
       )
-      )
+    )
+    
+    #' instantiate this outside of the for loop, since it is used in multiple
+    #' nodes in the flow control
+    #' TODO: collect all samples and perform differences at the end?
+    rmd_removed_samps <- if (any(grepl("rmdfilt", names(objects$filters)))) {
+      tmp_idx = which(grepl("rmdfilt", names(objects$filters)))
+      attr(objects$filters[[tmp_idx]], "sample_names")[which(objects$filters[[tmp_idx]]$pvalue < input$pvalue_threshold)]
+    } else NULL
     
     # text for first filter object
     for (i in 1:length(objects$filters)) {
       # rmd filter
       if (grepl("rmdfilt", names(objects$filters)[i])) {
-        rmd_removed_samps <- attr(objects$filters[[i]], "sample_names")[which(objects$filters[[i]]$pvalue < input$pvalue_threshold)]
         divs[[i]] <- tagList(
           tags$b("rMd Filter:"),
           tags$p(sprintf("p-value threshold: %s", input$pvalue_threshold)),
@@ -37,7 +43,7 @@ list(
         # get samples and check whether we are removing or keeping
         filter_samples <- unlist(objects$filters[[i]])
         object_samples <- attr(objects$filters[[i]], "omicsData")$f_data[, get_fdata_cname(attr(objects$filters[[i]], "omicsData"))]
-
+        
         if ("f_data_keep" %in% names(objects$filters[[i]])) {
           f_data_keep <- filter_samples
           f_data_remove <- setdiff(object_samples, f_data_keep) %>% union(rmd_removed_samps) # ** include samples removed by rmd filter
