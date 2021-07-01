@@ -1,7 +1,9 @@
 #
 observeEvent(input$top_page,
   {
-    toggleElement("js_saveplot", condition = input$top_page %in% c("Upload Data", "Group Samples", "Data Summary", "Filter", "Normalization", "Analysis"))
+    toggleElement("js_saveplot", condition = input$top_page %in% c("Upload Data", "Group Samples", "Data Summary", 
+                                                                   "Filter", "Normalization", "Peptide Statistics",
+                                                                   "Protein Rollup", "Statistics"))
   },
   priority = 10,
   ignoreInit = FALSE
@@ -44,8 +46,8 @@ observeEvent(input$viewplots, {
   showModal(
     modalDialog(
       tagList(
-        DTOutput("modal_plot_table"),
-        plotOutput("modal_plot")
+        withSpinner(DTOutput("modal_plot_table")),
+        withSpinner(plotOutput("modal_plot"))
       ),
       footer = tagList(
         # div(disabled(actionButton(inputId = "add_plot", width = '100%', label = "Save Current Plot for Later Download", icon = icon("save"))))

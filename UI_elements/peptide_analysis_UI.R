@@ -1,7 +1,7 @@
 # main plot display which takes in the plot object that is created immediately after imd_anova() is run
-output$statistics_mainplot <- renderPlot({
-  req(!is.null(plots$statistics_mainplot))
-  p <- plots$statistics_mainplot
+output$peptide_statistics_mainplot <- renderPlot({
+  req(!is.null(plots$peptide_statistics_mainplot))
+  p <- plots$peptide_statistics_mainplot
   if (inherits(p, "list")) {
     p <- gridExtra::arrangeGrob(p[[1]], p[[2]], ncol = 2)
     plots$last_plot <- p
@@ -15,24 +15,24 @@ output$statistics_mainplot <- renderPlot({
 
 #'@details returns a different sidepanel of options depending on what stats
 #'statistics was selected.
-output$statistics_tab_sidepanel <- renderUI({
-  req(input$stats_select_method != NULLSELECT_)
+output$peptide_statistics_tab_sidepanel <- renderUI({
+  req(input$peptide_stats_select_method != NULLSELECT_)
   
-  if (input$stats_select_method == "imdanova"){
+  if (input$peptide_stats_select_method == "imdanova"){
     bsCollapse(
-      id = "imdanova-sidepanel-options", multiple = TRUE, 
-      open = c("imdanova-specify-comparisons"), 
+      id = "peptide_imdanova-sidepanel-options", multiple = TRUE, 
+      open = c("peptide_imdanova-specify-comparisons"), 
       #
       bsCollapsePanel(
         subsection_header(
           "Group comparisons",
-          "imdanova_groups_ok",
+          "peptide_imdanova_groups_ok",
           "color:orange;float:right",
           icon("ok", lib = "glyphicon")
         ),
-        value = "imdanova-specify-comparisons",
+        value = "peptide_imdanova-specify-comparisons",
         pickerInput(
-          "imdanova_comparison_method",
+          "peptide_imdanova_comparison_method",
           "Select comparisons to use (singleton groups excluded):",
           c(
             "All pairwise comparisons",
@@ -44,11 +44,11 @@ output$statistics_tab_sidepanel <- renderUI({
           multiple = TRUE
         ),
         
-        uiOutput("pairwise_comp_selector"),
+        uiOutput("peptide_pairwise_comp_selector"),
         
         hr(),
         
-        DTOutput("pairwise_comp_display"),
+        DTOutput("peptide_pairwise_comp_display"),
         
         tags$script('Shiny.addCustomMessageHandler("unbind-DT-RR", function(x) {
                       Shiny.unbindAll($(document.getElementById(x)).find(".dataTable"));
@@ -57,15 +57,15 @@ output$statistics_tab_sidepanel <- renderUI({
       bsCollapsePanel(
         subsection_header(
           "iMd-ANOVA test settings",
-          "imdanova_settings_ok",
+          "peptide_imdanova_settings_ok",
           "color:orange;float:right",
           icon("ok", lib = "glyphicon")
         ),
-        value = "imdanova-select-settings",
-        uiOutput("imdanova_test_method_UI"),
-        uiOutput("imdanova_pval_adjust_UI"),
-        numericInput("pval_thresh", "Significance threshold", value = 0.05, step = 0.01),
-        bsButton("apply_imdanova", "Perform iMd-ANOVA")
+        value = "peptide_imdanova-select-settings",
+        uiOutput("peptide_imdanova_test_method_UI"),
+        uiOutput("peptide_imdanova_pval_adjust_UI"),
+        numericInput("peptide_pval_thresh", "Significance threshold", value = 0.05, step = 0.01),
+        bsButton("peptide_apply_imdanova", "Perform iMd-ANOVA")
       )
     )
   }
@@ -73,26 +73,26 @@ output$statistics_tab_sidepanel <- renderUI({
 
 #'@details Give options for comparisons depending on what user selected as the
 #' method to perform comparisons (All comparisons, control vs treatment, custom)
-output$pairwise_comp_selector <- renderUI({
-  req(input$imdanova_comparison_method)
+output$peptide_pairwise_comp_selector <- renderUI({
+  req(input$peptide_imdanova_comparison_method)
   
-  if (input$imdanova_comparison_method == "All pairwise comparisons") {
+  if (input$peptide_imdanova_comparison_method == "All pairwise comparisons") {
     return()
-  } else if (input$imdanova_comparison_method == "Control to test condition comparisons") {
+  } else if (input$peptide_imdanova_comparison_method == "Control to test condition comparisons") {
     groups <- objects$omicsData %>%
       pmartR:::get_group_table()
     groups <- groups[groups > 1] %>% names()
     
     return(
       div(
-        pickerInput("imdanova_control_group",
+        pickerInput("peptide_imdanova_control_group",
                     "Select control group:",
                     groups,
-                    selected = input$imdanova_control_group,
+                    selected = input$peptide_imdanova_control_group,
                     options = pickerOptions(maxOptions = 1),
                     multiple = TRUE
         ),
-        uiOutput("non_control_groups")
+        uiOutput("peptide_non_control_groups")
       )
     )
   } else {
@@ -102,10 +102,10 @@ output$pairwise_comp_selector <- renderUI({
     combos <- apply(combn(groups, 2), 2, toString)
     
     return(
-      pickerInput("imdanova_custom_comps",
+      pickerInput("peptide_imdanova_custom_comps",
                   "Select group comparisons of interest:",
                   combos,
-                  selected = isolate(input$imdanova_custom_comps),
+                  selected = isolate(input$peptide_imdanova_custom_comps),
                   multiple = TRUE
       )
     )
@@ -114,28 +114,28 @@ output$pairwise_comp_selector <- renderUI({
 
 #'@details Select the 'treatment' groups to compare to the selected control.
 #'The control selection will be disabled.
-output$non_control_groups <- renderUI({
-  req(input$imdanova_control_group)
+output$peptide_non_control_groups <- renderUI({
+  req(input$peptide_imdanova_control_group)
   groups <- objects$omicsData %>%
     pmartR:::get_group_table()
   groups <- groups[groups > 1] %>% names()
   
-  pickerInput("imdanova_non_control_groups",
+  pickerInput("peptide_imdanova_non_control_groups",
               "Select group(s) to compare to control:",
               groups,
-              selected = isolate(input$imdanova_non_control_groups),
+              selected = isolate(input$peptide_imdanova_non_control_groups),
               choicesOpt = list(
-                disabled = groups %in% input$imdanova_control_group
+                disabled = groups %in% input$peptide_imdanova_control_group
               ),
               multiple = TRUE
   )
 })
 
 #'@details display the data-table of possible comparisons.
-output$pairwise_comp_display <- renderDT(
+output$peptide_pairwise_comp_display <- renderDT(
   {
     req(!is.null(comp_df_holder$comp_df))
-    session$sendCustomMessage("unbind-DT-RR", "pairwise_comp_display")
+    session$sendCustomMessage("unbind-DT-RR", "peptide_pairwise_comp_display")
     comp_df_holder$comp_df
   },
   options = list(
@@ -148,7 +148,7 @@ output$pairwise_comp_display <- renderDT(
 )
 
 #'@details Picker for which type of statistical test to use in imd-anova
-output$imdanova_test_method_UI <- renderUI({
+output$peptide_imdanova_test_method_UI <- renderUI({
   req(objects$omicsData)
   
   filt_method <- attributes(objects$omicsData)$filters$imdanovaFilt$filter_method
@@ -188,14 +188,14 @@ output$imdanova_test_method_UI <- renderUI({
   }
   
   return(
-    pickerInput("imdanova_test_method",
+    pickerInput("peptide_imdanova_test_method",
                 "Test method:",
                 c(
                   "ANOVA" = "anova",
                   "G-Test" = "gtest",
                   "Combined" = "combined"
                 ),
-                selected = input$imdanova_test_method,
+                selected = input$peptide_imdanova_test_method,
                 options = pickerOptions(maxOptions = 1),
                 multiple = TRUE,
                 choicesOpt = choicesOpt
@@ -205,26 +205,26 @@ output$imdanova_test_method_UI <- renderUI({
 })
 
 # limit adjustment options depending on test method
-output$imdanova_pval_adjust_UI <- renderUI({
-  req(input$imdanova_test_method)
-  if (input$imdanova_test_method == "anova") {
+output$peptide_imdanova_pval_adjust_UI <- renderUI({
+  req(input$peptide_imdanova_test_method)
+  if (input$peptide_imdanova_test_method == "anova") {
     choices <- c("Holm" = "holm", "Bonferroni" = "bonferroni", "Tukey" = "tukey", "Dunnet" = "dunnett", "None" = "none")
   }
   else {
     choices <- c("Holm" = "holm", "Bonferroni" = "bonferroni", "None" = "none")
   }
-  pickerInput("pval_adjust", "Multiple comparisons adjustment", choices = choices)
+  pickerInput("peptide_pval_adjust", "Multiple comparisons adjustment", choices = choices)
 })
 
 # display table output from imd_anova
-output$statistics_summary_table <- renderDT({
-  objects$imdanova_res[["Full_results"]]
+output$peptide_statistics_summary_table <- renderDT({
+  objects$peptide_imdanova_res[["Full_results"]]
 }, options = list(scrollX =TRUE))
 
 # theme UI
-output$statistics_plot_options <- renderUI({
+output$peptide_statistics_plot_options <- renderUI({
   style_UI("statistics")
 })
-output$statistics_apply_style <- renderUI({
-  apply_style_UI("statistics", FALSE, inherits(plots$statistics_mainplot, "list"))
+output$peptide_statistics_apply_style <- renderUI({
+  apply_style_UI("statistics", FALSE, inherits(plots$peptide_statistics_mainplot, "list"))
 })

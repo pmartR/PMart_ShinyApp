@@ -3,6 +3,28 @@ protein_rollup_UI <- function() {
     class = "collapse_page",
     column(
       4,
+      
+      bsCollapsePanel(
+        "Isoform Identification",
+        
+        
+        uiOutput("bpquant_options"),
+        
+        hr(),
+        
+        splitLayout(
+          disabled(actionButton(
+            "bpquant",
+            "Compute Isoforms"
+          )),
+          prettySwitch(
+            inputId = "bpquant_lock",
+            label = "Unlock/Lock",
+            width = "100%"
+          )
+        )
+      ),
+      
       bsCollapse(
         id = "rollup_sidebar", open = "rollup_opts", multiple = TRUE,
         bsCollapsePanel("Protein Rollup Options",
@@ -10,6 +32,7 @@ protein_rollup_UI <- function() {
           radioGroupButtons("which_rollup", "Rollup Method", c("Reference" = "rrollup", "Z-Score" = "zrollup", "Quantile" = "qrollup")),
           radioGroupButtons("which_combine_fn", "Center By:", c("Median" = "median", "Mean" = "mean")),
           numericInput("qrollup_thresh", "Quantile cutoff", value = 0),
+          uiOutput("bpquant_apply_icon_UI"),
           hr(),
           bsButton("apply_rollup", "Roll-up"),
           hidden(div("Applying rollup, please wait...",
@@ -23,18 +46,42 @@ protein_rollup_UI <- function() {
     ),
     column(
       8,
-      bsCollapse(
-        id = "rollup_mainpanel", multiple = TRUE, open = c("rollup_summary", "rollup_plot_opts"),
-        bsCollapsePanel("Rollup Results",
-          value = "rollup_summary",
-          plotOutput("rollup_plot")
-        ),
-        bsCollapsePanel("Plot Options",
-          value = "rollup_plot_opts",
-          uiOutput("rollup_plot_options"),
-          uiOutput("rollup_apply_style")
+      tabsetPanel(
+        id = "rollup_mainpanel",
+        tabPanel(
+          "Rollup Results",
+
+          # bsCollapse(
+            # id = "rollup_mainpanel", multiple = TRUE, open = c("rollup_summary", "rollup_plot_opts"),
+            # bsCollapsePanel("Result Plot",
+                            # value = "rollup_summary",
+          br(),
+          uiOutput("rollup_plot_UI"),
+                            # withSpinner(plotOutput("rollup_plot")),
+          br(),
+            # ),
+            # bsCollapsePanel("Plot Options",
+                            # value = "rollup_plot_opts",
+          wellPanel(
+                            uiOutput("rollup_plot_options"),
+                            uiOutput("rollup_apply_style")
+          )
+            # )
+          # )
         )
       )
+      # bsCollapse(
+      #   id = "rollup_mainpanel", multiple = TRUE, open = c("rollup_summary", "rollup_plot_opts"),
+      #   bsCollapsePanel("Rollup Results",
+      #     value = "rollup_summary",
+      #     withSpinner(plotOutput("rollup_plot"))
+      #   ),
+      #   bsCollapsePanel("Plot Options",
+      #     value = "rollup_plot_opts",
+      #     uiOutput("rollup_plot_options"),
+      #     uiOutput("rollup_apply_style")
+      #   )
+      # )
     )
   )
 }

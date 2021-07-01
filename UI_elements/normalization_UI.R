@@ -103,31 +103,31 @@ list(
     if (input$norm_modal_plot_select == "ba") {
       if (!is.null(objects$omicsData_2)) {
         tagList(
-          plotOutput("norm_modal_ba_plots"),
-          plotOutput("norm_modal_ba_plots_2")
+          withSpinner(plotOutput("norm_modal_ba_plots")),
+          withSpinner(plotOutput("norm_modal_ba_plots_2"))
         )
       }
       else {
-        plotOutput("norm_modal_ba_plots")
+        withSpinner(plotOutput("norm_modal_ba_plots"))
       }
     }
     else if (input$norm_modal_plot_select == "fac") {
       if (!is.null(objects$omicsData_2)) {
         tagList(
           splitLayout(
-            plotOutput("norm_modal_loc_boxplot"),
-            plotOutput("norm_modal_scale_boxplot")
+            withSpinner(plotOutput("norm_modal_loc_boxplot")),
+            withSpinner(plotOutput("norm_modal_scale_boxplot"))
           ),
           splitLayout(
-            plotOutput("norm_modal_loc_boxplot_2"),
-            plotOutput("norm_modal_scale_boxplot_2")
+            withSpinner(plotOutput("norm_modal_loc_boxplot_2")),
+            withSpinner(plotOutput("norm_modal_scale_boxplot_2"))
           )
         )
       }
       else {
         splitLayout(
-          plotOutput("norm_modal_loc_boxplot"),
-          plotOutput("norm_modal_scale_boxplot")
+          withSpinner(plotOutput("norm_modal_loc_boxplot")),
+          withSpinner(plotOutput("norm_modal_scale_boxplot"))
         )
       }
     }
@@ -148,22 +148,22 @@ list(
   output$normalized_boxplots_cond <- renderUI({
     if (!is.null(objects$omicsData_2)) {
       tagList(
-        plotOutput("normalized_boxplots"),
-        plotOutput("normalized_boxplots_2")
+        withSpinner(plotOutput("normalized_boxplots")),
+        withSpinner(plotOutput("normalized_boxplots_2"))
       )
     }
     else {
-      plotOutput("normalized_boxplots")
+      withSpinner(plotOutput("normalized_boxplots"))
     }
   }),
 
   # go to rollup tab button only visible in peptide land
-  output$goto_rollup <- renderUI({
+  output$goto_stats <- renderUI({
     if (inherits(objects$omicsData, "pepData")) {
-      actionButton("goto_rollup", "Continue to protein rollup tab", style = "margin-top:5px;width:75%")
+      actionButton("goto_pepstats", "Continue to Peptide Statistics Tab", style = "margin-top:5px;width:75%")
     }
     else {
-      NULL
+      actionButton("goto_statistics", "Continue to Statistics Tab", style = "margin-top:5px;width:75%")
     }
   }),
 

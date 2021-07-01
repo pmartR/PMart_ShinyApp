@@ -9,8 +9,8 @@ download_UI <- function() {
       ),
       value = "download_plots",
       fluidRow(
-        column(4, DTOutput("download_plot_table")),
-        column(6, plotOutput("download_plot"))
+        column(4, withSpinner(DTOutput("download_plot_table"))),
+        column(6, withSpinner(plotOutput("download_plot")))
       ),
       div(
         style = "float:left",

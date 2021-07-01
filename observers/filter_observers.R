@@ -639,7 +639,7 @@ observeEvent(input$apply_filters, {
             hr(),
             filters2_div,
             actionButton("filter_dismiss", "Stay on this tab", width = "75%"),
-            actionButton("goto_norm", "Continue to normalization", style = "margin-top:5px;width:75%"),
+            actionButton("goto_norm", "Continue to Normalization Tab", style = "margin-top:5px;width:75%"),
             bookmarkButton(label = "Bookmark the result of this page...", style = "margin-top:5px;width:75%")
           )
         ),

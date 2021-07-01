@@ -10,6 +10,9 @@ library(pmartR)
 library(dplyr)
 library(purrr)
 library(shinyjs)
+library(shinycssloaders)
+library(plotly)
+library(shinyalert)
 
 ######## GLOBAL VALUES ##########
 # static objects
@@ -18,7 +21,7 @@ dt_checkmark <- '<span class="glyphicon glyphicon-ok" style="color:deepskyblue">
 dt_minus <- '<span class="glyphicon glyphicon-minus"></span>'
 
 ttext_ <- list(
-  "MAIN_EFFECTS_INFO" = "Main effects are the variables of interest, those values across which you want to make comparisons.  Covariates are those values that are not of experimental interest, but must be controlled for in the analysis.",
+  "MAIN_EFFECTS_INFO" = "Main effects are the variables of interest, those values across which you want to make comparisons.  Covariates are those values that are not of experimental interest, but must be controlled for in the statistics.",
   "RMD_PROP_MISSING_WARNING" = "We advise against using proportion missing as a metric in lipidomics/metabolomics data, as they often have a very low proportion missing."
 ) 
 

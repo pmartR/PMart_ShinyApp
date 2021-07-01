@@ -29,13 +29,20 @@ observeEvent(input$remove_plot_download, {
 # remove or add a plot from the download queue
 observeEvent(input$mark_table_download, {
   req(length(input$download_tables_table_rows_selected) > 0)
-  cond <- tables$tables_table[input$download_tables_table_rows_selected, 2] == dt_minus
+  
+  if(is.null(objects$Prior_rollup)){
+    table_use <- tables$tables_table
+  } else {
+    table_use <- tables$revenge_of_tables_table
+  }
+  
+  cond <- table_use[input$download_tables_table_rows_selected, 2] == dt_minus
 
   if (cond) {
-    tables$tables_table[input$download_tables_table_rows_selected, 2] <- dt_checkmark
+    table_use[input$download_tables_table_rows_selected, 2] <- dt_checkmark
   }
   else {
-    tables$tables_table[input$download_tables_table_rows_selected, 2] <- dt_minus
+    table_use[input$download_tables_table_rows_selected, 2] <- dt_minus
   }
 })
 ###
@@ -47,12 +54,20 @@ observeEvent(input$makezipfile, {
   on.exit({
     enable("makezipfile")
   })
+  
+  if(is.null(objects$Prior_rollup)){
+    table_use <- tables$tables_table
+    resloc_use <- resources_locations
+  } else {
+    table_use <- tables$revenge_of_tables_table
+    resloc_use <- resources_locations_peprollup
+  }
 
   print(tempdir())
   fs <- vector()
 
   plots_marked_for_death <- which(plots$plot_table[, 2] == dt_checkmark)
-  tables_marked_for_death <- which(tables$tables_table[, 2] == dt_checkmark)
+  tables_marked_for_death <- which(table_use[, 2] == dt_checkmark)
 
   total_files <- length(c(plots_marked_for_death, tables_marked_for_death))
 
@@ -69,8 +84,8 @@ observeEvent(input$makezipfile, {
     # do.call('pluck', c(list(get('omicsData_postmortem')),list('e_data')))
     if (length(tables_marked_for_death) > 0) {
       for (i in tables_marked_for_death) {
-        table_name <- tables$tables_table[i, 1]
-        resloc <- resources_locations[[table_name]]
+        table_name <- table_use[i, 1]
+        resloc <- resloc_use[[table_name]]
 
         if (inherits(resloc, "list")) {
           # use pluck to extract the table from its location within the reactive variables

@@ -227,10 +227,10 @@ observeEvent(input$makeobject, {
           column(10,
             align = "center", offset = 1,
             HTML('<h4 style= "color:#1A5276">Your data has been successfully uploaded. 
-                      You may proceed to the subsequent tabs for analysis.</h4>'),
+                      You may proceed to the subsequent tabs for statistics.</h4>'),
             hr(),
             actionButton("upload_dismiss", "Review results", width = "75%"),
-            actionButton("goto_groups", "Continue to groups tab", style = "margin:5px;width:75%")
+            actionButton("goto_groups", "Continue to Groups Tab", style = "margin:5px;width:75%")
           )
         ),
         footer = NULL

@@ -207,12 +207,21 @@ list(
   output$upload_boxplots <- renderUI({
     if (two_lipids()) {
       tagList(
-        div(id = "upload_boxplots_1", style = "border-style:solid;border-width:1px;", plotOutput("omicsData_upload_boxplot")),
-        div(id = "upload_boxplots_2", style = "border-style:solid;border-width:1px;", plotOutput("omicsData_2_upload_boxplot"))
+        div(id = "upload_boxplots_1", 
+            style = "border-style:solid;border-width:1px;", 
+            withSpinner(plotOutput("omicsData_upload_boxplot"))
+            ),
+        div(id = "upload_boxplots_2", 
+            style = "border-style:solid;border-width:1px;", 
+            withSpinner(plotOutput("omicsData_2_upload_boxplot"))
+            )
       )
     }
     else {
-      div(id = "upload_boxplots_1", style = "border-style:solid;border-width:1px;", plotOutput("omicsData_upload_boxplot"))
+      div(id = "upload_boxplots_1", 
+          style = "border-style:solid;border-width:1px;", 
+          withSpinner(plotOutput("omicsData_upload_boxplot"))
+          )
     }
   }),
   # ...summary tables
@@ -280,4 +289,6 @@ list(
     req(isTruthy(as.logical(input$emeta_yn)) | input$datatype == "pep")
     DTOutput("head_emeta")
   })
+  
+  
 )

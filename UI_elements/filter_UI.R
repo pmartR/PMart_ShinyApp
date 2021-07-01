@@ -11,6 +11,15 @@ list(
     obj2_inds <- which(grepl("_2", names(objects$filters)))
     obj1_inds <- setdiff(1:length(objects$filters), obj2_inds)
 
+    
+    if(length(objects$filters) == 0) return(
+      div(
+        br(),
+        strong("No filters will be applied"),
+        br()
+      )
+      )
+    
     # text for first filter object
     for (i in 1:length(objects$filters)) {
       # rmd filter
@@ -136,12 +145,12 @@ list(
   # plot one or both UI elements
   output$filter_dynamic_mainplot <- renderUI({
     if (!is.null(objects$uploaded_omicsData) & is.null(objects$uploaded_omicsData_2)) {
-      plotOutput("filter_mainplot")
+      withSpinner(plotOutput("filter_mainplot"))
     }
     else if (any(!is.null(objects$uploaded_omicsData), !is.null(objects$uploaded_omicsData_2))) {
       tagList(
-        plotOutput("filter_mainplot"),
-        plotOutput("filter_mainplot_2")
+        withSpinner(plotOutput("filter_mainplot")),
+        withSpinner(plotOutput("filter_mainplot_2"))
       )
     }
   }),

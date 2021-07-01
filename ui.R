@@ -1,6 +1,7 @@
 ui <- function(request) {
   tagList(
     useShinyjs(),
+    shinyalert::useShinyalert(),
     list(tags$head(HTML('<link rel="icon", href="pmartlogo.png", 
                                  type="image/png" />'))),
     div(
@@ -34,12 +35,17 @@ ui <- function(request) {
 
       normalization_UI(),
 
+      #### Peptide-level Tabs ####
+      
+      #### Peptide Statistics ####
+      peptide_statistics_UI(),
+
       #### Protein Rollup ####
       protein_rollup_UI(),
 
-      #### ANALYSIS TAB ####
+      #### statistics TAB ####
 
-      analysis_UI(),
+      statistics_UI(),
 
       #### DOWNLOAD TAB ####
 

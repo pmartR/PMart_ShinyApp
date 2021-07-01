@@ -18,7 +18,13 @@ list(
 
   output$download_tables_table <- renderDT(
     {
-      tables$tables_table
+      if(is.null(objects$Prior_rollup)){
+        table_use <- tables$tables_table
+      } else {
+        table_use <- tables$revenge_of_tables_table
+      }
+
+      table_use
     },
     selection = "single",
     escape = FALSE
