@@ -359,7 +359,34 @@ list(
       }
     )
   }),
-
+  
+  #'@details Check whether we have done stats or normalized the data, warn users 
+  #' that they will have to re-apply normalization if their data was not already
+  #' normalized, and reapply stats.
+  output$execute_apply_filters_UI <- renderUI({
+    upload_isnorm <- attr(objects$uploaded_omicsData, "data_info")$norm_info$is_normalized
+    cur_isnorm <- attr(objects$omicsData, "data_info")$norm_info$is_normalized
+    will_reset <- (!upload_isnorm & cur_isnorm) | !is.null(objects$imdanova_res)
+    
+    if (will_reset) {
+      div(
+        tags$span(style = "color:red", infotext_[['RESET_FILTERS_WARNING']]),
+        div(
+          bsButton("allow_reapply_filters", "OK, let me reset"),
+          disabled(
+            bsButton("apply_filters", "Reset and apply all filters", style = "info")
+          ),
+          div(style = "float:right", modalButton("Update filter values (dont apply)"))
+        )
+      )
+    } else {
+      div(
+        bsButton("apply_filters", "Apply all filters", style = "info"),
+        div(style = "float:right", modalButton("Update filter values (dont apply)"))
+      )
+    }
+  }),
+  
   #
   output$warnings_filter <- renderUI({
     HTML(paste(revals$warnings_filter, collapse = ""))

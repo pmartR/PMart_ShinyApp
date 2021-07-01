@@ -34,7 +34,10 @@ infotext_ <- list(
   indicator.",
   "MISSING_DATA_REPLACE" = "The value specified here will be replaced by NA in
   the data file.  If missing values are already NA in your data, then you do not 
-  have to specify this field."
+  have to specify this field.",
+  "RESET_FILTERS_WARNING" = "Re-applying filters will delete any statistics you 
+  have computed.  If your data was normalized in the normalize tab, you will 
+  also have to re-normalize it."
 ) 
 
 global_input_choices = list(
