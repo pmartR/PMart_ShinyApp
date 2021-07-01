@@ -1,2 +1,3 @@
-# pmart_standalone
+# PMart_ShinyApp
+Shiny GUI implementation of pmartR
 
