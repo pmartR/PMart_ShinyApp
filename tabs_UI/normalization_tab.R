@@ -55,12 +55,12 @@ normalization_UI <- function() {
           value = "spans_mainpanel",
           column(
             6,
-            plotOutput("spans_plot")
+            withSpinner(plotOutput("spans_plot"))
           ),
           column(
             6,
             div(
-              DTOutput("spans_table")
+              withSpinner(DTOutput("spans_table"))
             )
           )
         ),

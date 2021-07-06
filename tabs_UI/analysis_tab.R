@@ -1,21 +1,21 @@
-analysis_UI <- function() {
-  tabPanel("Analysis",
+statistics_UI <- function() {
+  tabPanel("Statistics",
     class = "collapse_page",
     column(
       4,
       bsCollapse(
-        id = "analysis_collapse_left", multiple = TRUE, open = "stats-analysis-options",
+        id = "statistics_collapse_left", multiple = TRUE, open = "stats-statistics-options",
         bsCollapsePanel(
           subsection_header(
-            "Specify Statistical Analysis",
-            "stats-analysis-ok",
+            "Specify Statistic Method",
+            "stats-statistics-ok",
             "color:orange;float:right",
             icon("ok", lib = "glyphicon")
           ),
-          value = "stats-analysis-options",
+          value = "stats-statistics-options",
           pickerInput(
             "stats_select_method",
-            "Select analysis method:",
+            "Select statistics method:",
             choices = c(
               "Select one" = NULLSELECT_,
               "iMd-ANOVA" = "imdanova"
@@ -25,27 +25,27 @@ analysis_UI <- function() {
           )
         )
       ),
-      uiOutput("analysis_tab_sidepanel")
+      uiOutput("statistics_tab_sidepanel")
     ),
     column(
       8,
       # TODO replace with either contitional UI or tabpanel that displays the 
-      # appropriate plot for whatever statistical analysis we did
+      # appropriate plot for whatever statistical statistics we did
       bsCollapse(
-        id = "analysis_collapse_main", multiple = TRUE,
+        id = "statistics_collapse_main", multiple = TRUE,
         bsCollapsePanel("Plots",
-          value = "analysis_plots",
+          value = "statistics_plots",
           radioGroupButtons("imdanova_plot_type", "Plot type", choices = c("Bar" = "bar", "Volcano" = "volcano")),
-          plotOutput("analysis_mainplot")
+          withSpinner(plotOutput("statistics_mainplot"))
         ),
         bsCollapsePanel("Plot Options",
-          value = "analysis_plot_opts",
-          uiOutput("analysis_plot_options"),
-          uiOutput("analysis_apply_style")
+          value = "statistics_plot_opts",
+          uiOutput("statistics_plot_options"),
+          uiOutput("statistics_apply_style")
         ),
         bsCollapsePanel("Tables",
-          value = "analysis_tables",
-          DTOutput("analysis_summary_table")
+          value = "statistics_tables",
+          withSpinner(DTOutput("statistics_summary_table"))
         )
       )
     )

@@ -44,12 +44,21 @@ list(
   output$qc_plots <- renderUI({
     if (two_lipids()) {
       tagList(
-        div(id = "qc_plots_1", style = "border-style:solid;border-width:1px;", plotOutput("omicsData_plot")),
-        div(id = "qc_plots_2", style = "border-style:solid;border-width:1px;", plotOutput("omicsData_plot_2"))
+        div(id = "qc_plots_1", 
+            style = "border-style:solid;border-width:1px;", 
+            withSpinner(plotOutput("omicsData_plot"))
+            ),
+        div(id = "qc_plots_2", 
+            style = "border-style:solid;border-width:1px;",
+            withSpinner(plotOutput("omicsData_plot_2"))
+            )
       )
     }
     else {
-      div(id = "qc_plots_1", style = "border-style:solid;border-width:1px;", plotOutput("omicsData_plot"))
+      div(id = "qc_plots_1", 
+          style = "border-style:solid;border-width:1px;", 
+          withSpinner(plotOutput("omicsData_plot"))
+          )
     }
   }),
 

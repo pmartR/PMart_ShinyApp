@@ -41,7 +41,10 @@ data_summary_UI <- function() {
               )
             ))
           )
-        ) # parent collapse
+        ), # parent collapse
+        
+        actionButton("go_to_filter", "Continue to Filter Tab", width = "100%")
+        
       ), # column 4
       column(
         8,

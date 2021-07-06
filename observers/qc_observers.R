@@ -53,13 +53,40 @@ observeEvent(qc_flip(),
   ignoreInit = TRUE
 )
 
+## Pop-up to continue
+# observeEvent(input$go_to_filter, {
+#   
+#   showModal(
+#     modalDialog(
+#       title = "Proceed",
+#       fluidRow(
+#         column(10,
+#                align = "center", offset = 1,
+#                actionButton("qc_dismiss", "Stay on this tab", width = "75%"),
+#                actionButton("goto_filter", "Continue to filters", style = "margin-top:5px;width:75%"),
+#                # bookmarkButton(label = "Bookmark the result of this page...", style = "margin-top:5px;width:75%")
+#         )
+#       ),
+#       footer = NULL
+#     )
+#   )
+#   
+#   
+# })
+
 # qc success buttons
-observeEvent(input$goto_filter, {
+observeEvent(input$go_to_filter, {
   updateTabsetPanel(session, "top_page", selected = "Filter")
   removeModal()
 })
 
-observeEvent(input$qc_dismiss, {
-  removeModal()
-})
-#
+# # qc success buttons
+# observeEvent(input$goto_filter, {
+#   updateTabsetPanel(session, "top_page", selected = "Filter")
+#   removeModal()
+# })
+# 
+# observeEvent(input$qc_dismiss, {
+#   removeModal()
+# })
+

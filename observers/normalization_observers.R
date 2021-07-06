@@ -272,9 +272,8 @@ observeEvent(c(input$apply_normalization, input$apply_normalization_modal), {
                 )),
                 hr(),
                 actionButton("normalization_dismiss", "Review results", width = "75%"),
-                uiOutput("goto_rollup"),
-                actionButton("goto_analysis", "Continue to analysis tab", style = "margin-top:5px;width:75%")
-              )
+                uiOutput("goto_stats")
+                )
             )
           },
           footer = NULL
@@ -293,12 +292,12 @@ observeEvent(c(input$apply_normalization, input$apply_normalization_modal), {
 
 # dismiss and move to next tabs
 observeEvent(input$normalization_dismiss, removeModal())
-observeEvent(input$goto_analysis, {
-  updateTabsetPanel(session, "top_page", selected = "Analysis")
+observeEvent(input$goto_statistics, {
+  updateTabsetPanel(session, "top_page", selected = "Statistics")
   removeModal()
 })
-observeEvent(input$goto_rollup, {
-  updateTabsetPanel(session, "top_page", selected = "Protein Rollup")
+observeEvent(input$goto_pepstats, {
+  updateTabsetPanel(session, "top_page", selected = "Peptide Statistics")
   removeModal()
 })
 
