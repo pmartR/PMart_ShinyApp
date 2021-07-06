@@ -6,7 +6,7 @@ observeEvent(c(objects$omicsData, input$top_page), {
     "which_combine_fn", 
     "qrollup_thresh", 
     "apply_rollup",
-    "bpquant_lock"
+    "bpquant_lock"#,
     # "bpquant"
            )
   

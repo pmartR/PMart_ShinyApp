@@ -5,7 +5,7 @@ list(
     plot_name <- plots$plot_table[input$modal_plot_table_rows_selected, 1]
     p <- plots$allplots[[plot_name]]
     
-    if(inherits(p, "ggplot")){
+    if(inherits(p, c("ggplot", "gtable"))){
       return(withSpinner(plotOutput("modal_plot")))
     } else {
       return(withSpinner(plotlyOutput("modal_plotly")))
@@ -34,7 +34,10 @@ list(
   }),
 
   # render the plot table reactive value
-  output$modal_plot_table <- renderDT(plots$plot_table, selection = "single", escape = FALSE),
+  output$modal_plot_table <- renderDT(plots$plot_table, 
+                                      selection = list(mode = 'single', 
+                                                       selected = 1), 
+                                      escape = FALSE),
 
   # display number of saved plots for saved plots button
   output$n_saved_plots <- renderUI({

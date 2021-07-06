@@ -7,7 +7,7 @@ statistics_UI <- function() {
         id = "statistics_collapse_left", multiple = TRUE, open = "stats-statistics-options",
         bsCollapsePanel(
           subsection_header(
-            "Specify Statistical statistics",
+            "Specify Statistic Method",
             "stats-statistics-ok",
             "color:orange;float:right",
             icon("ok", lib = "glyphicon")

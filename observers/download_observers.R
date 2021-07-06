@@ -69,6 +69,10 @@ observeEvent(input$makezipfile, {
   plots_marked_for_death <- which(plots$plot_table[, 2] == dt_checkmark)
   tables_marked_for_death <- which(table_use[, 2] == dt_checkmark)
 
+  ## Temp remove plotly
+  keep <- !map_lgl(plots$allplots[plots_marked_for_death], inherits, "plotly")
+  plots_marked_for_death <- plots_marked_for_death[keep]
+  
   total_files <- length(c(plots_marked_for_death, tables_marked_for_death))
 
   withProgress(message = "Writing files: ", {

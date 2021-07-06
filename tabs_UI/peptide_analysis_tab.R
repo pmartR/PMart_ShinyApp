@@ -7,7 +7,7 @@ peptide_statistics_UI <- function() {
                id = "peptide_statistics_collapse_left", multiple = TRUE, open = "peptide_stats-statistics-options",
                bsCollapsePanel(
                  subsection_header(
-                   "Specify Statistical statistics",
+                   "Specify Statistics Method",
                    "peptide_stats-statistics-ok",
                    "color:orange;float:right",
                    icon("ok", lib = "glyphicon")

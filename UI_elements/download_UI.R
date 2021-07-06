@@ -1,13 +1,16 @@
 list(
   
   output$download_plot_UI <- renderUI({
+
+    if(length(input$download_plot_table_rows_selected) < 1){
+      return(NULL)
+    } 
     
     plot_name <- plots$plot_table[input$download_plot_table_rows_selected, 1]
     p <- plots$allplots[[plot_name]]
     
-    if(length(input$download_plot_table_rows_selected) < 1){
-      return(NULL)
-    } else if(inherits(p, "ggplot")){
+    
+    if(inherits(p, c("ggplot", "gtable"))){
       return(withSpinner(plotOutput("download_plot")))
     } else {
       return(withSpinner(plotlyOutput("download_plotly")))
@@ -49,7 +52,7 @@ list(
 
       table_use
     },
-    selection = "single",
+    selection = list(selection = "single", selected = 1),
     escape = FALSE
   )
 )
