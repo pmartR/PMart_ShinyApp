@@ -6,7 +6,7 @@ list(
     
     ## 
     # if (pro_class) {
-    #   data <- objects$Prior_rollup
+    #   data <- objects$omicsData_pre_rollup
     # } else {
       data <- objects$omicsData
     #}
@@ -98,7 +98,7 @@ list(
     pro_class <- inherits(objects$omicsData, "proData")
 
     if (pro_class) {
-      data <- objects$Prior_rollup
+      data <- objects$omicsData_pre_rollup
     } else {
       data <- objects$omicsData
     }
@@ -193,7 +193,7 @@ list(
     # pro_class <- inherits(objects$omicsData, "proData")
     # 
     # # if (pro_class) {
-    # #   data <- objects$Prior_rollup
+    # #   data <- objects$omicsData_pre_rollup
     # # } else {
     #   data <- objects$omicsData
     # # }

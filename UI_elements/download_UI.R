@@ -44,7 +44,7 @@ list(
 
   output$download_tables_table <- renderDT(
     {
-      if(is.null(objects$Prior_rollup)){
+      if(is.null(objects$omicsData_pre_rollup)){
         table_use <- tables$tables_table
       } else {
         table_use <- tables$revenge_of_tables_table

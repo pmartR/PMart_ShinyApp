@@ -5,8 +5,8 @@ observeEvent(c(objects$omicsData, input$top_page), {
     "which_rollup",
     "which_combine_fn", 
     "qrollup_thresh", 
-    "apply_rollup",
-    "bpquant_lock"#,
+    "apply_rollup"#,
+    # "bpquant_lock",
     # "bpquant"
            )
   
@@ -51,7 +51,7 @@ observeEvent(input[["bpquant"]], {
   pro_class <- inherits(objects$omicsData, "proData")
   
   if (pro_class) {
-    data <- objects$Prior_rollup
+    data <- objects$omicsData_pre_rollup
   } else {
     data <- objects$omicsData
   }
@@ -130,8 +130,8 @@ observeEvent(input[["bpquant_lock"]], {
         text = "Re-enabling isoform identification will clear previously rolled-up results. Are you sure you want to do this?",
         callbackR = function(value) {
           if (value) {
-            objects$omicsData <- objects$Prior_rollup
-            objects$Prior_rollup <- NULL
+            objects$omicsData <- objects$omicsData_pre_rollup
+            objects$omicsData_pre_rollup <- NULL
             
             enable("bpquant_max_prot")
             enable("bpquant_comps")
@@ -161,7 +161,7 @@ observeEvent(input$apply_rollup, {
   tryCatch(
     {
 
-      objects$Prior_rollup <- objects$omicsData
+      objects$omicsData_pre_rollup <- objects$omicsData
       
       cname <- get_edata_cname(objects$omicsData)
       objects$omicsData$e_data[[cname]] <- as.character(objects$omicsData$e_data[[cname]]) #### Weird thing with numerics?

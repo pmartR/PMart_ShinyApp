@@ -30,7 +30,7 @@ observeEvent(input$remove_plot_download, {
 observeEvent(input$mark_table_download, {
   req(length(input$download_tables_table_rows_selected) > 0)
   
-  if(is.null(objects$Prior_rollup)){
+  if(is.null(objects$omicsData_pre_rollup)){
     table_use <- tables$tables_table
   } else {
     table_use <- tables$revenge_of_tables_table
@@ -55,7 +55,7 @@ observeEvent(input$makezipfile, {
     enable("makezipfile")
   })
   
-  if(is.null(objects$Prior_rollup)){
+  if(is.null(objects$omicsData_pre_rollup)){
     table_use <- tables$tables_table
     resloc_use <- resources_locations
   } else {

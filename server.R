@@ -12,7 +12,7 @@ shinyServer(function(session, input, output) {
   
   resources_locations_peprollup <- list(
     "Protein Data File (e_data)" = list("objects", "omicsData", "e_data"),
-    "Peptide Data File (e_data)" = list("objects", "Prior_rollup", "e_data"),
+    "Peptide Data File (e_data)" = list("objects", "omicsData_pre_rollup", "e_data"),
     "Sample Info (f_data)" = list("objects", "omicsData", "f_data"),
     "Biomolecule Information (e_meta)" = list("objects", "omicsData", "e_meta"),
     "Protein iMd-Anova Table" = list("objects", "imdanova_res", "Full_results"),
@@ -105,15 +105,15 @@ shinyServer(function(session, input, output) {
   # set options("shiny.testmode" == T) to get a developer button
   output$developer_buttons <- renderUI({
 
-    # if (isTRUE(getOption("shiny.test.mode"))) {
+    if (isTRUE(getOption("shiny.test.mode"))) {
       div(
         style = "position:absolute;z-index:9999;bottom:10px;left:10px;",
         actionButton("Browser", "whats wrong!?!?", style = "background:deepskyblue")
       )
-    # }
-    # else {
-    #   return(NULL)
-    # }
+    }
+    else {
+      return(NULL)
+    }
   })
 
   observeEvent(input$Browser, {
