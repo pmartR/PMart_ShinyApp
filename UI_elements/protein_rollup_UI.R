@@ -149,7 +149,7 @@ list(
           selected = "No"
         ))
       )
-    } else if (#is.null(data$bpquant) || 
+    } else if (is.null(data$bpquant) || 
                !input[["bpquant_lock"]]) {
       text <- "Compute and lock-in Isoform Identification results"
       
@@ -186,41 +186,45 @@ list(
   }),
   
   output[["bpquant_res"]] <- renderPlotly({
-    pro_class <- inherits(objects$omicsData, "proData")
+    req(!is.null(objects$omicsData), cancelOutput = TRUE)
+    plots$last_plot <- plots$bpquant
+    plots$bpquant
     
-    # if (pro_class) {
-    #   data <- objects$Prior_rollup
-    # } else {
-      data <- objects$omicsData
-    # }
-      
-    req(!is.null(objects$bpquant), cancelOutput = TRUE)
-    
-    result <- objects$bpquant
-    plotter <- table(map_dbl(result, function(df) {
-      max(unique(df[[3]]))
-    }))
-    df <- as.data.frame(plotter, stringsAsFactors = F)
-    plot_ly(
-      df,
-      x = ~Var1,
-      y = ~Freq,
-      type = "bar",
-      showlegend = FALSE
-    ) %>%
-      add_text(
-        showlegend = FALSE,
-        textposition = "top middle",
-        data = df,
-        x = ~Var1,
-        y = ~Freq,
-        text = ~ paste(Freq)
-      ) %>%
-      layout(
-        title = "Isoforms Detected",
-        xaxis = list(title = "Total Isoforms"),
-        yaxis = list(title = "Number of Protein Groups")
-      )
+    # pro_class <- inherits(objects$omicsData, "proData")
+    # 
+    # # if (pro_class) {
+    # #   data <- objects$Prior_rollup
+    # # } else {
+    #   data <- objects$omicsData
+    # # }
+    #   
+    # req(!is.null(objects$bpquant), cancelOutput = TRUE)
+    # 
+    # result <- objects$bpquant
+    # plotter <- table(map_dbl(result, function(df) {
+    #   max(unique(df[[3]]))
+    # }))
+    # df <- as.data.frame(plotter, stringsAsFactors = F)
+    # plot_ly(
+    #   df,
+    #   x = ~Var1,
+    #   y = ~Freq,
+    #   type = "bar",
+    #   showlegend = FALSE
+    # ) %>%
+    #   add_text(
+    #     showlegend = FALSE,
+    #     textposition = "top middle",
+    #     data = df,
+    #     x = ~Var1,
+    #     y = ~Freq,
+    #     text = ~ paste(Freq)
+    #   ) %>%
+    #   layout(
+    #     title = "Isoforms Detected",
+    #     xaxis = list(title = "Total Isoforms"),
+    #     yaxis = list(title = "Number of Protein Groups")
+    #   )
   }),
   
   ##  Rollup plot

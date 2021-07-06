@@ -90,9 +90,10 @@ observe({
   # both files contain id column
   else if (input$datatype == "pep" & isTRUE(input$proteins_yn == "TRUE")) {
     req(!is.null(input$id_col))
-    req(!is.null(input$protein_column))
+    # req(!is.null(input$protein_column)) ## Doesn't load if cond_shared_ids is false
     cond_files <- !is.null(input$file_emeta)
-    cond_procol <- input$protein_column %in% colnames(revals$e_meta)[-which(colnames(revals$e_meta) == input$id_col)]
+    cond_procol <- !is.null(input$protein_column) && 
+      input$protein_column %in% colnames(revals$e_meta)[-which(colnames(revals$e_meta) == input$id_col)]
     cond_idcol_edata <- isTRUE(input$id_col %in% colnames(e_data()))
     cond_idcol_emeta <- isTRUE(input$id_col %in% colnames(revals$e_meta))
     cond_nasymbol <- !is.null(input$na_symbol)

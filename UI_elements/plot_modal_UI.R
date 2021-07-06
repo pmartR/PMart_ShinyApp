@@ -1,5 +1,18 @@
 list(
   # render a plot depending on which row in the plot table is selected
+  output$modal_plot_UI <- renderUI({
+    req(length(input$modal_plot_table_rows_selected) > 0, cancelOutput = TRUE)
+    plot_name <- plots$plot_table[input$modal_plot_table_rows_selected, 1]
+    p <- plots$allplots[[plot_name]]
+    
+    if(inherits(p, "ggplot")){
+      return(withSpinner(plotOutput("modal_plot")))
+    } else {
+      return(withSpinner(plotlyOutput("modal_plotly")))
+    }
+  }),
+  
+  
   output$modal_plot <- renderPlot({
     req(length(input$modal_plot_table_rows_selected) > 0, cancelOutput = TRUE)
     plot_name <- plots$plot_table[input$modal_plot_table_rows_selected, 1]
@@ -11,6 +24,13 @@ list(
     else {
       return(p)
     }
+  }),
+  
+  output$modal_plotly <- renderPlotly({
+    req(length(input$modal_plot_table_rows_selected) > 0, cancelOutput = TRUE)
+    plot_name <- plots$plot_table[input$modal_plot_table_rows_selected, 1]
+    p <- plots$allplots[[plot_name]]
+    return(p)
   }),
 
   # render the plot table reactive value

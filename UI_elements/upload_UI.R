@@ -110,9 +110,18 @@ list(
   # select which column contains protein ID
   # if not protein data or there is no e_meta, then simply pass a random column or NULL
   output$promap_UI <- renderUI({
-    req(input$id_col %in% colnames(revals$e_meta))
-
-    if (input$datatype == "pep" & input$proteins_yn == "TRUE") {
+    req(length(colnames(revals$e_meta))> 0)
+    if(!(input$id_col %in% colnames(revals$e_meta))){
+      return(
+        div(
+          style = "color:red;margin-bottom:5px",
+          paste0("Unique biomolecule column '", input$id_col, 
+                 "' also required in biomolecule file.",
+                 " Current biomolecule file contains the following columns: ",
+                 toString(colnames(revals$e_meta)))
+        )
+      )
+    } else if (input$datatype == "pep" & input$proteins_yn == "TRUE") {
       choices <- colnames(revals$e_meta)[-which(colnames(revals$e_meta) == input$id_col)]
       pickerInput("protein_column", "Which column in your biomolecule file contains protein identifiers?",
         choices = c("Select a column", choices), selected = "Select a column"

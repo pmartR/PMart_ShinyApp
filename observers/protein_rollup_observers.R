@@ -6,7 +6,8 @@ observeEvent(c(objects$omicsData, input$top_page), {
     "which_combine_fn", 
     "qrollup_thresh", 
     "apply_rollup",
-    "bpquant"
+    "bpquant_lock"
+    # "bpquant"
            )
   
   req(!is.null(objects$omicsData))
@@ -22,7 +23,8 @@ observeEvent(input[["bpquant"]], {
   
   req(length(input[["bpquant_comps"]]) > 2 && 
         length(input[["bpquant_comps"]]) < 6 && 
-        input[["bpquant_lock"]])
+        input[["bpquant_lock"]] &&
+        input[["bpquant"]] > 0)
   
   removeTab("rollup_mainpanel", "BPQuant Results", session = getDefaultReactiveDomain())
   
@@ -62,6 +64,34 @@ observeEvent(input[["bpquant"]], {
   )
   
   objects$bpquant <- isoformres
+  
+  ### Plot
+  plotter <- table(map_dbl(isoformres, function(df) {
+    max(unique(df[[3]]))
+  }))
+  df <- as.data.frame(plotter, stringsAsFactors = F)
+  plots$bpquant <- plot_ly(
+    df,
+    x = ~Var1,
+    y = ~Freq,
+    type = "bar",
+    showlegend = FALSE
+  ) %>%
+    add_text(
+      showlegend = FALSE,
+      textposition = "top middle",
+      data = df,
+      x = ~Var1,
+      y = ~Freq,
+      text = ~ paste(Freq)
+    ) %>%
+    layout(
+      title = "Isoforms Detected",
+      xaxis = list(title = "Total Isoforms"),
+      yaxis = list(title = "Number of Protein Groups")
+    )
+  
+  
   
   updateRadioButtons(session, "bpquant_apply",
                      label = "Use protein isoforms?", 

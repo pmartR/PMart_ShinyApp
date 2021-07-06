@@ -1,7 +1,22 @@
 list(
+  
+  output$download_plot_UI <- renderUI({
+    
+    plot_name <- plots$plot_table[input$download_plot_table_rows_selected, 1]
+    p <- plots$allplots[[plot_name]]
+    
+    if(length(input$download_plot_table_rows_selected) < 1){
+      return(NULL)
+    } else if(inherits(p, "ggplot")){
+      return(withSpinner(plotOutput("download_plot")))
+    } else {
+      return(withSpinner(plotlyOutput("download_plotly")))
+    }
+  }),
+  
   # render a plot depending on which row in the plot table is selected
   output$download_plot <- renderPlot({
-    req(length(input$download_plot_table_rows_selected) > 0, cancelOutput = TRUE)
+    # req(length(input$download_plot_table_rows_selected) > 0, cancelOutput = TRUE)
     plot_name <- plots$plot_table[input$download_plot_table_rows_selected, 1]
     p <- plots$allplots[[plot_name]]
 
@@ -11,6 +26,14 @@ list(
     else {
       return(p)
     }
+  }),
+  
+  output$download_plotly <- renderPlotly({
+    # req(length(input$download_plot_table_rows_selected) > 0, cancelOutput = TRUE)
+    plot_name <- plots$plot_table[input$download_plot_table_rows_selected, 1]
+    p <- plots$allplots[[plot_name]]
+    
+      return(p)
   }),
 
   # render the plot table reactive value

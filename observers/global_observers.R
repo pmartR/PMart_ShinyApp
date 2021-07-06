@@ -47,7 +47,7 @@ observeEvent(input$viewplots, {
     modalDialog(
       tagList(
         withSpinner(DTOutput("modal_plot_table")),
-        withSpinner(plotOutput("modal_plot"))
+        uiOutput("modal_plot_UI")
       ),
       footer = tagList(
         # div(disabled(actionButton(inputId = "add_plot", width = '100%', label = "Save Current Plot for Later Download", icon = icon("save"))))
