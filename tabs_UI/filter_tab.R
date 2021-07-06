@@ -42,7 +42,7 @@ filter_UI <- function() {
           ),
           column(
             6,
-            numericInput("cv_threshold", "Maximum CV", 150, step = 1)
+            uiOutput("cv_threshold_UI")
           )
         ),
 

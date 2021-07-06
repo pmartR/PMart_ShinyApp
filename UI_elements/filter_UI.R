@@ -1,4 +1,21 @@
 list(
+  #'@details Input for cv filter cv_threshold.  Inside a reactive UI so that the
+  #'maximum CV can be displayed depending on the data.
+  output$cv_threshold_UI <- renderUI({
+    req(objects$uploaded_omicsData)
+    tmp_cvfilt <- cv_filter(objects$uploaded_omicsData)
+    max_cv = max(tmp_cvfilt$CV_pooled, na.rm=T)
+    
+    if(!is.null(objects$uploaded_omicsData_2)) {
+      tmp_cvfilt <- cv_filter(objects$uploaded_omicsData_2)
+      max_cv <- min(max_cv, max(tmp_cvfilt$CV_pooled, na.rm=T))
+    }
+    
+    title = sprintf("Maximum CV (between 1 and %s)", round(max_cv, 2))
+    
+    numericInput("cv_threshold", title, round(max_cv*0.9, 2), step = 1)
+  }),
+
   # Summary of current filters and parameters
   output$filter_review <- renderUI({
     # store text as a list of HTML elements
@@ -61,7 +78,7 @@ list(
         )
         # cv filter
       } else if (grepl("cvfilt", names(objects$filters)[i])) {
-        n_removed <- summary(objects$filters[[i]], cv_threshold = input$cv_threshold)$filtered_biomolecules
+        n_removed <- sum(objects$filters[[i]]$CV_pooled > input$cv_threshold, na.rm=T)
         divs[[i]] <- tagList(
           tags$b("Coefficient of Variation (CV) Filter:"),
           tags$p("CV threshold: ", input$cv_threshold, "| Biomolecules removed: ", n_removed),
@@ -366,7 +383,8 @@ list(
   output$execute_apply_filters_UI <- renderUI({
     upload_isnorm <- attr(objects$uploaded_omicsData, "data_info")$norm_info$is_normalized
     cur_isnorm <- attr(objects$omicsData, "data_info")$norm_info$is_normalized
-    will_reset <- (!upload_isnorm & cur_isnorm) | !is.null(objects$imdanova_res)
+    is_rolled_up <- inherits(objects$omicsData, "proData") & inherits(objects$uploaded_omicsData, "pepData")
+    will_reset <- (!upload_isnorm & cur_isnorm) | !is.null(objects$imdanova_res) | is_rolled_up
     
     if (will_reset) {
       div(

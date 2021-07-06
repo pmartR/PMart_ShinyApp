@@ -37,7 +37,8 @@ infotext_ <- list(
   have to specify this field.",
   "RESET_FILTERS_WARNING" = "Re-applying filters will delete any statistics you 
   have computed.  If your data was normalized in the normalize tab, you will 
-  also have to re-normalize it."
+  have to re-normalize it.  Rolled-up protein data will revert to the peptide
+  level."
 ) 
 
 global_input_choices = list(
