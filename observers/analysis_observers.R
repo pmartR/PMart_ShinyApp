@@ -61,7 +61,7 @@ observeEvent(get_swap_vals(), {
 
 # make statres object
 observeEvent(input$apply_imdanova, {
-  req(!is.null(objects$omicsData), input$top_page == "Analysis")
+  req(!is.null(objects$omicsData), input$top_page == "Statistics")
   
   tryCatch(
     {
@@ -74,15 +74,56 @@ observeEvent(input$apply_imdanova, {
         pval_adjust = input$pval_adjust, 
         pval_thresh = input$pval_thresh
       )
+      
+      # success modal if all is well
+      showModal(
+        modalDialog(
+          {
+            fluidRow(
+              column(10,
+                     align = "center", offset = 1,
+                     tags$h4(
+                       paste0(
+                         "Statistical analysis has been performed using ",
+                         input$imdanova_test_method,
+                         " test method from pmartR's iMd-ANOVA function. ",
+                         "Multiple comparisons P-value correction peformed: ",
+                         switch(input$pval_adjust,
+                                       "tukey" = "Tukey", 
+                                       "dunnet" = "Dunnett",
+                                       "holm" = "Holm",
+                                       "bonferroni" = "Bonferroni",
+                                       "none" = "none"
+                         ),
+                         ". P-value threshold: ",
+                         input$pval_thresh
+                       )
+                     ),
+                     hr(),
+                     actionButton("stats_dismiss", "Review results", width = "75%"),
+                     actionButton("goto_downloads", "Continue to Download Tab", width = "75%")
+              )
+            )
+          },
+          footer = NULL
+        )
+      )
+      
     },
     error = function(e) {
-      msg <- paste0("Something went wrong running the analysis.  \n System error:  ", e)
+      msg <- paste0("Something went wrong running the statistics.  \n System error:  ", e)
       message(msg)
-      revals$warnings_analysis$bad_imdanova <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+      revals$warnings_statistics$bad_imdanova <<- sprintf("<p style = 'color:red'>%s</p>", msg)
       objects$imdanova_res <- NULL
-      plots$analysis_mainplot <- NULL
+      plots$statistics_mainplot <- NULL
     }
   )
+})
+
+observeEvent(input$stats_dismiss, removeModal())
+observeEvent(input$goto_downloads,{
+  updateTabsetPanel(session, "top_page", selected = "Download")
+  removeModal()
 })
 
 # make plot object
@@ -90,14 +131,25 @@ observeEvent(c(objects$imdanova_res, input$imdanova_plot_type), {
   req(!is.null(objects$imdanova_res))
   tryCatch(
     {
-      plots$analysis_mainplot <- plot(objects$imdanova_res, plot_type = input$imdanova_plot_type, bw_theme = TRUE)
-      updateCollapse(session, "analysis_collapse_main", open = "analysis_plots")
+      ### Removal for Class
+      if(input$imdanova_plot_type == "volcano"){
+        temp <- objects$imdanova_res
+        attr(temp, "statistical_test") <- "anova"
+        plots$peptide_statistics_mainplot <- plot(temp, 
+                                                  plot_type = input$imdanova_plot_type, 
+                                                  bw_theme = TRUE)
+      } else {
+      plots$statistics_mainplot <- plot(objects$imdanova_res, 
+                                        plot_type = input$imdanova_plot_type, 
+                                        bw_theme = TRUE)
+      }
+      updateCollapse(session, "statistics_collapse_main", open = "statistics_plots")
     },
     error = function(e) {
       msg <- paste0("Something went wrong plotting your imdanovaRes object.  \n System error:  ", e)
       message(msg)
-      revals$warnings_analysis$bad_imdanova_plot <<- sprintf("<p style = 'color:red'>%s</p>", msg)
-      plots$analysis_mainplot <- NULL
+      revals$warnings_statistics$bad_imdanova_plot <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+      plots$statistics_mainplot <- NULL
     }
   )
 })
@@ -105,43 +157,43 @@ observeEvent(c(objects$imdanova_res, input$imdanova_plot_type), {
 # apply plot styling to...
 
 # ...first plot...
-observeEvent(input$analysis_apply_style_plot_1, {
-  analysis_xangle <- if (is_empty(input$analysis_xangle) | is.na(input$analysis_xangle)) 0 else input$analysis_xangle
-  analysis_yangle <- if (is_empty(input$analysis_yangle) | is.na(input$analysis_yangle)) 0 else input$analysis_yangle
+observeEvent(input$statistics_apply_style_plot_1, {
+  statistics_xangle <- if (is_empty(input$statistics_xangle) | is.na(input$statistics_xangle)) 0 else input$statistics_xangle
+  statistics_yangle <- if (is_empty(input$statistics_yangle) | is.na(input$statistics_yangle)) 0 else input$statistics_yangle
 
   theme <- theme(
-    axis.title.x = element_text(size = input$analysis_x_fontsize),
-    axis.title.y = element_text(size = input$analysis_y_fontsize),
-    axis.text.x = element_text(angle = analysis_xangle, size = input$analysis_x_ticksize),
-    axis.text.y = element_text(angle = analysis_yangle, size = input$analysis_y_ticksize),
-    plot.title = element_text(size = input$analysis_title_fontsize)
+    axis.title.x = element_text(size = input$statistics_x_fontsize),
+    axis.title.y = element_text(size = input$statistics_y_fontsize),
+    axis.text.x = element_text(angle = statistics_xangle, size = input$statistics_x_ticksize),
+    axis.text.y = element_text(angle = statistics_yangle, size = input$statistics_y_ticksize),
+    plot.title = element_text(size = input$statistics_title_fontsize)
   )
 
-  if (inherits(plots$analysis_mainplot, "list")) {
-    plots$analysis_mainplot[[1]] <- plots$analysis_mainplot[[1]] + xlab(input$analysis_xlab) + ylab(input$analysis_ylab) + ggtitle(input$analysis_title) + theme
+  if (inherits(plots$statistics_mainplot, "list")) {
+    plots$statistics_mainplot[[1]] <- plots$statistics_mainplot[[1]] + xlab(input$statistics_xlab) + ylab(input$statistics_ylab) + ggtitle(input$statistics_title) + theme
   }
   else {
-    plots$analysis_mainplot <- plots$analysis_mainplot + xlab(input$analysis_xlab) + ylab(input$analysis_ylab) + ggtitle(input$analysis_title) + theme
+    plots$statistics_mainplot <- plots$statistics_mainplot + xlab(input$statistics_xlab) + ylab(input$statistics_ylab) + ggtitle(input$statistics_title) + theme
   }
 })
 
 # ...second plot
-observeEvent(input$analysis_apply_style_plot_2, {
-  analysis_xangle <- if (is_empty(input$analysis_xangle) | is.na(input$analysis_xangle)) 0 else input$analysis_xangle
-  analysis_yangle <- if (is_empty(input$analysis_yangle) | is.na(input$analysis_yangle)) 0 else input$analysis_yangle
+observeEvent(input$statistics_apply_style_plot_2, {
+  statistics_xangle <- if (is_empty(input$statistics_xangle) | is.na(input$statistics_xangle)) 0 else input$statistics_xangle
+  statistics_yangle <- if (is_empty(input$statistics_yangle) | is.na(input$statistics_yangle)) 0 else input$statistics_yangle
 
   theme <- theme(
-    axis.title.x = element_text(size = input$analysis_x_fontsize),
-    axis.title.y = element_text(size = input$analysis_y_fontsize),
-    axis.text.x = element_text(angle = analysis_xangle, size = input$analysis_x_ticksize),
-    axis.text.y = element_text(angle = analysis_yangle, size = input$analysis_y_ticksize),
-    plot.title = element_text(size = input$analysis_title_fontsize)
+    axis.title.x = element_text(size = input$statistics_x_fontsize),
+    axis.title.y = element_text(size = input$statistics_y_fontsize),
+    axis.text.x = element_text(angle = statistics_xangle, size = input$statistics_x_ticksize),
+    axis.text.y = element_text(angle = statistics_yangle, size = input$statistics_y_ticksize),
+    plot.title = element_text(size = input$statistics_title_fontsize)
   )
 
-  if (inherits(plots$analysis_mainplot, "list")) {
-    plots$analysis_mainplot[[2]] <- plots$analysis_mainplot[[2]] + xlab(input$analysis_xlab) + ylab(input$analysis_ylab) + ggtitle(input$analysis_title) + theme
+  if (inherits(plots$statistics_mainplot, "list")) {
+    plots$statistics_mainplot[[2]] <- plots$statistics_mainplot[[2]] + xlab(input$statistics_xlab) + ylab(input$statistics_ylab) + ggtitle(input$statistics_title) + theme
   }
   else {
-    plots$analysis_mainplot_2 <- plots$analysis_mainplot_2 + xlab(input$analysis_xlab) + ylab(input$analysis_ylab) + ggtitle(input$analysis_title) + theme
+    plots$statistics_mainplot_2 <- plots$statistics_mainplot_2 + xlab(input$statistics_xlab) + ylab(input$statistics_ylab) + ggtitle(input$statistics_title) + theme
   }
 })
