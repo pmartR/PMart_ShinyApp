@@ -38,7 +38,20 @@ normalization_UI <- function() {
               radioGroupButtons("backtransform", "Apply backtransformation?", choices = c("Yes" = TRUE, "No" = FALSE)),
               hr(),
               hidden(bsButton("use_selected_spans", "Use parameters from table selection")),
-              hidden(bsButton("inspect_norm", "Analyze currently selected normalization method"))
+              hidden(
+                bsButton(
+                "inspect_norm", 
+                "Analyze currently selected normalization method",
+                style = "primary"
+                )
+              ),
+              hidden(
+                div(
+                  "Analyzing, please wait...",
+                   id = "analyze_norm_busy", class = "fadein-out",
+                   style = "color:deepskyblue;font-weight:bold;margin-bottom:5px"
+                )
+              )
             )
           ),
           hr(),

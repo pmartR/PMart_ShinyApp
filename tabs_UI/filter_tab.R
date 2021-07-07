@@ -148,9 +148,9 @@ filter_UI <- function() {
         uiOutput("fdata_regex")
         )
       ), # parent collapse
-      actionButton("review_filters", "Review and Apply Filters", width = "100%"),
+      bsButton("review_filters", "Review and apply filters", style = "primary"),
       uiOutput("warnings_filter"),
-      uiOutput("filter_data_summary")
+      uiOutput("filter_data_summary", style="margin-top:3px")
     ), # column 4
     column(
       8,

@@ -136,12 +136,16 @@ list(
   # plot normalized data after modal dismiss
   output$normalized_boxplots <- renderPlot({
     req(pluck(attributes(objects$omicsData), "data_info", "norm_info", "is_normalized") == TRUE)
-    plot(objects$omicsData, bw_theme = TRUE)
+    p <- plot(objects$omicsData, bw_theme = TRUE)
+    plots$last_plot <- p
+    p
   }),
 
   output$normalized_boxplots_2 <- renderPlot({
     req(pluck(attributes(objects$omicsData_2), "data_info", "norm_info", "is_normalized") == TRUE)
-    plot(objects$omicsData_2, bw_theme = TRUE)
+    p <- plot(objects$omicsData_2, bw_theme = TRUE)
+    plots$last_plot_2 <- p
+    p
   }),
   #
 

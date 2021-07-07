@@ -55,7 +55,7 @@ ui <- function(request) {
     ## Plot saving buttons
     hidden(
       div(
-        id = "js_saveplot", style = "position:absolute;top:3px;right:16px;z-index:1000",
+        id = "js_saveplot", style = "position:absolute;top:3px;right:16px;z-index:1100",
         fluidRow(
           column(6, bsButton("viewplots", uiOutput("n_saved_plots"), style = "info")),
           column(6, bsButton("saveplot", "Save Last Plot", style = "info"))

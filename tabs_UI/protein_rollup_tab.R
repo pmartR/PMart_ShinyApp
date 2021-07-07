@@ -13,9 +13,10 @@ protein_rollup_UI <- function() {
         hr(),
         
         splitLayout(
-          disabled(actionButton(
+          disabled(bsButton(
             "bpquant",
-            "Compute Isoforms"
+            "Compute Isoforms",
+            style = "primary"
           )),
           prettySwitch(
             inputId = "bpquant_lock",
@@ -34,7 +35,7 @@ protein_rollup_UI <- function() {
           numericInput("qrollup_thresh", "Quantile cutoff", value = 0),
           uiOutput("bpquant_apply_icon_UI"),
           hr(),
-          bsButton("apply_rollup", "Roll-up"),
+          bsButton("apply_rollup", "Roll-up", style = "primary"),
           hidden(div("Applying rollup, please wait...",
             id = "rollup_busy", class = "fadein-out",
             style = "color:deepskyblue;font-weight:bold;margin-bottom:5px"

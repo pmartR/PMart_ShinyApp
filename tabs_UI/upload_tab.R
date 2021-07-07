@@ -86,7 +86,7 @@ upload_UI <- function() {
           )
           )
         ), # parent collapse
-        disabled(actionButton("makeobject", "Create omicsData object")),
+        disabled(bsButton("makeobject", "Create omicsData object", style = "primary")),
         uiOutput("warnings_upload"),
         br(),
         uiOutput("uploaded_data_summary")

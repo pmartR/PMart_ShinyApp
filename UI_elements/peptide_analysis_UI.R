@@ -65,7 +65,7 @@ output$peptide_statistics_tab_sidepanel <- renderUI({
         uiOutput("peptide_imdanova_test_method_UI"),
         uiOutput("peptide_imdanova_pval_adjust_UI"),
         numericInput("peptide_pval_thresh", "Significance threshold", value = 0.05, step = 0.01),
-        bsButton("peptide_apply_imdanova", "Perform iMd-ANOVA")
+        bsButton("peptide_apply_imdanova", "Perform iMd-ANOVA", style = "primary")
       )
     )
   }

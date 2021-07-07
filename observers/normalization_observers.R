@@ -308,8 +308,10 @@ observeEvent(input$inspect_norm, {
 
   # disable button while working...
   disable("inspect_norm")
+  show("analyze_norm_busy")
   on.exit({
     enable("inspect_norm")
+    hide("analyze_norm_busy")
   })
 
   # initialize parameters
@@ -405,7 +407,7 @@ observeEvent(input$inspect_norm, {
         footer = tagList(
           div(
             style = "float:left",
-            bsButton("apply_normalization_modal", button_name, style = "info")
+            bsButton("apply_normalization_modal", button_name, style = "primary")
           ),
           modalButton("Choose another normalization")
         ),

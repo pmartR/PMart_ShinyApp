@@ -392,14 +392,14 @@ list(
         div(
           bsButton("allow_reapply_filters", "OK, let me reset"),
           disabled(
-            bsButton("apply_filters", "Reset and apply all filters", style = "info")
+            bsButton("apply_filters", "Reset and apply all filters", style = "primary")
           ),
           div(style = "float:right", modalButton("Update filter values (dont apply)"))
         )
       )
     } else {
       div(
-        bsButton("apply_filters", "Apply all filters", style = "info"),
+        bsButton("apply_filters", "Apply all filters", style = "primary"),
         div(style = "float:right", modalButton("Update filter values (dont apply)"))
       )
     }
