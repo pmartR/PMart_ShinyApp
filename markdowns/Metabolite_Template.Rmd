@@ -19,102 +19,27 @@ metabDataAttr <- attributes(metabData)
 metabStats <- params$metabStats
 metabStatsAttr <- attributes(metabStats)
 pmart_inputs <- params$pmart_inputs
-
-# Create sentence for scale data change
-if (metabDataAttr$data_info$data_scale_orig == metabDataAttr$data_info$data_scale) {
-  ScaleData <- paste0('The original scale of the data was "', metabDataAttr$data_info$data_scale_orig,
-    '" and remained unchanged.')
-} else {
-  ScaleData <- paste0('The original scale of the data was "', metabDataAttr$data_info$data_scale_orig,
-    '" and was changed to "', metabDataAttr$data_info$data_scale, '."')
-}
 ```
 
 ## Upload Data 
 
 ### *Expression Data*
 
-A molecule expression data file called "`r pmart_inputs$file_edata$name`" was uploaded to pmart. 
-The column that designates unique molecules was marked as "`r metabDataAttr$cnames$edata_cname`." 
-`r ScaleData` The value to denote missing data was "`r pmart_inputs$na_symbol`" and the expression data
-"`r ifelse(pmart_inputs$normalized_yn == "0", "was not already", "was already")`" normalized. 
+A molecule expression data file called **`r pmart_inputs$file_edata$name`** was uploaded to pmart. 
+The column that designates unique molecules was marked as **`r metabDataAttr$cnames$edata_cname`.**
+`r if (metabDataAttr$data_info$data_scale_orig == metabDataAttr$data_info$data_scale) {"The original scale of the data was **metabDataAttr$data_info$data_scale_orig** and remained unchanged."} else {paste0("The original scale of the data was **", metabDataAttr$data_info$data_scale_orig, "** and was changed to **", metabDataAttr$data_info$data_scale, "**.")}` 
+The value to denote missing data was **`r pmart_inputs$na_symbol`** and the expression data
+**`r ifelse(pmart_inputs$normalized_yn == "0", "was not already", "was already")`** normalized. 
 
-### *Biomolecule Information*
+`r if (is.null(metabDataAttr$cnames$emeta_cname) == FALSE) {paste0("### *Biomolecule Information*\nAn associated biomolecule information file was also uploaded called **", pmart_inputs$file_emeta$name, "** and the protein identifier column was designated as **", metabDataAttr$cnames$emeta_cname, "**.")}`
 
-```{r Biomolecule Info Text}
-# Set the biomolecule information text 
-BiomoleculeText <- "No biomolecule information was uploaded."
+`r if ("Var1" %in% colnames(metabData$f_data) == FALSE) {paste0("### *Sample Information*\nAn associated sample information file was also uploaded called **", pmart_inputs$file_fdata$name, "**. Trimmed samples names **", ifelse(pmart_inputs$usevizsampnames == "No", "were not", "were"), "** used. The column in the sample information file which indicates sample names was designated as **", metabDataAttr$cnames$fdata_cname, "**.")}`
 
-# If an e_meta file is included, create the text for it
-if (is.null(metabDataAttr$cnames$emeta_cname) == FALSE) {
-  BiomoleculeText <- HTML(paste("An associated biomolecule information file was also",
-    "uploaded called", paste0('<strong>"', pmart_inputs$file_emeta$name, '"</strong>"'), 
-    "and the protein identifier column was designated as", 
-    paste0("<strong>", metabDataAttr$cnames$emeta_cname, "</strong>.")))
-}
-```
-
-`r BiomoleculeText`
-
-### *Sample Information*
-
-```{r Sample Info Text}
-# Set the sample information text
-SampleInfoText <- "No sample information was uploaded."
-
-# If an f_data file is included, create the text for it
-if ("Var1" %in% colnames(metabData$f_data) == FALSE) {
-  SampleInfoText <- HTML(paste('An associated sample information file was also uploaded called <strong>',
-    paste0('"', pmart_inputs$file_fdata$name, '".</strong>'), "Trimmed sample names <strong>", 
-    ifelse(pmart_inputs$usevizsampnames == "No", "were not", "were"), 
-    "</strong> used. The column in the sample information file which indicates",
-    "sample names was designated as <strong>", paste0('"', metabDataAttr$cnames$fdata_cname, '".</strong>')))
-}
-```
-
-`r SampleInfoText`
-
-## Group Samples
-
-### *Grouping Information*
-
-This table summarizes all the user specified main effects or covariates in pmart. The 
-"Selected Column Name" denotes the name of the column in the sample information 
-file assigned as a main effect or covariate. 
+`r if (is.null(metabDataAttr$group_DF) == FALSE) {paste0("## Group Samples\n### *Grouping Information*\nThis table summarizes to which group or covariate each column in the Expression Data belongs.")}`
 
 ```{r Grouping Information: Main Effects and Covariates}
-resetNULL <- function(x) {ifelse(x == "None" || is.na(x), "None selected", x)}
-
-data.table("Main Effect or Covariate" = c("First Main Effect", "Second Main Effect",
-  "First Covariate", "Second Covariate"), "Selected Column Name" = c(resetNULL(pmart_inputs$gcol1),
-  resetNULL(pmart_inputs$gcol2), resetNULL(pmart_inputs$cvcol1), 
-  resetNULL(pmart_inputs$cvcol2))) %>% kable()
-```
-
-### *Number of Samples per Main Effects*
-
-```{r Grouping Information: Bar Chart}
-# Generate plots for main effects 
-plotForMainEffects <- function(effect) {
-  count <- metabData$f_data %>%
-    select(all_of(effect)) %>%
-    table() %>%
-    as.data.table() 
-  colnames(count) <- c("Group", "Number of samples")
-  ggplot(count, aes(x = Group, y = `Number of samples`, fill = Group)) +
-    geom_bar(stat = "identity") + theme_bw() + 
-    geom_text(aes(label = `Number of samples`), 
-              position = position_dodge(width = 1), vjust = -0.25) +
-    ylim(c(0, max(count$`Number of samples`) * 1.1))
-}
-
-if (is.null(pmart_inputs$gcol1) == FALSE && pmart_inputs$gcol1 != "None") {
-  plotForMainEffects(pmart_inputs$gcol1) + 
-    ggtitle(paste("First Main Effect:", pmart_inputs$gcol1))
-}
-if (is.null(pmart_inputs$gcol2) == FALSE && pmart_inputs$gcol2 != "None") {
-  plotForMainEffects(pmart_inputs$gcol2) + 
-    ggtitle(paste("Second Main Effect:", pmart_inputs$gcol2))
+if (is.null(metabDataAttr$group_DF) == FALSE) {
+  metabDataAttr$group_DF %>% kable()
 }
 ```
 
@@ -133,7 +58,7 @@ metabDataSum %>% kable()
 ### *Missing Value Table*
 
 In the table below, the first column denotes the sample and the second is the missing number of observations.
-The third column represents the second as a percentage of the total number of observations
+The third column represents the second as a proportion of the total number of observations
 for that sample. 
 
 ```{r Data Summary: Missing Value Table}
@@ -149,12 +74,7 @@ metabData$e_data %>%
   ) %>% kable()
 ```
 
-## Filter
-
-Filters **`r ifelse(length(metabDataAttr$filters) == 0, "were not", "were")`** applied.
-`r ifelse(length(metabDataAttr$filters) == 0, "", paste("A total of", length(metabDataAttr$filters), "filters were applied. See the table below for a descriptions of the filters and the order."))`
-
-### *Summary of Applied Filters*
+`r if(length(metabDataAttr$filters) > 0) {paste0("## Filters\nA total of **", length(metabDataAttr$filters), "** filter(s) were applied. See the table below for descriptions of the filters and their order.\n### *Summary of Applied Filters*")}`
 
 ```{r Filter: Table Summarizing Applied Filters}
 #  Put applied filters in a table
@@ -221,24 +141,6 @@ if (length(metabDataAttr$filters) != 0) {
 ```
 
 ```{r Create Filter Text}
-# Molecule Filter 
-MoleculeFilterText <- "Molecule filters were not applied to the data."
-
-if ("Molecule Filter" %in% FilterTable$Filter) {
-  MoleculeFilterText <- paste0("A molecule filter was applied to the data, which removes 
-    biomolecule(s) (", paste0(metabDataAttr$cnames$edata_cname, "s"), ") not having at least", 
-    " the minimum number of samples (Min Number Molecules).")
-}
-
-# CV Filter
-CVFilterText <- "CV filters were not applied to the data."
-
-if ("CV Filter" %in% FilterTable$Filter) {
-  CVFilterText <- paste0("A coefficient of variation (CV) filter was applied to the data ",
-    "which removes biomolecule(s) (", paste0(metabDataAttr$cnames$edata_cname, "s"), ") with a CV greater than ",
-    "the threshold (Max CV).")
-}
-
 # imd-ANOVA Filter
 imdAnovFilterText <- "imd-ANOVA filters were not applied to the data."
 
@@ -249,18 +151,6 @@ if ("imd-ANOVA Filter" %in% FilterTable$Filter) {
     " be applied to the data, removing biomolecules not having at least a minimum number of non-missing ",
     "values (Min G-Test) in at least one of the groups.")
 }
-
-# Proteomics Filter
-ProteomicsFilterText <- "Proteomics filters were not applied to the data."
-
-if ("Proteomics Filter" %in% FilterTable$Filter) {
-  ProteomicsFilterText <- paste0("A degenerate peptide filter (Degenerate Peptides Removed)",
-    " can be applied to the data, ", 
-    "which identifies biomolecule(s) (", paste0(metabDataAttr$cnames$edata_cname, "s"), ") not belonging ",
-    "to one protein. Additionally, a protein filter can be applied to the data which identifies proteins ",
-    "not having at least a minimum number of peptides (Min Number of Peptides) mapping to them.")
-}
-
 
 # rMD Filter
 rMDFilterText <- "rMD filters were not applied to the data."
@@ -280,13 +170,12 @@ if ("Custom Filter" %in% FilterTable$Filter) {
 }
 ```
 
-### *Molecule Filter*
+`r if ("Molecule Filter" %in% FilterTable$Filter) {paste0("### *Molecule Filter*\nA molecule filter was applied to the data, which removes biomolecule(s), **", metabDataAttr$cnames$edata_cname, "(s)**, not having at least the minimum number of samples (Min Number Molecules).")}`
 
-`r MoleculeFilterText`
+`r if ("CV Filter" %in% FilterTable$Filter) {paste0("### *CV Filter*\nA coefficient of variation (CV) filter was applied to the data which removes biomolecule(s), **", metabDataAttr$cnames$edata_cname, "(s)**, with a CV greater than the threshold (Max CV).")} `
 
-### *CV Filter*
+`r if ("imd-ANOVA Filter" %in% FilterTable$Filter) {paste0("### *imd-ANOVA Filter*\nAn ANOVA filter can be applied to the data which removes biomolecule(s), **", metabDataAttr$cnames$edata_cname, "(s)** of non-missing values per group (Min ANOVA). Additionaly, an IMD (independence of missing data) filter can be applied to the data, removing biomolecules not having at least a minimum number of non-missing values (Min G-Test) in at least one of the groups.")}`
 
-`r CVFilterText`
 
 ### *imd-ANOVA Filter*
 
@@ -348,7 +237,7 @@ if (is.null(metabStats) == FALSE) {
 }
 
 if (is.null(metabStats) == FALSE) {
-  metabStatsAttr$number_significant %>% kable()
+  metabStatsAttr$number_significant[1:4] %>% kable("latex") 
 }
 
 if (is.null(metabStats) == FALSE) {
@@ -356,6 +245,6 @@ if (is.null(metabStats) == FALSE) {
 }
 ```
 
-
+`r if (TRUE) {"## Kelly didn't lie"}`
 
 
