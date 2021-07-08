@@ -55,7 +55,7 @@ groups_UI <- function() {
           )
           )
         ), # parent collapse
-        disabled(actionButton("group_designation", "Apply Grouping")),
+        disabled(bsButton("group_designation", "Apply Grouping", style = "primary")),
         br(),
         br(),
         uiOutput("warnings_groups"),

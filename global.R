@@ -10,6 +10,9 @@ library(pmartR)
 library(dplyr)
 library(purrr)
 library(shinyjs)
+library(shinycssloaders)
+library(plotly)
+library(shinyalert)
 
 ######## GLOBAL VALUES ##########
 # static objects
@@ -18,8 +21,9 @@ dt_checkmark <- '<span class="glyphicon glyphicon-ok" style="color:deepskyblue">
 dt_minus <- '<span class="glyphicon glyphicon-minus"></span>'
 
 ttext_ <- list(
-  "MAIN_EFFECTS_INFO" = "Main effects are the variables of interest, those values across which you want to make comparisons.  Covariates are those values that are not of experimental interest, but must be controlled for in the analysis.",
-  "RMD_PROP_MISSING_WARNING" = "We advise against using proportion missing as a metric in lipidomics/metabolomics data, as they often have a very low proportion missing."
+  "MAIN_EFFECTS_INFO" = "Main effects are the variables of interest, those values across which you want to make comparisons.  Covariates are those values that are not of experimental interest, but must be controlled for in the statistics.",
+  "RMD_PROP_MISSING_WARNING" = "We advise against using proportion missing as a metric in lipidomics/metabolomics data, as they often have a very low proportion missing.",
+  "RMD_CUSTOM_FILTER_INFO" = "If you want to filter out one or more samples based on inspection of the rMd metrics and not a p-value cutoff, note their names and use a custom sample filter from the sample filters section to remove them."
 ) 
 
 infotext_ <- list(
@@ -30,7 +34,11 @@ infotext_ <- list(
   indicator.",
   "MISSING_DATA_REPLACE" = "The value specified here will be replaced by NA in
   the data file.  If missing values are already NA in your data, then you do not 
-  have to specify this field."
+  have to specify this field.",
+  "RESET_FILTERS_WARNING" = "Re-applying filters will delete any statistics you 
+  have computed.  If your data was normalized in the normalize tab, you will 
+  have to re-normalize it.  Rolled-up protein data will revert to the peptide
+  level."
 ) 
 
 global_input_choices = list(

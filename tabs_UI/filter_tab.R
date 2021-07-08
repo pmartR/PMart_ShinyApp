@@ -42,7 +42,7 @@ filter_UI <- function() {
           ),
           column(
             6,
-            numericInput("cv_threshold", "Maximum CV", 150, step = 1)
+            uiOutput("cv_threshold_UI")
           )
         ),
 
@@ -101,7 +101,14 @@ filter_UI <- function() {
             5,
             actionButton(
               inputId = "add_rmdfilt",
-              label = div("Add/Remove rMd filter", hidden(div(id = "rmdfilt_exists", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))),
+              label = div(class="flex-inline",
+                "Add/Remove rMd filter", 
+                tipify(
+                  icon("question-sign", lib = "glyphicon", class = "info-right"),
+                  title = ttext_[["RMD_CUSTOM_FILTER_INFO"]]
+                ),
+                hidden(div(id = "rmdfilt_exists", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
+              ),
               width = "100%"
             ),
             actionButton("plot_rmdfilt", "Plot this filter", width = "100%")
@@ -126,7 +133,9 @@ filter_UI <- function() {
             6,
             actionButton(
               inputId = "add_customfilt",
-              label = div("Add/Remove custom filter", hidden(div(id = "customfilt_exists", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))),
+              label = div("Add/Remove custom filter", hidden(
+                div(id = "customfilt_exists", style = "color:orange;float:right", icon("ok", lib = "glyphicon"))
+              )), 
               width = "100%"
             )
           ),
@@ -139,9 +148,9 @@ filter_UI <- function() {
         uiOutput("fdata_regex")
         )
       ), # parent collapse
-      actionButton("review_filters", "Review and Apply Filters", width = "100%"),
+      bsButton("review_filters", "Review and apply filters", style = "primary"),
       uiOutput("warnings_filter"),
-      uiOutput("filter_data_summary")
+      uiOutput("filter_data_summary", style="margin-top:3px")
     ), # column 4
     column(
       8,

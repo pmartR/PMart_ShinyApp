@@ -141,12 +141,21 @@ list(
   output$group_barplots <- renderUI({
     if (two_lipids()) {
       tagList(
-        div(id = "sample_barplots_1", style = "border-style:solid;border-width:1px;", plotOutput("group_barplots_1")),
-        div(id = "sample_barplots_2", style = "border-style:solid;border-width:1px;", plotOutput("group_barplots_2"))
+        div(id = "sample_barplots_1", 
+            style = "border-style:solid;border-width:1px;", 
+            withSpinner(plotOutput("group_barplots_1"))
+            ),
+        div(id = "sample_barplots_2", 
+            style = "border-style:solid;border-width:1px;", 
+            withSpinner(plotOutput("group_barplots_2"))
+            )
       )
     }
     else {
-      div(id = "sample_barplots_1", style = "border-style:solid;border-width:1px;", plotOutput("group_barplots_1"))
+      div(id = "sample_barplots_1", 
+          style = "border-style:solid;border-width:1px;", 
+          withSpinner(plotOutput("group_barplots_1"))
+          )
     }
   }),
   ##
