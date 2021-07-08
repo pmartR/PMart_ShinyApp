@@ -1,4 +1,21 @@
 list(
+  #'@details Input for cv filter cv_threshold.  Inside a reactive UI so that the
+  #'maximum CV can be displayed depending on the data.
+  output$cv_threshold_UI <- renderUI({
+    req(objects$uploaded_omicsData)
+    tmp_cvfilt <- cv_filter(objects$uploaded_omicsData)
+    max_cv = max(tmp_cvfilt$CV_pooled, na.rm=T)
+    
+    if(!is.null(objects$uploaded_omicsData_2)) {
+      tmp_cvfilt <- cv_filter(objects$uploaded_omicsData_2)
+      max_cv <- min(max_cv, max(tmp_cvfilt$CV_pooled, na.rm=T))
+    }
+    
+    title = sprintf("Maximum CV (between 1 and %s)", round(max_cv, 2))
+    
+    numericInput("cv_threshold", title, round(max_cv*0.9, 2), step = 1)
+  }),
+
   # Summary of current filters and parameters
   output$filter_review <- renderUI({
     # store text as a list of HTML elements
@@ -10,12 +27,27 @@ list(
     # indices of which filters/HTML elements belong to each object
     obj2_inds <- which(grepl("_2", names(objects$filters)))
     obj1_inds <- setdiff(1:length(objects$filters), obj2_inds)
-
+    
+    if(length(objects$filters) == 0) return(
+      div(
+        br(),
+        strong("No filters will be applied"),
+        br()
+      )
+    )
+    
+    #' instantiate this outside of the for loop, since it is used in multiple
+    #' nodes in the flow control
+    #' TODO: collect all samples and perform differences at the end?
+    rmd_removed_samps <- if (any(grepl("rmdfilt", names(objects$filters)))) {
+      tmp_idx = which(grepl("rmdfilt", names(objects$filters)))
+      attr(objects$filters[[tmp_idx]], "sample_names")[which(objects$filters[[tmp_idx]]$pvalue < input$pvalue_threshold)]
+    } else NULL
+    
     # text for first filter object
     for (i in 1:length(objects$filters)) {
       # rmd filter
       if (grepl("rmdfilt", names(objects$filters)[i])) {
-        rmd_removed_samps <- attr(objects$filters[[i]], "sample_names")[which(objects$filters[[i]]$pvalue < input$pvalue_threshold)]
         divs[[i]] <- tagList(
           tags$b("rMd Filter:"),
           tags$p(sprintf("p-value threshold: %s", input$pvalue_threshold)),
@@ -28,7 +60,7 @@ list(
         # get samples and check whether we are removing or keeping
         filter_samples <- unlist(objects$filters[[i]])
         object_samples <- attr(objects$filters[[i]], "omicsData")$f_data[, get_fdata_cname(attr(objects$filters[[i]], "omicsData"))]
-
+        
         if ("f_data_keep" %in% names(objects$filters[[i]])) {
           f_data_keep <- filter_samples
           f_data_remove <- setdiff(object_samples, f_data_keep) %>% union(rmd_removed_samps) # ** include samples removed by rmd filter
@@ -46,7 +78,7 @@ list(
         )
         # cv filter
       } else if (grepl("cvfilt", names(objects$filters)[i])) {
-        n_removed <- summary(objects$filters[[i]], cv_threshold = input$cv_threshold)$filtered_biomolecules
+        n_removed <- sum(objects$filters[[i]]$CV_pooled > input$cv_threshold, na.rm=T)
         divs[[i]] <- tagList(
           tags$b("Coefficient of Variation (CV) Filter:"),
           tags$p("CV threshold: ", input$cv_threshold, "| Biomolecules removed: ", n_removed),
@@ -136,12 +168,12 @@ list(
   # plot one or both UI elements
   output$filter_dynamic_mainplot <- renderUI({
     if (!is.null(objects$uploaded_omicsData) & is.null(objects$uploaded_omicsData_2)) {
-      plotOutput("filter_mainplot")
+      withSpinner(plotOutput("filter_mainplot"))
     }
     else if (any(!is.null(objects$uploaded_omicsData), !is.null(objects$uploaded_omicsData_2))) {
       tagList(
-        plotOutput("filter_mainplot"),
-        plotOutput("filter_mainplot_2")
+        withSpinner(plotOutput("filter_mainplot")),
+        withSpinner(plotOutput("filter_mainplot_2"))
       )
     }
   }),
@@ -344,7 +376,35 @@ list(
       }
     )
   }),
-
+  
+  #'@details Check whether we have done stats or normalized the data, warn users 
+  #' that they will have to re-apply normalization if their data was not already
+  #' normalized, and reapply stats.
+  output$execute_apply_filters_UI <- renderUI({
+    upload_isnorm <- attr(objects$uploaded_omicsData, "data_info")$norm_info$is_normalized
+    cur_isnorm <- attr(objects$omicsData, "data_info")$norm_info$is_normalized
+    is_rolled_up <- inherits(objects$omicsData, "proData") & inherits(objects$uploaded_omicsData, "pepData")
+    will_reset <- (!upload_isnorm & cur_isnorm) | !is.null(objects$imdanova_res) | is_rolled_up
+    
+    if (will_reset) {
+      div(
+        tags$span(style = "color:red", infotext_[['RESET_FILTERS_WARNING']]),
+        div(
+          bsButton("allow_reapply_filters", "OK, let me reset"),
+          disabled(
+            bsButton("apply_filters", "Reset and apply all filters", style = "primary")
+          ),
+          div(style = "float:right", modalButton("Update filter values (dont apply)"))
+        )
+      )
+    } else {
+      div(
+        bsButton("apply_filters", "Apply all filters", style = "primary"),
+        div(style = "float:right", modalButton("Update filter values (dont apply)"))
+      )
+    }
+  }),
+  
   #
   output$warnings_filter <- renderUI({
     HTML(paste(revals$warnings_filter, collapse = ""))

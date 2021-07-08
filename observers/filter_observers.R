@@ -55,7 +55,12 @@ observeEvent(input$add_cvfilt, {
     objects$filters$cvfilt <- tryCatch(
       {
         revals$warnings_filter$cv_filter1 <<- NULL
-        cv_filter(objects$uploaded_omicsData)
+        tmp_cvfilt <- cv_filter(objects$uploaded_omicsData)
+        test_filt_conditions <- summary(
+          tmp_cvfilt,
+          cv_threshold = input$cv_threshold
+        )
+        tmp_cvfilt
       },
       error = function(e) {
         msg <- paste0("Something went wrong updating your CV filter object \n System error:  ", e)
@@ -67,6 +72,11 @@ observeEvent(input$add_cvfilt, {
       objects$filters$cvfilt_2 <- tryCatch(
         {
           revals$warnings_filter$cv_filter2 <<- NULL
+          tmp_cvfilt <- cv_filter(objects$uploaded_omicsData_2)
+          test_filt_conditions <- summary(
+            tmp_cvfilt,
+            cv_threshold = input$cv_threshold
+          )
           cv_filter(objects$uploaded_omicsData_2)
         },
         error = function(e) {
@@ -373,10 +383,10 @@ observeEvent(c(input$plot_molfilt, input$mol_min_num),
 )
 
 # cv filter plot
-observeEvent(c(input$plot_cvfilt, input$cv_threshold),
+observeEvent(c(input$plot_cvfilt, input$cv_threshold, input$add_cvfilt),
   {
     revals$warnings_filter$cvfilt_plot <- revals$warnings_filter$cvfilt_plot_2 <- NULL
-
+    
     plots$filter_mainplot <- tryCatch(
       {
         plot(cv_filter(objects$uploaded_omicsData), cv_threshold = input$cv_threshold, bw_theme = TRUE)
@@ -491,18 +501,12 @@ observeEvent(input$review_filters, {
   showModal(
     modalDialog(
       tagList(
-        uiOutput("filter_review")
-      ),
-      footer = tagList(
-        # div(disabled(actionButton(inputId = "add_plot", width = '100%', label = "Save Current Plot for Later Download", icon = icon("save"))))
-        div(
-          style = "float:left",
-          bsButton("apply_filters", "Apply all filters", style = "info")
-        ),
-        modalButton("Update filter values (dont apply)"),
+        uiOutput("filter_review"),
+        uiOutput("execute_apply_filters_UI"),
         hr(),
         uiOutput("warnings_filter_modal")
       ),
+      footer = NULL,
       size = "l"
     )
   )
@@ -513,7 +517,10 @@ observeEvent(input$review_filters, {
 #################
 observeEvent(input$apply_filters, {
   req(!is.null(objects$uploaded_omicsData))
-
+  
+  # stats results are no longer valid, remove them
+  objects$imdanova_res <- NULL
+  
   tryCatch(
     {
       # make temp objects and clear summaries
@@ -639,8 +646,7 @@ observeEvent(input$apply_filters, {
             hr(),
             filters2_div,
             actionButton("filter_dismiss", "Stay on this tab", width = "75%"),
-            actionButton("goto_norm", "Continue to normalization", style = "margin-top:5px;width:75%"),
-            bookmarkButton(label = "Bookmark the result of this page...", style = "margin-top:5px;width:75%")
+            actionButton("goto_norm", "Continue to normalization", style = "margin-top:5px;width:75%")
           )
         ),
         footer = NULL
@@ -650,6 +656,12 @@ observeEvent(input$apply_filters, {
 
   #### CUSTOM FILTER UNDER (mental) CONSTRUCTION #####
 })
+
+#'@details enable the apply button if applying filters would cause a reset of
+#'stats or normalization
+observeEvent(input$allow_reapply_filters, {
+  shinyjs::enable("apply_filters")
+}, ignoreInit = T)
 
 ###
 

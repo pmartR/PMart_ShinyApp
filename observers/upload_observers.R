@@ -90,9 +90,10 @@ observe({
   # both files contain id column
   else if (input$datatype == "pep" & isTRUE(input$proteins_yn == "TRUE")) {
     req(!is.null(input$id_col))
-    req(!is.null(input$protein_column))
+    # req(!is.null(input$protein_column)) ## Doesn't load if cond_shared_ids is false
     cond_files <- !is.null(input$file_emeta)
-    cond_procol <- input$protein_column %in% colnames(revals$e_meta)[-which(colnames(revals$e_meta) == input$id_col)]
+    cond_procol <- !is.null(input$protein_column) && 
+      input$protein_column %in% colnames(revals$e_meta)[-which(colnames(revals$e_meta) == input$id_col)]
     cond_idcol_edata <- isTRUE(input$id_col %in% colnames(e_data()))
     cond_idcol_emeta <- isTRUE(input$id_col %in% colnames(revals$e_meta))
     cond_nasymbol <- !is.null(input$na_symbol)
@@ -227,10 +228,10 @@ observeEvent(input$makeobject, {
           column(10,
             align = "center", offset = 1,
             HTML('<h4 style= "color:#1A5276">Your data has been successfully uploaded. 
-                      You may proceed to the subsequent tabs for analysis.</h4>'),
+                      You may proceed to the subsequent tabs for statistics.</h4>'),
             hr(),
             actionButton("upload_dismiss", "Review results", width = "75%"),
-            actionButton("goto_groups", "Continue to groups tab", style = "margin:5px;width:75%")
+            actionButton("goto_groups", "Continue to Groups Tab", style = "margin:5px;width:75%")
           )
         ),
         footer = NULL

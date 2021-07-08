@@ -28,6 +28,11 @@
   background-color:lightgray;
 }
 
+.flex-baseline {
+  display:flex;
+  align-items:baseline;
+}
+
 .inline_top{
   display:inline-block;
   vertical-align:top;
@@ -40,6 +45,13 @@
 .inline-wrapper-1 > div {
   display:inline-block;
 }
+
+/* Tooltips */
+.info-right {
+  color:deepskyblue;
+  margin-left:3px;
+}
+
 
 .collapse_page .panel-heading{
   font-weight:bold;

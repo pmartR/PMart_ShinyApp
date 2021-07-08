@@ -9,7 +9,16 @@ shinyServer(function(session, input, output) {
     "Biomolecule Information (e_meta)" = list("objects", "omicsData", "e_meta"),
     "iMd-Anova Table" = list("objects", "imdanova_res", "Full_results")
   )
-
+  
+  resources_locations_peprollup <- list(
+    "Protein Data File (e_data)" = list("objects", "omicsData", "e_data"),
+    "Peptide Data File (e_data)" = list("objects", "omicsData_pre_rollup", "e_data"),
+    "Sample Info (f_data)" = list("objects", "omicsData", "f_data"),
+    "Biomolecule Information (e_meta)" = list("objects", "omicsData", "e_meta"),
+    "Protein iMd-Anova Table" = list("objects", "imdanova_res", "Full_results"),
+    "Peptide iMd-Anova Table" = list("objects", "peptide_imdanova_res", "Full_results")
+  )
+  
   # misc reactive values
   revals <- reactiveValues(
     warnings_upload = list(), warnings_groups = list(), warnings_transform = list(), warnings_normalize = list(),
@@ -30,7 +39,17 @@ shinyServer(function(session, input, output) {
 
   # tables of results and other things (intentionally have plot_table in plots$... reactive list)
   # +1000 points for variable called tables_table, which is accessed by calling tables$tables_table
-  tables <- reactiveValues(tables_table = data.frame("Table" = names(resources_locations), "Download?" = dt_checkmark, stringsAsFactors = FALSE, check.names = FALSE))
+  tables <- reactiveValues(tables_table = data.frame("Table" = names(resources_locations), 
+                                                     "Download?" = dt_checkmark, 
+                                                     stringsAsFactors = FALSE, 
+                                                     check.names = FALSE),
+                           revenge_of_tables_table = data.frame(
+                             "Table" = names(resources_locations_peprollup), 
+                             "Download?" = dt_checkmark, 
+                             stringsAsFactors = FALSE,
+                             check.names = FALSE)
+                           
+                           )
 
   # local file, not tracked by git.  Create one if you would like to perform postmortem debugging
   tryCatch(
@@ -83,8 +102,9 @@ shinyServer(function(session, input, output) {
     x
   })
 
-  # set options("shiny.testmode" == T) to get a developer button
+  # set options("shiny.testmode" = T) to get a developer button
   output$developer_buttons <- renderUI({
+
     if (isTRUE(getOption("shiny.testmode"))) {
       div(
         style = "position:absolute;z-index:9999;bottom:10px;left:10px;",

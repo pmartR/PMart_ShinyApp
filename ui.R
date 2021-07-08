@@ -1,6 +1,7 @@
 ui <- function(request) {
   tagList(
     useShinyjs(),
+    shinyalert::useShinyalert(),
     list(tags$head(HTML('<link rel="icon", href="pmartlogo.png", 
                                  type="image/png" />'))),
     div(
@@ -34,12 +35,17 @@ ui <- function(request) {
 
       normalization_UI(),
 
+      #### Peptide-level Tabs ####
+      
+      #### Peptide Statistics ####
+      peptide_statistics_UI(),
+
       #### Protein Rollup ####
       protein_rollup_UI(),
 
-      #### ANALYSIS TAB ####
+      #### statistics TAB ####
 
-      analysis_UI(),
+      statistics_UI(),
 
       #### DOWNLOAD TAB ####
 
@@ -49,7 +55,7 @@ ui <- function(request) {
     ## Plot saving buttons
     hidden(
       div(
-        id = "js_saveplot", style = "position:absolute;top:3px;right:16px;z-index:1000",
+        id = "js_saveplot", style = "position:absolute;top:3px;right:16px;z-index:1100",
         fluidRow(
           column(6, bsButton("viewplots", uiOutput("n_saved_plots"), style = "info")),
           column(6, bsButton("saveplot", "Save Last Plot", style = "info"))
