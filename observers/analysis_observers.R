@@ -135,7 +135,7 @@ observeEvent(c(objects$imdanova_res, input$imdanova_plot_type), {
       if(input$imdanova_plot_type == "volcano"){
         temp <- objects$imdanova_res
         attr(temp, "statistical_test") <- "anova"
-        plots$peptide_statistics_mainplot <- plot(temp, 
+        plots$statistics_mainplot <- plot(temp, 
                                                   plot_type = input$imdanova_plot_type, 
                                                   bw_theme = TRUE)
       } else {
