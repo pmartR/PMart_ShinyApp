@@ -176,7 +176,7 @@ if ("Custom Filter" %in% FilterTable$Filter) {
 
 `r if ("imd-ANOVA Filter" %in% FilterTable$Filter) {paste0("### *imd-ANOVA Filter*\nAn ANOVA filter can be applied to the data which removes biomolecule(s), **", metabDataAttr$cnames$edata_cname, "(s)**, of non-missing values per group (Min ANOVA). Additionaly, an IMD (independence of missing data) filter can be applied to the data, removing biomolecules not having at least a minimum number of non-missing values (Min G-Test) in at least one of the groups.")}`
 
-`r if ("rMD Filter" %in% FilterTable$Filter) {paste0("### *rMD Filter*\nA robust Mahalanobis distance (rMD) filter was applied to the data, removing sample(s), **", metabDataAttr$cnames$fdata_cname, "(s)**, with an associated rMD p-value of less than thre threshold (P-Value Threshold). Metrcis used to calculate the p-values are also included (Metrics Used).")}`
+`r if ("rMD Filter" %in% FilterTable$Filter) {paste0("### *rMD Filter*\nA robust Mahalanobis distance (rMD) filter was applied to the data, removing sample(s), **", metabDataAttr$cnames$fdata_cname, "(s)**, with an associated rMD p-value of less than the threshold (P-Value Threshold). Metrics used to calculate the p-values are also included (Metrics Used).")}`
 
 `r if ("Custom Filter" %in% FilterTable$Filter) {paste0("### *Custom Filter*\n Custom filters can be used to remove samples, biomolecules or proteins.")}`
 
@@ -233,7 +233,12 @@ if (is.null(metabStats) == FALSE) {
 }
 ```
 
-`r if (pmart_inputs$ReportCode) {"## Example Code"}`
+`r if (pmart_inputs$ReportCode) {paste0('## Example Code\n### *Upload Data *\nlibrary(pmartR)\n\nlibrary(pmartRdata)\n\ndata("metab_edata")\n\ndata("metab_fdata")\n\nmymetabData <- as.metabData(e_data = metab_edata, f_data = metab_fdata, edata_cname = "Metabolite", fdata_cname = "SampleID")\n\nsummary(mymetabData)\n\n', ifelse(is.null(metabDataAttr$group_DF), '\n', '### *Group Samples*\nmymetabData <- group_designation(omicsData = mymetabData, main_effects = "Condition")\n\nplot(mymetabData)\n\n'), ifelse(length(metabDataAttr$filters) == 0, '', '### *Apply Filters*\nNote: Apply filters only if they make sense given the context of the analysis, and their plots. You can apply any filter with: applyFilt(filter, mymetabData, other_parameters), and visualize any filter with plot(filter, other_parameters).\n\nmoleculeFilt <- molecule_filter(omicsData = mymetabData); plot(moleculeFilt, min_num = 2)\n\ncvFilt <- cv_filter(mymetabData); plot(cvFilt, cv_threshold = 80)\n\nimdFilt <- imdanova_filter(omicsData = mymetabData); plot(imdFilt, min_nonmiss_anova = 2)\n\nrmdFilt <- rmd_filter(omicsData = mymetabData, metrics = c("MAD", "Skewness", "Correlation")); plot(rmdFilt, pvalue_threshold = 0.0001)\n\ncustFilt <- custom_filter(omicsData = mymetabData, f_data_remove = "Infection1")\n\n'), ifelse(metabDataAttr$data_info$norm_info$is_normalized == FALSE, '', '### *Normalization*\nNote: There are many normalization parameters. This is an example.\n\nmymetabData <- normalize_global(omicsData = mymetabData, subset_fn = "all", norm_fn = "mean")\n\n'), ifelse(is.null(metabStats), '', '### *Statistical Analysis*\nNote: There are many imdanova parameters. This is an example.\n\nimdanova_res <- imd_anova(omicsData = mymetabData, test_method = "anova"); plot(imdanova_res)'))}`
+
+
+
+
+
 
 
 
