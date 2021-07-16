@@ -1,5 +1,6 @@
 upload_UI <- function() {
   tabPanel("Upload Data",
+    value = 'upload_data_tab',
     class = "collapse_page",
     fluidRow( # begin fluidrow
       column(

@@ -1,6 +1,17 @@
 ui <- function(request) {
   tagList(
     useShinyjs(),
+    shinyjs::extendShinyjs(
+      script = "lib/shinyui.js",
+      functions = c(
+        "isTabdisabled", # For testing purposes
+        "isIconhidden", # For testing purposes
+        "disableTab", # Disables a tab
+        "enableTab", # Enables a tab
+        "disableBtn", # Disables a button
+        "toggleTabInputs" # Toggles state of inputs on a page
+      )
+    ),
     shinyalert::useShinyalert(),
     list(tags$head(HTML('<link rel="icon", href="pmartlogo.png", 
                                  type="image/png" />'))),

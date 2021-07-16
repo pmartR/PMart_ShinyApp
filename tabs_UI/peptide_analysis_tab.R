@@ -1,5 +1,6 @@
 peptide_statistics_UI <- function() {
   tabPanel("Peptide Statistics",
+           value = "peptide_statistics_tab",
            class = "collapse_page",
            column(
              4,

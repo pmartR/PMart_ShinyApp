@@ -1,5 +1,6 @@
 statistics_UI <- function() {
   tabPanel("Statistics",
+    value = "statistics_tab",
     class = "collapse_page",
     column(
       4,

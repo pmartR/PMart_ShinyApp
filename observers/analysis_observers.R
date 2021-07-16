@@ -61,7 +61,7 @@ observeEvent(get_swap_vals(), {
 
 # make statres object
 observeEvent(input$apply_imdanova, {
-  req(!is.null(objects$omicsData), input$top_page == "Statistics")
+  req(!is.null(objects$omicsData), input$top_page == "statistics_tab")
   
   tryCatch(
     {
@@ -122,7 +122,7 @@ observeEvent(input$apply_imdanova, {
 
 observeEvent(input$stats_dismiss, removeModal())
 observeEvent(input$goto_downloads,{
-  updateTabsetPanel(session, "top_page", selected = "Download")
+  updateTabsetPanel(session, "top_page", selected = "download_tab")
   removeModal()
 })
 

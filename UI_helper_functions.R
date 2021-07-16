@@ -56,6 +56,37 @@ apply_style_UI <- function(pagename, two_lipids, two_plots, flip_button = FALSE)
   }
 }
 
+#'@details Toggle(add/remove) a tooltip on an element given some condition
+#'
+#'@param session The shiny session
+#'@param id input id to select, if specified, will prepend '#' to form the jquery
+#'@param condition boolean to indicate whether to show (T) or hide (F) the tooltip
+#'@param tooltip_text string to show in the tooltip
+#'@param selector jquery selector if selecting input id is not specific enough.
+#'Will override the selector formed from specifying 'id'. 
+#'@param position the display position of the tooltip relative to the element.
+toggleTooltip <- function(session, id = NULL, condition = T, tooltip_text = "", selector = NULL, position="bottom") {
+  if (!is.null(selector)) {
+    jquery = selector
+  } else {
+    jquery = paste0("#", id)
+  }
+  if (condition) {
+    # addTooltip(session, id, tooltip_text) # tooltip('destroy') is awful
+    shinyjs::runjs(
+      sprintf("$('%s').attr('data-original-title', '%s')", jquery, tooltip_text)
+    )
+    shinyjs::runjs(
+      sprintf("$('%s').tooltip({placement:'%s'})", jquery, position)
+    )
+  }
+  else {
+    shinyjs::runjs(
+      sprintf("$('%s').attr('data-original-title', null)", jquery)
+    )
+  }
+}
+
 #'@description Helper to create a text div with an icon next to it, possibly
 #'hidden and with css styling applied.
 subsection_header <- function(titletext, id, style, icon, hidden = T, tooltip_text = NULL) {

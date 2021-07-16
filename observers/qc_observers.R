@@ -76,7 +76,7 @@ observeEvent(qc_flip(),
 
 # qc success buttons
 observeEvent(input$go_to_filter, {
-  updateTabsetPanel(session, "top_page", selected = "Filter")
+  updateTabsetPanel(session, "top_page", selected = "filter_tab")
   removeModal()
 })
 

@@ -64,7 +64,7 @@ observe({
 
 # make statres object
 observeEvent(input$peptide_apply_imdanova, {
-  req(!is.null(objects$omicsData), input$top_page == "Peptide Statistics" &&
+  req(!is.null(objects$omicsData), input$top_page == "peptide_statistics_tab" &&
         !is.null( input$peptide_imdanova_test_method))
   
   tryCatch(
@@ -128,11 +128,11 @@ observeEvent(input$peptide_apply_imdanova, {
 
 observeEvent(input$pepstats_dismiss, removeModal())
 observeEvent(input$goto_rollup,{
-  updateTabsetPanel(session, "top_page", selected = "Protein Rollup")
+  updateTabsetPanel(session, "top_page", selected = "protein_rollup_tab")
   removeModal()
 })
 observeEvent(input$pep_goto_downloads,{
-  updateTabsetPanel(session, "top_page", selected = "Download")
+  updateTabsetPanel(session, "top_page", selected = "download_tab")
   removeModal()
 })
 

@@ -1,5 +1,6 @@
 protein_rollup_UI <- function() {
   tabPanel("Protein Rollup",
+    value = "protein_rollup_tab",
     class = "collapse_page",
     column(
       4,

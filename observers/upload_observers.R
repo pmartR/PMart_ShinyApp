@@ -297,7 +297,7 @@ observeEvent(input$upload_dismiss, {
 })
 
 observeEvent(input$goto_groups, {
-  updateTabsetPanel(session, "top_page", selected = "Group Samples")
+  updateTabsetPanel(session, "top_page", selected = "group_samples_tab")
   removeModal()
 })
 #

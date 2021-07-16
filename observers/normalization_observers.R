@@ -1,6 +1,6 @@
 # toggle display of spans panel if they are in pep/pro land and have chosen to use spans
 observeEvent(c(input$top_page, input$spans_or_manual), {
-  req(input$top_page == "Normalization")
+  req(input$top_page == "normalization_tab")
 
   is_peppro <- inherits(objects$omicsData, c("pepData", "proData"))
   using_spans <- input$spans_or_manual == "spans" & is_peppro
@@ -84,7 +84,7 @@ observe({
 
 # warn of bad or empty parameters
 observe({
-  req(input$top_page == "Normalization")
+  req(input$top_page == "normalization_tab")
   isolate(revals$warnings_normalize$empty_params <<- NULL)
   isolate(revals$warnings_normalize$bad_params <<- NULL)
 
@@ -218,7 +218,7 @@ observeEvent(input$subset_fn, {
 
 # apply normalize_global with current params to objects$omicsData
 observeEvent(c(input$apply_normalization, input$apply_normalization_modal), {
-  req(input$top_page == "Normalization", any(c(input$apply_normalization, input$apply_normalization_modal) > 0))
+  req(input$top_page == "normalization_tab", any(c(input$apply_normalization, input$apply_normalization_modal) > 0))
   ####
   removeModal()
 
@@ -293,11 +293,11 @@ observeEvent(c(input$apply_normalization, input$apply_normalization_modal), {
 # dismiss and move to next tabs
 observeEvent(input$normalization_dismiss, removeModal())
 observeEvent(input$goto_statistics, {
-  updateTabsetPanel(session, "top_page", selected = "Statistics")
+  updateTabsetPanel(session, "top_page", selected = "statistics_tab")
   removeModal()
 })
 observeEvent(input$goto_pepstats, {
-  updateTabsetPanel(session, "top_page", selected = "Peptide Statistics")
+  updateTabsetPanel(session, "top_page", selected = "peptide_statistics_tab")
   removeModal()
 })
 

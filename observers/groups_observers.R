@@ -217,7 +217,7 @@ observeEvent(input$groups_dismiss, {
 
 # move tabs and dismiss modal
 observeEvent(input$goto_qc, {
-  updateTabsetPanel(session, "top_page", selected = "Data Summary")
+  updateTabsetPanel(session, "top_page", selected = "data_summary_tab")
   removeModal()
 })
 

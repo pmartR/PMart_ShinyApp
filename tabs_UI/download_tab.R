@@ -1,5 +1,6 @@
 download_UI <- function() {
   tabPanel("Download",
+    value = "download_tab",
     class = "collapse_page",
     bsCollapse(
       id = "download_collapse", multiple = FALSE, open = c("download_plots", "download_tables"),
