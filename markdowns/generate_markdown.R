@@ -33,14 +33,22 @@ list(
         # Check for peptide roll-up into protein data
         if (class(objects$omicData) != "proData") {
           
-          browser()
+          # Create a temporary directory and copy the report there
+          report <- file.path(tempdir(), "Peptide_Template.Rmd")
+          file.copy(file.path("markdowns", "Peptide_Template.Rmd"), report, overwrite = TRUE)
+          
+          # Set up specific parameters needed by the peptide data markdown
+          params <- list(titleName = input$ReportName,
+                         pepData = objects$omicsData,
+                         pepStats = objects$imdanova_res,
+                         pmart_inputs = reactiveValuesToList(input),
+                         spans_results = objects$spans_res)
           
           
         } else {
-        
-          browser()
-          
+      
           # objects$omicsData_pre_rollup
+          
           
         }
         

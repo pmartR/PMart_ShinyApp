@@ -12,7 +12,9 @@ date: "`r format(Sys.time(), '%B %d, %Y')`"
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, error = FALSE)
 library(dplyr); library(pmartR); library(knitr); library(DT); library(ggplot2);
 library(data.table); library(patchwork); library(purrr)
+```
 
+```{r Read In Results}
 # This data will be passed to the markdown through shiny
 metabData <- params$metabData
 metabDataAttr <- attributes(metabData)
@@ -31,9 +33,30 @@ The column that designates unique molecules was marked as **`r metabDataAttr$cna
 The value to denote missing data was **`r pmart_inputs$na_symbol`** and the expression data
 **`r ifelse(pmart_inputs$normalized_yn == "0", "was not already", "was already")`** normalized. 
 
-`r if (is.null(metabDataAttr$cnames$emeta_cname) == FALSE) {paste0("### *Biomolecule Information*\nAn associated biomolecule information file was also uploaded called **", pmart_inputs$file_emeta$name, "** and the protein identifier column was designated as **", metabDataAttr$cnames$emeta_cname, "**.")}`
+`r if (is.null(metabDataAttr$cnames$emeta_cname) == FALSE) {paste0("### *Biomolecule Information*\nAn associated biomolecule information file was also uploaded called **", pmart_inputs$file_emeta$name, "** and the molecule identifier column was designated as **", metabDataAttr$cnames$emeta_cname, "**.")}`
 
 `r if ("Var1" %in% colnames(metabData$f_data) == FALSE) {paste0("### *Sample Information*\nAn associated sample information file was also uploaded called **", pmart_inputs$file_fdata$name, "**. Trimmed samples names **", ifelse(pmart_inputs$usevizsampnames == "No", "were not", "were"), "** used. The column in the sample information file which indicates sample names was designated as **", metabDataAttr$cnames$fdata_cname, "**.")}`
+
+`r if (pmart_inputs$ReportCode) {"### *Example Code*"}`
+
+```{r eval = FALSE, echo = pmart_inputs$ReportCode}
+# This is example code of how to generate a metabolite data object in R.
+
+# First, load pmartR
+library(pmartR)
+library(pmartRdata)
+library(tidyverse)
+
+# Then, pull the example data 
+data("metab_edata")
+data("metab_fdata")
+
+# Generate the metabolomics data object. Note that NA's have been converted to 0's in this step.
+mymetabData <- as.metabData(e_data = metab_edata, 
+                            f_data = metab_fdata, 
+                            edata_cname = "Metabolite", 
+                            fdata_cname = "SampleID")
+```
 
 `r if (is.null(metabDataAttr$group_DF) == FALSE) {paste0("## Group Samples\n### *Grouping Information*\nThis table summarizes to which group or covariate each column in the Expression Data belongs.")}`
 
@@ -57,7 +80,7 @@ metabDataSum %>% kable()
 
 ### *Missing Value Table*
 
-In the table below, the first column denotes the sample and the second is the missing number of observations.
+In the table below, the first column denotes the sample and the second is the number of missing observations.
 The third column represents the second as a proportion of the total number of observations
 for that sample. 
 
@@ -72,6 +95,25 @@ metabData$e_data %>%
   mutate(
     "Proportion Missing" = round(`Missing Observations` / nrow(metabData$e_data), 3),
   ) %>% kable()
+```
+
+`r if (pmart_inputs$ReportCode && is.null(metabDataAttr$group_DF) == FALSE) {"### *Example Code*"}`
+
+```{r eval = FALSE, echo = pmart_inputs$ReportCode, include = is.null(metabDataAttr$group_DF) == FALSE}
+# This is example code of how to transform, group, and get a summarize the metabolite data in R.
+
+# Transform the data
+mymetabData <- edata_transform(omicsData = mymetabData, data_scale = "log2")
+
+# Set group designations
+mymetabData <- group_designation(omicsData = mymetabData, main_effects = "Condition")
+
+# Summarize results
+summary(mymetabData)
+
+# You can also visualize a heatmap or pca
+cor_result(mymetabData) %>% plot()
+dim_reduction(mymetabData) %>% plot()
 ```
 
 `r if(length(metabDataAttr$filters) > 0) {paste0("## Filters\nA total of **", length(metabDataAttr$filters), "** filter(s) were applied. See the table below for descriptions of the filters and their order.\n\n### *Summary of Applied Filters*")}`
@@ -89,23 +131,16 @@ if (length(metabDataAttr$filters) != 0) {
     if (filter$type == "moleculeFilt") {
       return(c("Filter" = "Molecule Filter", "Type" = "Biomolecule", "Parameters" = 
                paste0("Min Number Molecules: ", filter$threshold), 
-               "Summary" = paste0(filter$filtered %>% length(), " biomolecule(s) were filtered.")))
-    } else
-    
-    # Proteomics Filter
-    if (filter$type == "proteomicsFilt") {
-      return(c("Filter" = "Proteomics Filter", "Type" = "Biomolecule", "Parameters" = 
-               paste0("Min Number of Peptides: ", filter$threshold$min_num_peps,
-                      " & Degenerate Peptides Removed: ", ifelse(filter$threshold$degen_peps, "Yes", "No")),
-               "Summary" = paste0(filter$filtered$e_data_remove %>% length(), " biomolecule(s) were filtered and ",
-                                  filter$filtered$e_meta_remove %>% length(), " protein(s) were filtered.")))
+               "Summary" = paste0(filter$filtered %>% length(), " biomolecule(s) were filtered."),
+               "First 5 Filtered" = paste0(filter$filtered[1:5][!is.na(filter$filtered[1:5])], collapse = " & ")))
     } else
       
     # CV Filter
     if (filter$type == "cvFilt") {
       return(c("Filter" = "CV Filter", "Type" = "Biomolecule", "Parameters" = 
                paste0("Max CV: ", filter$threshold),
-               "Summary" = paste0(filter$filtered %>% length(), " biomolecule(s) were filtered.")))
+               "Summary" = paste0(filter$filtered %>% length(), " biomolecule(s) were filtered."),
+               "First 5 Filtered" = paste0(filter$filtered[1:5][!is.na(filter$filtered[1:5])], collapse = " & ")))
     } else
       
     # imd-ANOVA filter
@@ -113,7 +148,8 @@ if (length(metabDataAttr$filters) != 0) {
       return(c("Filter" = "imd-ANOVA Filter", "Type" = "Biomolecule", "Parameters" = 
                paste0("Min ANOVA: ", filter$threshold$min_nonmiss_anova,
                       " & Min G-Test: ", filter$threshold$min_nonmiss_gtest),
-               "Summary" = paste0(filter$filtered %>% length(), " biomolecule(s) were filtered.")))
+               "Summary" = paste0(filter$filtered %>% length(), " biomolecule(s) were filtered."),
+               "First 5 Filtered" = paste0(filter$filtered[1:5][!is.na(filter$filtered[1:5])], collapse = " & ")))
     } else 
       
     # rmd Filter
@@ -121,7 +157,8 @@ if (length(metabDataAttr$filters) != 0) {
       return(c("Filter" = "rMD Filter", "Type" = "Sample", "Parameters" = 
                  paste0("P-Value Threshold: ", filter$threshold, " & Metrics Used: ",
                         pmart_inputs$rmd_metrics %>% paste(collapse = ", ")),
-               "Summary" = paste0(filter$filtered %>% length(), " sample(s) were filtered.")))
+               "Summary" = paste0(filter$filtered %>% length(), " sample(s) were filtered."),
+               "First 5 Filtered" = paste0(filter$filtered[1:5][!is.na(filter$filtered[1:5])], collapse = " & ")))
     } else 
       
     # Custom filter
@@ -129,7 +166,11 @@ if (length(metabDataAttr$filters) != 0) {
       return(c("Filter" = "Custom Filter", "Type" = "Sample or Biomolecule", "Parameters" = "",
                "Summary" = paste0(filter$filtered$f_data_remove %>% length(), " sample(s) were filtered. ",
                            filter$filtered$e_data_remove %>% length(), " biomolecule(s) were filtered. ", 
-                           filter$filtered$e_meta_remove %>% length(), " protein(s) were filtered.")))
+                           filter$filtered$e_meta_remove %>% length(), " protein(s) were filtered."),
+               "First 5 Filtered" = paste0(filter$filtered$f_data_remove[1:5][!is.na(filter$filtered$f_data_remove[1:5])], 
+                                           filter$filtered$e_data_remove[1:5][!is.na(filter$filtered$e_data_remove[1:5])],
+                                           filter$filtered$e_meta_remove[1:5][!is.na(filter$filtered$e_meta_remove[1:5])],
+                                           collapse = " & ")))
       
     } else {stop(paste0(filter$type, " is not a recognized filter type."))}
   
@@ -137,36 +178,6 @@ if (length(metabDataAttr$filters) != 0) {
   
   cbind("Order" = 1:nrow(FilterTable), FilterTable) %>% kable()
   
-}
-```
-
-```{r Create Filter Text}
-# imd-ANOVA Filter
-imdAnovFilterText <- "imd-ANOVA filters were not applied to the data."
-
-if ("imd-ANOVA Filter" %in% FilterTable$Filter) {
-  imdAnovFilterText <- paste0("An ANOVA filter can be applied to the data which removes biomolecule(s) (",
-    paste0(metabDataAttr$cnames$edata_cname, "s"), ") not having at least a minimum number ",
-    "of non-missing values per group (Min ANOVA). Additionaly, an IMD (independence of missing data) filter can",
-    " be applied to the data, removing biomolecules not having at least a minimum number of non-missing ",
-    "values (Min G-Test) in at least one of the groups.")
-}
-
-# rMD Filter
-rMDFilterText <- "rMD filters were not applied to the data."
-
-if ("rMD Filter" %in% FilterTable$Filter) {
-  rMDFilterText <- paste0("A robust Mahalanobis distance (rMD) filter was applied to the",
-    " data, removing sample(s) (", paste0(metabDataAttr$cnames$fdata_cname, "s"), ") with an associated ",
-    "rMD-associated p-value less than the threshold (P-Value Threshold). Metrics ",
-    "used to calculate the p-value are also included (Metrics Used).")
-}
-
-# Custom filter
-customFilterText <- "Custom filters were not applied to the data."
-
-if ("Custom Filter" %in% FilterTable$Filter) {
-  customFilterText <- "Custom filters can be used to remove samples, biomolecules, or proteins."
 }
 ```
 
@@ -180,11 +191,51 @@ if ("Custom Filter" %in% FilterTable$Filter) {
 
 `r if ("Custom Filter" %in% FilterTable$Filter) {paste0("### *Custom Filter*\n Custom filters can be used to remove samples, biomolecules or proteins.")}`
 
+`r if (pmart_inputs$ReportCode && length(metabDataAttr$filters) > 0) {"### *Example Code*"}`
+
+```{r eval = FALSE, echo = pmart_inputs$ReportCode, include = length(metabDataAttr$filters) > 0}
+# This is example code of how to apply and generate filters. 
+
+# Note: Apply filters only if they make sense given the context of the analysis. You can apply any filter with: 
+applyFilt(filter, mymetabData, other_parameters)
+
+# and visualize any filter with: 
+plot(filter, other_parameters)
+
+# and summarize any filter.
+summary(filter, other_parameters)
+
+# Run the biomolecule filter
+moleculeFilt <- molecule_filter(omicsData = mymetabData)
+plot(moleculeFilt, min_num = 2)
+
+# Run the coefficient of variation filter
+cvFilt <- cv_filter(mymetabData)
+plot(cvFilt, cv_threshold = 80)
+
+# Run the imd-ANOVA filter before running an imd-ANOVA (statistical analysis step)
+imdFilt <- imdanova_filter(omicsData = mymetabData)
+plot(imdFilt, min_nonmiss_anova = 2)
+
+# Run a robust Mahalanobis distance filter
+rmdFilt <- rmd_filter(omicsData = mymetabData, metrics = c("MAD", "Skewness", "Correlation"))
+plot(rmdFilt, pvalue_threshold = 0.0001)
+
+# Run a custom filter. This one remove the Infection1 sample. 
+custFilt <- custom_filter(omicsData = mymetabData, f_data_remove = "Infection1")
+```
+
 `r if (metabDataAttr$data_info$norm_info$is_normalized) {"## Normalization\nMetabolite data **was** normalized.\n\n### *Manual*"}`
 
 ```{r Normalization: Manual, Plot}
 if (metabDataAttr$data_info$norm_info$is_normalized) {
-  plot(metabData, bw_theme = TRUE)  
+  
+  if (is.null(metabDataAttr$group_DF) == FALSE) {
+    
+    plot(metabData, order_by = pmart_inputs$gcol1, color_by = pmart_inputs$gcol1, bw_theme = TRUE)
+    
+  } else {plot(metabData, bw_theme = TRUE)}  
+  
 }
 ```
 
@@ -201,6 +252,15 @@ if (is.null(metabDataAttr$data_info$norm_info$norm_type) == FALSE
                          SubsetParameters, 
                          metabDataAttr$data_info$norm_info$norm_fn)) %>% kable()
 }
+```
+
+`r if (pmart_inputs$ReportCode && metabDataAttr$data_info$norm_info$is_normalized) {"### *Example Code*"}`
+
+```{r eval = FALSE, echo = pmart_inputs$ReportCode, include = metabDataAttr$data_info$norm_info$is_normalized}
+# This is example code of how to conduct the normalization step. 
+
+# Note: There are many normalization parameters to consider. Use ?normalize_global to see them
+normalmetabData <- normalize_global(omicsData = mymetabData, subset_fn = "all", norm_fn = "mean")
 ```
 
 `r if (is.null(metabStats) == FALSE) {"## Statistical Analysis\n The statistical analysis step **was** run."}`
@@ -233,9 +293,15 @@ if (is.null(metabStats) == FALSE) {
 }
 ```
 
-`r if (pmart_inputs$ReportCode) {paste0('## Example Code\n### *Upload Data *\nlibrary(pmartR)\n\nlibrary(pmartRdata)\n\ndata("metab_edata")\n\ndata("metab_fdata")\n\nmymetabData <- as.metabData(e_data = metab_edata, f_data = metab_fdata, edata_cname = "Metabolite", fdata_cname = "SampleID")\n\nsummary(mymetabData)\n\n', ifelse(is.null(metabDataAttr$group_DF), '\n', '### *Group Samples*\nmymetabData <- group_designation(omicsData = mymetabData, main_effects = "Condition")\n\nplot(mymetabData)\n\n'), ifelse(length(metabDataAttr$filters) == 0, '', '### *Apply Filters*\nNote: Apply filters only if they make sense given the context of the analysis, and their plots. You can apply any filter with: applyFilt(filter, mymetabData, other_parameters), and visualize any filter with plot(filter, other_parameters).\n\nmoleculeFilt <- molecule_filter(omicsData = mymetabData); plot(moleculeFilt, min_num = 2)\n\ncvFilt <- cv_filter(mymetabData); plot(cvFilt, cv_threshold = 80)\n\nimdFilt <- imdanova_filter(omicsData = mymetabData); plot(imdFilt, min_nonmiss_anova = 2)\n\nrmdFilt <- rmd_filter(omicsData = mymetabData, metrics = c("MAD", "Skewness", "Correlation")); plot(rmdFilt, pvalue_threshold = 0.0001)\n\ncustFilt <- custom_filter(omicsData = mymetabData, f_data_remove = "Infection1")\n\n'), ifelse(metabDataAttr$data_info$norm_info$is_normalized == FALSE, '', '### *Normalization*\nNote: There are many normalization parameters. This is an example.\n\nmymetabData <- normalize_global(omicsData = mymetabData, subset_fn = "all", norm_fn = "mean")\n\n'), ifelse(is.null(metabStats), '', '### *Statistical Analysis*\nNote: There are many imdanova parameters. This is an example.\n\nimdanova_res <- imd_anova(omicsData = mymetabData, test_method = "anova"); plot(imdanova_res)'))}`
+`r if (pmart_inputs$ReportCode && is.null(metabStats) == FALSE) {"### *Example Code*"}`
 
+```{r eval = FALSE, echo = pmart_inputs$ReportCode, include = is.null(metabStats) == FALSE}
+# This is example code of how to conduct the imdanova step
 
+# Note: You should consider whether you want to conduct an anova (default), gtest (missingness), or both. 
+# See ?imd_anova for more information
+metabStats <- imd_anova(normalmetabData, test_method = "anova")
+```
 
 
 
