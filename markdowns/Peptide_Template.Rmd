@@ -12,8 +12,10 @@ date: "`r format(Sys.time(), '%B %d, %Y')`"
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, error = FALSE)
 library(dplyr); library(pmartR); library(knitr); library(DT); library(ggplot2);
-library(data.table); library(patchwork); library(purrr); library(glue); library(crayon)
+library(data.table); library(patchwork); library(purrr)
+```
 
+```{r Read in Results}
 # This data will be passed to the markdown through shiny
 pepData <- params$pepData
 pepDataAttr <- attributes(pepData)
@@ -27,16 +29,39 @@ spans_results <- params$spans_results
 
 ### *Expression Data*
 
-A **`r ifelse(pmart_inputs$labeled_yn, "labelled", "unlabelled")`** peptide expression 
-data file called **`r pmart_inputs$file_edata$name`** was uploaded to pmart. 
-The column that designates unique peptides was marked as **`r pepDataAttr$cnames$edata_cname`.**
+A peptide expression data file called **`r pmart_inputs$file_edata$name`** was uploaded to pmart. 
+The column that designates unique peptide was marked as **`r pepDataAttr$cnames$edata_cname`.**
 `r if (pepDataAttr$data_info$data_scale_orig == pepDataAttr$data_info$data_scale) {"The original scale of the data was **pepDataAttr$data_info$data_scale_orig** and remained unchanged."} else {paste0("The original scale of the data was **", pepDataAttr$data_info$data_scale_orig, "** and was changed to **", pepDataAttr$data_info$data_scale, "**.")}` 
 The value to denote missing data was **`r pmart_inputs$na_symbol`** and the expression data
 **`r ifelse(pmart_inputs$normalized_yn == "0", "was not already", "was already")`** normalized. 
 
-`r if (is.null(pepDataAttr$cnames$emeta_cname) == FALSE) {paste0("### *Biomolecule Information*\nAn associated biomolecule information file was also uploaded called **", pmart_inputs$file_emeta$name, "** and the protein identifier column was designated as **", pepDataAttr$cnames$emeta_cname, "**.")}`
+`r if (is.null(pepDataAttr$cnames$emeta_cname) == FALSE) {paste0("### *Biomolecule Information*\nAn associated biomolecule information file was also uploaded called **", pmart_inputs$file_emeta$name, "** and the molecule identifier column was designated as **", pepDataAttr$cnames$emeta_cname, "**.")}`
 
 `r if ("Var1" %in% colnames(pepData$f_data) == FALSE) {paste0("### *Sample Information*\nAn associated sample information file was also uploaded called **", pmart_inputs$file_fdata$name, "**. Trimmed samples names **", ifelse(pmart_inputs$usevizsampnames == "No", "were not", "were"), "** used. The column in the sample information file which indicates sample names was designated as **", pepDataAttr$cnames$fdata_cname, "**.")}`
+
+`r if (pmart_inputs$ReportCode) {"### *Example Code*"}`
+
+```{r eval = FALSE, echo = pmart_inputs$ReportCode}
+# This is example code of how to generate a peptide data object in R.
+
+# First, load pmartR
+library(pmartR)
+library(pmartRdata)
+library(dplyr)
+
+# Then, pull the example data 
+data("pep_edata")
+data("pep_emeta")
+data("pep_fdata")
+
+# Generate the peptide data object. Note that NA's have been converted to 0's in this step.
+mypepData <- as.pepData(e_data = pep_edata, 
+                        e_meta = pep_emeta,
+                        f_data = pep_fdata, 
+                        edata_cname = "Mass_Tag_ID",
+                        fdata_cname = "SampleID",
+                        emeta_cname = "Mass_Tag_ID")
+```
 
 `r if (is.null(pepDataAttr$group_DF) == FALSE) {paste0("## Group Samples\n### *Grouping Information*\nThis table summarizes to which group or covariate each column in the Expression Data belongs.")}`
 
@@ -60,7 +85,7 @@ pepDataSum %>% kable()
 
 ### *Missing Value Table*
 
-In the table below, the first column denotes the sample and the second is the missing number of observations.
+In the table below, the first column denotes the sample and the second is the number of missing observations.
 The third column represents the second as a proportion of the total number of observations
 for that sample. 
 
@@ -75,6 +100,25 @@ pepData$e_data %>%
   mutate(
     "Proportion Missing" = round(`Missing Observations` / nrow(pepData$e_data), 3),
   ) %>% kable()
+```
+
+`r if (pmart_inputs$ReportCode && is.null(pepDataAttr$group_DF) == FALSE) {"### *Example Code*"}`
+
+```{r eval = FALSE, echo = pmart_inputs$ReportCode, include = is.null(pepDataAttr$group_DF) == FALSE}
+# This is example code of how to transform, group, and get a summarize the peptide data in R.
+
+# Transform the data
+mypepData <- edata_transform(omicsData = mypepData, data_scale = "log2")
+
+# Set group designations
+mypepData <- group_designation(omicsData = mypepData, main_effects = "Condition")
+
+# Summarize results
+summary(mypepData)
+
+# You can also visualize a heatmap or pca
+cor_result(mypepData) %>% plot()
+dim_reduction(mypepData) %>% plot()
 ```
 
 `r if(length(pepDataAttr$filters) > 0) {paste0("## Filters\nA total of **", length(pepDataAttr$filters), "** filter(s) were applied. See the table below for descriptions of the filters and their order.\n\n### *Summary of Applied Filters*")}`
@@ -92,7 +136,8 @@ if (length(pepDataAttr$filters) != 0) {
     if (filter$type == "moleculeFilt") {
       return(c("Filter" = "Molecule Filter", "Type" = "Biomolecule", "Parameters" = 
                paste0("Min Number Molecules: ", filter$threshold), 
-               "Summary" = paste0(filter$filtered %>% length(), " biomolecule(s) were filtered.")))
+               "Summary" = paste0(filter$filtered %>% length(), " biomolecule(s) were filtered."),
+               "First 5 Filtered" = paste0(filter$filtered[1:5][!is.na(filter$filtered[1:5])], collapse = " & ")))
     } else
     
     # Proteomics Filter
@@ -101,14 +146,18 @@ if (length(pepDataAttr$filters) != 0) {
                paste0("Min Number of Peptides: ", filter$threshold$min_num_peps,
                       " & Degenerate Peptides Removed: ", ifelse(filter$threshold$degen_peps, "Yes", "No")),
                "Summary" = paste0(filter$filtered$e_data_remove %>% length(), " biomolecule(s) were filtered and ",
-                                  filter$filtered$e_meta_remove %>% length(), " protein(s) were filtered.")))
+                                  filter$filtered$e_meta_remove %>% length(), " protein(s) were filtered."),
+               "First 5 Filtered" = paste0(filter$filtered$e_data_remove[1:5][!is.na(filter$filtered$e_data_remove[1:5])],
+                                           filter$filtered$e_meta_remove[1:5][!is.na(filter$filtered$e_meta_remove[1:5])],
+                                           collapse = " & ")))
     } else
       
     # CV Filter
     if (filter$type == "cvFilt") {
       return(c("Filter" = "CV Filter", "Type" = "Biomolecule", "Parameters" = 
                paste0("Max CV: ", filter$threshold),
-               "Summary" = paste0(filter$filtered %>% length(), " biomolecule(s) were filtered.")))
+               "Summary" = paste0(filter$filtered %>% length(), " biomolecule(s) were filtered."),
+               "First 5 Filtered" = paste0(filter$filtered[1:5][!is.na(filter$filtered[1:5])], collapse = " & ")))
     } else
       
     # imd-ANOVA filter
@@ -116,7 +165,8 @@ if (length(pepDataAttr$filters) != 0) {
       return(c("Filter" = "imd-ANOVA Filter", "Type" = "Biomolecule", "Parameters" = 
                paste0("Min ANOVA: ", filter$threshold$min_nonmiss_anova,
                       " & Min G-Test: ", filter$threshold$min_nonmiss_gtest),
-               "Summary" = paste0(filter$filtered %>% length(), " biomolecule(s) were filtered.")))
+               "Summary" = paste0(filter$filtered %>% length(), " biomolecule(s) were filtered."),
+               "First 5 Filtered" = paste0(filter$filtered[1:5][!is.na(filter$filtered[1:5])], collapse = " & ")))
     } else 
       
     # rmd Filter
@@ -124,7 +174,8 @@ if (length(pepDataAttr$filters) != 0) {
       return(c("Filter" = "rMD Filter", "Type" = "Sample", "Parameters" = 
                  paste0("P-Value Threshold: ", filter$threshold, " & Metrics Used: ",
                         pmart_inputs$rmd_metrics %>% paste(collapse = ", ")),
-               "Summary" = paste0(filter$filtered %>% length(), " sample(s) were filtered.")))
+               "Summary" = paste0(filter$filtered %>% length(), " sample(s) were filtered."),
+               "First 5 Filtered" = paste0(filter$filtered[1:5][!is.na(filter$filtered[1:5])], collapse = "&")))
     } else 
       
     # Custom filter
@@ -132,7 +183,11 @@ if (length(pepDataAttr$filters) != 0) {
       return(c("Filter" = "Custom Filter", "Type" = "Sample or Biomolecule", "Parameters" = "",
                "Summary" = paste0(filter$filtered$f_data_remove %>% length(), " sample(s) were filtered. ",
                            filter$filtered$e_data_remove %>% length(), " biomolecule(s) were filtered. ", 
-                           filter$filtered$e_meta_remove %>% length(), " protein(s) were filtered.")))
+                           filter$filtered$e_meta_remove %>% length(), " protein(s) were filtered."),
+               "First 5 Filtered" = paste0(filter$filtered$f_data_remove[1:5][!is.na(filter$filtered$f_data_remove[1:5])], 
+                                           filter$filtered$e_data_remove[1:5][!is.na(filter$filtered$e_data_remove[1:5])],
+                                           filter$filtered$e_meta_remove[1:5][!is.na(filter$filtered$e_meta_remove[1:5])],
+                                           collapse = " & ")))
       
     } else {stop(paste0(filter$type, " is not a recognized filter type."))}
   
@@ -145,7 +200,7 @@ if (length(pepDataAttr$filters) != 0) {
 
 `r if ("Molecule Filter" %in% FilterTable$Filter) {paste0("### *Molecule Filter*\nA molecule filter was applied to the data, which removes biomolecule(s), **", pepDataAttr$cnames$edata_cname, "(s)**, not having at least the minimum number of samples (Min Number Molecules).")}`
 
-`r if ("Proteomics Filter" %in% FilterTable$Filer) {paste0("### *Proteomics Filter*\nA degenerate peptide filter (Degenerate Peptides Removed) was applied to the data, which identifies peptides, **", pepDataAttr$cnames$edata_cname, "(s)**, not belonging to a single protein. Additionally, a protein filter can be applied to the data which identifies proteins not having at least a minimum number of peptides (Min Number of Peptides) mapping to them.")}`
+`r if ("Proteomics Filter" %in% FilterTable$Filter) {paste0("### *Proteomics Filter*\nA degenerate peptide filter (Degenerate Peptides Removed) was applied to the data, which identifies peptides, **", pepDataAttr$cnames$edata_cname, "(s)**, not belonging to a single protein. Additionally, a protein filter can be applied to the data which identifies proteins not having at least a minimum number of peptides (Min Number of Peptides) mapping to them.")}`
 
 `r if ("CV Filter" %in% FilterTable$Filter) {paste0("### *CV Filter*\nA coefficient of variation (CV) filter was applied to the data which removes biomolecule(s), **", pepDataAttr$cnames$edata_cname, "(s)**, with a CV greater than the threshold (Max CV).")} `
 
@@ -155,11 +210,55 @@ if (length(pepDataAttr$filters) != 0) {
 
 `r if ("Custom Filter" %in% FilterTable$Filter) {paste0("### *Custom Filter*\n Custom filters can be used to remove samples, biomolecules or proteins.")}`
 
+`r if (pmart_inputs$ReportCode && length(pepDataAttr$filters) > 0) {"### *Example Code*"}`
+
+```{r eval = FALSE, echo = pmart_inputs$ReportCode, include = length(pepDataAttr$filters) > 0}
+# This is example code of how to apply and generate filters. 
+
+# Note: Apply filters only if they make sense given the context of the analysis. You can apply any filter with: 
+applyFilt(filter, mypepData, other_parameters)
+
+# and visualize any filter with: 
+plot(filter, other_parameters)
+
+# and summarize any filter.
+summary(filter, other_parameters)
+
+# Run the biomolecule filter
+moleculeFilt <- molecule_filter(omicsData = mypepData)
+plot(moleculeFilt, min_num = 2)
+
+# Run the coefficient of variation filter
+cvFilt <- cv_filter(omicsData = mypepData)
+plot(cvFilt, cv_threshold = 80)
+
+# Run the proteomics filter
+protFilt <- proteomics_filter(omicsData = mypepData)
+summary(protFilt, min_num_peps = 1, degen_peps = FALSE)
+
+# Run the imd-ANOVA filter before running an imd-ANOVA (statistical analysis step)
+imdFilt <- imdanova_filter(omicsData = mypepData)
+plot(imdFilt, min_nonmiss_anova = 2)
+
+# Run a robust Mahalanobis distance filter
+rmdFilt <- rmd_filter(omicsData = mypepData, metrics = c("MAD", "Skewness", "Correlation"))
+plot(rmdFilt, pvalue_threshold = 0.0001)
+
+# Run a custom filter. This one remove the Infection1 sample. 
+custFilt <- custom_filter(omicsData = mypepData, f_data_remove = "Infection1")
+```
+
 `r if (pepDataAttr$data_info$norm_info$is_normalized) {"## Normalization\nPeptide data **was** normalized.\n\n### *Manual*"}`
 
 ```{r Normalization: Manual, Plot}
 if (pepDataAttr$data_info$norm_info$is_normalized) {
-  plot(pepData, bw_theme = TRUE)  
+  
+  if (is.null(pepDataAttr$group_DF) == FALSE) {
+    
+    plot(pepData, order_by = pmart_inputs$gcol1, color_by = pmart_inputs$gcol1, bw_theme = TRUE)
+    
+  } else {plot(pepData, bw_theme = TRUE)}  
+
 }
 ```
 
@@ -178,7 +277,7 @@ if (is.null(pepDataAttr$data_info$norm_info$norm_type) == FALSE
 }
 ```
 
-`r if (is.null(spans_results) == FALSE) {"### *SPANS*\n\nSPANS was run to determine optimum normalization parameters."}`
+`r if (is.null(spans_results) == FALSE) {"### *SPANS*\n\nSPANS **was** run to determine optimum normalization parameters."}`
 
 ```{r, SPANS}
 if (is.null(spans_results) == FALSE) {
@@ -186,7 +285,20 @@ if (is.null(spans_results) == FALSE) {
 }
 ``` 
 
-`r if (is.null(pepStats) == FALSE) {"## Statistical Analysis\n The statistical analysis step was run."}`
+`r if (pmart_inputs$ReportCode && pepDataAttr$data_info$norm_info$is_normalized) {"### *Example Code*"}`
+
+```{r eval = FALSE, echo = pmart_inputs$ReportCode, include = pepDataAttr$data_info$norm_info$is_normalized}
+# This is example code of how to conduct the normalization step. 
+
+# Note: There are many normalization parameters to consider. Use ?normalize_global to see them
+normalpepData <- normalize_global(omicsData = mypepData, subset_fn = "all", norm_fn = "mean")
+
+# By default, the spans procedure runs many normalization functions for many subsets.
+# It is a good way to select an appropriate normalization method. 
+spansResults <- spans_procedure(normalpepData)
+```
+
+`r if (is.null(pepStats) == FALSE) {"## Statistical Analysis\n The statistical analysis step **was** run."}`
 
 ```{r Analysis: Comparison Text}
 ComparisonsText <- ""
@@ -216,4 +328,12 @@ if (is.null(pepStats) == FALSE) {
 }
 ```
 
-`r if (pmart_inputs$ReportCode) {paste0('## Example Code\n### *Upload Data *\nlibrary(pmartR)\n\nlibrary(pmartRdata)\n\ndata("pep_edata")\n\ndata("pep_fdata")\n\ndata("pep_emeta")\n\nmypepData <- as.pepData(e_data = pep_edata, f_data = pep_fdata, e_meta = pep_emeta, edata_cname = "Mass_Tag_ID", fdata_cname = "SampleID", edata_cname = "Protein")\n\nsummary(mypepData)\n\n', ifelse(is.null(pepDataAttr$group_DF), '\n', '### *Group Samples*\nmypepData <- group_designation(omicsData = mypepData, main_effects = "Condition")\n\nplot(mypepData)\n\n'), ifelse(length(pepDataAttr$filters) == 0, '', '### *Apply Filters*\nNote: Apply filters only if they make sense given the context of the analysis, and their plots. You can apply any filter with: applyFilt(filter, mypepData, other_parameters), and visualize any filter with plot(filter, other_parameters).\n\nmoleculeFilt <- molecule_filter(omicsData = mypepData); plot(moleculeFilt, min_num = 2)\n\ncvFilt <- cv_filter(mypepData); plot(cvFilt, cv_threshold = 80)\n\nimdFilt <- imdanova_filter(omicsData = mypepData); plot(imdFilt, min_nonmiss_anova = 2)\n\nrmdFilt <- rmd_filter(omicsData = mypepData, metrics = c("MAD", "Skewness", "Correlation")); plot(rmdFilt, pvalue_threshold = 0.0001)\n\ncustFilt <- custom_filter(omicsData = mypepData, f_data_remove = "Infection1")\n\n'), ifelse(pepDataAttr$data_info$norm_info$is_normalized == FALSE, '', '### *Normalization*\nNote: There are many normalization parameters. This is an example.\n\nmypepData <- normalize_global(omicsData = mypepData, subset_fn = "all", norm_fn = "mean")\n\n'), ifelse(is.null(spans_results), "", "spans_procedure(mypepData)\n\n"), ifelse(is.null(pepStats), '', '### *Statistical Analysis*\nNote: There are many imdanova parameters. This is an example.\n\nimdanova_res <- imd_anova(omicsData = mypepData, test_method = "anova"); plot(imdanova_res)'))}`
+`r if (pmart_inputs$ReportCode && is.null(pepStats) == FALSE) {"### *Example Code*"}`
+
+```{r eval = FALSE, echo = pmart_inputs$ReportCode, include = is.null(pepStats) == FALSE}
+# This is example code of how to conduct the imdanova step
+
+# Note: You should consider whether you want to conduct an anova (default), gtest (missingness), or both. 
+# See ?imd_anova for more information
+pepStats <- imd_anova(normalpepData, test_method = "anova")
+```

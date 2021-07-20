@@ -54,6 +54,22 @@ list(
         
   
       } else
+        
+      # Generate the protein data report if the input is proteins
+      if (input$datatype == "pro") {
+        
+        # Create a temporary directory and copy the report there
+        report <- file.path(tempdir(), "Protein_Template.Rmd")
+        file.copy(file.path("markdowns", "Protein_Template.Rmd"))
+        
+        # Set up specific parameters needed by the protein data markdown
+        params <- list(titleName = input$ReportName,
+                       proData = objects$omicsData,
+                       proStats = objects$imdanova_res,
+                       pmart_inputs = reactiveValuesToList(input),
+                       spans_results = objects$spans_res)
+        
+      } else
       
       # Generate the metabolite data report if the input data is metabolites
       if (input$datatype == "metab") {

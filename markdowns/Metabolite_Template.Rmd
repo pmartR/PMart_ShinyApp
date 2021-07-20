@@ -70,7 +70,7 @@ if (is.null(metabDataAttr$group_DF) == FALSE) {
 
 ### *Summary Table*
 
-The first column in the table below denotes a property of the peptide data, and the "Data" column
+The first column in the table below denotes a property of the metabolite data, and the "Data" column
 states that property's value.
 
 ```{r Data Summary: Main Table}
@@ -166,7 +166,7 @@ if (length(metabDataAttr$filters) != 0) {
       return(c("Filter" = "Custom Filter", "Type" = "Sample or Biomolecule", "Parameters" = "",
                "Summary" = paste0(filter$filtered$f_data_remove %>% length(), " sample(s) were filtered. ",
                            filter$filtered$e_data_remove %>% length(), " biomolecule(s) were filtered. ", 
-                           filter$filtered$e_meta_remove %>% length(), " protein(s) were filtered."),
+                           filter$filtered$e_meta_remove %>% length(), " e_meta variable(s) were filtered."),
                "First 5 Filtered" = paste0(filter$filtered$f_data_remove[1:5][!is.na(filter$filtered$f_data_remove[1:5])], 
                                            filter$filtered$e_data_remove[1:5][!is.na(filter$filtered$e_data_remove[1:5])],
                                            filter$filtered$e_meta_remove[1:5][!is.na(filter$filtered$e_meta_remove[1:5])],
@@ -210,7 +210,7 @@ moleculeFilt <- molecule_filter(omicsData = mymetabData)
 plot(moleculeFilt, min_num = 2)
 
 # Run the coefficient of variation filter
-cvFilt <- cv_filter(mymetabData)
+cvFilt <- cv_filter(omicsData = mymetabData)
 plot(cvFilt, cv_threshold = 80)
 
 # Run the imd-ANOVA filter before running an imd-ANOVA (statistical analysis step)
@@ -225,7 +225,7 @@ plot(rmdFilt, pvalue_threshold = 0.0001)
 custFilt <- custom_filter(omicsData = mymetabData, f_data_remove = "Infection1")
 ```
 
-`r if (metabDataAttr$data_info$norm_info$is_normalized) {"## Normalization\nMetabolite data **was** normalized.\n\n### *Manual*"}`
+`r if (metbDataAttr$data_info$norm_info$is_normalized) {"## Normalization\nMetabolite data **was** normalized.\n\n### *Manual*"}`
 
 ```{r Normalization: Manual, Plot}
 if (metabDataAttr$data_info$norm_info$is_normalized) {
