@@ -31,7 +31,7 @@ list(
       if (input$datatype == "pep") {
         
         # Check for peptide roll-up into protein data
-        if (class(objects$omicData) != "proData") {
+        if (class(objects$omicsData) != "proData") {
           
           # Create a temporary directory and copy the report there
           report <- file.path(tempdir(), "Peptide_Template.Rmd")
@@ -44,15 +44,22 @@ list(
                          pmart_inputs = reactiveValuesToList(input),
                          spans_results = objects$spans_res)
           
-          
         } else {
       
-          # objects$omicsData_pre_rollup
+          message("Using the roll-up template")
           
+          report <- file.path(tempdir(), "Rollup_Template.Rmd")
+          file.copy(file.path("markdowns", "Rollup_Template.Rmd"), report, overwrite = TRUE)
           
-        }
+          # Set up specific parameters need by the rollup data markdown
+          params <- list(titleName = input$ReportName,
+                         pepData = objects$uploaded_omicsData,
+                         proStats = objects$imdanova_res,
+                         pmart_inputs = reactiveValuesToList(input),
+                         spans_results = objects$spans_res)
         
-  
+         }
+        
       } else
         
       # Generate the protein data report if the input is proteins
@@ -60,7 +67,7 @@ list(
         
         # Create a temporary directory and copy the report there
         report <- file.path(tempdir(), "Protein_Template.Rmd")
-        file.copy(file.path("markdowns", "Protein_Template.Rmd"))
+        file.copy(file.path("markdowns", "Protein_Template.Rmd"), report, overwrite = TRUE)
         
         # Set up specific parameters needed by the protein data markdown
         params <- list(titleName = input$ReportName,
@@ -84,8 +91,25 @@ list(
                        metabStats = objects$imdanova_res, 
                        pmart_inputs = reactiveValuesToList(input))
         
+      } else
+        
+      # Generate the lipid data report if the input data is lipidomics
+      if (input$datatype == "lip") {
+        
+        # Create a temporary directory and copy the report there 
+        report <- file.path(tempdir(), "Lipid_Template.Rmd")
+        file.copy(file.path("markdowns", "Lipid_Template.Rmd"), report, overwrite = TRUE)
+        
+        # Set up specific parameters needed by the metabolite data markdown
+        params <- list(titleName = input$ReportName,
+                       lipidData = objects$omicsData,
+                       lipidStats = objects$imdanova_res, 
+                       pmart_inputs = reactiveValuesToList(input))
+        
       }
       
+      else {warning("Unrecognized input multi-omics data type!")}
+        
       # This general function passes the parameters and the correct report to the render function 
       rmarkdown::render(report, output_file = file, params = params, envir = new.env(parent = globalenv()))
       

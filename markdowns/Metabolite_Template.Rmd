@@ -225,7 +225,7 @@ plot(rmdFilt, pvalue_threshold = 0.0001)
 custFilt <- custom_filter(omicsData = mymetabData, f_data_remove = "Infection1")
 ```
 
-`r if (metbDataAttr$data_info$norm_info$is_normalized) {"## Normalization\nMetabolite data **was** normalized.\n\n### *Manual*"}`
+`r if (metabDataAttr$data_info$norm_info$is_normalized) {"## Normalization\nMetabolite data **was** normalized.\n\n### *Manual*"}`
 
 ```{r Normalization: Manual, Plot}
 if (metabDataAttr$data_info$norm_info$is_normalized) {
