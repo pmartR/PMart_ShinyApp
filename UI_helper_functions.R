@@ -23,6 +23,111 @@ style_UI <- function(pagename, ...) {
   )
 }
 
+#'@details plot updating function for UI panel for axes options with optional prepended elements.
+#'@param pagename The name of the page or the string to prepend to each input name
+#'@param plot Plotly vizualization to update
+add_plot_styling <- function(input, pagename, plot, subplot = F) {
+  xangle <- if (is_empty(input[[paste0(pagename, "_xangle")]]) |
+                       is.na(input[[paste0(pagename, "_xangle")]])) 0 else input[[paste0(pagename, "_xangle")]]
+  yangle <- if (is_empty(input[[paste0(pagename, "_yangle")]]) |
+                       is.na(input[[paste0(pagename, "_yangle")]])) 0 else input[[paste0(pagename, "_yangle")]]
+  
+  
+  if(inherits(plot, "plotly")){
+      p <- plot %>% plotly::layout(
+        xaxis = list(
+          title = list(
+            text = ifelse(subplot, "", input[[paste0(pagename, "_xlab")]]), 
+            font = list(
+              size = input[[paste0(pagename, "_x_fontsize")]]
+            )
+          ),
+          tickangle = xangle,
+          tickfont = list(size = input[[paste0(pagename, "_x_ticksize")]])
+        ),
+        yaxis = list(
+          title = list(
+            text = ifelse(subplot, "", input[[paste0(pagename, "_ylab")]]), 
+            font = list(
+              size = input[[paste0(pagename, "_y_fontsize")]]
+              )
+            ),
+            tickangle = yangle,
+            tickfont = list(size = input[[paste0(pagename, "_y_ticksize")]])
+        ),
+        title = list(
+          text = ifelse(subplot, "", input[[paste0(pagename, "_title")]]), 
+          font = list(
+            size = input[[paste0(pagename, "_title_fontsize")]]
+          )
+        )
+      )
+      
+      if(subplot){
+        p$x$layout$annotations[[1]]$text <- input[[paste0(pagename, "_xlab")]]
+        p$x$layout$annotations[[1]]$size <- input[[paste0(pagename, "_x_fontsize")]]
+        p$x$layout$annotations[[2]]$text <- input[[paste0(pagename, "_ylab")]]
+        p$x$layout$annotations[[2]]$size <- input[[paste0(pagename, "_y_fontsize")]]
+        
+        for(ax in names(p$x$layout)[str_detect(names(p$x$layout), "xaxis")]){
+          p$x$layout[[ax]]$tickangle <- xangle
+          p$x$layout[[ax]]$tickfont$size <- input[[paste0(pagename, "_x_ticksize")]]
+        }
+        
+        for(ax in names(p$x$layout)[str_detect(names(p$x$layout), "yaxis")]){
+          p$x$layout[[ax]]$tickangle <- yangle
+          p$x$layout[[ax]]$tickfont$size <- input[[paste0(pagename, "_y_ticksize")]]
+        }
+        
+        if(!is.na(input[[paste0(pagename, "_title")]]) &&
+           input[[paste0(pagename, "_title")]] != ""){
+          
+          title <- list(
+            text = input[[paste0(pagename, "_title")]],
+            xref = "paper",
+            yref = "paper",
+            yanchor = "bottom",
+            xanchor = "center",
+            align = "center",
+            font = list(size = input[[paste0(pagename, "_title_fontsize")]]),
+            x = 0.5,
+            y = 1.1,
+            showarrow = FALSE
+          )
+          
+           p <- p %>% layout(annotations = title, 
+                        margin = list(t = 50 + input[[paste0(pagename, "_title_fontsize")]],
+                                      b = 50 + input[[paste0(pagename, "_x_fontsize")]]
+                                      )
+                        )
+        }
+        
+        p
+      }
+      
+    return(p)
+  } else {
+    
+    theme_plot <- theme(
+      axis.title.x = element_text(size = input[[paste0(pagename, "_x_fontsize")]]),
+      axis.title.y = element_text(size = input[[paste0(pagename, "_y_fontsize")]]),
+      axis.text.x = element_text(angle = xangle, 
+                                 size = input[[paste0(pagename, "_x_ticksize")]]),
+      axis.text.y = element_text(angle = yangle, 
+                                 size = input[[paste0(pagename, "_y_ticksize")]]),
+      plot.title = element_text(size = input[[paste0(pagename, "_title_fontsize")]])
+    )
+    
+    labels <- labs(title = input[[paste0(pagename, "_title")]], 
+                   x = input[[paste0(pagename, "_xlab")]], 
+                   y = input[[paste0(pagename, "_ylab")]])
+    
+    return(plot + theme_plot + labels)
+    
+  }
+  
+}
+
 #'@details A helper to make an inline set of colorpicker inputs
 #'@param cpicker_args list of lists, each sub-element being a list of arguments
 #'passed to one instance of colourpicker::pickerInput

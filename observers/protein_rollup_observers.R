@@ -32,18 +32,20 @@ observeEvent(input[["bpquant"]], {
   
   removeTab("rollup_mainpanel", "BPQuant Results", session = getDefaultReactiveDomain())
   
-  showNotification("Calculating isoforms, please wait...",
-                   duration = NULL,
-                   closeButton = FALSE,
-                   id = "bpquant_note"
-  )
+  shinyjs::show("isoform_busy")
+  on.exit(hide("isoform_busy"))
   
   appendTab(
     "rollup_mainpanel",
     tabPanel(
       "BPQuant Results",
       br(),
-      withSpinner(plotlyOutput("bpquant_res"))
+      withSpinner(plotlyOutput("bpquant_res")),
+      br(),
+      wellPanel(
+        uiOutput("bpquant_plot_options"),
+        uiOutput("bpquant_apply_style")
+      )
     )
   )
   
@@ -107,15 +109,6 @@ observeEvent(input[["bpquant"]], {
   )
   enable("bpquant_apply")
   
-  # radioGroupButtons(
-  #   "bpquant_apply",
-  #   "Use protein isoforms?",
-  #   choices = c("Yes", "No"),
-  #   selected = isolate(input[["bpquant_apply"]])
-  # )
-  
-  
-  removeNotification("bpquant_note")
 })
 
 # lock/unlock bpquant
@@ -205,10 +198,14 @@ observeEvent(input$apply_rollup, {
       )
       
       show("prorollicon")
-      updateCollapse(session, "rollup_mainpanel", open = "rollup_summary", 
+      updateCollapse(session, "rollup_sidebar", open = "rollup_summary", 
                      close = c("rollup_opts", "isoform_identification"))
+      updateTabsetPanel(session, "rollup_mainpanel",
+                        selected = "Rollup Results"
+      )
       revals$rollup_summary <- summary(objects$omicsData)
-      plots$rollup_plot <- plot(objects$omicsData, bw_theme = TRUE)
+      plots$rollup_plot <- plot(objects$omicsData, bw_theme = TRUE, interactive = T, 
+                                color_by = "Group", order_by = "Group")
       
       showModal(
         modalDialog(
@@ -261,4 +258,23 @@ observeEvent(input$rollup_goto_stats,{
 observeEvent(input$rollup_goto_downloads,{
   updateTabsetPanel(session, "top_page", selected = "download_tab")
   removeModal()
+})
+
+## Update plot style
+observeEvent(input$bpquant_apply_style_plot_1, {
+  
+    plots$bpquant <- add_plot_styling(
+      input,
+      "bpquant", 
+      plots$bpquant
+    )
+})
+
+observeEvent(input$rollup_apply_style_plot_1, {
+  
+  plots$rollup_plot <- add_plot_styling(
+    input,
+    "rollup", 
+    plots$rollup_plot
+  )
 })

@@ -184,7 +184,7 @@ list(
   }),
 
   # Top filter plot
-  output$filter_mainplot <- renderPlot({
+  output$filter_mainplot <- renderPlotly({
     if (inherits(plots$filter_mainplot, "list")) {
       p <- gridExtra::arrangeGrob(plots$filter_mainplot[[1]], plots$filter_mainplot[[2]], ncol = 2)
       plots$last_plot <- p
@@ -197,7 +197,7 @@ list(
   }),
 
   # other filter plot for lipid data
-  output$filter_mainplot_2 <- renderPlot({
+  output$filter_mainplot_2 <- renderPlotly({
     if (inherits(plots$filter_mainplot_2, "list")) {
 
       p <- gridExtra::arrangeGrob(plots$filter_mainplot_2[[1]], plots$filter_mainplot_2[[2]], ncol = 2)
@@ -213,12 +213,12 @@ list(
   # plot one or both UI elements
   output$filter_dynamic_mainplot <- renderUI({
     if (!is.null(objects$omicsData) & is.null(objects$omicsData_2)) {
-      withSpinner(plotOutput("filter_mainplot"))
+      withSpinner(plotlyOutput("filter_mainplot"))
     }
     else if (any(!is.null(objects$omicsData), !is.null(objects$omicsData_2))) {
       tagList(
-        withSpinner(plotOutput("filter_mainplot")),
-        withSpinner(plotOutput("filter_mainplot_2"))
+        withSpinner(plotlyOutput("filter_mainplot")),
+        withSpinner(plotlyOutput("filter_mainplot_2"))
       )
     }
   }),
@@ -227,10 +227,15 @@ list(
   output$fdata_customfilt <- renderUI({
     req(!is.null(objects$omicsData))
     fdata_IDS <- objects$omicsData$f_data %>% purrr::pluck(get_fdata_cname(objects$omicsData))
-
+    if (!(isTRUE(input$fdata_customfilt_regex == "") | is.null(input$fdata_customfilt_regex))) {
+      fdata_IDS <- fdata_IDS[grepl(input$fdata_customfilt_regex, fdata_IDS)]
+    }
     if (two_lipids()) {
       req(!is.null(objects$omicsData_2))
       fdata_IDS_2 <- objects$omicsData_2$f_data %>% purrr::pluck(get_fdata_cname(objects$omicsData_2))
+      if (!(isTRUE(input$fdata_customfilt_regex_2 == "") | is.null(input$fdata_customfilt_regex_2))) {
+        fdata_IDS_2 <- fdata_IDS_2[grepl(input$fdata_customfilt_regex_2, fdata_IDS_2)]
+      }
 
       fluidRow(
         column(

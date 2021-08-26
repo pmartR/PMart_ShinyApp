@@ -35,16 +35,28 @@ apply_filt <- function(){
           tmp2 <- applyFilt(objects$filters$cvfilt_2, tmp2, cv_threshold = input$cv_threshold)
         }
       }
+
+      # if(e$message == "None of the samples will be removed with the current thresholds.")
       # imd filter
-      if (!is.null(objects$filters$imdanovafilt) & is.null(attributes(tmp)$filters$imdanovaFilt)) {
-        tmp <- applyFilt(objects$filters$imdanovafilt, tmp, min_nonmiss_anova = input$min_nonmiss_anova, min_nonmiss_gtest = input$min_nonmiss_gtest)
-        if (!is.null(objects$filters$imdanovafilt_2) & !is.null(tmp2) & is.null(attributes(tmp2)$filters$imdanovaFilt)) {
-          tmp2 <- applyFilt(objects$filters$imdanovafilt_2, tmp2, min_nonmiss_anova = input$min_nonmiss_anova, min_nonmiss_gtest = input$min_nonmiss_gtest)
+      if (!is.null(objects$filters$imdanovafilt) & 
+          is.null(attributes(tmp)$filters$imdanovaFilt)) {
+        tmp <- applyFilt(objects$filters$imdanovafilt, 
+                         tmp, 
+                         min_nonmiss_anova = input$min_nonmiss_anova, 
+                         min_nonmiss_gtest = input$min_nonmiss_gtest
+                         )
+        if (!is.null(objects$filters$imdanovafilt_2) & 
+            !is.null(tmp2) & 
+            is.null(attributes(tmp2)$filters$imdanovaFilt)) {
+          tmp2 <- applyFilt(objects$filters$imdanovafilt_2, 
+                            tmp2, 
+                            min_nonmiss_anova = input$min_nonmiss_anova, 
+                            min_nonmiss_gtest = input$min_nonmiss_gtest)
         }
       }
-
+      
       #### SAMPLE/CUSTOM FILTERS ####
-
+      
       # rMd filter
       if (!is.null(objects$filters$rmdfilt) & is.null(attributes(tmp)$filters$rmdFilt)) {
         tmp <- applyFilt(objects$filters$rmdfilt, tmp, pvalue_threshold = input$pvalue_threshold)
@@ -513,7 +525,7 @@ observeEvent(c(input$plot_rmdfilt, input$rmd_metrics, input$pvalue_threshold, in
         p <- plot(rmd_filter(objects$uploaded_omicsData, 
                              metrics = input$rmd_metrics),
                   pvalue_threshold = input$pvalue_threshold, 
-                  sampleID = sampleID1, bw_theme = TRUE#, interactive = T
+                  sampleID = sampleID1, bw_theme = TRUE, interactive = T
                   )
 
         # block for displaying sample names if we are plotting all samples
@@ -540,7 +552,7 @@ observeEvent(c(input$plot_rmdfilt, input$rmd_metrics, input$pvalue_threshold, in
         {
           p <- plot(rmd_filter(objects$uploaded_omicsData_2, metrics = input$rmd_metrics),
             pvalue_threshold = input$pvalue_threshold, sampleID = sampleID2, 
-            bw_theme = TRUE#, interactive = T
+            bw_theme = TRUE, interactive = T
           )
 
           if (is.null(sampleID2)) {
@@ -573,7 +585,7 @@ observeEvent(c(input$plot_profilt, input$min_num_peps, input$degen_peps),
       {
         plot(proteomics_filter(objects$uploaded_omicsData), 
              min_num_peps = as.numeric(input$min_num_peps), 
-             bw_theme = TRUE#, interactive = T
+             bw_theme = TRUE, interactive = T
              )
       },
       error = function(e) {
@@ -595,7 +607,7 @@ observeEvent(c(input$plot_molfilt, input$mol_min_num),
     plots$filter_mainplot <- tryCatch(
       {
         plot(molecule_filter(objects$uploaded_omicsData), 
-             min_num = input$mol_min_num, bw_theme = TRUE#, interactive = T
+             min_num = input$mol_min_num, bw_theme = TRUE, interactive = T
              )
       },
       error = function(e) {
@@ -610,7 +622,7 @@ observeEvent(c(input$plot_molfilt, input$mol_min_num),
         {
           plot(molecule_filter(objects$uploaded_omicsData_2), 
                min_num = input$mol_min_num, 
-               bw_theme = TRUE#, interactive = T
+               bw_theme = TRUE, interactive = T
                )
         },
         error = function(e) {
@@ -632,10 +644,13 @@ observeEvent(c(input$plot_cvfilt, input$cv_threshold),
     
     plots$filter_mainplot <- tryCatch(
       {
-        plot(cv_filter(objects$uploaded_omicsData),
+        p <- plot(cv_filter(objects$uploaded_omicsData),
              cv_threshold = input$cv_threshold,
-             bw_theme = TRUE#, interactive = T
-             )
+             bw_theme = TRUE)
+        title_info <- paste(str_extract_all(as.character(p$labels$title)[3], "[0-9]+")[[1]], collapse = ".")
+        p$labels$title <- paste0("Coefficient of Variation (CV): CV Threshold = ",
+                                 title_info)
+        ggplotly(p)
       },
       error = function(e) {
         msg <- paste0("Something went wrong making your CV filter plot \n System error: ", e)
@@ -647,10 +662,13 @@ observeEvent(c(input$plot_cvfilt, input$cv_threshold),
     if (!is.null(objects$uploaded_omicsData_2)) {
       plots$filter_mainplot_2 <- tryCatch(
         {
-          plot(cv_filter(objects$uploaded_omicsData_2), 
-               cv_threshold = input$cv_threshold, 
-               bw_theme = TRUE#, interactive = T
-               )
+          p <- plot(cv_filter(objects$uploaded_omicsData_2),
+                    cv_threshold = input$cv_threshold,
+                    bw_theme = TRUE)
+          title_info <- paste(str_extract_all(as.character(p$labels$title)[3], "[0-9]+")[[1]], collapse = ".")
+          p$labels$title <- paste0("Coefficient of Variation (CV): CV Threshold = ",
+                                   title_info)
+          ggplotly(p)
         },
         error = function(e) {
           msg <- paste0("Something went wrong making your second CV filter plot \n System error: ", e)
@@ -674,7 +692,7 @@ observeEvent(c(input$plot_imdanovafilt, input$min_nonmiss_anova, input$min_nonmi
         plot(imdanova_filter(objects$uploaded_omicsData), 
              min_nonmiss_anova = input$min_nonmiss_anova, 
              min_nonmiss_gtest = input$min_nonmiss_gtest, 
-             bw_theme = TRUE#, interactive = T
+             bw_theme = TRUE, interactive = T
              )
       },
       error = function(e) {
@@ -690,7 +708,7 @@ observeEvent(c(input$plot_imdanovafilt, input$min_nonmiss_anova, input$min_nonmi
           plot(imdanova_filter(objects$uploaded_omicsData_2), 
                min_nonmiss_anova = input$min_nonmiss_anova, 
                min_nonmiss_gtest = input$min_nonmiss_gtest, 
-               bw_theme = TRUE#, interactive = T
+               bw_theme = TRUE, interactive = T
                )
         },
         error = function(e) {
@@ -712,43 +730,29 @@ observeEvent(c(input$plot_imdanovafilt, input$min_nonmiss_anova, input$min_nonmi
 
 # ...first plot...
 observeEvent(input$filter_apply_style_plot_1, {
-  filter_xangle <- if (is_empty(input$filter_xangle) | is.na(input$filter_xangle)) 0 else input$filter_xangle
-  filter_yangle <- if (is_empty(input$filter_yangle) | is.na(input$filter_yangle)) 0 else input$filter_yangle
-
-  theme <- theme(
-    axis.title.x = element_text(size = input$filter_x_fontsize),
-    axis.title.y = element_text(size = input$filter_y_fontsize),
-    axis.text.x = element_text(angle = filter_xangle, size = input$filter_x_ticksize),
-    axis.text.y = element_text(angle = filter_yangle, size = input$filter_y_ticksize),
-    plot.title = element_text(size = input$filter_title_fontsize)
-  )
-
+  
   if (inherits(plots$filter_mainplot, "list")) {
-    plots$filter_mainplot[[1]] <- plots$filter_mainplot[[1]] + xlab(input$filter_xlab) + ylab(input$filter_ylab) + ggtitle(input$filter_title) + theme
+    plots$filter_mainplot[[1]] <- add_plot_styling(input, 
+                                                   "filter",
+                                                   plots$filter_mainplot[[1]])
   }
   else {
-    plots$filter_mainplot <- plots$filter_mainplot + xlab(input$filter_xlab) + ylab(input$filter_ylab) + ggtitle(input$filter_title) + theme
+    plots$filter_mainplot <- add_plot_styling(input, "filter", plots$filter_mainplot)
   }
 })
 
 # ...second plot
 observeEvent(input$filter_apply_style_plot_2, {
-  filter_xangle <- if (is_empty(input$filter_xangle) | is.na(input$filter_xangle)) 0 else input$filter_xangle
-  filter_yangle <- if (is_empty(input$filter_yangle) | is.na(input$filter_yangle)) 0 else input$filter_yangle
-
-  theme <- theme(
-    axis.title.x = element_text(size = input$filter_x_fontsize),
-    axis.title.y = element_text(size = input$filter_y_fontsize),
-    axis.text.x = element_text(angle = filter_xangle, size = input$filter_x_ticksize),
-    axis.text.y = element_text(angle = filter_yangle, size = input$filter_y_ticksize),
-    plot.title = element_text(size = input$filter_title_fontsize)
-  )
 
   if (inherits(plots$filter_mainplot, "list")) {
-    plots$filter_mainplot[[2]] <- plots$filter_mainplot[[2]] + xlab(input$filter_xlab) + ylab(input$filter_ylab) + ggtitle(input$filter_title) + theme
+    plots$filter_mainplot[[2]] <- add_plot_styling(input, 
+                                                   "filter",
+                                                   plots$filter_mainplot[[2]])
   }
   else {
-    plots$filter_mainplot_2 <- plots$filter_mainplot_2 + xlab(input$filter_xlab) + ylab(input$filter_ylab) + ggtitle(input$filter_title) + theme
+    plots$filter_mainplot_2 <- add_plot_styling(input, 
+                                                "filter",
+                                                plots$filter_mainplot_2)
   }
 })
 
