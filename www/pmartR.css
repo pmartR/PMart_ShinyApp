@@ -2,6 +2,13 @@
   *background:#f6941d;
 }*/
 
+.nav li a.disabled {
+  background-color: #aaa !important;
+  color: #333 !important;
+  cursor: not-allowed !important;
+  border-color: #aaa !important;
+}
+
 .grey_text{
   color:silver;
   color:rgba(0,0,0,0.2);
@@ -52,6 +59,21 @@
   margin-left:3px;
 }
 
+.nav > li > .tooltip {
+  min-width:150px;
+}
+
+.tooltip-wrapper {
+  display:inline-block;
+}
+
+.tooltip-wrapper .btn[disabled] {
+  pointer-events: none;
+}
+
+.tooltip-wrapper.disabled {
+  cursor: not-allowed;
+}
 
 .collapse_page .panel-heading{
   font-weight:bold;

@@ -8,12 +8,16 @@ observeEvent(c(objects$omicsData, input$top_page), {
     "apply_rollup"#,
     # "bpquant_lock",
     # "bpquant"
-           )
+   )
   
   req(!is.null(objects$omicsData))
   for (el in ids) {
     toggleState(el, condition = inherits(objects$omicsData, "pepData"))
   }
+  
+  is_rolled_up <- inherits(objects$uploaded_omicsData, "pepData") & inherits(objects$omicsData, "proData")
+  toggleTooltip(session, "apply_rollup_jswrapper", is_rolled_up, tooltip_text = ttext_[["ROLLUP_DISABLE_INFO"]])
+  
 })
 
 
@@ -158,11 +162,10 @@ observeEvent(input$apply_rollup, {
   shinyjs::show("rollup_busy")
   on.exit(hide("rollup_busy"))
 
+  objects$omicsData_pre_rollup <- objects$omicsData
+  
   tryCatch(
     {
-
-      objects$omicsData_pre_rollup <- objects$omicsData
-      
       cname <- get_edata_cname(objects$omicsData)
       objects$omicsData$e_data[[cname]] <- as.character(objects$omicsData$e_data[[cname]]) #### Weird thing with numerics?
       objects$omicsData$e_meta[[cname]] <- as.character(objects$omicsData$e_meta[[cname]])
@@ -178,19 +181,6 @@ observeEvent(input$apply_rollup, {
         qrollup_thresh = thresh
       )
       
-      # func <- get(input$which_rollup, envir = asNamespace("pmartR"), mode = "function")
-      # if (input$which_rollup == "qrollup") {
-      #   objects$omicsData <- func(objects$omicsData, 
-      #                             input$qrollup_thresh,
-      #                             isoformRes = objects$bpquant,
-      #                             combine_fn = input$which_combine_fn)
-      # }
-      # else {
-      #   objects$omicsData <- func(objects$omicsData, 
-      #                             isoformRes = objects$bpquant,
-      #                             combine_fn = input$which_combine_fn)
-      # }
-
       updateCollapse(session, "rollup_mainpanel", open = "rollup_summary")
       revals$rollup_summary <- summary(objects$omicsData)
       plots$rollup_plot <- plot(objects$omicsData, bw_theme = TRUE)
@@ -229,19 +219,21 @@ observeEvent(input$apply_rollup, {
     error = function(e) {
       msg <- paste0("Something went wrong rollup up your pepdata:  \n System error:  ", e)
       message(msg)
+      objects$omicsData <- objects$omicsData_pre_rollup
       revals$warnings_rollup$bad_rollup <<- sprintf("<p style = 'color:red'>%s</p>", msg)
       revals$rollup_summary <- NULL
       plots$rollup_plot <- NULL
+      
     }
   )
 })
 
 observeEvent(input$rollup_dismiss, removeModal())
 observeEvent(input$rollup_goto_stats,{
-  updateTabsetPanel(session, "top_page", selected = "Statistics")
+  updateTabsetPanel(session, "top_page", selected = "statistics_tab")
   removeModal()
 })
 observeEvent(input$rollup_goto_downloads,{
-  updateTabsetPanel(session, "top_page", selected = "Download")
+  updateTabsetPanel(session, "top_page", selected = "download_tab")
   removeModal()
 })

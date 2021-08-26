@@ -1,5 +1,6 @@
 normalization_UI <- function() {
   tabPanel("Normalization",
+    value = "normalization_tab",
     class = "collapse_page",
     column(
       4,
