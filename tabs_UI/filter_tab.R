@@ -1,5 +1,6 @@
 filter_UI <- function() {
   tabPanel("Filter",
+    value = "filter_tab",
     class = "collapse_page",
     column(
       4,

@@ -21,7 +21,10 @@ output$peptide_statistics_tab_sidepanel <- renderUI({
   if (input$peptide_stats_select_method == "imdanova"){
     bsCollapse(
       id = "peptide_imdanova-sidepanel-options", multiple = TRUE, 
-      open = c("peptide_imdanova-specify-comparisons"), 
+      open = c(
+        "peptide_imdanova-specify-comparisons", 
+        "peptide_imdanova-select-settings"
+      ), 
       #
       bsCollapsePanel(
         subsection_header(
@@ -65,7 +68,11 @@ output$peptide_statistics_tab_sidepanel <- renderUI({
         uiOutput("peptide_imdanova_test_method_UI"),
         uiOutput("peptide_imdanova_pval_adjust_UI"),
         numericInput("peptide_pval_thresh", "Significance threshold", value = 0.05, step = 0.01),
-        bsButton("peptide_apply_imdanova", "Perform iMd-ANOVA", style = "primary")
+        div(
+          id = "peptide_apply_imdanova_jswrapper", 
+          class= "tooltip-wrapper",
+          bsButton("peptide_apply_imdanova", "Perform iMd-ANOVA", style = "primary")
+        )
       )
     )
   }

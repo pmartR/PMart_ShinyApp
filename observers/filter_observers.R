@@ -675,7 +675,7 @@ observeEvent(reactiveValuesToList(objects), {
 })
 
 observeEvent(input$goto_norm, {
-  updateTabsetPanel(session, "top_page", selected = "Normalization")
+  updateTabsetPanel(session, "top_page", selected = "normalization_tab")
   removeModal()
 })
 

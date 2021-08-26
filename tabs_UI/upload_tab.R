@@ -1,5 +1,6 @@
 upload_UI <- function() {
   tabPanel("Upload Data",
+    value = 'upload_data_tab',
     class = "collapse_page",
     fluidRow( # begin fluidrow
       column(
@@ -33,19 +34,19 @@ upload_UI <- function() {
             hidden(div(id = "ok_columnids", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
           ),
           value = "columnids",
-          conditionalPanel(
-            "input.datatype=='pep'",
-            radioGroupButtons("proteins_yn", "Does your metadata file contain peptide to protein mappings?",
-              choices = c("Yes" = "TRUE", "No" = "FALSE")
-            ),
-            radioGroupButtons("labeled_yn", "Is this labeled peptide data?",
-              choices = c("Yes" = "TRUE", "No" = "FALSE"), selected = "FALSE"
-            )
-          ),
           hidden(div(
             id = "js_id_col",
             uiOutput("id_col")
           )),
+          conditionalPanel(
+            "input.datatype=='pep'",
+            radioGroupButtons(
+              "labeled_yn",
+              "Is this labeled peptide data?",
+              choices = c("Yes" = "TRUE", "No" = "FALSE"),
+              selected = "FALSE"
+            )
+          ),
           hidden(div(
             id = "js_datascale",
             uiOutput("datascale_UI"),
@@ -76,6 +77,14 @@ upload_UI <- function() {
           ),
           value = "meta_collapse",
           uiOutput("emeta_yn"),
+          conditionalPanel(
+            "input.emeta_yn=='TRUE' && input.datatype=='pep'",
+            radioGroupButtons(
+              "proteins_yn",
+              "Does your biomolecule information file contain peptide to protein mappings?",
+              choices = c("Yes" = "TRUE", "No" = "FALSE")
+            ), 
+          ),
           hidden(div(
             id = "js_emeta_UI",
             uiOutput("emeta_UI")

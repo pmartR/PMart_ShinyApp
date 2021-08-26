@@ -91,20 +91,10 @@ list(
   # do they have an emeta file to upload?
   output$emeta_yn <- renderUI({
     req(input$datatype, input$datatype != "none")
-    if (input$datatype != "pep") {
-      radioGroupButtons("emeta_yn",
-        "Do you have a file containing extra biomolecule information?",
-        choices = c("Yes" = T, "No" = F)
-      )
-    }
-    else {
-      hidden(
-        radioGroupButtons("emeta_yn",
-          "Do you have a file containing extra biomolecule information?",
-          choices = c("Yes" = T, "No" = F), selected = "Yes"
-        )
-      )
-    }
+    radioGroupButtons("emeta_yn",
+      "Do you have a file containing extra biomolecule information?",
+      choices = c("Yes" = T, "No" = F)
+    )
   }),
 
   # select which column contains protein ID
@@ -121,7 +111,7 @@ list(
                  toString(colnames(revals$e_meta)))
         )
       )
-    } else if (input$datatype == "pep" & input$proteins_yn == "TRUE") {
+    } else if (input$datatype == "pep" & isTRUE(as.logical(input$proteins_yn))) {
       choices <- colnames(revals$e_meta)[-which(colnames(revals$e_meta) == input$id_col)]
       pickerInput("protein_column", "Which column in your biomolecule file contains protein identifiers?",
         choices = c("Select a column", choices), selected = "Select a column"
@@ -130,7 +120,7 @@ list(
     else {
       choices <- colnames(revals$e_meta)
       hidden(pickerInput("protein_column", "Which column in your biomolecule file contains protein identifiers?",
-        choices = choices, selected = choices[1]
+        choices = choices, selected = input$id_col # this should exist in choices
       ))
     }
   }),
@@ -181,12 +171,11 @@ list(
         )
       )
     }
-    else if (input$datatype == "pep" & isTRUE(input$proteins_yn == "TRUE")) {
+    else if (isTRUE(as.logical(input$emeta_yn))) {
       title_upload_div
     }
     else {
-      req(as.logical(input$emeta_yn))
-      title_upload_div
+      hidden(title_upload_div)
     }
   }),
 

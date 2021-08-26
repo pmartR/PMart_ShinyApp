@@ -1,8 +1,10 @@
 peptide_statistics_UI <- function() {
   tabPanel("Peptide Statistics",
+           value = "peptide_statistics_tab",
            class = "collapse_page",
            column(
              4,
+             inlineCSS("#peptide_statistics_collapse_left {margin-bottom:5px;}"),
              bsCollapse(
                id = "peptide_statistics_collapse_left", multiple = TRUE, open = "peptide_stats-statistics-options",
                bsCollapsePanel(

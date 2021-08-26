@@ -1,5 +1,6 @@
 data_summary_UI <- function() {
   tabPanel("Data Summary",
+    value = "data_summary_tab",
     class = "collapse_page",
     fluidRow(
       column(

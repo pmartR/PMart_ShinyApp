@@ -37,7 +37,8 @@ observeEvent(input$done_idcols, {
   shinyjs::show("ok_columnids")
 })
 
-# disable if they try to log transform data with zeros
+#'@details disable if they try to log transform data with zeros.  Store an
+#'indicator that is TRUE if all is well.
 observe({
   isolate(revals$warnings_upload$bad_transform <- NULL)
   
@@ -57,10 +58,14 @@ observe({
     } else NULL
   )
   
-  toggleState("makeobject", condition = !cond)
+  revals$boolean$upload$log_zeros <- !cond
 })
 
-# when they select e_meta files, check that all columns are in order and close the collapsebar if everything looks ok
+#'@details Check that everything in the biomolecule information section is ok.
+#' If it is, then collapse the sidebar, show a checkmark, and activate the create
+#' omicsData button.
+#' TODO:  store conditions in a named list in revals$boolean$upload$emeta_ok,
+#' or break this up a bit into multiple conditions.
 observe({
   # 2 file lipid conditions:
   # two emeta files uploaded
@@ -81,8 +86,14 @@ observe({
       }
     )) | !isTruthy(input$emeta_yn)
     cond_nasymbol <- !is.null(input$na_symbol)
-    cond_shared_ids <- all(e_data()[[input$id_col]] %in% revals$e_meta[[input$id_col]]) & all(e_data_2()[[input$id_col_2]] %in% revals$e_meta_2[[input$id_col_2]])
-    cond <- all(cond_idcol_edata, cond_idcol_emeta, cond_nasymbol, cond_shared_ids) | isTruthy(!as.logical(input$emeta_yn))
+    cond_shared_ids <-
+      all(e_data()[[input$id_col]] %in% revals$e_meta[[input$id_col]]) &
+      all(e_data_2()[[input$id_col_2]] %in% revals$e_meta_2[[input$id_col_2]])
+    cond <-
+      all(cond_idcol_edata,
+          cond_idcol_emeta,
+          cond_nasymbol,
+          cond_shared_ids) | isTruthy(!as.logical(input$emeta_yn))
   }
   # peptide with protein id col conditions:
   # emeta is uploaded
@@ -95,10 +106,12 @@ observe({
     cond_procol <- !is.null(input$protein_column) && 
       input$protein_column %in% colnames(revals$e_meta)[-which(colnames(revals$e_meta) == input$id_col)]
     cond_idcol_edata <- isTRUE(input$id_col %in% colnames(e_data()))
-    cond_idcol_emeta <- isTRUE(input$id_col %in% colnames(revals$e_meta))
+    cond_idcol_emeta <- isTRUE(input$id_col %in% colnames(revals$e_meta)) | is.null(revals$e_meta)
     cond_nasymbol <- !is.null(input$na_symbol)
     cond_shared_ids <- if (!is.null(revals$e_meta)) all(e_data()[[input$id_col]] %in% revals$e_meta[[input$id_col]]) else TRUE
-    cond <- all(cond_files, cond_procol, cond_idcol_edata, cond_idcol_emeta, cond_nasymbol, cond_shared_ids)
+    cond_emeta <- all(cond_files, cond_shared_ids, cond_idcol_emeta, cond_procol) | isTruthy(!as.logical(input$emeta_yn))
+    
+    cond <- all(cond_idcol_edata, cond_nasymbol, cond_emeta)
   }
   # anything else conditions:
   # emeta is uploaded
@@ -107,27 +120,37 @@ observe({
     req(!is.null(input$id_col))
     cond_files <- !is.null(input$file_emeta)
     cond_idcol_edata <- isTRUE(input$id_col %in% colnames(e_data()))
-    cond_idcol_emeta <- isTRUE(input$id_col %in% colnames(revals$e_meta)) | is.null(revals$e_meta) | !isTruthy(input$emeta_yn)
+    cond_idcol_emeta <- isTRUE(input$id_col %in% colnames(revals$e_meta)) | is.null(revals$e_meta)
     cond_nasymbol <- !is.null(input$na_symbol)
     cond_shared_ids <- all(e_data()[[input$id_col]] %in% revals$e_meta[[input$id_col]]) 
-    cond <- all(cond_idcol_edata, cond_idcol_emeta, cond_nasymbol, cond_shared_ids) | isTruthy(!as.logical(input$emeta_yn))
-  }
-
-  # if all conditions met, wait a moment, close the panel
-  if (cond) {
-    Sys.sleep(0.6)
-    updateCollapse(session, "upload_collapse_left", close = "meta_collapse")
+    cond_emeta <- all(cond_files, cond_shared_ids, cond_idcol_emeta) | isTruthy(!as.logical(input$emeta_yn))
+    
+    cond <- all(cond_idcol_edata, cond_nasymbol, cond_emeta)
   }
 
   # toggle css and display warnings
   toggleCssClass("js_id_col", "error-textcolor", condition = any(!cond_idcol_edata, !cond_idcol_emeta, !cond_shared_ids) & cond_files)
-  revals$warnings_upload$bad_identifier <- if (any(!cond_idcol_edata, !cond_idcol_emeta, !cond_shared_ids) & cond_files & isTruthy(as.logical(input$emeta_yn))) "<p style = 'color:red'>One or more of your identifier columns are not found in or have inconsistent values across the e_data and e_meta files.</p>" else NULL
-
-  # condition debugger
-  # print(c(cond_files, cond_idcol_edata, cond_idcol_emeta, cond_nasymbol, cond_shared_ids))
-
+  revals$warnings_upload$bad_identifier <-
+    if (any(!cond_idcol_edata,!cond_idcol_emeta,!cond_shared_ids) &
+        cond_files &
+        isTruthy(as.logical(input$emeta_yn))) {
+      "<p style = 'color:red'>One or more of your identifier columns are not found in or have inconsistent values across the e_data and e_meta files.</p>" 
+    } else NULL
+  
   toggle("ok_metadata", condition = cond)
-  toggleState("makeobject", condition = cond)
+  
+  revals$boolean$upload$emeta_ok <- cond
+  # toggleState("makeobject", condition = cond)
+})
+
+#'@details Collect all values that indicate all required inputs are correct and
+#'toggle the button to make the object on/off depending.
+observe({
+  revals$boolean$upload
+  # TODO:  Add info messages as to why things were disabled.
+  toggleState("makeobject",
+              condition = all(unlist(revals$boolean$upload)) & 
+                length(unlist(revals$boolean$upload)) > 0)
 })
 
 # make data and display success message on successful objects$omicsData object creation
@@ -148,9 +171,16 @@ observeEvent(input$makeobject, {
   objects$uploaded_omicsData <- objects$omicsData <- tryCatch(
     {
       object_fn(
-        e_data = e_data(), e_meta = revals$e_meta, f_data = f_data_upload(),
-        edata_cname = input$id_col, emeta_cname = input$protein_column, fdata_cname = "SampleId",
-        data_scale = input$data_scale, norm_info = list(is_normalized = as.logical(as.integer(input$normalized_yn)))
+        e_data = e_data(),
+        e_meta = revals$e_meta,
+        f_data = f_data_upload(),
+        edata_cname = input$id_col,
+        emeta_cname = input$protein_column, # this will be the id column if we are not in pepdata land.
+        fdata_cname = "SampleId",
+        data_scale = input$data_scale,
+        norm_info = list(is_normalized = as.logical(as.integer(
+          input$normalized_yn
+        )))
       ) %>%
         edata_replace(input$na_symbol, NA)
     },
@@ -166,9 +196,14 @@ observeEvent(input$makeobject, {
     objects$uploaded_omicsData_2 <- objects$omicsData_2 <- tryCatch(
       {
         object_fn(
-          e_data = e_data_2(), e_meta = revals$e_meta_2, f_data = f_data_upload_2(),
-          edata_cname = input$id_col, emeta_cname = colnames(revals$e_meta_2)[1], fdata_cname = "SampleId",
-          data_scale = input$data_scale, norm_info = list(is_normalized = input$normalized_yn)
+          e_data = e_data_2(),
+          e_meta = revals$e_meta_2,
+          f_data = f_data_upload_2(),
+          edata_cname = input$id_col_2,
+          emeta_cname = input$id_col_2,
+          fdata_cname = "SampleId",
+          data_scale = input$data_scale,
+          norm_info = list(is_normalized = input$normalized_yn)
         ) %>%
           edata_replace(input$na_symbol, NA)
       },
@@ -261,17 +296,23 @@ observe({
   toggleElement("toggle_fdata", condition = two_lipids() & cond_fdata2exists)
 })
 
+#'@details store emeta info in an intermediate container that can be NULLED
+observeEvent(input$file_emeta, {
+  revals$e_meta_info <- input$file_emeta
+}, priority = 10)
+
 ## store null values in e_meta if no file chosen since it is not required to make object
 observe({
-  if(!isTruthy(as.logical(input$emeta_yn)) & input$datatype != "pep") {
+  if(!isTruthy(as.logical(input$emeta_yn))) {
     revals$e_meta <- NULL
+    revals$e_meta_info <- NULL
     shinyjs::reset("file_emeta")
   }
-  else if (is.null(input$file_emeta$datapath)) {
+  else if (is.null(revals$e_meta_info$datapath)) {
     revals$e_meta <- NULL
   }
   else {
-    filename <- input$file_emeta$datapath
+    filename <- revals$e_meta_info$datapath
     revals$e_meta <- read.csv(filename, stringsAsFactors = FALSE)
   }
 })
@@ -297,7 +338,7 @@ observeEvent(input$upload_dismiss, {
 })
 
 observeEvent(input$goto_groups, {
-  updateTabsetPanel(session, "top_page", selected = "Group Samples")
+  updateTabsetPanel(session, "top_page", selected = "group_samples_tab")
   removeModal()
 })
 #

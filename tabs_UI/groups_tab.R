@@ -1,5 +1,6 @@
 groups_UI <- function() {
   tabPanel("Group Samples",
+    value = "group_samples_tab",
     class = "collapse_page",
     fluidRow(
       column(

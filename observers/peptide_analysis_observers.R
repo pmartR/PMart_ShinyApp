@@ -64,7 +64,7 @@ observe({
 
 # make statres object
 observeEvent(input$peptide_apply_imdanova, {
-  req(!is.null(objects$omicsData), input$top_page == "Peptide Statistics" &&
+  req(!is.null(objects$omicsData), input$top_page == "peptide_statistics_tab" &&
         !is.null( input$peptide_imdanova_test_method))
   
   tryCatch(
@@ -128,11 +128,11 @@ observeEvent(input$peptide_apply_imdanova, {
 
 observeEvent(input$pepstats_dismiss, removeModal())
 observeEvent(input$goto_rollup,{
-  updateTabsetPanel(session, "top_page", selected = "Protein Rollup")
+  updateTabsetPanel(session, "top_page", selected = "protein_rollup_tab")
   removeModal()
 })
 observeEvent(input$pep_goto_downloads,{
-  updateTabsetPanel(session, "top_page", selected = "Download")
+  updateTabsetPanel(session, "top_page", selected = "download_tab")
   removeModal()
 })
 
@@ -207,4 +207,22 @@ observeEvent(input$peptide_statistics_apply_style_plot_2, {
   else {
     plots$peptide_statistics_mainplot_2 <- plots$peptide_statistics_mainplot_2 + xlab(input$peptide_statistics_xlab) + ylab(input$peptide_statistics_ylab) + ggtitle(input$peptide_statistics_title) + theme
   }
+})
+
+#'@details disable the imd-anova button if we are not analyzing pepData.  If the
+#'data has been rolled up, show a tooltip explaining as such.
+# disable inputs if we are not working with pepdata
+observeEvent(c(objects$omicsData, input$top_page, input$peptide_apply_imdanova), {
+  ids <- c(
+    "peptide_apply_imdanova"
+  )
+  
+  req(!is.null(objects$omicsData))
+  for (el in ids) {
+    toggleState(el, condition = inherits(objects$omicsData, "pepData"))
+  }
+  
+  is_rolled_up <- inherits(objects$uploaded_omicsData, "pepData") & inherits(objects$omicsData, "proData")
+  toggleTooltip(session, "peptide_apply_imdanova_jswrapper", is_rolled_up, tooltip_text = ttext_[["ROLLUP_DISABLE_INFO"]])
+  
 })
