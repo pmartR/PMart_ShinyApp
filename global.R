@@ -19,6 +19,7 @@ library(shinyalert)
 filter_names <- read.csv("./filter_names.csv", stringsAsFactors = F)
 dt_checkmark <- '<span class="glyphicon glyphicon-ok" style="color:deepskyblue"></span>'
 dt_minus <- '<span class="glyphicon glyphicon-minus"></span>'
+blueq = icon("question-sign", lib="glyphicon", style = "color:deepskyblue;")
 
 #'@details text displayed in tooltips
 ttext_ <- list(
