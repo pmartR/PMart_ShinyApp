@@ -12,12 +12,12 @@ observeEvent(c(input$transform, objects$omicsData, objects$omicsData_2), {
 })
 
 observeEvent(input$which_qc_plot, {
-  axes_ids <- c("qc_xlab", "qc_ylab", "qc_title")
-  dropdown_ids <- c("qc_colors", "missingval_type", "qc_order_by", "qc_color_by", "qc_color_by_2", "qc_order_by_2", "qc_title_2", "qc_colors")
+  axes_ids <- c("qc_xlab", "qc_ylab", "qc_title", "qc_title_2")
+  dropdown_ids <- c("qc_colors", "qc_order_by", "qc_color_by", "qc_color_by_2", "qc_order_by_2", "js_qc_colors")
   choices <- list(
-    "boxplots" = c(axes_ids, "qc_order_by", "qc_order_by", "qc_color_by", "qc_color_by_2", "qc_order_by_2", "qc_title_2"),
-    "missingval_bar" = c(axes_ids, "missingval_type", "qc_colors"),
-    "missingval_scatter" = c(axes_ids, "qc_colors")
+    "boxplots" = c(axes_ids, "qc_order_by", "qc_color_by", "qc_color_by_2", "qc_order_by_2", "qc_title_2"),
+    "bar" = c(axes_ids, "qc_order_by", "qc_color_by", "js_qc_colors"),
+    "scatter" = c(axes_ids, "js_qc_colors")
   )
 
   # Toggle axes and coloring options depending on plot type
@@ -25,13 +25,16 @@ observeEvent(input$which_qc_plot, {
     toggleState(inputid, condition = inputid %in% choices[[input$which_qc_plot]])
     # toggleCssClass(paste0("js_", inputid), "grey_out", condition = !(inputid %in% choices[[input$chooseplots]]))
   })
-
-  panel_names <- c("plot_type", "axes_opts", "boxplot_opts", "missingval_opts")
+  
+  #' Open relevant panels based on plot type.  Currently redundant, but keeping
+  #' structure in place if in the future other plot options require special
+  #' panels
+  panel_names <- c("axes_opts", "qc_plot_params")
 
   panel_open <- switch(input$which_qc_plot,
-    boxplots = "boxplot_opts",
-    missingval_bar = "missingval_opts",
-    missingval_scatter = "missingval_opts"
+    boxplots = "qc_plot_params",
+    bar = "qc_plot_params",
+    scatter = "qc_plot_params"
   )
 
   updateCollapse(session, "qc_collapse", open = panel_open, close = setdiff(c("boxplot_opts", "missingval_opts"), panel_open))

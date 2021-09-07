@@ -147,7 +147,9 @@ observe({
 #'toggle the button to make the object on/off depending.
 observe({
   revals$boolean$upload
-  # TODO:  Add info messages as to why things were disabled.
+  #' TODO:  Add info messages as to why things were disabled.  (or rather, check
+  #' that every info message that appears in red below the button is a good 
+  #' reason for the button to be disabled)
   toggleState("makeobject",
               condition = all(unlist(revals$boolean$upload)) & 
                 length(unlist(revals$boolean$upload)) > 0)
@@ -331,6 +333,11 @@ observe({
   }
 })
 ##
+
+#'@details navigate to the data requirements sub-tab
+observeEvent(input$upload_to_datareqs, {
+  updateTabsetPanel(session, "top_page", "data_requirements")
+})
 
 # modal dialog behavior
 observeEvent(input$upload_dismiss, {

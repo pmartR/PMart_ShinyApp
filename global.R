@@ -20,10 +20,13 @@ filter_names <- read.csv("./filter_names.csv", stringsAsFactors = F)
 dt_checkmark <- '<span class="glyphicon glyphicon-ok" style="color:deepskyblue"></span>'
 dt_minus <- '<span class="glyphicon glyphicon-minus"></span>'
 blueq = icon("question-sign", lib="glyphicon", style = "color:deepskyblue;")
+blueexcl = icon("exclamation-sign", lib="glyphicon", style = "color:deepskyblue;")
 
 #'@details text displayed in tooltips
 ttext_ <- list(
+  "ABUNDANCE_ZEROS_TO_NA" = "Zeros will be automatically transformed to NA in raw abundance data.",
   "MAIN_EFFECTS_INFO" = "Main effects are the variables of interest, those values across which you want to make comparisons.  Covariates are those values that are not of experimental interest, but must be controlled for in the statistics.",
+  "MISSING_DATA_REPLACE" = "The value specified here will be replaced by NA in the data file.  If missing values are already NA in your data or the missing values are zeros in your abundance data, then you do not have to specify this field.",
   "RMD_PROP_MISSING_WARNING" = "We advise against using proportion missing as a metric in lipidomics/metabolomics data, as they often have a very low proportion missing.",
   "RMD_CUSTOM_FILTER_INFO" = "If you want to filter out one or more samples based on inspection of the rMd metrics and not a p-value cutoff, note their names and use a custom sample filter from the sample filters section to remove them.",
   "ROLLUP_DISABLE_INFO" = "Your data has already been rolled up to the protein level, if you would like to revert to the peptide level, go back to the filter page and re-apply your filters (you may need to re-do other steps that happened after the filter tab.)",
@@ -39,9 +42,6 @@ infotext_ <- list(
   which would cause some values to be transformed to -infinity.  Either specify
   that zeros indicate missing values or replace them with NA's or the missing value
   indicator.",
-  "MISSING_DATA_REPLACE" = "The value specified here will be replaced by NA in
-  the data file.  If missing values are already NA in your data, then you do not 
-  have to specify this field.",
   "RESET_FILTERS_WARNING" = "Re-applying filters will delete any statistics you 
   have computed.  If your data was normalized in the normalize tab, you will 
   have to re-normalize it.  Rolled-up protein data will revert to the peptide
@@ -49,11 +49,16 @@ infotext_ <- list(
 ) 
 
 global_input_choices = list(
-  "RMD_FILTER_CHOICES" = list("Median Absolute Distance"="MAD", 
+  RMD_FILTER_CHOICES = list("Median Absolute Distance"="MAD", 
                               "Kurtosis", 
                               "Skewness", 
                               "Correlation", 
-                              "Proportion Missing" = "Proportion_Missing")
+                              "Proportion Missing" = "Proportion_Missing"),
+  MISSINGVAL_COLORS = c(
+    "YlOrRd", "YlOrBr", "YlGnBu", "YlGn", "Reds", "RdPu", "Purples", "PuRd", "PuBuGn", "PuBu", "OrRd", "Oranges", "Greys",
+    "Greens", "GnBu", "BuPu", "BuGn", "Blues", "Set3", "Set2", "Set1", "Pastel2", "Pastel1", "Paired", "Dark2", "Accent",
+    "Spectral", "RdYlGn", "RdYlBu", "RdGy", "RdBu", "PuOr", "PRGn", "PiYG", "BrBG"
+  )
 )
 
 NULLSELECT_ = "__nullselect__"

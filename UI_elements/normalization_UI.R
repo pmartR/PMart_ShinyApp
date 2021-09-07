@@ -42,7 +42,7 @@ list(
   # spans score plot
   output$spans_plot <- renderPlot({
     req(!is.null(objects$spans_res))
-    p <- plot(objects$spans_res, plot_type = "ggplot")
+    p <- plot(objects$spans_res)
     plots$last_plot <- p
     return(p)
   }),

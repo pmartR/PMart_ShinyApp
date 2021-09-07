@@ -68,9 +68,18 @@ list(
 
   # select data scale
   output$datascale_UI <- renderUI({
-    pickerInput("data_scale", "On what scale is your data?",
-      choices = list("Raw intensity" = "abundance", "Log base 2" = "log2", "Log base 10" = "log10", "Natural log" = "log"),
-      selected = "abundance"
+    div(class = "inline-wrapper-1",
+      pickerInput("data_scale", "On what scale is your data?",
+        choices = list("Raw intensity" = "abundance", "Log base 2" = "log2", "Log base 10" = "log10", "Natural log" = "log"),
+        selected = "abundance"
+      ),
+      conditionalPanel(
+        "input.data_scale == 'abundance'",
+        tipify(
+          blueexcl,
+          title = gsub("\n", " ", ttext_[["ABUNDANCE_ZEROS_TO_NA"]])
+        )
+      )
     )
   }),
 

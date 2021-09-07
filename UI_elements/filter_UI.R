@@ -4,11 +4,11 @@ list(
   output$cv_threshold_UI <- renderUI({
     req(objects$uploaded_omicsData)
     tmp_cvfilt <- cv_filter(objects$uploaded_omicsData)
-    max_cv = max(tmp_cvfilt$CV_pooled, na.rm=T)
+    max_cv = max(tmp_cvfilt$CV, na.rm=T)
     
     if(!is.null(objects$uploaded_omicsData_2)) {
       tmp_cvfilt <- cv_filter(objects$uploaded_omicsData_2)
-      max_cv <- min(max_cv, max(tmp_cvfilt$CV_pooled, na.rm=T))
+      max_cv <- min(max_cv, max(tmp_cvfilt$CV, na.rm=T))
     }
     
     title = sprintf("Maximum CV (between 1 and %s)", round(max_cv, 2))
@@ -78,7 +78,7 @@ list(
         )
         # cv filter
       } else if (grepl("cvfilt", names(objects$filters)[i])) {
-        n_removed <- sum(objects$filters[[i]]$CV_pooled > input$cv_threshold, na.rm=T)
+        n_removed <- sum(objects$filters[[i]]$CV > input$cv_threshold, na.rm=T)
         divs[[i]] <- tagList(
           tags$b("Coefficient of Variation (CV) Filter:"),
           tags$p("CV threshold: ", input$cv_threshold, "| Biomolecules removed: ", n_removed),
