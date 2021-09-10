@@ -36,7 +36,8 @@ inspect_norm <- function(omicsData, subset_fn, norm_fn, params) {
     loc_boxplot <- loc_df %>% ggplot() +
       geom_boxplot(aes(x = Group, y = VAL__, fill = Group)) +
       ylab("Location Parameter Value") +
-      ggtitle("Location parameter values for chosen normalization, by group")
+      ggtitle("Location parameter values for chosen normalization, by group") +
+      theme_bw()
 
     # same as above but for scale
     if (!is.null(params$scale)) {
@@ -44,7 +45,8 @@ inspect_norm <- function(omicsData, subset_fn, norm_fn, params) {
       scale_boxplot <- scale_df %>% ggplot() +
         geom_boxplot(aes(x = Group, y = VAL__, fill = Group)) +
         ylab("Scale Parameter Value") +
-        ggtitle("Scale parameter values for chosen normalization, by group")
+        ggtitle("Scale parameter values for chosen normalization, by group") + 
+        theme_bw()
     }
     else {
       scale_boxplot <- NULL
