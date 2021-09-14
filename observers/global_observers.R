@@ -1,9 +1,18 @@
 #
 observeEvent(input$top_page,
   {
-    toggleElement("js_saveplot", condition = input$top_page %in% c("Upload Data", "Group Samples", "Data Summary", 
-                                                                   "Filter", "Normalization", "Peptide Statistics",
-                                                                   "Protein Rollup", "Statistics"))
+    toggleElement(
+      "js_saveplot", 
+      condition = input$top_page %in% c("Upload Data", 
+                                        "Reference",
+                                        "Group Samples", 
+                                        "Data Summary", 
+                                        "Filter", 
+                                        "Normalization", 
+                                        "Peptide Statistics",
+                                        "Protein Rollup", 
+                                        "Statistics")
+      )
   },
   priority = 10,
   ignoreInit = FALSE

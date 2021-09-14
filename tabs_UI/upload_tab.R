@@ -14,8 +14,25 @@ upload_UI <- function() {
           value = "datselect",
 
           div(id = "js_datatype", pickerInput("datatype", "Specify molecule type",
-            choices = c("None" = "none", "Peptides" = "pep", "Proteins" = "pro", "Metabolites" = "metab", "Lipids" = "lip")
+            choices = c("None" = "none", "Peptides" = "pep", "Proteins" = "pro", 
+                        "Metabolites" = "metab",
+                        "Lipids" = "lip")
           )),
+          
+          conditionalPanel(
+            "input.datatype=='pep'",
+            radioGroupButtons("labeled_yn", "Is this labeled peptide data?",
+                              choices = c("Yes" = "iso", "No" = "pep"), selected = "pep"
+            )
+          ),
+          
+          conditionalPanel(
+            "input.datatype=='metab'",
+            radioGroupButtons("metab_type", "Which type of instrumentation?",
+                              choices = c("LC/MS or GC/MS" = "metab", "NMR" = "nmr"), selected = "FALSE"
+            )
+          ),
+          
           conditionalPanel(
             "input.datatype=='lip'",
             radioGroupButtons("twolipids_yn", "Separate files for positive and negative ionization?",
@@ -37,11 +54,8 @@ upload_UI <- function() {
             "input.datatype=='pep'",
             radioGroupButtons("proteins_yn", "Does your metadata file contain peptide to protein mappings?",
               choices = c("Yes" = "TRUE", "No" = "FALSE")
-            ),
-            radioGroupButtons("labeled_yn", "Is this labeled peptide data?",
-              choices = c("Yes" = "TRUE", "No" = "FALSE"), selected = "FALSE"
-            )
-          ),
+            )),
+
           hidden(div(
             id = "js_id_col",
             uiOutput("id_col")
@@ -61,7 +75,7 @@ upload_UI <- function() {
             )
           )),
           conditionalPanel(
-            "input.labeled_yn == 'FALSE'",
+            "input.labeled_yn == 'pep'",
             hidden(div(
               id = "js_normalized_yn",
               uiOutput("normalized_UI")

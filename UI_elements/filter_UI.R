@@ -4,11 +4,11 @@ list(
   output$cv_threshold_UI <- renderUI({
     req(objects$uploaded_omicsData)
     tmp_cvfilt <- cv_filter(objects$uploaded_omicsData)
-    max_cv = max(tmp_cvfilt$CV_pooled, na.rm=T)
+    max_cv = max(tmp_cvfilt$CV, na.rm=T)
     
     if(!is.null(objects$uploaded_omicsData_2)) {
       tmp_cvfilt <- cv_filter(objects$uploaded_omicsData_2)
-      max_cv <- min(max_cv, max(tmp_cvfilt$CV_pooled, na.rm=T))
+      max_cv <- min(max_cv, max(tmp_cvfilt$CV, na.rm=T))
     }
     
     title = sprintf("Maximum CV (between 1 and %s)", round(max_cv, 2))
@@ -32,6 +32,7 @@ list(
       div(
         br(),
         strong("No filters will be applied"),
+        br(),
         br()
       )
     )
@@ -78,7 +79,7 @@ list(
         )
         # cv filter
       } else if (grepl("cvfilt", names(objects$filters)[i])) {
-        n_removed <- sum(objects$filters[[i]]$CV_pooled > input$cv_threshold, na.rm=T)
+        n_removed <- sum(objects$filters[[i]]$CV > input$cv_threshold, na.rm=T)
         divs[[i]] <- tagList(
           tags$b("Coefficient of Variation (CV) Filter:"),
           tags$p("CV threshold: ", input$cv_threshold, "| Biomolecules removed: ", n_removed),
@@ -86,7 +87,14 @@ list(
         )
         # imd filter
       } else if (grepl("imdanovafilt", names(objects$filters)[i])) {
-        foo <- summary(objects$filters[[i]], min_nonmiss_anova = input$min_nonmiss_anova, min_nonmiss_gtest = input$min_nonmiss_gtest)
+        
+        mng <- if(is.na(input$min_nonmiss_gtest)) NULL else input$min_nonmiss_gtest
+        mna <- if(is.na(input$min_nonmiss_anova)) NULL else input$min_nonmiss_anova
+        
+        foo <- summary(objects$filters[[i]], 
+                       min_nonmiss_anova = mna, 
+                       min_nonmiss_gtest = mng
+                       )
         divs[[i]] <- tagList(
           tags$b("iMd-ANOVA Filter:"),
           tags$p(
@@ -394,13 +402,13 @@ list(
           disabled(
             bsButton("apply_filters", "Reset and apply all filters", style = "primary")
           ),
-          div(style = "float:right", modalButton("Update filter values (dont apply)"))
+          div(style = "float:right", modalButton("Update filter values (don't apply)"))
         )
       )
     } else {
       div(
         bsButton("apply_filters", "Apply all filters", style = "primary"),
-        div(style = "float:right", modalButton("Update filter values (dont apply)"))
+        div(style = "float:right", modalButton("Update filter values (don't apply)"))
       )
     }
   }),

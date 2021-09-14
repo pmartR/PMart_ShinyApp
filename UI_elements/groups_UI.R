@@ -55,7 +55,21 @@ list(
 
   # id column(s) for new fdata if they choose to do grouping
   output$fdata_id_col <- renderUI({
+    
+    matching_col_n <- map_int(1:ncol(f_data()), function(col) {
+      sum(f_data()[[col]] %in% colnames(objects$omicsData$e_data))
+    })
+    
+    matching_col <- colnames(f_data())[which(matching_col_n == max(matching_col_n))[1]]
+    
     if (two_lipids()) {
+      
+      matching_col_n2 <- map_int(1:ncol(f_data()), function(col) {
+        sum(f_data()[[col]] %in% colnames(objects$omicsData$e_data))
+      })
+      
+      matching_col2 <- colnames(f_data())[which(matching_col_n2 == max(matching_col_n2))[1]]
+      
       tagList(
         splitLayout(cellArgs = list(style = "text-align:center"), "Dataset 1", "Dataset 2"),
         br(style = "padding:2px"),
@@ -64,21 +78,25 @@ list(
           column(
             6,
             pickerInput("fdata_id_col", NULL,
-              choices = colnames(f_data())
+              choices = colnames(f_data()),
+              selected = matching_col
             )
           ),
           column(
             6,
             pickerInput("fdata_id_col_2", NULL,
-              choices = colnames(f_data_2())
+              choices = colnames(f_data_2()),
+              selected = matching_col2
             )
           )
         )
       )
     }
     else {
+      
       pickerInput("fdata_id_col", "Which column in your grouping file indicates sample names?",
-        choices = colnames(f_data())
+        choices = colnames(f_data()),
+        selected = matching_col
       )
     }
   }),
@@ -230,6 +248,7 @@ list(
   }),
   ##
 
+  ### Why are the group values left out here? Redundant with graphs sure
   # grouped data summaries
   output$omicsData_groups_summary <- renderDT(revals$groups_summary[1:6, ], rownames = T, options = list(dom = "t")),
   output$omicsData_groups_summary_2 <- renderDT(revals$groups_summary_2[1:6, ], rownames = T, options = list(dom = "t")),
@@ -252,6 +271,8 @@ list(
       )
     )
   }),
+  
+  outputOptions(output, "grouped_data_summary", suspendWhenHidden = FALSE),
   #
 
   # group tab warnings

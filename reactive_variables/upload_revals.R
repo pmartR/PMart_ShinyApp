@@ -6,7 +6,7 @@ e_data <- reactive({
   filename <- input$file_edata$datapath
 
   # exportTestValues(e_data = read.csv(filename, stringsAsFactors = FALSE))
-  read.csv(filename, stringsAsFactors = FALSE)
+  read.csv(filename, stringsAsFactors = FALSE, check.names = F)
 })
 
 e_data_2 <- reactive({
@@ -17,7 +17,7 @@ e_data_2 <- reactive({
   filename <- input$file_edata_2$datapath
 
   # exportTestValues(e_data = read.csv(filename, stringsAsFactors = FALSE))
-  read.csv(filename, stringsAsFactors = FALSE)
+  read.csv(filename, stringsAsFactors = FALSE, check.names = F)
 })
 
 # indicator to check whether there are zeros in the data

@@ -13,17 +13,20 @@ library(shinyjs)
 library(shinycssloaders)
 library(plotly)
 library(shinyalert)
+library(reshape2)
 
 ######## GLOBAL VALUES ##########
 # static objects
-filter_names <- read.csv("./filter_names.csv", stringsAsFactors = F)
+filter_names <- read.csv("./filter_names.csv", stringsAsFactors = F, check.names = F)
 dt_checkmark <- '<span class="glyphicon glyphicon-ok" style="color:deepskyblue"></span>'
 dt_minus <- '<span class="glyphicon glyphicon-minus"></span>'
 
 ttext_ <- list(
   "MAIN_EFFECTS_INFO" = "Main effects are the variables of interest, those values across which you want to make comparisons.  Covariates are those values that are not of experimental interest, but must be controlled for in the statistics.",
   "RMD_PROP_MISSING_WARNING" = "We advise against using proportion missing as a metric in lipidomics/metabolomics data, as they often have a very low proportion missing.",
-  "RMD_CUSTOM_FILTER_INFO" = "If you want to filter out one or more samples based on inspection of the rMd metrics and not a p-value cutoff, note their names and use a custom sample filter from the sample filters section to remove them."
+  "RMD_CUSTOM_FILTER_INFO" = "If you want to filter out one or more samples based on inspection of the rMd metrics and not a p-value cutoff, note their names and use a custom sample filter from the sample filters section to remove them.",
+  "REFERENCE_DISABLED_ROW" = "Disabled entries contain missing values in some samples. These might be due to NAs generated in log transformation or replacement of values less than or equal to zero.",
+  "REFERENCE_DISABLED_COL" = "Disabled entries are non-numeric."
 ) 
 
 infotext_ <- list(
