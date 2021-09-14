@@ -12,6 +12,15 @@ observeEvent(input$top_page,
         "peptide_statistics_tab",
         "protein_rollup_tab", 
         "statistics_tab")
+      # condition = input$top_page %in% c("Upload Data", 
+      #                                   "Reference",
+      #                                   "Group Samples", 
+      #                                   "Data Summary", 
+      #                                   "Filter", 
+      #                                   "Normalization", 
+      #                                   "Peptide Statistics",
+      #                                   "Protein Rollup", 
+      #                                   "Statistics")
       )
   },
   priority = 10,

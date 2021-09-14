@@ -3,7 +3,7 @@ f_data <- reactive({
   req(input$file_fdata$datapath)
   # Load file
   filename <- input$file_fdata$datapath
-  read.csv(filename, stringsAsFactors = FALSE)
+  read.csv(filename, stringsAsFactors = FALSE, check.names = F)
 })
 
 f_data_2 <- reactive({
@@ -11,7 +11,7 @@ f_data_2 <- reactive({
   req(input$file_fdata_2$datapath)
   # Load file
   filename <- input$file_fdata_2$datapath
-  read.csv(filename, stringsAsFactors = FALSE)
+  read.csv(filename, stringsAsFactors = FALSE, check.names = F)
 })
 
 main_effects <- reactive({

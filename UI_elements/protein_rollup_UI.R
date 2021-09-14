@@ -12,7 +12,11 @@ list(
     #}
     
     stats <- objects$peptide_imdanova_res
+# <<<<<<< HEAD
     group_info <- pmartR:::get_group_DF(data)
+# =======
+#     group_info <- pmartR:::get_group_table(data)
+# >>>>>>> f5b829a (Reset, Isobaric, NMR additions)
     comp_info <- attr(stats, "comparisons")
     
     l1 <- nrow(unique(data$f_data[attr(group_info, "main_effects")]))
@@ -93,6 +97,7 @@ list(
   # Icon manipulations
   output[["bpquant_apply_icon_UI"]] <- renderUI({
     
+    req(!is.null(attr(objects$omicsData, "group_DF")))
     # input$bpquant
     
     pro_class <- inherits(objects$omicsData, "proData")
@@ -104,7 +109,11 @@ list(
     }
     
     stats <- objects$peptide_imdanova_res
+# <<<<<<< HEAD
     group_info <- pmartR:::get_group_DF(data)
+# =======
+#     group_info <- pmartR:::get_group_table(data)
+# >>>>>>> f5b829a (Reset, Isobaric, NMR additions)
     comp_info <- attr(stats, "comparisons")
     
     l1 <- nrow(unique(data$f_data[attr(group_info, "main_effects")]))

@@ -32,6 +32,7 @@ list(
       div(
         br(),
         strong("No filters will be applied"),
+        br(),
         br()
       )
     )
@@ -86,7 +87,14 @@ list(
         )
         # imd filter
       } else if (grepl("imdanovafilt", names(objects$filters)[i])) {
-        foo <- summary(objects$filters[[i]], min_nonmiss_anova = input$min_nonmiss_anova, min_nonmiss_gtest = input$min_nonmiss_gtest)
+        
+        mng <- if(is.na(input$min_nonmiss_gtest)) NULL else input$min_nonmiss_gtest
+        mna <- if(is.na(input$min_nonmiss_anova)) NULL else input$min_nonmiss_anova
+        
+        foo <- summary(objects$filters[[i]], 
+                       min_nonmiss_anova = mna, 
+                       min_nonmiss_gtest = mng
+                       )
         divs[[i]] <- tagList(
           tags$b("iMd-ANOVA Filter:"),
           tags$p(
@@ -394,13 +402,13 @@ list(
           disabled(
             bsButton("apply_filters", "Reset and apply all filters", style = "primary")
           ),
-          div(style = "float:right", modalButton("Update filter values (dont apply)"))
+          div(style = "float:right", modalButton("Update filter values (don't apply)"))
         )
       )
     } else {
       div(
         bsButton("apply_filters", "Apply all filters", style = "primary"),
-        div(style = "float:right", modalButton("Update filter values (dont apply)"))
+        div(style = "float:right", modalButton("Update filter values (don't apply)"))
       )
     }
   }),

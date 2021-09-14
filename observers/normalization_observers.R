@@ -11,6 +11,12 @@ observeEvent(c(input$top_page, input$spans_or_manual), {
   toggle("inspect_norm", condition = !using_spans)
   toggle("use_selected_spans", condition = using_spans)
   toggle("apply_normalization", condition = using_spans)
+  
+  if(get_data_norm(objects$omicsData)){
+    updateButton(session,"apply_normalization", label = "Update normalization")
+  } else {
+    updateButton(session,"apply_normalization", label = "Apply normalization")
+  }
 
   if (using_spans) {
     updateCollapse(session, "spans_submenu", open = "use_spans")
@@ -281,6 +287,8 @@ observeEvent(c(input$apply_normalization, input$apply_normalization_modal), {
       )
       # be nice and open the plot panel for them
       updateCollapse(session, "normalization_mainpanel", open = "normdata_mainpanel")
+      
+      enable("reset_normalization")
     },
     error = function(e) {
       msg <- paste0("Something went wrong normalizing your data.  \n System error:  ", e)
@@ -288,6 +296,15 @@ observeEvent(c(input$apply_normalization, input$apply_normalization_modal), {
       revals$warnings_normalize$bad_norm_obj1 <<- sprintf("<p style = 'color:red'>%s</p>", msg)
     }
   )
+})
+
+# reset normalization; really only needed where no normalization desired
+observeEvent(input$reset_normalization, {
+  disable("reset_normalization")
+  makeobject()
+  refnorm()
+  makegroup()
+  apply_filt()
 })
 
 # dismiss and move to next tabs
@@ -313,23 +330,34 @@ observeEvent(input$inspect_norm, {
     enable("inspect_norm")
     hide("analyze_norm_busy")
   })
-
+  
   # initialize parameters
-  if (input$subset_fn %in% c("all", "complete")) {
-    params <- NULL
-  }
-  else if (input$subset_fn == "los") {
-    params <- list(los = input$los)
-  }
-  else if (input$subset_fn == "ppp") {
-    params <- list(ppp = input$ppp)
-  }
-  else if (input$subset_fn == "rip") {
-    params <- list(rip = input$rip)
-  }
-  else if (input$subset_fn == "ppp_rip") {
-    params <- list(ppp_rip = list(ppp = input$ppp, rip = input$rip))
-  }
+  params <- switch(
+    input$subset_fn,
+     all = NULL,
+     complete = NULL,
+     los = list(los = input$los),
+     ppp = list(ppp = input$ppp),
+     rip = list(rip = input$rip),
+     ppp_rip = list(ppp_rip = list(ppp = input$ppp, rip = input$rip))
+    )
+
+  # # initialize parameters
+  # if (input$subset_fn %in% c("all", "complete")) {
+  #   params <- NULL
+  # }
+  # else if (input$subset_fn == "los") {
+  #   params <- list(los = input$los)
+  # }
+  # else if (input$subset_fn == "ppp") {
+  #   params <- list(ppp = input$ppp)
+  # }
+  # else if (input$subset_fn == "rip") {
+  #   params <- list(rip = input$rip)
+  # }
+  # else if (input$subset_fn == "ppp_rip") {
+  #   params <- list(ppp_rip = list(ppp = input$ppp, rip = input$rip))
+  # }
 
   # inspect_norm() returns a 4 element list of p_location, p_scale, loc_boxplot, scale_boxplot, norm_modal_ba_plots
   res_1 <- tryCatch(
@@ -381,13 +409,15 @@ observeEvent(input$inspect_norm, {
     location_msg <- tags$b(tags$h4(sprintf("P-value from Kruskal-Wallis test on location parameters%s:  %s", extra_text, round(res_1$p_location, 3))))
     scale_msg <- if (!is.null(res_1$p_scale)) tags$b(tags$h4(sprintf("P-value from Kruskal-Wallis test on scale parameters%s:  %s", extra_text, round(res_1$p_scale, 3)))) else NULL
 
+    text <- ifelse(get_data_norm(objects$omicsData), "Update", "Apply")
+    
     # conditional message/button name depending on if we have a low p-value
     if (any(c(res_1$p_location, res_1$p_scale, res_2$p_location, res_2$p_scale) < 0.05)) {
       proceed_msg <- tagList(tags$b(style = "color:red", "Low p-values suggest your normalization factors are related to a variable of interest.  This may skew your results, consider choosing another method."), hr())
-      button_name <- "Apply normalization anyway"
+      button_name <- paste(text, " normalization anyway", collapse ="")
     }
     else {
-      button_name <- "Apply Normalization"
+      button_name <- paste(text, " normalization", collapse = "")
       proceed_msg <- NULL
     }
 

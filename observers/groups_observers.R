@@ -1,4 +1,95 @@
 # toggle fdata id col select if f_data() exists
+makegroup <- function(){
+  
+  req(objects$omicsData, f_data())
+  
+  ## Check two lipids requirements and process first
+  if (two_lipids()) {
+    req(objects$omicsData_2, f_data_2())
+    
+    if (input$usevizsampnames == "Yes") {
+      if (input$customsampnames_opts == "first_n") {
+        args_2 <- list(firstn = input$first_n_2)
+      }
+      else if (input$customsampnames_opts == "range") {
+        args_2 <- list(from = input$range_low_2, to = input$range_high_2)
+      }
+      else if (input$customsampnames_opts == "split") {
+        args_2 <- list(delim = input$delimiter_2, components = as.numeric(input$split_el_2))
+      }
+    }
+    
+    objects$omicsData_2 <- objects$uploaded_omicsData_2 <- tryCatch(
+      {
+        tmp <- objects$omicsData_2
+        tmp$f_data <- f_data_2()
+        attr(tmp, "cnames")$fdata_cname <- input$fdata_id_col_2
+        # pmartR:::verify_data_info(tmp)  ###################### New check function?
+        tmp <- group_designation(tmp,
+                                 main_effects = main_effects_2(),
+                                 covariates = covariates_2()
+        )
+        
+        if (input$usevizsampnames == "Yes") {
+          tmp <- do.call(custom_sampnames, args = c(omicsData = list(tmp), args_2))
+        }
+        
+        tmp
+      },
+      error = function(e) {
+        msg <- paste0("Something went wrong grouping your second omicsData object \n System error:  ", e)
+        message(msg)
+        revals$warnings_groups$obj_2 <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+        tmp <- objects$omicsData_2
+        attr(tmp, "group_DF") <- NULL
+        tmp
+      }
+    )
+  }
+  
+  ## Process omicsData normally
+  if (input$usevizsampnames == "Yes") {
+    if (input$customsampnames_opts == "first_n") {
+      args <- list(firstn = input$first_n)
+    }
+    else if (input$customsampnames_opts == "range") {
+      args <- list(from = input$range_low, to = input$range_high)
+    }
+    else if (input$customsampnames_opts == "split") {
+      args <- list(delim = input$delimiter, components = as.numeric(input$split_el))
+    }
+  }
+  
+  # replace fdata and fdata cname, then check data integrity
+  objects$omicsData <- objects$uploaded_omicsData <- tryCatch(
+    {
+      
+      tmp <- objects$omicsData
+      tmp$f_data <- f_data()
+      attr(tmp, "cnames")$fdata_cname <- input$fdata_id_col
+      # pmartR:::verify_data_info(tmp)  ###################### New check function?
+      tmp <- group_designation(tmp,
+                               main_effects = main_effects(),
+                               covariates = covariates()
+      )
+      
+      if (input$usevizsampnames == "Yes") {
+        tmp <- do.call(custom_sampnames, args = c(omicsData = list(tmp), args))
+      }
+      
+      tmp
+    },
+    error = function(e) {
+      msg <- paste0("Something went wrong grouping your omicsData object \n System error:  ", e)
+      message(msg)
+      revals$warnings_groups$obj_1 <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+      tmp <- objects$omicsData
+      attr(tmp, "group_DF") <- NULL
+      tmp
+    }
+  )
+}
+
 observe({
   req(f_data())
   toggleElement("js_fdata_id_col", condition = !is.null(f_data()))
@@ -6,12 +97,9 @@ observe({
 
 observeEvent(c(input$file_fdata, input$file_fdata_2), {
   Sys.sleep(0.7)
-  if (two_lipids()) {
-    cond <- !is.null(input$file_fdata) & !is.null(input$file_fdata_2)
-  }
-  else {
-    cond <- !is.null(input$file_fdata)
-  }
+  
+  cond <- !is.null(input$file_fdata) && 
+    (!two_lipids() || !is.null(input$file_fdata_2))
 
   if (cond) {
     updateCollapse(session, "groups_collapse_left", open = c("fdata_columns"))
@@ -58,17 +146,7 @@ lapply(list("gcol1_2", "gcol2_2", "cvcol1_2", "cvcol2_2"), function(el) {
 
 # apply group designation
 observeEvent(input$group_designation, {
-  if (input$usevizsampnames == "Yes") {
-    if (input$customsampnames_opts == "first_n") {
-      args <- list(firstn = input$first_n)
-    }
-    else if (input$customsampnames_opts == "range") {
-      args <- list(from = input$range_low, to = input$range_high)
-    }
-    else if (input$customsampnames_opts == "split") {
-      args <- list(delim = input$delimiter, components = as.numeric(input$split_el))
-    }
-  }
+  makegroup()
 
   if (two_lipids()) {
     req(objects$uploaded_omicsData, objects$uploaded_omicsData_2, f_data(), f_data_2())
@@ -167,17 +245,31 @@ observeEvent(input$group_designation, {
     )
   }
 
-  cond1 <- is.null(attributes(objects$uploaded_omicsData)$group_DF)
-  cond2 <- !is.null(objects$uploaded_omicsData_2) & is.null(attributes(objects$uploaded_omicsData_2)$group_DF)
+  # cond1 <- is.null(attributes(objects$uploaded_omicsData)$group_DF)
+  # cond2 <- !is.null(objects$uploaded_omicsData_2) & is.null(attributes(objects$uploaded_omicsData_2)$group_DF)
+  
+  cond1 <- is.null(attributes(objects$omicsData)$group_DF)
+  cond2 <- !is.null(objects$omicsData_2) & is.null(attributes(objects$omicsData_2)$group_DF)
+
 
 
   if (!cond1 & !cond2) {
     updateCollapse(session, "groups_collapse_left", close = c("fdata_upload", "fdata_columns"))
     shinyjs::show("ok_fdata_idcols")
+    shinyjs::show("grouped_data_summary")
 
     revals$warnings_groups$failed_groupdes <- NULL
     revals$warnings_groups$obj_1 <- NULL
     revals$warnings_groups$obj_2 <- NULL
+
+    if(inherits(objects$omicsData, "nmrData") ||
+       (inherits(objects$omicsData, "pepData") &&
+        input$labeled_yn == "iso")){
+      usebutton <- actionButton("goto_reference", "Continue to Reference Tab", style = "margin:5px;width:75%")
+    } else {
+      usebutton <- div(actionButton("goto_qc", "Continue to Data Summary Tab", style = "margin:5px;width:75%"),
+                       actionButton("goto_filter", "Continue to Filter Tab", style = "margin:5px;width:75%"))
+    }
 
     # if grouping structure is created, show success modal
     showModal(
@@ -186,25 +278,40 @@ observeEvent(input$group_designation, {
         fluidRow(
           column(10,
             align = "center", offset = 1,
-            HTML('<h4 style= "color:#1A5276">Your data has been successfully grouped. 
+            HTML('<h4 style= "color:#1A5276">Your data has been successfully grouped.
                       Future comparisons will be made across these groups.</h4>'),
             hr(),
             actionButton("groups_dismiss", "Review results", width = "75%"),
-            actionButton("goto_qc", "Continue to Data Summary Tab", style = "margin:5px;width:75%")
+            usebutton
+            # actionButton("goto_qc", "Continue to Data Summary Tab", style = "margin:5px;width:75%")
           )
         ),
         footer = NULL
       )
     )
 
-    revals$groups_summary <- summary(objects$uploaded_omicsData)
-    revals$groups_summary_2 <- if (two_lipids()) summary(objects$uploaded_omicsData_2) else NULL
+    revals$groups_summary <- summary(objects$omicsData)
+    revals$groups_summary_2 <- if (two_lipids()) summary(objects$omicsData_2) else NULL
   }
   else {
     revals$warnings_groups$failed_groupdes <- "<p style = 'color:grey'>Something went wrong grouping your objects$omicsData object(s), please verify all fields are correct.</p>"
     revals$groups_summary <- NULL
     revals$groups_summary_2 <- NULL
   }
+  
+  enable("group_reset")
+})
+
+observeEvent(input$group_reset, {
+  req(!is.null(objects$omicsData) && input$group_reset > 0)
+  makeobject(use_iso = F)
+
+  updateCollapse(session, "groups_collapse_left", close = c("fdata_upload"), open = "fdata_columns")
+  updateCollapse(session, "groups_collapse_right", close = c("fdata_plots"), open = "fdata_preview")
+  
+  shinyjs::hide("ok_fdata_idcols")
+  shinyjs::hide("grouped_data_summary")
+  disable("group_reset")
 })
 
 # dismiss modal and open plot collapsepanel
@@ -250,6 +357,9 @@ observe({
     cond_sample_names <- all(f_data()[[fdata_idcol1]] %in% sample_names())
     cond_main_effects <- (length(main_effects()) != 0) & all(main_effects() %in% colnames(f_data()))
     cond_covariates <- if (length(covariates() == 0)) TRUE else all(covariates() %in% colnames(f_data()))
+    cond_NA_groups <- any(is.na(f_data()[main_effects()]))
+    cond_iso_nrm <- inherits(objects$omicsData, "pepData") && 
+                        input$labeled_yn == "iso"
 
     cond <- all(cond_files, cond_idcol_fdata, cond_main_effects, cond_covariates, cond_sample_names)
   }
@@ -259,6 +369,11 @@ observe({
   revals$warnings_groups$idcol_fdata <- if (!cond_idcol_fdata) "<p style = 'color:grey'>Selected ID columns were not found in one or more grouping files.</p>" else NULL
   revals$warnings_groups$main_effects <- if (!cond_main_effects) "<p style = 'color:grey'>No main effect specified or not found in one or more grouping files.</p>" else NULL
   revals$warnings_groups$covariates <- if (!cond_covariates) "<p style = 'color:grey'>Specified covariates not found in one or more grouping files.</p>" else NULL
-
-  toggleState("group_designation", condition = cond)
+  revals$warnings_groups$NA_groups <- if(cond_NA_groups) "<p style = 'color:grey'>Specified main effect(s) are not assigned for all samples; samples with missing main effect(s) will be removed. </p>" else NULL
+  revals$warnings_groups$reference <- if(cond_NA_groups && cond_iso_nrm) "<p style = 'color:grey'>Note: Reference samples without assigned main effect(s) will still be available for downstream reference normalization.</p>" else NULL
+  
+  
+  groups_not_applied <- is.null(attributes(objects$omicsData)$group_DF)
+  
+  toggleState("group_designation", condition = cond && groups_not_applied)
 })
