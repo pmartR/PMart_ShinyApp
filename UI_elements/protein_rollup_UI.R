@@ -8,6 +8,7 @@ list(
     data <- objects$omicsData
     
     stats <- objects$peptide_imdanova_res
+# <<<<<<< HEAD
     group_info <- pmartR:::get_group_DF(data)
 
     comp_info <- attr(stats, "comparisons")
