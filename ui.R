@@ -73,6 +73,13 @@ ui <- function(request) {
         )
       )
     ),
-    uiOutput("developer_buttons")
+    uiOutput("developer_buttons"),
+    
+    # Add UI if MAP is enabled
+    if (MAP) {
+      div(id = "js_midpoint", style = "position:absolute;top:3px;right:350px;z-index:1100", 
+          bsButton("exportMid", "Save and Export Progress", style = "success"))
+    }
+    
   )
 } # shinyUI + tagList
