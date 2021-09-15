@@ -56,27 +56,42 @@ list(
           message(paste("Loading data through", Tab, "tab"))
           
           # These tabs will need to be disabled regardless
-          js$disableTab("upload_data_tab")
+          js$disableTab("Upload")
           js$disableTab("group_samples_tab")
           js$disableTab("data_summary_tab")
           js$disableTab("filter_tab")
           js$disableTab("normalization_tab")
           
           # Add additional tabs depending on what kind of data was exported
-          if (Tab %in% c("peptide_statistics", "protein_rollup", "Statistics")) {
+          if (Tab %in% c("peptide_statistics_tab", "protein_rollup_tab", "statistics_tab")) {
             js$disableTab("peptide_statistics_tab")
           } 
-          if (Tab %in% c("protein_rollup", "Statistics")) {
+          if (Tab %in% c("protein_rollup_tab", "statistics_tab")) {
             js$disableTab("protein_rollup_tab")
           } 
-          if (Tab == "Statistics") {
+          if (Tab == "statistics_tab") {
             js$disableTab("statistics_tab")
           }
           
-          # Load omics data 
-          objects$omicsData <- MidPointFile$MidPointFile$`Data Objects`
-    
+          # Jump to a specific tab if protein data 
+          if (class(MidPointFile$MidPointFile$`Data Objects`$OmicsData) == "pepData") {
+            if (Tab == "normalization_tab") {
+              js$enableTab("peptide_statistics_tab")
+              js$enableTab("protein_rollup_tab")
+              updateTabsetPanel(session, inputId = "top_page", selected = "peptide_statistics_tab")
+            } else if (Tab == "peptide_statistics_tab") {
+              js$enableTab("protein_rollup_tab")
+              updateTabsetPanel(session, inputId = "top_page", selected = "protein_rollup_tab")
+            }
+          } else {
+            updateTabsetPanel(session, inputId = "top_page", selected = "statistics_tab")
+          }
           
+          # Load omics data 
+          objects$omicsData <- MidPointFile$MidPointFile$`Data Objects`$OmicsData
+          objects$peptide_imdanova_res <-  MidPointFile$MidPointFile$`Data Objects`$OmicsStatsPep
+          objects$imdanova_res <-  MidPointFile$MidPointFile$`Data Objects`$OmicsStats
+    
         } else {
           
           sendSweetAlert(session, "Wrong MidPoint File Upload!", 
@@ -144,17 +159,15 @@ list(
     OmicsStatsPep <- objects$peptide_imdanova_res
     OmicsStats <- objects$imdanova_res
     
-    browser()
-    
     # Determine which tab the exporting is on 
     if (is.null(objects$imdanova_res) == FALSE) {
-      Tab <- "Statistics"
+      Tab <- "statistics_tab"
     } else if (input$datatype == "pep" & class(objects$omicsData) == "proData") {
-      Tab <- "protein_rollup"
+      Tab <- "protein_rollup_tab"
     } else if (is.null(objects$peptide_imdanova_res) == FALSE) {
-      Tab <- "peptide_statisics"
+      Tab <- "peptide_statistics_tab"
     } else {
-      Tab <- "Normalization"
+      Tab <- "normalization_tab"
     }
     
     # Generate pmartRpep midpoint object
