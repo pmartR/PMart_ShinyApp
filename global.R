@@ -15,6 +15,10 @@ library(plotly)
 library(shinyalert)
 
 ######## GLOBAL VALUES ##########
+
+# Pull app version from global variable
+MAP <- ifelse(Sys.getenv("MAP_VERSION") == "1", TRUE, FALSE)
+
 # static objects
 filter_names <- read.csv("./filter_names.csv", stringsAsFactors = F)
 dt_checkmark <- '<span class="glyphicon glyphicon-ok" style="color:deepskyblue"></span>'

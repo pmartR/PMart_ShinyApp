@@ -1,12 +1,30 @@
 e_data <- reactive({
-  # Error handling: Need file_edata path
-  req(input$file_edata$datapath)
-
-  # Load file
-  filename <- input$file_edata$datapath
-
-  # exportTestValues(e_data = read.csv(filename, stringsAsFactors = FALSE))
-  read.csv(filename, stringsAsFactors = FALSE)
+  
+  # This function has a MAP version
+  if (MAP) {
+    
+    # Error handling: Need edata
+    req(input$file_edata)
+    
+    # Disable input widget
+    disable(id = "file_edata")
+    
+    # Return data 
+    return(MapConnect$Project$Data$e_data)
+    
+  } else {
+  
+    # Error handling: Need file_edata path
+    req(input$file_edata$datapath)
+    
+    # Load file
+    filename <- input$file_edata$datapath
+    
+    # exportTestValues(e_data = read.csv(filename, stringsAsFactors = FALSE))
+    read.csv(filename, stringsAsFactors = FALSE)  
+    
+  }
+  
 })
 
 e_data_2 <- reactive({

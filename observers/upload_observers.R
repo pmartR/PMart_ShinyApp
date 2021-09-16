@@ -303,21 +303,34 @@ observeEvent(input$file_emeta, {
   revals$e_meta_info <- input$file_emeta
 }, priority = 10)
 
-## store null values in e_meta if no file chosen since it is not required to make object
-observe({
-  if(!isTruthy(as.logical(input$emeta_yn))) {
-    revals$e_meta <- NULL
-    revals$e_meta_info <- NULL
-    shinyjs::reset("file_emeta")
-  }
-  else if (is.null(revals$e_meta_info$datapath)) {
-    revals$e_meta <- NULL
-  }
-  else {
-    filename <- revals$e_meta_info$datapath
-    revals$e_meta <- read.csv(filename, stringsAsFactors = FALSE)
-  }
-})
+
+if (MAP) {
+  observe({
+    Sys.sleep(3)
+    if (is.null(MapConnect$Project) == FALSE) {
+      revals$e_meta <- MapConnect$Project$Data$e_meta
+    }
+  })
+}
+
+
+if (MAP == FALSE) {
+  ## store null values in e_meta if no file chosen since it is not required to make object
+  observe({
+    if(!isTruthy(as.logical(input$emeta_yn))) {
+      revals$e_meta <- NULL
+      revals$e_meta_info <- NULL
+      shinyjs::reset("file_emeta")
+    }
+    else if (is.null(revals$e_meta_info$datapath)) {
+      revals$e_meta <- NULL
+    }
+    else {
+      filename <- revals$e_meta_info$datapath
+      revals$e_meta <- read.csv(filename, stringsAsFactors = FALSE)
+    }
+  })
+}
 
 observe({
   if(!isTruthy(as.logical(input$emeta_yn))) {
