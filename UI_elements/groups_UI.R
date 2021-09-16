@@ -48,7 +48,7 @@ list(
         
         # If a project object was uploaded, use that name 
         if (is.null(MapConnect$Project) == FALSE) {
-          FileName <- MapConnect$Project$Data$e_data_filename %>% strsplit("/") %>% unlist() %>% tail(1)
+          FileName <- MapConnect$Project$Data$f_data_filename %>% strsplit("/") %>% unlist() %>% tail(1)
         }
         
         
