@@ -84,8 +84,7 @@ filter_UI <- function() {
                 numericInput("min_num_peps", "Minimum number of peptides mapped to each protein:", 2, step = 1),
                 checkboxInput("degen_peps", "Remove Degenerate Peptides?", TRUE)
               )
-            ),
-            hr()
+            )
           )
         )
         ), # end biomolecule filter collapse
@@ -146,7 +145,7 @@ filter_UI <- function() {
           )
         ),
         uiOutput("fdata_customfilt"),
-        uiOutput("fdata_regex")
+        uiOutput("edata_customfilt_pickers")
         )
       ), # parent collapse
       bsButton("review_filters", "Review and apply filters", style = "primary"),

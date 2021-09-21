@@ -370,9 +370,19 @@ observeEvent(input$add_customfilt, {
     objects$filters$customfilt <- tryCatch(
       {
         revals$warnings_filter$customfilt <<- NULL
+        
         # removed samples either user specified samples, or in the case of 'Keep', the complement of user specified samples
-        samples_rmv <- if (input$remove_or_keep == "Remove") input$fdata_customfilt_choices else setdiff(sample_names(), input$fdata_customfilt_choices)
-        if (length(samples_rmv) > 0) custom_filter(objects$uploaded_omicsData, f_data_remove = samples_rmv) else NULL
+        samples_rmv <- if (input$remove_or_keep == "Remove"){
+          input$fdata_customfilt_choices
+        } else setdiff(sample_names(), input$fdata_customfilt_choices)
+        
+        if (length(samples_rmv) > 0){
+          custom_filter(
+            objects$uploaded_omicsData, 
+            f_data_remove = samples_rmv,
+            e_data_remove = input$edata_customfilt_remove_mols_1
+          ) 
+        } else NULL
       },
       error = function(e) {
         msg <- paste0("Something went wrong updating your custom sample filter object \n System error:  ", e)
@@ -384,8 +394,18 @@ observeEvent(input$add_customfilt, {
       objects$filters$customfilt_2 <- tryCatch(
         {
           revals$warnings_filter$customfilt_2 <<- NULL
-          samples_rmv <- if (input$remove_or_keep == "Remove") input$fdata_customfilt_choices_2 else setdiff(sample_names_2(), input$fdata_customfilt_choices_2)
-          if (length(samples_rmv) > 0) custom_filter(objects$uploaded_omicsData_2, f_data_remove = samples_rmv) else NULL
+          
+          samples_rmv <- if (input$remove_or_keep == "Remove"){
+            input$fdata_customfilt_choices_2
+          } else setdiff(sample_names_2(), input$fdata_customfilt_choices_2)
+          
+          if (length(samples_rmv) > 0) {
+            custom_filter(
+              objects$uploaded_omicsData_2, 
+              f_data_remove = samples_rmv,
+              e_data_remove = input$edata_customfilt_remove_mols_2
+            ) 
+          } else NULL
         },
         error = function(e) {
           msg <- paste0("Something went wrong updating your second custom sample filter object \n System error:  ", e)

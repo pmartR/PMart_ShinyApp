@@ -59,22 +59,38 @@ list(
       # custom filter
       else if (grepl("customfilt", names(objects$filters)[i])) {
         # get samples and check whether we are removing or keeping
-        filter_samples <- unlist(objects$filters[[i]])
         object_samples <- attr(objects$filters[[i]], "omicsData")$f_data[, get_fdata_cname(attr(objects$filters[[i]], "omicsData"))]
         
         if ("f_data_keep" %in% names(objects$filters[[i]])) {
-          f_data_keep <- filter_samples
+          f_data_keep <- objects$filters[[i]]["f_data_keep"]
           f_data_remove <- setdiff(object_samples, f_data_keep) %>% union(rmd_removed_samps) # ** include samples removed by rmd filter
         }
         else if ("f_data_remove" %in% names(objects$filters[[i]])) {
-          f_data_remove <- filter_samples
+          f_data_remove <- objects$filters[[i]]["f_data_remove"]
           f_data_keep <- setdiff(object_samples, union(f_data_remove, rmd_removed_samps)) # **
         }
-
+        
+        e_data_remove = objects$filters$customfilt$e_data_remove
+        e_data_remove_div <- if(length(e_data_remove) > 0) {
+            tags$p("Biomolecules Removed: ", div(style = "overflow-x:auto", paste(e_data_remove, collapse = " | ")))
+        } else {
+          NULL
+        }
+        
+        f_data_remove_div <- if(length(f_data_remove) > 0) {
+          tagList(
+            tags$p("Samples Removed: ", div(style = "overflow-x:auto", paste(f_data_remove, collapse = " | "))),
+            tags$p("Remaining Samples:", div(style = "overflow-x:auto", paste(f_data_keep, collapse = " | ")))
+          )
+        } else {
+          NULL
+        }
+        
         divs[[i]] <- tagList(
           tags$b("Custom Filter:"),
-          tags$p("Samples Removed: ", div(style = "overflow-x:auto", paste(f_data_remove, collapse = " | "))),
-          tags$p("Remaining Samples:", div(style = "overflow-x:auto", paste(f_data_keep, collapse = " | "))),
+          f_data_remove_div,
+          hr(),
+          e_data_remove_div,
           hr()
         )
         # cv filter
@@ -191,59 +207,49 @@ list(
   output$fdata_customfilt <- renderUI({
     req(!is.null(objects$omicsData))
     fdata_IDS <- objects$omicsData$f_data %>% purrr::pluck(get_fdata_cname(objects$omicsData))
-    if (!(isTRUE(input$fdata_customfilt_regex == "") | is.null(input$fdata_customfilt_regex))) {
-      fdata_IDS <- fdata_IDS[grepl(input$fdata_customfilt_regex, fdata_IDS)]
-    }
+
     if (two_lipids()) {
       req(!is.null(objects$omicsData_2))
       fdata_IDS_2 <- objects$omicsData_2$f_data %>% purrr::pluck(get_fdata_cname(objects$omicsData_2))
-      if (!(isTRUE(input$fdata_customfilt_regex_2 == "") | is.null(input$fdata_customfilt_regex_2))) {
-        fdata_IDS_2 <- fdata_IDS_2[grepl(input$fdata_customfilt_regex_2, fdata_IDS_2)]
-      }
 
       fluidRow(
         column(
           6,
-          div(pickerInput("fdata_customfilt_choices", "Select Manually (dataset 1)", choices = fdata_IDS, multiple = TRUE))
+          div(
+            pickerInput(
+              "fdata_customfilt_choices",
+              "Select Manually (dataset 1)",
+              choices = fdata_IDS,
+              multiple = TRUE,
+              options = list(`live-search` = TRUE, `actions-box` = TRUE)
+            )
+          )
         ),
         column(
           6,
-          div(pickerInput("fdata_customfilt_choices_2", "Select Manually (dataset 2)", choices = fdata_IDS_2, multiple = TRUE))
-        )
-      )
-    }
-    else {
-      div(
-        style = "display:flex",
-        div(pickerInput("fdata_customfilt_choices", "Select Manually", choices = fdata_IDS, multiple = TRUE), style = "width:50%")
-      )
-    }
-  }),
-
-  # regex filter for custom filter
-  output$fdata_regex <- renderUI({
-    req(!is.null(objects$omicsData))
-    if (two_lipids()) {
-      req(!is.null(objects$omicsData_2))
-      tagList(
-        tags$b("Filter choices by regex string"),
-        fluidRow(
-          column(
-            6,
-            div(textInput("fdata_customfilt_regex", "(dataset 1)"))
-          ),
-          column(
-            6,
-            div(textInput("fdata_customfilt_regex_2", "(dataset 2)"))
+          div(
+            pickerInput(
+              "fdata_customfilt_choices_2",
+              "Select Manually (dataset 2)",
+              choices = fdata_IDS_2,
+              multiple = TRUE,
+              options = list(`live-search` = TRUE, `actions-box` = TRUE)
+            )
           )
         )
       )
     }
     else {
-      div(textInput("fdata_customfilt_regex", "Filter choices by regex string"))
+      pickerInput(
+        "fdata_customfilt_choices",
+        "Select Manually",
+        choices = fdata_IDS,
+        multiple = TRUE,
+        options = list(`live-search` = TRUE, `actions-box` = TRUE)
+      )
     }
   }),
-  
+
   #'@details Condition UI for rmd metric selection.  We deselect Proportion_Missing
   #' by default in the case of lipid data or metabolite data.
   output$rmd_metrics_out <- renderUI({
@@ -371,7 +377,50 @@ list(
       }
     }
   }),
-
+  
+  #'@details Picker inputs for selecting which molecules to remove using e_data
+  #'custom filter.
+  output$edata_customfilt_pickers<- renderUI({
+    req(!is.null(objects$uploaded_omicsData))
+    mols1 = objects$uploaded_omicsData$e_data[,get_edata_cname(objects$uploaded_omicsData)]
+    
+    if(two_lipids()){
+      validate(need(!is.null(objects$uploaded_omicsData_2)), "No second object")
+      mols2 = objects$uploaded_omicsData_2$e_data[,get_edata_cname(objects$uploaded_omicsData_2)]
+      
+      tagList(
+        tags$p("Select biomolecules to remove:"),
+        fluidRow(
+          column(6,
+             pickerInput(
+               "edata_customfilt_remove_mols_1",
+               choices = mols1,
+               multiple = T,
+               options = list(`live-search` = TRUE, `actions-box` = TRUE)
+             )       
+          ),
+          column(6, 
+             pickerInput(
+               "edata_customfilt_remove_mols_2",
+               choices = mols2,
+               multiple = T,
+               options = list(`live-search` = TRUE, `actions-box` = TRUE)
+             ) 
+          )
+        )
+      )
+    } else {
+      pickerInput(
+        "edata_customfilt_remove_mols_1",
+        "Select biomolecules to remove:",
+        choices = mols1,
+        multiple = T,
+        options = list(`live-search` = TRUE, `actions-box` = TRUE)
+      ) 
+    }
+    
+  }),
+  
   # Conditional UI for proteomics filter, invisible if the object is not pepData with protein column
   output$profilt_UI <- renderUI({
     if (class(objects$omicsData) == "pepData") {
