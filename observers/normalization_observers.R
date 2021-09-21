@@ -330,7 +330,10 @@ observeEvent(input$inspect_norm, {
   else if (input$subset_fn == "ppp_rip") {
     params <- list(ppp_rip = list(ppp = input$ppp, rip = input$rip))
   }
-
+  
+  # clear warnings
+  revals$warnings_normalize$bad_inspection_obj1 <- revals$warnings_normalize$bad_inspection_obj2 <- NULL
+  
   # inspect_norm() returns a 4 element list of p_location, p_scale, loc_boxplot, scale_boxplot, norm_modal_ba_plots
   res_1 <- tryCatch(
     {

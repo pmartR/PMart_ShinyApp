@@ -10,6 +10,7 @@ library(pmartR)
 library(dplyr)
 library(purrr)
 library(shinyjs)
+library(colourpicker)
 library(shinycssloaders)
 library(plotly)
 library(shinyalert)
@@ -29,6 +30,7 @@ blueexcl = icon("exclamation-sign", lib="glyphicon", style = "color:deepskyblue;
 #'@details text displayed in tooltips
 ttext_ <- list(
   "ABUNDANCE_ZEROS_TO_NA" = "Zeros will be automatically transformed to NA in raw abundance data.",
+  "IMD_INTERACTIVE_MANY_POINTS" = "If your data has many biomolecules, creating an interactive plot may take a while.",
   "MAIN_EFFECTS_INFO" = "Main effects are the variables of interest, those values across which you want to make comparisons.  Covariates are those values that are not of experimental interest, but must be controlled for in the statistics.",
   "MISSING_DATA_REPLACE" = "The value specified here will be replaced by NA in the data file.  If missing values are already NA in your data or the missing values are zeros in your abundance data, then you do not have to specify this field.",
   "RMD_PROP_MISSING_WARNING" = "We advise against using proportion missing as a metric in lipidomics/metabolomics data, as they often have a very low proportion missing.",

@@ -126,33 +126,71 @@ observeEvent(input$goto_downloads,{
   removeModal()
 })
 
-# make plot object
-observeEvent(c(objects$imdanova_res, input$imdanova_plot_type), {
-  req(!is.null(objects$imdanova_res))
-  tryCatch(
-    {
-      ### Removal for Class
-      if(input$imdanova_plot_type == "volcano"){
+#'@details when imd_anova_res object is created or the style is updated, make a 
+#'plot of the object and open the panel that displays it.
+observeEvent(
+  c(
+    objects$imdanova_res,
+    input$imdanova_plot_type,
+    input$stats_update_plot_content
+  ),
+  {
+    req(!is.null(objects$imdanova_res))
+    
+    interactive = if (is.null(input$stats_interactive_yn)) {
+      FALSE
+    } else
+      as.logical(input$stats_interactive_yn)
+    
+    fc_colors = if (all(map_lgl(
+      list(
+        input$imd_down_cpicker,
+        input$imd_nonsig_cpicker,
+        input$imd_up_cpicker
+      ),
+      isTruthy
+    ))) {
+      c(
+        input$imd_down_cpicker,
+        input$imd_nonsig_cpicker,
+        input$imd_imd_up_cpicker
+      )
+    } else
+      c("red", "black", "green")
+    
+    tryCatch({
+      if (input$imdanova_plot_type == "volcano") {
         temp <- objects$imdanova_res
-        attr(temp, "statistical_test") <- "anova"
-        plots$statistics_mainplot <- plot(temp, 
-                                                  plot_type = input$imdanova_plot_type, 
-                                                  bw_theme = TRUE)
+        plots$statistics_mainplot <- plot(
+          temp,
+          plot_type = input$imdanova_plot_type,
+          fc_threshold = input$imd_plot_fc_thresh,
+          fc_colors = fc_colors,
+          bw_theme = TRUE,
+          interactive = interactive
+        )
       } else {
-      plots$statistics_mainplot <- plot(objects$imdanova_res, 
-                                        plot_type = input$imdanova_plot_type, 
-                                        bw_theme = TRUE)
+        plots$statistics_mainplot <- plot(
+          objects$imdanova_res,
+          plot_type = input$imdanova_plot_type,
+          bw_theme = TRUE,
+          fc_colors = fc_colors,
+          interactive = interactive
+        )
       }
       updateCollapse(session, "statistics_collapse_main", open = "statistics_plots")
     },
     error = function(e) {
-      msg <- paste0("Something went wrong plotting your imdanovaRes object.  \n System error:  ", e)
+      msg <-
+        paste0("Something went wrong plotting your imdanovaRes object.  \n System error:  ",
+               e)
       message(msg)
-      revals$warnings_statistics$bad_imdanova_plot <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+      revals$warnings_statistics$bad_imdanova_plot <<-
+        sprintf("<p style = 'color:red'>%s</p>", msg)
       plots$statistics_mainplot <- NULL
-    }
-  )
-})
+    })
+  }
+)
 
 # apply plot styling to...
 
