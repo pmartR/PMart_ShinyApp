@@ -33,17 +33,31 @@ list(
       )
     }
     else {
-      div(
-        id = "js_file_edata",
-        fileInput("file_edata", "Upload CSV Data File",
-          multiple = FALSE,
-          accept = c(
-            "text/csv",
-            "text/comma-separated-values,text/plain",
-            ".csv"
+      
+      if (MAP) {
+
+        div(
+          id = "js_file_edata",
+          textInput("file_edata", "Uploaded CSV Data File", 
+                    value = MapConnect$Project$Data$e_data_filename %>% strsplit("/") %>% unlist() %>% tail(1))
+        )
+        
+      } else {
+        
+        div(
+          id = "js_file_edata",
+          fileInput("file_edata", "Upload CSV Data File",
+                    multiple = FALSE,
+                    accept = c(
+                      "text/csv",
+                      "text/comma-separated-values,text/plain",
+                      ".csv"
+                    )
           )
         )
-      )
+        
+      }
+    
     }
   }),
 
@@ -68,9 +82,18 @@ list(
 
   # select data scale
   output$datascale_UI <- renderUI({
-    pickerInput("data_scale", "On what scale is your data?",
-      choices = list("Raw intensity" = "abundance", "Log base 2" = "log2", "Log base 10" = "log10", "Natural log" = "log"),
-      selected = "abundance"
+    div(class = "inline-wrapper-1",
+      pickerInput("data_scale", "On what scale is your data?",
+        choices = list("Raw intensity" = "abundance", "Log base 2" = "log2", "Log base 10" = "log10", "Natural log" = "log"),
+        selected = "abundance"
+      ),
+      conditionalPanel(
+        "input.data_scale == 'abundance'",
+        tipify(
+          blueexcl,
+          title = gsub("\n", " ", ttext_[["ABUNDANCE_ZEROS_TO_NA"]])
+        )
+      )
     )
   }),
 
@@ -127,17 +150,30 @@ list(
 
   # emeta upload sub-panel
   output$emeta_UI <- renderUI({
-    title_upload_div <- div(
-      id = "js_file_emeta",
-      fileInput("file_emeta", "Upload CSV Biomolecule Information File",
-        multiple = FALSE,
-        accept = c(
-          "text/csv",
-          "text/comma-separated-values,text/plain",
-          ".csv"
+    
+    if (MAP) {
+      
+      title_upload_div <- disabled(div(
+        id = "js_file_emeta",
+        textInput("file_emeta", "Uploaded CSV Biomolecule Information File", 
+                  value = MapConnect$Project$Data$e_meta_filename %>% strsplit("/") %>% unlist() %>% tail(1))
+      ))
+      
+    } else {
+      
+      title_upload_div <- div(
+        id = "js_file_emeta",
+        fileInput("file_emeta", "Upload CSV Biomolecule Information File",
+                  multiple = FALSE,
+                  accept = c(
+                    "text/csv",
+                    "text/comma-separated-values,text/plain",
+                    ".csv"
+                  )
         )
       )
-    )
+      
+    }
 
     if (two_lipids()) {
       tagList(

@@ -6,14 +6,14 @@ data_summary_UI <- function() {
       column(
         4,
         radioGroupButtons("which_qc_plot", "Choose a Plot Type:",
-          choices = c("Boxplots" = "boxplots", "Missing Values Barplots" = "missingval_bar", "Missing Values Scatterplots" = "missingval_scatter")
+          choices = c("Boxplots" = "boxplots", "Missing Values Barplots" = "bar", "Missing Values Scatterplots" = "scatter")
         ),
         bsCollapse(
-          id = "qc_collapse", multiple = TRUE, open = c("plot_type", "axes_opts"),
-          bsCollapsePanel("Boxplots Options",
-            value = "boxplot_opts",
+          id = "qc_collapse", multiple = TRUE, open = c("qc_plot_params"),
+          bsCollapsePanel("Plot Options",
+            value = "qc_plot_params",
             tagList(
-              div("Order Boxplots By:", style = "font-weight:bold"),
+              div("Order Samples By:", style = "font-weight:bold"),
               fluidRow(
                 column(6, uiOutput("qc_order_by")),
                 column(6, uiOutput("qc_order_by_2"))
@@ -21,25 +21,18 @@ data_summary_UI <- function() {
             ),
             # color selection
             tagList(
-              div("Color Boxplots By:", style = "font-weight:bold"),
+              div("Color Samples By:", style = "font-weight:bold"),
               fluidRow(
                 column(6, uiOutput("qc_color_by")),
                 column(6, uiOutput("qc_color_by_2"))
               )
-            )
-          ),
-          bsCollapsePanel("Missing Value Options",
-            value = "missingval_opts",
-            # By sample or by molecule if missingval plot
-            div(id = "js_missingval_type", radioGroupButtons("missingval_type", "Plot Missing Values By:",
-              choices = c("Sample" = "bySample", "Biomolecule" = "byMolecule")
-            )),
-            div(id = "js_qc_colors", pickerInput("qc_colors", "Missing Values Colors",
-              choices = c(
-                "YlOrRd", "YlOrBr", "YlGnBu", "YlGn", "Reds", "RdPu", "Purples", "PuRd", "PuBuGn", "PuBu", "OrRd", "Oranges", "Greys",
-                "Greens", "GnBu", "BuPu", "BuGn", "Blues", "Set3", "Set2", "Set1", "Pastel2", "Pastel1", "Paired", "Dark2", "Accent",
-                "Spectral", "RdYlGn", "RdYlBu", "RdGy", "RdBu", "PuOr", "PRGn", "PiYG", "BrBG"
-              )
+            ),
+            div(
+              id = "js_qc_colors",
+              pickerInput(
+                "qc_colors",
+                "Missing Values Colors",
+                choices = global_input_choices$MISSINGVAL_COLORS
             ))
           )
         ), # parent collapse

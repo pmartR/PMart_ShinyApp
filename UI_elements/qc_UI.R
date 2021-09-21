@@ -4,7 +4,7 @@ list(
     req(!is.null(objects$omicsData))
     choices <- colnames(objects$omicsData$f_data %>% dplyr::select(-one_of(attributes(objects$omicsData)$cnames$fdata_cname)))
     pickerInput("qc_order_by", NULL,
-      choices = c("Select one", choices, "Group Levels" = "group_DF"),
+      choices = c("Select one", choices, "Group Levels" = "Group"),
       selected = all_inputs()$qc_order_by,
       options = pickerOptions(dropupAuto = FALSE)
     )
@@ -14,7 +14,7 @@ list(
     req(!is.null(objects$omicsData_2))
     choices <- colnames(objects$omicsData_2$f_data %>% dplyr::select(-one_of(attributes(objects$omicsData_2)$cnames$fdata_cname)))
     pickerInput("qc_order_by_2", NULL,
-      choices = c("Select one(dataset 2)" = "Select one", choices, "Group Levels" = "group_DF"),
+      choices = c("Select one(dataset 2)" = "Select one", choices, "Group Levels" = "Group"),
       selected = all_inputs()$qc_order_by_2
     )
   }),
@@ -25,7 +25,7 @@ list(
     req(!is.null(objects$omicsData))
     choices <- colnames(objects$omicsData$f_data %>% dplyr::select(-one_of(attributes(objects$omicsData)$cnames$fdata_cname)))
     pickerInput("qc_color_by", NULL,
-      choices = c("Select one", choices, "Group Levels" = "group_DF"),
+      choices = c("Select one", choices, "Group Levels" = "Group"),
       selected = all_inputs()$qc_color_by
     )
   }),
@@ -34,7 +34,7 @@ list(
     req(!is.null(objects$omicsData_2))
     choices <- colnames(objects$omicsData_2$f_data %>% dplyr::select(-one_of(attributes(objects$omicsData_2)$cnames$fdata_cname)))
     pickerInput("qc_color_by_2", NULL,
-      choices = c("Select one (dataset 2)" = "Select one", choices, "Group Levels" = "group_DF"),
+      choices = c("Select one (dataset 2)" = "Select one", choices, "Group Levels" = "Group"),
       selected = all_inputs()$qc_color_by_2
     )
   }),
@@ -90,29 +90,24 @@ list(
 
     # commonly used params
     use_VizSampNames <- "VizSampNames" %in% colnames(objects$omicsData$f_data)
-
+    
+    order_by <- if (isTRUE(input$qc_order_by == "Select one")) NULL else input$qc_order_by
+    color_by <- if (isTRUE(input$qc_color_by == "Select one")) NULL else input$qc_color_by
+    
     # ifelse chain for which type of plot
     if (input$which_qc_plot == "boxplots") {
-      # specific boxplot options
-      order_by <- if (isTRUE(input$qc_order_by == "Select one")) NULL else input$qc_order_by
-      color_by <- if (isTRUE(input$qc_color_by == "Select one")) NULL else input$qc_color_by
-
       p <- plot(objects$omicsData,
         order_by = order_by, color_by = color_by,
         use_VizSampNames = use_VizSampNames,
         bw_theme = TRUE
       )
     }
-    else if (input$which_qc_plot == "missingval_bar") {
+    else if (input$which_qc_plot %in% c("bar", "scatter")) {
       p <- plot(missingval_result(objects$omicsData),
-        type = input$missingval_type,
+        objects$omicsData,
+        order_by = order_by, color_by = color_by,
+        plot_type = input$which_qc_plot,
         use_VizSampNames = use_VizSampNames,
-        palette = input$qc_colors,
-        bw_theme = TRUE
-      )
-    }
-    else if (input$which_qc_plot == "missingval_scatter") {
-      p <- missingval_scatterplot(objects$omicsData,
         palette = input$qc_colors,
         bw_theme = TRUE
       )
@@ -142,15 +137,15 @@ list(
         use_VizSampNames = use_VizSampNames
       )
     }
-    else if (input$which_qc_plot == "missingval_bar") {
+    else if (input$which_qc_plot == "bar") {
       p <- plot(missingval_result(objects$omicsData_2),
-        type = input$missingval_type,
+        plot_type = input$missingval_type,
         use_VizSampNames = use_VizSampNames,
         bw_theme = TRUE,
         palette = input$qc_colors
       )
     }
-    else if (input$which_qc_plot == "missingval_scatter") {
+    else if (input$which_qc_plot == "scatter") {
       p <- missingval_scatterplot(objects$omicsData_2,
         bw_theme = TRUE,
         palette = input$qc_colors

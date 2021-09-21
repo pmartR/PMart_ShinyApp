@@ -71,7 +71,7 @@ upload_UI <- function() {
               textInput("na_symbol", "What value denotes missing data?", value = NA),
               tipify(
                 div(style="color:deepskyblue", icon("question-sign", lib = "glyphicon")),
-                title = gsub("\n", " ", infotext_[["MISSING_DATA_REPLACE"]])
+                title = ttext_[["MISSING_DATA_REPLACE"]]
               )
             )),
             conditionalPanel(

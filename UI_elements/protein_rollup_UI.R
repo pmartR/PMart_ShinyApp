@@ -12,7 +12,7 @@ list(
     #}
     
     stats <- objects$peptide_imdanova_res
-    group_info <- pmartR:::get_group_info(data)
+    group_info <- pmartR:::get_group_DF(data)
     comp_info <- attr(stats, "comparisons")
     
     l1 <- nrow(unique(data$f_data[attr(group_info, "main_effects")]))
@@ -104,7 +104,7 @@ list(
     }
     
     stats <- objects$peptide_imdanova_res
-    group_info <- pmartR:::get_group_info(data)
+    group_info <- pmartR:::get_group_DF(data)
     comp_info <- attr(stats, "comparisons")
     
     l1 <- nrow(unique(data$f_data[attr(group_info, "main_effects")]))

@@ -275,6 +275,7 @@ observeEvent(input$add_customfilt, {
 # rmdfilter plot
 observeEvent(c(input$plot_rmdfilt, input$rmd_metrics, input$pvalue_threshold, input$rmd_sample, input$rmdfilt_plot_type),
   {
+    req(input$plot_rmdfilt > 0)
     # store selected sample ID's or NULL if we are plotting all samples
     sampleID1 <- if (length(input$rmd_sample) > 0 & (input$rmdfilt_plot_type %in% c("subset", "outliers"))) input$rmd_sample else NULL
 
@@ -334,6 +335,7 @@ observeEvent(c(input$plot_rmdfilt, input$rmd_metrics, input$pvalue_threshold, in
 # proteomics filter plot
 observeEvent(c(input$plot_profilt, input$min_num_peps, input$degen_peps),
   {
+    req(input$plot_profilt > 0)
     revals$warnings_filter$profilt_plot <- NULL
 
     plots$filter_mainplot <- tryCatch(
@@ -353,6 +355,7 @@ observeEvent(c(input$plot_profilt, input$min_num_peps, input$degen_peps),
 # molecule filter plot
 observeEvent(c(input$plot_molfilt, input$mol_min_num),
   {
+    req(input$plot_molfilt > 0)
     revals$warnings_filter$molfilt_plot <- revals$warnings_filter$molfilt_plot_2 <- NULL
 
     plots$filter_mainplot <- tryCatch(
@@ -383,8 +386,9 @@ observeEvent(c(input$plot_molfilt, input$mol_min_num),
 )
 
 # cv filter plot
-observeEvent(c(input$plot_cvfilt, input$cv_threshold, input$add_cvfilt),
+observeEvent(c(input$plot_cvfilt, input$cv_threshold),
   {
+    req(input$plot_cvfilt > 0)
     revals$warnings_filter$cvfilt_plot <- revals$warnings_filter$cvfilt_plot_2 <- NULL
     
     plots$filter_mainplot <- tryCatch(
@@ -417,6 +421,7 @@ observeEvent(c(input$plot_cvfilt, input$cv_threshold, input$add_cvfilt),
 # imd anova filter plot
 observeEvent(c(input$plot_imdanovafilt, input$min_nonmiss_anova, input$min_nonmiss_gtest),
   {
+    req(input$plot_imdanovafilt > 0)
     revals$warnings_filter$imdanova_plot <- revals$warnings_filter$imdanova_plot_2 <- NULL
 
     plots$filter_mainplot <- tryCatch(

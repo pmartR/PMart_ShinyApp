@@ -90,7 +90,6 @@ observeEvent(input$group_designation, {
     objects$uploaded_omicsData_2$f_data <- f_data_2()
     attr(objects$uploaded_omicsData, "cnames")$fdata_cname <- input$fdata_id_col
     attr(objects$uploaded_omicsData_2, "cnames")$fdata_cname <- input$fdata_id_col_2
-    req(pmartR:::verify_data_info(objects$uploaded_omicsData), pmartR:::verify_data_info(objects$uploaded_omicsData_2))
 
     objects$omicsData <- objects$uploaded_omicsData <- tryCatch(
       {
@@ -143,7 +142,6 @@ observeEvent(input$group_designation, {
 
     objects$uploaded_omicsData$f_data <- f_data()
     attr(objects$uploaded_omicsData, "cnames")$fdata_cname <- input$fdata_id_col
-    req(pmartR:::verify_data_info(objects$uploaded_omicsData))
 
     objects$omicsData <- objects$uploaded_omicsData <- tryCatch(
       {

@@ -39,17 +39,38 @@ list(
       )
     }
     else {
-      div(
-        id = "js_file_fdata",
-        fileInput("file_fdata", "Upload CSV Data File for Sample Assignment",
-          multiple = FALSE,
-          accept = c(
-            "text/csv",
-            "text/comma-separated-values,text/plain",
-            ".csv"
+      
+      # Add different UI for MAP
+      if (MAP) {
+        
+        # Set FileName to an empty string
+        FileName <- ""
+        
+        # If a project object was uploaded, use that name 
+        if (is.null(MapConnect$Project) == FALSE) {
+          FileName <- MapConnect$Project$Data$f_data_filename %>% strsplit("/") %>% unlist() %>% tail(1)
+        }
+        
+        
+        div(
+          id = "js_file_fdata",
+          textInput("file_fdata", "Upload CSV Data File for Sample Assignment", 
+                    value = FileName)
+        )
+        
+      } else {
+        div(
+          id = "js_file_fdata",
+          fileInput("file_fdata", "Upload CSV Data File for Sample Assignment",
+                    multiple = FALSE,
+                    accept = c(
+                      "text/csv",
+                      "text/comma-separated-values,text/plain",
+                      ".csv"
+                    )
           )
         )
-      )
+      }
     }
   }),
 

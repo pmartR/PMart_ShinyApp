@@ -64,13 +64,20 @@ ui <- function(request) {
     ), # end Navbarpage
 
     ## Plot saving buttons
-    hidden(
+    div(
+      style = "position:absolute;top:3px;right:16px;z-index:1100;",
       div(
-        id = "js_saveplot", style = "position:absolute;top:3px;right:16px;z-index:1100",
-        fluidRow(
-          column(6, bsButton("viewplots", uiOutput("n_saved_plots"), style = "info")),
-          column(6, bsButton("saveplot", "Save Last Plot", style = "info"))
-        )
+        class = "inline-wrapper-1", 
+        bsButton("viewplots", uiOutput("n_saved_plots"), style = "info"),
+        hidden(div(id = "js_saveplot", style = "vertical-align:top",
+          bsButton("saveplot", "Save Last Plot", style = "info")
+        )),
+        # Add UI if MAP is enabled
+        if (MAP) {
+          div(id = "js_midpoint", style = "vertical-align:top",
+              bsButton("exportMid", "Save and Export Progress", style = "success")
+          )
+        } else NULL
       )
     ),
     uiOutput("developer_buttons")

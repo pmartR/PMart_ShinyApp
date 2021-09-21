@@ -163,6 +163,7 @@ observeEvent(input$apply_rollup, {
   on.exit(hide("rollup_busy"))
 
   objects$omicsData_pre_rollup <- objects$omicsData
+  revals$warnings_rollup$bad_rollup <- NULL
   
   tryCatch(
     {
@@ -217,7 +218,7 @@ observeEvent(input$apply_rollup, {
       
     },
     error = function(e) {
-      msg <- paste0("Something went wrong rollup up your pepdata:  \n System error:  ", e)
+      msg <- paste0("Something went wrong rolling up your pepdata:  \n System error:  ", e)
       message(msg)
       objects$omicsData <- objects$omicsData_pre_rollup
       revals$warnings_rollup$bad_rollup <<- sprintf("<p style = 'color:red'>%s</p>", msg)

@@ -147,7 +147,9 @@ observe({
 #'toggle the button to make the object on/off depending.
 observe({
   revals$boolean$upload
-  # TODO:  Add info messages as to why things were disabled.
+  #' TODO:  Add info messages as to why things were disabled.  (or rather, check
+  #' that every info message that appears in red below the button is a good 
+  #' reason for the button to be disabled)
   toggleState("makeobject",
               condition = all(unlist(revals$boolean$upload)) & 
                 length(unlist(revals$boolean$upload)) > 0)
@@ -301,21 +303,34 @@ observeEvent(input$file_emeta, {
   revals$e_meta_info <- input$file_emeta
 }, priority = 10)
 
-## store null values in e_meta if no file chosen since it is not required to make object
-observe({
-  if(!isTruthy(as.logical(input$emeta_yn))) {
-    revals$e_meta <- NULL
-    revals$e_meta_info <- NULL
-    shinyjs::reset("file_emeta")
-  }
-  else if (is.null(revals$e_meta_info$datapath)) {
-    revals$e_meta <- NULL
-  }
-  else {
-    filename <- revals$e_meta_info$datapath
-    revals$e_meta <- read.csv(filename, stringsAsFactors = FALSE)
-  }
-})
+
+if (MAP) {
+  observe({
+    Sys.sleep(3)
+    if (is.null(MapConnect$Project) == FALSE) {
+      revals$e_meta <- MapConnect$Project$Data$e_meta
+    }
+  })
+}
+
+
+if (MAP == FALSE) {
+  ## store null values in e_meta if no file chosen since it is not required to make object
+  observe({
+    if(!isTruthy(as.logical(input$emeta_yn))) {
+      revals$e_meta <- NULL
+      revals$e_meta_info <- NULL
+      shinyjs::reset("file_emeta")
+    }
+    else if (is.null(revals$e_meta_info$datapath)) {
+      revals$e_meta <- NULL
+    }
+    else {
+      filename <- revals$e_meta_info$datapath
+      revals$e_meta <- read.csv(filename, stringsAsFactors = FALSE)
+    }
+  })
+}
 
 observe({
   if(!isTruthy(as.logical(input$emeta_yn))) {
@@ -331,6 +346,11 @@ observe({
   }
 })
 ##
+
+#'@details navigate to the data requirements sub-tab
+observeEvent(input$upload_to_datareqs, {
+  updateTabsetPanel(session, "top_page", "data_requirements")
+})
 
 # modal dialog behavior
 observeEvent(input$upload_dismiss, {
