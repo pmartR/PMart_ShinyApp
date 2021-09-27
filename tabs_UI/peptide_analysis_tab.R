@@ -37,7 +37,7 @@ peptide_statistics_UI <- function() {
                id = "peptide_statistics_collapse_main", multiple = TRUE,
                bsCollapsePanel("Plots",
                                value = "peptide_statistics_plots",
-                               radioGroupButtons("peptide_imdanova_plot_type", "Plot type", choices = c("Bar" = "bar", "Volcano" = "volcano")),
+                               uiOutput("peptide_imdanova_plot_type_UI"), 
                                withSpinner(uiOutput("peptide_statistics_mainplot"))
                ),
                bsCollapsePanel("Plot Options",

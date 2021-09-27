@@ -4,6 +4,7 @@ statistics_UI <- function() {
     class = "collapse_page",
     column(
       4,
+      inlineCSS("#statistics_collapse_left {margin-bottom:5px;}"),
       bsCollapse(
         id = "statistics_collapse_left", multiple = TRUE, open = "stats-statistics-options",
         bsCollapsePanel(
@@ -36,7 +37,7 @@ statistics_UI <- function() {
         id = "statistics_collapse_main", multiple = TRUE,
         bsCollapsePanel("Plots",
           value = "statistics_plots",
-          radioGroupButtons("imdanova_plot_type", "Plot type", choices = c("Bar" = "bar", "Volcano" = "volcano")),
+          uiOutput("imdanova_plot_type_UI"), 
           withSpinner(uiOutput("statistics_mainplot"))
         ),
         bsCollapsePanel("Plot Options",

@@ -164,31 +164,25 @@ observeEvent(
       c(
         input$imd_down_cpicker,
         input$imd_nonsig_cpicker,
-        input$imd_imd_up_cpicker
+        input$imd_up_cpicker
       )
     } else
       c("red", "black", "green")
+
+    color_low = if(isTruthy(input$imd_low_cpicker)) input$imd_low_cpicker else "#132B43"
+    color_high = if(isTruthy(input$imd_high_cpicker)) input$imd_high_cpicker else "#56B1F7"
     
     tryCatch({
-      if (input$imdanova_plot_type == "volcano") {
-        temp <- objects$imdanova_res
-        plots$statistics_mainplot <- plot(
-          temp,
-          plot_type = input$imdanova_plot_type,
-          fc_threshold = input$imd_plot_fc_thresh,
-          fc_colors = fc_colors,
-          bw_theme = TRUE,
-          interactive = interactive
-        )
-      } else {
-        plots$statistics_mainplot <- plot(
-          objects$imdanova_res,
-          plot_type = input$imdanova_plot_type,
-          bw_theme = TRUE,
-          fc_colors = fc_colors,
-          interactive = interactive
-        )
-      }
+      plots$statistics_mainplot <- plot(
+        objects$imdanova_res,
+        plot_type = input$imdanova_plot_type,
+        bw_theme = TRUE,
+        fc_colors = fc_colors,
+        fc_threshold = input$imd_plot_fc_thresh,
+        interactive = interactive,
+        color_low = color_low,
+        color_high = color_high
+      )
       updateCollapse(session, "statistics_collapse_main", open = "statistics_plots")
     },
     error = function(e) {
