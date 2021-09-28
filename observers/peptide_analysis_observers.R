@@ -151,34 +151,74 @@ observeEvent(input$pep_goto_downloads,{
   removeModal()
 })
 
-# make plot object
-observeEvent(c(objects$peptide_imdanova_res, input$peptide_imdanova_plot_type), {
-  req(!is.null(objects$peptide_imdanova_res))
-  tryCatch(
-    {
-      ### Removal for Class
-      if(input$peptide_imdanova_plot_type == "volcano"){
+#'@details when imd_anova_res object is created or the style is updated, make a 
+#'plot of the object and open the panel that displays it.
+observeEvent(
+  c(
+    objects$peptide_imdanova_res,
+    input$peptide_imdanova_plot_type,
+    input$peptide_stats_update_plot_content
+  ),
+  {
+    req(!is.null(objects$peptide_imdanova_res))
+    
+    interactive = if (is.null(input$peptide_stats_interactive_yn)){
+      FALSE
+    } else as.logical(input$peptide_stats_interactive_yn)
+    
+    fc_colors = if (all(map_lgl(
+      list(
+        input$pep_imd_down_cpicker,
+        input$pep_imd_nonsig_cpicker,
+        input$pep_imd_up_cpicker
+      ),
+      isTruthy
+    ))) {
+      c(
+        input$pep_imd_down_cpicker,
+        input$pep_imd_nonsig_cpicker,
+        input$pep_imd_up_cpicker
+      )
+    } else
+      c("red", "black", "green")
+    
+    tryCatch({
+      if (input$peptide_imdanova_plot_type == "volcano") {
         temp <- objects$peptide_imdanova_res
-        attr(temp, "statistical_test") <- "anova"
-        plots$peptide_statistics_mainplot <- plot(temp, 
-                                                  plot_type = input$peptide_imdanova_plot_type, 
-                                                  bw_theme = TRUE)
+        plots$peptide_statistics_mainplot <-
+          plot(
+            temp,
+            fc_threshold = input$peptide_imd_plot_fc_thresh,
+            fc_colors = fc_colors,
+            plot_type = input$peptide_imdanova_plot_type,
+            interactive = interactive,
+            bw_theme = TRUE
+          )
       } else {
-        plots$peptide_statistics_mainplot <- plot(objects$peptide_imdanova_res, 
-                                                  plot_type = input$peptide_imdanova_plot_type, 
-                                                  bw_theme = TRUE)
+        plots$peptide_statistics_mainplot <-
+          plot(
+            objects$peptide_imdanova_res,
+            fc_colors = fc_colors,
+            plot_type = input$peptide_imdanova_plot_type,
+            interactive = interactive,
+            bw_theme = TRUE
+          )
       }
       
       updateCollapse(session, "peptide_statistics_collapse_main", open = "peptide_statistics_plots")
     },
     error = function(e) {
-      msg <- paste0("Something went wrong plotting your imdanovaRes object.  \n System error:  ", e)
+      msg <-
+        paste0("Something went wrong plotting your imdanovaRes object.  \n System error:  ",
+               e)
       message(msg)
-      revals$warnings_peptide_statistics$bad_imdanova_plot <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+      revals$warnings_peptide_statistics$bad_imdanova_plot <<-
+        sprintf("<p style = 'color:red'>%s</p>", msg)
       plots$peptide_statistics_mainplot <- NULL
-    }
-  )
-})
+    })
+  },
+  priority = 5
+)
 
 # apply plot styling to...
 

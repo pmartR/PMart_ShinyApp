@@ -1,16 +1,16 @@
 # main plot display which takes in the plot object that is created immediately after imd_anova() is run
-output$statistics_mainplot <- renderPlot({
+output$statistics_mainplot <- renderUI({
   req(!is.null(plots$statistics_mainplot))
   # browser()
   p <- plots$statistics_mainplot
-  if (inherits(p, "list")) {
-    p <- gridExtra::arrangeGrob(p[[1]], p[[2]], ncol = 2)
-    plots$last_plot <- p
-    grid::grid.draw(p)
+  plots$last_plot <- p
+  if (inherits(p, "plotly")) {
+    output$statistics_mainplot_plotly <- renderPlotly(p)
+    plotlyOutput("statistics_mainplot_plotly")
   }
-  else {
-    plots$last_plot <- p
-    return(p)
+  else if (inherits(p, "ggplot")) {
+    output$statistics_mainplot_ggplot <- renderPlot(p)
+    plotOutput("statistics_mainplot_ggplot")
   }
 })
 
@@ -22,7 +22,7 @@ output$statistics_tab_sidepanel <- renderUI({
   if (input$stats_select_method == "imdanova"){
     bsCollapse(
       id = "imdanova-sidepanel-options", multiple = TRUE, 
-      open = c("imdanova-specify-comparisons"), 
+      open = c("imdanova-specify-comparisons", "imdanova-select-settings"), 
       #
       bsCollapsePanel(
         subsection_header(
@@ -231,10 +231,51 @@ output$statistics_summary_table <- renderDT({
   objects$imdanova_res[["Full_results"]]
 }, options = list(scrollX =TRUE))
 
-# theme UI
+#'@details UI created with the helper function style_UI to edit plot options
+#'in plot.<object> function as well as axes values (if it is a ggplot)
 output$statistics_plot_options <- renderUI({
-  style_UI("statistics")
+  cpicker_args <- list(
+    list(inputId = "imd_down_cpicker", label = "Negative", value = "red"),
+    list(inputId = "imd_nonsig_cpicker", label = "Non significant", value = "black"),
+    list(inputId = "imd_up_cpicker", label = "Positive", value = "green")
+  )
+  
+  tagList(
+    h4("Main plot content"),
+    conditionalPanel(
+      "input.imdanova_plot_type == 'volcano'",
+      div(
+        class = "inline-wrapper-1",
+        numericInput("imd_plot_fc_thresh", "Fold-change Threshold", value = NULL),
+        radioGroupButtons(
+          "stats_interactive_yn",
+          choices = c("Interactive" = T, "Static" = F),
+          selected = F
+        )
+      )
+    ),
+    h5("Statistical significance/fold change colors"),
+    inline_cpickers(cpicker_args), # UI helper
+    div(
+      class = "inline-wrapper-1",
+      actionButton("stats_update_plot_content", "Update plot"),
+      conditionalPanel("input.stats_interactive_yn == 'TRUE'",
+                       tipify(blueexcl, ttext_[["IMD_INTERACTIVE_MANY_POINTS"]]))
+    ),
+    conditionalPanel(
+      "input.stats_interactive_yn == 'FALSE'",
+      tagList(
+        style_UI(
+          "statistics",
+          hr(),
+          h4("Axes styling")
+        ),
+        uiOutput("statistics_apply_style")
+      )
+    )
+  )
 })
+
 output$statistics_apply_style <- renderUI({
   apply_style_UI("statistics", FALSE, inherits(plots$statistics_mainplot, "list"))
 })
