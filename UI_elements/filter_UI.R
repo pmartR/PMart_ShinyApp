@@ -288,12 +288,16 @@ list(
     if(all(!metric_filt)) metric_filt <- NULL
     
     pickerInput("rmd_metrics", 
-                label = div(class="flex-inline",
-                    "Metrics to determine outliers",
+                div(
+                  "Metrics to determine outliers",
+                  div(
+                    style = "color:deepskyblue;display:inline-block",
                     tipify(
-                      icon("question-sign", style = "color:deepskyblue", class = "info-right"), 
-                      title = "Metrics with zero variance are disabled")
-                    ),
+                      icon("question-sign", lib = "glyphicon"),
+                      title = "Metrics with zero variance are disabled"
+                    )
+                  )
+                ),
                 choices = global_input_choices[['RMD_FILTER_CHOICES']],
                 selected = selected,
                 choicesOpt = list(

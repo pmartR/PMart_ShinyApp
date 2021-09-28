@@ -786,6 +786,21 @@ observeEvent(input$apply_filters, {
       filters2 <- filters2_div <- NULL
     }
 
+    if(inherits(objects$omicsData, "nmrData")){
+      buttons <- div(
+        actionButton("filter_dismiss", "Stay on this tab", width = "75%"),
+        actionButton("goto_norm", "Continue to Normalization (optional)", 
+                     style = "margin-top:5px;width:75%"),
+        actionButton("goto_stats_filter", "Continue to Statistics", 
+                     style = "margin-top:5px;width:75%")
+      )
+    } else {
+      buttons <- div(
+        actionButton("filter_dismiss", "Stay on this tab", width = "75%"),
+        actionButton("goto_norm", "Continue to Normalization", style = "margin-top:5px;width:75%")
+      )
+    }
+    
     showModal(
       modalDialog(
         title = "Filters Applied",
@@ -796,8 +811,7 @@ observeEvent(input$apply_filters, {
             HTML(paste0(cond_text1, filters1)),
             hr(),
             filters2_div,
-            actionButton("filter_dismiss", "Stay on this tab", width = "75%"),
-            actionButton("goto_norm", "Continue to Normalization", style = "margin-top:5px;width:75%")
+            buttons
           )
         ),
         footer = NULL
@@ -827,6 +841,11 @@ observeEvent(reactiveValuesToList(objects), {
 
 observeEvent(input$goto_norm, {
   updateTabsetPanel(session, "top_page", selected = "normalization_tab")
+  removeModal()
+})
+
+observeEvent(input$goto_stats_filter, {
+  updateTabsetPanel(session, "top_page", selected = "statistics_tab")
   removeModal()
 })
 
