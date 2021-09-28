@@ -169,6 +169,7 @@ list(
   # plot of prodata after rollup
   output$rollup_plot <- renderPlotly({
     req(!is.null(objects$omicsData), cancelOutput = TRUE)
+    # browser()
     plots$last_plot <- plots$rollup_plot
     plots$rollup_plot
   }),

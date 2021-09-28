@@ -1,6 +1,7 @@
 # main plot display which takes in the plot object that is created immediately after imd_anova() is run
 output$peptide_statistics_mainplot <- renderUI({
   req(!is.null(plots$peptide_statistics_mainplot))
+  # browser()
   p <- plots$peptide_statistics_mainplot
   plots$last_plot <- p
   if (inherits(p, "plotly")) {
