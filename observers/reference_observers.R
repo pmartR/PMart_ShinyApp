@@ -1,14 +1,30 @@
 ## Reference observers
 success_modal <-
+    modalDialog(
+      title = "Reference Normalization Success",
+      fluidRow(
+        column(10,
+               align = "center", offset = 1,
+               HTML('<h4 style= "color:#1A5276">Your data has been successfully reference normalized. 
+                      Future processing will be performaed on the reference normalized data.</h4>'),
+               hr(),
+               actionButton("upload_dismiss", "Review results", width = "75%"),
+               actionButton("goto_filter", "Continue to Filters", style = "margin:5px;width:75%")
+        )
+      ),
+      footer = NULL
+    )
+    
+success_modal_no_input <-
   modalDialog(
-    title = "Reference Normalization Success",
+    title = "No Reference Normalization",
     fluidRow(
       column(10,
              align = "center", offset = 1,
-             HTML('<h4 style= "color:#1A5276">Your data has been successfully uploaded. 
+             HTML('<h4 style= "color:#1A5276">No reference normalization will be applied. 
                       You may proceed to the subsequent tabs.</h4>'),
              hr(),
-             actionButton("ref_dismiss", "Review results", width = "75%"),
+             actionButton("ref_dismiss", "Review results", style = "margin:5px;width:75%"),
              actionButton("goto_qc", "Continue to Data Summary Tab", style = "margin:5px;width:75%"),
              actionButton("goto_filter", "Continue to Filter Tab", style = "margin:5px;width:75%")
       )
@@ -32,8 +48,6 @@ refnorm <- function(){
   ## Cancel Conditions
   if(is.null(input[[paste0(tab, "_ref_samps")]]) || 
      input[[paste0(tab, "_ref_samps")]] == "No")  return()
-  
-  req(!cond && input[[paste0(tab, "_ref_done_idcols")]] > 0)
   
   showNotification("Normalizing, please wait....",
                    duration = NULL,
@@ -66,7 +80,8 @@ refnorm <- function(){
       emeta_cname = get_emeta_cname(objects$omicsData),
       data_scale = get_data_scale(objects$omicsData),
       is_normalized = get_data_norm(objects$omicsData),
-      isobaric_norm = get_isobaric_norm(objects$omicsData)
+      isobaric_norm = get_isobaric_norm(objects$omicsData),
+      check.names = F
     )
     
     objects$omicsData <- normalize_isobaric(applied_norm,
@@ -113,6 +128,11 @@ observeEvent(c(input$groups_dismiss, input$goto_reference), {
   })
 })
 
+observeEvent(input$ref_dismiss, {
+  # updateCollapse(session, "groups_collapse_right", open = "fdata_plots")
+  removeModal()
+})
+
 ## Based on if ref sampls used, open, close collapse panels and show/hide icons
 observeEvent(c(input$Isobaric_ref_samps, input$NMR_ref_samps, input$NMR_reference_source), {
   tabname <- ifelse(inherits(objects$omicsData, "nmrData"), "NMR", "Isobaric")
@@ -139,7 +159,7 @@ observeEvent(c(input$Isobaric_ref_samps, input$NMR_ref_samps, input$NMR_referenc
     showElement(paste0(tabname, "_reference_option_icon"))
     showElement(paste0(tabname, "_reference_input_icon"))
     updateCollapse(session, "references_collapse_left", close = c("columnids", "datselect"))
-    showModal(success_modal)
+    showModal(success_modal_no_input)
     
   }
 
@@ -150,7 +170,15 @@ observeEvent(
   {
     tab <- ifelse(inherits(objects$omicsData, "nmrData"), "NMR", "Isobaric")
     
-    req(input[[paste0(tab, "_ref_done_idcols")]] > 0)
+    if(tab == "NMR"){
+      cond <- get_nmr_norm(objects$omicsData)
+    } else if (tab == "Isobaric"){
+      cond <- get_isobaric_norm(objects$omicsData)
+    } else {
+      return()
+    }
+    
+    req((is.null(cond) || !cond) && input[[paste0(tab, "_ref_done_idcols")]] > 0)
 
     makeobject()
     refnorm()
@@ -171,14 +199,14 @@ observeEvent(
 )
 
 observeEvent(input$goto_filter, {
-  updateTabsetPanel(session, "top_page", selected = "Filter")
+  updateTabsetPanel(session, "top_page", selected = "filter_tab")
   removeModal()
 })
 
 observeEvent(input$ref_done, {
-  
-  tab <- ifelse(inherits(objects$omicsData, "nmrData"), "NMR", "Isobaric")
-  if(tab == "NMR"){
+  tabname <- ifelse(inherits(objects$omicsData, "nmrData"), "NMR", "Isobaric")
+
+  if(tabname == "NMR"){
     cond_disable_apply <- is.null(input$NMR_picker_reference) ||
       get_nmr_norm(objects$omicsData) ||
       input$NMR_picker_reference %in% c(
@@ -211,8 +239,7 @@ observeEvent(input$ref_done, {
   req(!cond_disable_apply)
   
   updateCollapse(session, "references_collapse_left", close = "columnids")
-  tab <- ifelse(inherits(objects$omicsData, "nmrData"), "NMR", "Isobaric")
-  showElement(paste0(tab, "_reference_input_icon"))
+  showElement(paste0(tabname, "_reference_input_icon"))
 })
 
 observeEvent(input$ref_reset,

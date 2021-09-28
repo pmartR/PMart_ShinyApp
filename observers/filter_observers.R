@@ -23,7 +23,7 @@ apply_filt <- function(){
         }
       }
       # proteomics filter
-      if (class(tmp) == "pepData") {
+      if (inherits(tmp, "pepData")) {
         if (isTRUE(!is.null(objects$filters$profilt) & is.null(attributes(tmp)$filters$proteomicsFilt))) {
           tmp <- applyFilt(objects$filters$profilt, tmp, min_num_peps = input$min_num_peps, degen_peps = input$degen_peps)
         }
@@ -326,9 +326,11 @@ observeEvent(input$add_imdanovafilt, {
 
 # create rmdfilt object
 observeEvent(input$add_rmdfilt, {
-  rmdfilt_exists <- !is.null(objects$filters$rmdfilt) & (!is.null(objects$filters$rmdfilt_2) | is.null(objects$uploaded_omicsData_2))
+  rmdfilt_exists <- !is.null(objects$filters$rmdfilt) & 
+    (!is.null(objects$filters$rmdfilt_2) | is.null(objects$uploaded_omicsData_2))
 
   if (!rmdfilt_exists) {
+    
     objects$filters$rmdfilt <- tryCatch(
       {
         revals$warnings_filter$rmdfilt1 <<- NULL
@@ -357,6 +359,46 @@ observeEvent(input$add_rmdfilt, {
   else {
     revals$warnings_filter$rmdfilt1 <- revals$warnings_filter$rmdfilt2 <- objects$filters$rmdfilt <- objects$filters$rmdfilt_2 <- NULL
   }
+  
+  ## Ipmart version
+  # metric_vars = apply(objects$filters$rmdfilt[,attr(objects$filters$rmdfilt, "metrics")], 2, var)
+  # cond_zerovars <- any(metric_vars == 0)
+  # cond_no_missing <- attr(omicsData_objects[[name]], "data_info")$num_miss_obs == 0 & 
+  #   "Proportion_Missing" %in% input[[sprintf("%s_rmd_metrics", name)]]
+  # cond = cond_zerovars | cond_no_missing
+  # 
+  # reset_metrics <- if(cond_no_missing) {
+  #   union("Proportion_Missing", names(metric_vars)[which(metric_vars == 0)])
+  # } else names(metric_vars)[which(metric_vars == 0)]
+  # reset_metrics <- gsub("Corr$", "Correlation", reset_metrics)
+  # 
+  # ## Remove effect
+  # updatePrettySwitch(
+  #   session, sprintf("%s_add_rmdfilt", name), 
+  #   value = !cond)
+  # 
+  # 
+  # show_add_tooltip(
+  #   session, sprintf("%s_rmd_novariance_warn_icon", name),
+  #   condition = cond,
+  #   tooltip_text = sprintf(
+  #     ttext[["RMDFILT_NO_VARIANCE"]], 
+  #     paste(reset_metrics, collapse = " | ")
+  #   )
+  # )
+  # 
+  # # deselect the offending zero-variance selection
+  # if (cond) {
+  #   new_selections <- setdiff(input[[sprintf("%s_rmd_metrics", name)]], reset_metrics)
+  #   updatePickerInput(
+  #     session, 
+  #     inputId = sprintf("%s_rmd_metrics", name),
+  #     selected = new_selections
+  #   )
+  #   
+  #   return()
+  # } 
+  
 
   # rmdfilt_exists <- !is.null(objects$filters$rmdfilt) & (!is.null(objects$filters$rmdfilt_2) | is.null(objects$uploaded_omicsData_2))
   # 
@@ -431,7 +473,11 @@ observeEvent(c(input$plot_rmdfilt, input$rmd_metrics, input$pvalue_threshold, in
     # store plot object in reactive variable
     plots$filter_mainplot <- tryCatch(
       {
-        p <- plot(rmd_filter(objects$uploaded_omicsData, metrics = input$rmd_metrics), pvalue_threshold = input$pvalue_threshold, sampleID = sampleID1, bw_theme = TRUE)
+        p <- plot(rmd_filter(objects$uploaded_omicsData, 
+                             metrics = input$rmd_metrics),
+                  pvalue_threshold = input$pvalue_threshold, 
+                  sampleID = sampleID1, bw_theme = TRUE#, interactive = T
+                  )
 
         # block for displaying sample names if we are plotting all samples
         if (is.null(sampleID1)) {
@@ -456,7 +502,8 @@ observeEvent(c(input$plot_rmdfilt, input$rmd_metrics, input$pvalue_threshold, in
       plots$filter_mainplot_2 <- tryCatch(
         {
           p <- plot(rmd_filter(objects$uploaded_omicsData_2, metrics = input$rmd_metrics),
-            pvalue_threshold = input$pvalue_threshold, sampleID = sampleID2, bw_theme = TRUE
+            pvalue_threshold = input$pvalue_threshold, sampleID = sampleID2, 
+            bw_theme = TRUE#, interactive = T
           )
 
           if (is.null(sampleID2)) {
@@ -487,7 +534,10 @@ observeEvent(c(input$plot_profilt, input$min_num_peps, input$degen_peps),
 
     plots$filter_mainplot <- tryCatch(
       {
-        plot(proteomics_filter(objects$uploaded_omicsData), min_num_peps = as.numeric(input$min_num_peps), bw_theme = TRUE)
+        plot(proteomics_filter(objects$uploaded_omicsData), 
+             min_num_peps = as.numeric(input$min_num_peps), 
+             bw_theme = TRUE#, interactive = T
+             )
       },
       error = function(e) {
         msg <- paste0("Something went wrong making your proteomics filter plot \n System error: ", e)
@@ -507,7 +557,9 @@ observeEvent(c(input$plot_molfilt, input$mol_min_num),
 
     plots$filter_mainplot <- tryCatch(
       {
-        plot(molecule_filter(objects$uploaded_omicsData), min_num = input$mol_min_num, bw_theme = TRUE)
+        plot(molecule_filter(objects$uploaded_omicsData), 
+             min_num = input$mol_min_num, bw_theme = TRUE#, interactive = T
+             )
       },
       error = function(e) {
         msg <- paste0("Something went wrong making your molecule filter plot \n System error: ", e)
@@ -519,7 +571,10 @@ observeEvent(c(input$plot_molfilt, input$mol_min_num),
     if (!is.null(objects$uploaded_omicsData_2)) {
       plots$filter_mainplot_2 <- tryCatch(
         {
-          plot(molecule_filter(objects$uploaded_omicsData_2), min_num = input$mol_min_num, bw_theme = TRUE)
+          plot(molecule_filter(objects$uploaded_omicsData_2), 
+               min_num = input$mol_min_num, 
+               bw_theme = TRUE#, interactive = T
+               )
         },
         error = function(e) {
           msg <- paste0("Something went wrong making your second molecule filter plot \n System error: ", e)
@@ -540,7 +595,10 @@ observeEvent(c(input$plot_cvfilt, input$cv_threshold),
     
     plots$filter_mainplot <- tryCatch(
       {
-        plot(cv_filter(objects$uploaded_omicsData), cv_threshold = input$cv_threshold, bw_theme = TRUE)
+        plot(cv_filter(objects$uploaded_omicsData),
+             cv_threshold = input$cv_threshold,
+             bw_theme = TRUE#, interactive = T
+             )
       },
       error = function(e) {
         msg <- paste0("Something went wrong making your CV filter plot \n System error: ", e)
@@ -552,7 +610,10 @@ observeEvent(c(input$plot_cvfilt, input$cv_threshold),
     if (!is.null(objects$uploaded_omicsData_2)) {
       plots$filter_mainplot_2 <- tryCatch(
         {
-          plot(cv_filter(objects$uploaded_omicsData_2), cv_threshold = input$cv_threshold, bw_theme = TRUE)
+          plot(cv_filter(objects$uploaded_omicsData_2), 
+               cv_threshold = input$cv_threshold, 
+               bw_theme = TRUE#, interactive = T
+               )
         },
         error = function(e) {
           msg <- paste0("Something went wrong making your second CV filter plot \n System error: ", e)
@@ -573,7 +634,11 @@ observeEvent(c(input$plot_imdanovafilt, input$min_nonmiss_anova, input$min_nonmi
 
     plots$filter_mainplot <- tryCatch(
       {
-        plot(imdanova_filter(objects$uploaded_omicsData), min_nonmiss_anova = input$min_nonmiss_anova, min_nonmiss_gtest = input$min_nonmiss_gtest, bw_theme = TRUE)
+        plot(imdanova_filter(objects$uploaded_omicsData), 
+             min_nonmiss_anova = input$min_nonmiss_anova, 
+             min_nonmiss_gtest = input$min_nonmiss_gtest, 
+             bw_theme = TRUE#, interactive = T
+             )
       },
       error = function(e) {
         msg <- paste0("Something went wrong making your iMd-ANOVA filter plot \n System error: ", e)
@@ -585,7 +650,11 @@ observeEvent(c(input$plot_imdanovafilt, input$min_nonmiss_anova, input$min_nonmi
     if (!is.null(objects$uploaded_omicsData_2)) {
       plots$filter_mainplot_2 <- tryCatch(
         {
-          plot(imdanova_filter(objects$uploaded_omicsData_2), min_nonmiss_anova = input$min_nonmiss_anova, min_nonmiss_gtest = input$min_nonmiss_gtest, bw_theme = TRUE)
+          plot(imdanova_filter(objects$uploaded_omicsData_2), 
+               min_nonmiss_anova = input$min_nonmiss_anova, 
+               min_nonmiss_gtest = input$min_nonmiss_gtest, 
+               bw_theme = TRUE#, interactive = T
+               )
         },
         error = function(e) {
           msg <- paste0("Something went wrong making your second iMd-ANOVA filter plot \n System error: ", e)
@@ -728,7 +797,7 @@ observeEvent(input$apply_filters, {
             hr(),
             filters2_div,
             actionButton("filter_dismiss", "Stay on this tab", width = "75%"),
-            actionButton("goto_norm", "Continue to normalization", style = "margin-top:5px;width:75%")
+            actionButton("goto_norm", "Continue to Normalization", style = "margin-top:5px;width:75%")
           )
         ),
         footer = NULL

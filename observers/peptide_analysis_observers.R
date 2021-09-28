@@ -2,7 +2,8 @@
 #' table that presents the group comparisons
 observe({
   req(input$peptide_imdanova_comparison_method, objects$omicsData)
-  
+  req(!is.null(attr(objects$omicsData,"group_DF")))
+
   if (input$peptide_imdanova_comparison_method == "Control to test condition comparisons") {
     control <- input$peptide_imdanova_control_group
     noncontrol <- input$peptide_imdanova_non_control_groups
@@ -65,7 +66,11 @@ observe({
 # make statres object
 observeEvent(input$peptide_apply_imdanova, {
   req(!is.null(objects$omicsData), input$top_page == "peptide_statistics_tab" &&
-        !is.null( input$peptide_imdanova_test_method))
+        !is.null( input$peptide_imdanova_test_method) &&
+        !is.null(comp_df_holder$comp_df))
+  
+  shinyjs::show("peptide_analysis_busy")
+  on.exit(hide("peptide_analysis_busy"))
   
   tryCatch(
     {
@@ -78,6 +83,14 @@ observeEvent(input$peptide_apply_imdanova, {
         pval_adjust = input$peptide_pval_adjust, 
         pval_thresh = input$peptide_pval_thresh
       )
+      
+      show("peptide_stats-statistics-ok")
+      show("peptide_imdanova_groups_ok")
+      show("peptide_imdanova_settings_ok")
+      
+      updateCollapse(session, "peptide_statistics_collapse_left", close = c("peptide_stats-statistics-options"))
+      updateCollapse(session, "peptide_imdanova-sidepanel-options", 
+                     close = c("peptide_imdanova-specify-comparisons", "peptide_imdanova-select-settings"))
       
       
       # success modal if all is well
@@ -106,7 +119,9 @@ observeEvent(input$peptide_apply_imdanova, {
                        ),
                      hr(),
                      actionButton("pepstats_dismiss", "Review results", width = "75%"),
+                     br(), 
                      actionButton("goto_rollup", "Continue to Protein Rollup Tab", width = "75%"),
+                     br(), 
                      actionButton("pep_goto_downloads", "Continue to Download Tab", width = "75%")
               )
             )

@@ -126,7 +126,7 @@ observe({
 
 # when spans is done, lead the user to the next collapse panel and show the plot/table
 observeEvent(objects$spans_res, {
-  updateCollapse(session, "spans_submenu", open = "choose_params")
+  updateCollapse(session, "spans_submenu", open = "choose_params", close = "use_spans")
   updateCollapse(session, "normalization_mainpanel", open = "spans_mainpanel")
 })
 
@@ -173,7 +173,7 @@ observeEvent(c(input$spans_table_rows_selected, objects$spans_res), {
 # update the parameter selections with those of the selected row
 observeEvent(input$use_selected_spans, {
   ### updating tons of inputs
-  req(!is.null(objects$spans_res))
+  req(!is.null(objects$spans_res) && input$use_selected_spans > 0)
 
   ind <- input$spans_table_rows_selected
   row <- objects$spans_res[ind, ]
@@ -227,6 +227,9 @@ observeEvent(c(input$apply_normalization, input$apply_normalization_modal), {
   req(input$top_page == "normalization_tab", any(c(input$apply_normalization, input$apply_normalization_modal) > 0))
   ####
   removeModal()
+
+  show("ok_normalization")
+  updateCollapse(session, "normalization_sidebar", close = "normalize_global_sidebar")
 
   tryCatch(
     {
@@ -301,10 +304,15 @@ observeEvent(c(input$apply_normalization, input$apply_normalization_modal), {
 # reset normalization; really only needed where no normalization desired
 observeEvent(input$reset_normalization, {
   disable("reset_normalization")
-  makeobject()
+  ## If not using reference normalized isobaric, make sure to render as pepdata
+  makeobject(use_iso = (inherits(objects$omicsData, "isobaricpepData") && 
+                          !is.null(get_isobaric_norm(objects$omicsData))))
   refnorm()
   makegroup()
   apply_filt()
+  
+  hide("ok_normalization")
+  updateCollapse(session, "normalization_sidebar", open = "normalize_global_sidebar")
 })
 
 # dismiss and move to next tabs

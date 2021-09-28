@@ -9,6 +9,8 @@ observe({
   #' not analyzing pepdata
   cond = !emeta_exists | !is_pepdata
   
+  cond_ref <- (is_pepdata && input$labeled_yn == "iso") || inherits(objects$omicsData, "nmrData")
+  
   toggleTooltip(
     session, 
     tooltip_text = ttext_[['TABDISABLE_NOT_PEP']], 
@@ -26,6 +28,7 @@ observe({
   
   toggleTab("peptide_statistics_tab", condition = is_pepdata)
   toggleTab("protein_rollup_tab", condition = !cond)
+  toggleTab("Reference", condition = cond_ref)
   
 
   #' Disable regular statistics if there is not e_meta, since we expect this tab

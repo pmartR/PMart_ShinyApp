@@ -2,12 +2,12 @@ list(
   #'@details Input for cv filter cv_threshold.  Inside a reactive UI so that the
   #'maximum CV can be displayed depending on the data.
   output$cv_threshold_UI <- renderUI({
-    req(objects$uploaded_omicsData)
-    tmp_cvfilt <- cv_filter(objects$uploaded_omicsData)
+    req(objects$omicsData)
+    tmp_cvfilt <- cv_filter(objects$omicsData)
     max_cv = max(tmp_cvfilt$CV, na.rm=T)
     
-    if(!is.null(objects$uploaded_omicsData_2)) {
-      tmp_cvfilt <- cv_filter(objects$uploaded_omicsData_2)
+    if(!is.null(objects$omicsData_2)) {
+      tmp_cvfilt <- cv_filter(objects$omicsData_2)
       max_cv <- min(max_cv, max(tmp_cvfilt$CV, na.rm=T))
     }
     
@@ -21,8 +21,8 @@ list(
     # store text as a list of HTML elements
     divs <- list()
 
-    fdata_cname <- attributes(objects$uploaded_omicsData)$cnames$fdata_cname
-    fdata_cname_2 <- attributes(objects$uploaded_omicsData_2)$cnames$fdata_cname
+    fdata_cname <- attributes(objects$omicsData)$cnames$fdata_cname
+    fdata_cname_2 <- attributes(objects$omicsData_2)$cnames$fdata_cname
 
     # indices of which filters/HTML elements belong to each object
     obj2_inds <- which(grepl("_2", names(objects$filters)))
@@ -163,6 +163,8 @@ list(
   # other filter plot for lipid data
   output$filter_mainplot_2 <- renderPlot({
     if (inherits(plots$filter_mainplot_2, "list")) {
+      
+      browser()
       p <- gridExtra::arrangeGrob(plots$filter_mainplot_2[[1]], plots$filter_mainplot_2[[2]], ncol = 2)
       plots$last_plot_2 <- p
       grid::grid.draw(p)
@@ -175,10 +177,10 @@ list(
 
   # plot one or both UI elements
   output$filter_dynamic_mainplot <- renderUI({
-    if (!is.null(objects$uploaded_omicsData) & is.null(objects$uploaded_omicsData_2)) {
+    if (!is.null(objects$omicsData) & is.null(objects$omicsData_2)) {
       withSpinner(plotOutput("filter_mainplot"))
     }
-    else if (any(!is.null(objects$uploaded_omicsData), !is.null(objects$uploaded_omicsData_2))) {
+    else if (any(!is.null(objects$omicsData), !is.null(objects$omicsData_2))) {
       tagList(
         withSpinner(plotOutput("filter_mainplot")),
         withSpinner(plotOutput("filter_mainplot_2"))
@@ -188,14 +190,14 @@ list(
 
   # Sample (fdata) filter
   output$fdata_customfilt <- renderUI({
-    req(!is.null(objects$uploaded_omicsData))
-    fdata_IDS <- objects$uploaded_omicsData$f_data %>% purrr::pluck(get_fdata_cname(objects$uploaded_omicsData))
+    req(!is.null(objects$omicsData))
+    fdata_IDS <- objects$omicsData$f_data %>% purrr::pluck(get_fdata_cname(objects$omicsData))
     if (!(isTRUE(input$fdata_customfilt_regex == "") | is.null(input$fdata_customfilt_regex))) {
       fdata_IDS <- fdata_IDS[grepl(input$fdata_customfilt_regex, fdata_IDS)]
     }
     if (two_lipids()) {
-      req(!is.null(objects$uploaded_omicsData_2))
-      fdata_IDS_2 <- objects$uploaded_omicsData_2$f_data %>% purrr::pluck(get_fdata_cname(objects$uploaded_omicsData_2))
+      req(!is.null(objects$omicsData_2))
+      fdata_IDS_2 <- objects$omicsData_2$f_data %>% purrr::pluck(get_fdata_cname(objects$omicsData_2))
       if (!(isTRUE(input$fdata_customfilt_regex_2 == "") | is.null(input$fdata_customfilt_regex_2))) {
         fdata_IDS_2 <- fdata_IDS_2[grepl(input$fdata_customfilt_regex_2, fdata_IDS_2)]
       }
@@ -221,9 +223,9 @@ list(
 
   # regex filter for custom filter
   output$fdata_regex <- renderUI({
-    req(!is.null(objects$uploaded_omicsData))
+    req(!is.null(objects$omicsData))
     if (two_lipids()) {
-      req(!is.null(objects$uploaded_omicsData_2))
+      req(!is.null(objects$omicsData_2))
       tagList(
         tags$b("Filter choices by regex string"),
         fluidRow(
@@ -246,17 +248,57 @@ list(
   #'@details Condition UI for rmd metric selection.  We deselect Proportion_Missing
   #' by default in the case of lipid data or metabolite data.
   output$rmd_metrics_out <- renderUI({
-    req(!is.null(objects$uploaded_omicsData))
-    if(class(objects$uploaded_omicsData) %in% c("lipidData", "metabData")){
-      selected = c("MAD", "Kurtosis", "Skewness", "Correlation")
+    req(!is.null(objects$omicsData))
+    
+    ## Error throwing work around
+    map_list <- c("MAD", "Kurtosis", "Skewness", "Corr", "Proportion_Missing")
+    metric_set <- unlist(global_input_choices[['RMD_FILTER_CHOICES']])
+    metric_set2 <- combn(metric_set, 2, simplify = F)
+    
+    res_check <- map(metric_set2, function(metric){
+      tryCatch({
+        rmd_filter(objects$omicsData, 
+                   metrics = metric)
+      }, error = function(e){
+        print(e)
+        return(NULL)
+      })
+
+    })
+    
+    pairs <- unlist(metric_set2[map_lgl(res_check, is.null)])
+    disable_metric <- unique(pairs[duplicated(pairs)])
+    
+    ok_meterics <- metric_set[!(metric_set %in% disable_metric)]
+    map_list <- map_list[!(metric_set %in% disable_metric)]
+    
+    filter <- rmd_filter(objects$omicsData, metrics = ok_meterics)
+    ok_meterics <- ok_meterics[map_lgl(map_list, function(metric) var(filter[metric]) != 0)]
+    metric_filt <- !(metric_set %in% ok_meterics)
+
+    if(class(objects$omicsData) %in% c("lipidData", "metabData")){
+      selected <-  c("MAD", "Kurtosis", "Skewness", "Correlation")
+      selected <- selected[selected %in% c("MAD", "Kurtosis", "Skewness", "Correlation", "Proportion_Missing")[!metric_filt]]
     }
     else {
-      selected = c("MAD", "Kurtosis", "Skewness", "Correlation", "Proportion_Missing")
+      selected <-  c("MAD", "Kurtosis", "Skewness", "Correlation", "Proportion_Missing")
+      selected <- selected[selected %in% c("MAD", "Kurtosis", "Skewness", "Correlation", "Proportion_Missing")[!metric_filt]]
     }
 
-    pickerInput("rmd_metrics", "Metrics to determine outliers",
+    if(all(!metric_filt)) metric_filt <- NULL
+    
+    pickerInput("rmd_metrics", 
+                label = div(class="flex-inline",
+                    "Metrics to determine outliers",
+                    tipify(
+                      icon("question-sign", style = "color:deepskyblue", class = "info-right"), 
+                      title = "Metrics with zero variance are disabled")
+                    ),
                 choices = global_input_choices[['RMD_FILTER_CHOICES']],
                 selected = selected,
+                choicesOpt = list(
+                  disabled = metric_filt
+                ),
                 multiple = TRUE
     )
   }),
@@ -264,9 +306,9 @@ list(
   #'@details warning icon that appears when we select proportion missing as
   #'a metric for lipidomics or metabolomics data.
   output$rmd_propmis_warn_icon <- renderUI({
-    req(!is.null(objects$uploaded_omicsData), input$rmd_metrics)
+    req(!is.null(objects$omicsData), input$rmd_metrics)
     if(
-      class(objects$uploaded_omicsData) %in% c("lipidData", "metabData") &
+      class(objects$omicsData) %in% c("lipidData", "metabData") &
       "Proportion_Missing" %in% input$rmd_metrics
       ){
       return(tipify(
@@ -281,15 +323,15 @@ list(
   
   # Conditional UI for rmd filter, depends on the sample names in the file(s)
   output$rmdfilt_plot_type <- renderUI({
-    req(!is.null(objects$uploaded_omicsData))
+    req(!is.null(objects$omicsData))
     if (input$rmdfilt_plot_type == "all") {
       NULL
     }
     else if (input$rmdfilt_plot_type == "subset") {
       if (two_lipids()) {
-        req(!is.null(objects$uploaded_omicsData_2))
-        choices1 <- objects$uploaded_omicsData$f_data[, get_fdata_cname(objects$uploaded_omicsData)]
-        choices2 <- objects$uploaded_omicsData_2$f_data[, get_fdata_cname(objects$uploaded_omicsData_2)]
+        req(!is.null(objects$omicsData_2))
+        choices1 <- objects$omicsData$f_data[, get_fdata_cname(objects$omicsData)]
+        choices2 <- objects$omicsData_2$f_data[, get_fdata_cname(objects$omicsData_2)]
 
         tagList(
           tags$p("Select samples to inspect:"),
@@ -300,17 +342,17 @@ list(
         )
       }
       else {
-        choices1 <- objects$uploaded_omicsData$f_data[, get_fdata_cname(objects$uploaded_omicsData)]
+        choices1 <- objects$omicsData$f_data[, get_fdata_cname(objects$omicsData)]
         pickerInput("rmd_sample", "Select samples to inspect:", choices = choices1, multiple = FALSE)
       }
     }
     else if (input$rmdfilt_plot_type == "outliers") {
-      temp_rmd_filter1 <- rmd_filter(objects$uploaded_omicsData, metrics = input$rmd_metrics)
+      temp_rmd_filter1 <- rmd_filter(objects$omicsData, metrics = input$rmd_metrics)
       if (two_lipids()) {
-        req(!is.null(objects$uploaded_omicsData_2))
-        temp_rmd_filter2 <- rmd_filter(objects$uploaded_omicsData_2, metrics = input$rmd_metrics)
-        choices1 <- objects$uploaded_omicsData$f_data[which(temp_rmd_filter1$pvalue < input$pvalue_threshold), get_fdata_cname(objects$uploaded_omicsData)]
-        choices2 <- objects$uploaded_omicsData_2$f_data[which(temp_rmd_filter2$pvalue < input$pvalue_threshold), get_fdata_cname(objects$uploaded_omicsData_2)]
+        req(!is.null(objects$omicsData_2))
+        temp_rmd_filter2 <- rmd_filter(objects$omicsData_2, metrics = input$rmd_metrics)
+        choices1 <- objects$omicsData$f_data[which(temp_rmd_filter1$pvalue < input$pvalue_threshold), get_fdata_cname(objects$omicsData)]
+        choices2 <- objects$omicsData_2$f_data[which(temp_rmd_filter2$pvalue < input$pvalue_threshold), get_fdata_cname(objects$omicsData_2)]
 
         tagList(
           tags$p("Select samples to inspect:"),
@@ -321,7 +363,7 @@ list(
         )
       }
       else {
-        choices1 <- objects$uploaded_omicsData$f_data[which(temp_rmd_filter1$pvalue < input$pvalue_threshold), get_fdata_cname(objects$uploaded_omicsData)]
+        choices1 <- objects$omicsData$f_data[which(temp_rmd_filter1$pvalue < input$pvalue_threshold), get_fdata_cname(objects$omicsData)]
         pickerInput("rmd_sample", "Select samples to inspect", choices = choices1, multiple = FALSE)
       }
     }
@@ -329,7 +371,7 @@ list(
 
   # Conditional UI for proteomics filter, invisible if the object is not pepData with protein column
   output$profilt_UI <- renderUI({
-    if (class(objects$uploaded_omicsData) == "pepData") {
+    if (class(objects$omicsData) == "pepData") {
       tagList(
         fluidRow(
           column(
@@ -389,9 +431,9 @@ list(
   #' that they will have to re-apply normalization if their data was not already
   #' normalized, and reapply stats.
   output$execute_apply_filters_UI <- renderUI({
-    upload_isnorm <- attr(objects$uploaded_omicsData, "data_info")$norm_info$is_normalized
+    upload_isnorm <- attr(objects$omicsData, "data_info")$norm_info$is_normalized
     cur_isnorm <- attr(objects$omicsData, "data_info")$norm_info$is_normalized
-    is_rolled_up <- inherits(objects$omicsData, "proData") & inherits(objects$uploaded_omicsData, "pepData")
+    is_rolled_up <- inherits(objects$omicsData, "proData") & inherits(objects$omicsData, "pepData")
     will_reset <- (!upload_isnorm & cur_isnorm) | !is.null(objects$imdanova_res) | is_rolled_up
     
     if (will_reset) {

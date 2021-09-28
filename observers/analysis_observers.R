@@ -61,7 +61,10 @@ observeEvent(get_swap_vals(), {
 
 # make statres object
 observeEvent(input$apply_imdanova, {
-  req(!is.null(objects$omicsData), input$top_page == "statistics_tab")
+  req(!is.null(objects$omicsData) && input$top_page == "statistics_tab" && !is.null(comp_df_holder$comp_df))
+  
+  shinyjs::show("analysis_busy")
+  on.exit(hide("analysis_busy"))
   
   tryCatch(
     {
@@ -75,6 +78,14 @@ observeEvent(input$apply_imdanova, {
         pval_thresh = input$pval_thresh
       )
       
+      show("stats-statistics-ok")
+      show("imdanova_groups_ok")
+      show("imdanova_settings_ok")
+
+      updateCollapse(session, "statistics_collapse_left", close = c("stats-statistics-options"))
+      updateCollapse(session, "imdanova-sidepanel-options", 
+                     close = c("imdanova-specify-comparisons", "imdanova-select-settings"))
+
       # success modal if all is well
       showModal(
         modalDialog(
@@ -136,12 +147,13 @@ observeEvent(c(objects$imdanova_res, input$imdanova_plot_type), {
         temp <- objects$imdanova_res
         attr(temp, "statistical_test") <- "anova"
         plots$statistics_mainplot <- plot(temp, 
-                                                  plot_type = input$imdanova_plot_type, 
-                                                  bw_theme = TRUE)
+                                          plot_type = input$imdanova_plot_type, 
+                                          bw_theme = TRUE)
       } else {
       plots$statistics_mainplot <- plot(objects$imdanova_res, 
                                         plot_type = input$imdanova_plot_type, 
-                                        bw_theme = TRUE)
+                                        bw_theme = TRUE#, interactive = T
+                                        )
       }
       updateCollapse(session, "statistics_collapse_main", open = "statistics_plots")
     },

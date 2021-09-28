@@ -1,11 +1,11 @@
 # toggle fdata id col select if f_data() exists
 makegroup <- function(){
   
-  req(objects$omicsData, f_data())
+  req(!is.null(objects$omicsData) && !is.null(f_data()))
   
   ## Check two lipids requirements and process first
   if (two_lipids()) {
-    req(objects$omicsData_2, f_data_2())
+    req(!is.null(objects$omicsData_2) && !is.null(f_data_2()))
     
     if (input$usevizsampnames == "Yes") {
       if (input$customsampnames_opts == "first_n") {
@@ -65,7 +65,9 @@ makegroup <- function(){
     {
       
       tmp <- objects$omicsData
-      tmp$f_data <- f_data()
+      ## as it turns out, having an f_data with samples not in e_data is problematic
+      ref_catch <- f_data()[[input$fdata_id_col]] %in% colnames(objects$omicsData$e_data)
+      tmp$f_data <- f_data()[ref_catch,]
       attr(tmp, "cnames")$fdata_cname <- input$fdata_id_col
       # pmartR:::verify_data_info(tmp)  ###################### New check function?
       tmp <- group_designation(tmp,
@@ -114,15 +116,19 @@ observeEvent(c(input$file_fdata, input$file_fdata_2), {
 
 # create 4 observers which maintain mutual exclusivity of main effects and covariates
 lapply(list("gcol1", "gcol2", "cvcol1", "cvcol2"), function(el) {
-  observeEvent(sapply(list("gcol1", "gcol2", "cvcol1", "cvcol2")[-which(list("gcol1", "gcol2", "cvcol1", "cvcol2") == el)], function(x) input[[x]]), {
-    req(input$fdata_id_col, f_data())
+  all_inputs <- list("gcol1", "gcol2", "cvcol1", "cvcol2")
+  observeEvent(c(sapply(all_inputs[-which(all_inputs == el)], function(x) input[[x]]), f_data()), {
+    req(!is.null(input$fdata_id_col) && !is.null(f_data()))
 
     revals[[el]] <- input[[el]]
     updateSelectInput(session, el,
-      choices = c("None", setdiff(
-        colnames(f_data()),
-        c(input$fdata_id_col, sapply(list("gcol1", "gcol2", "cvcol1", "cvcol2")[-which(list("gcol1", "gcol2", "cvcol1", "cvcol2") == el)], function(x) input[[x]]))
-      )),
+      choices = c("None", 
+                  setdiff(
+                    colnames(f_data()),
+                    c(input$fdata_id_col, 
+                      sapply(all_inputs[-which(all_inputs == el)], function(x) input[[x]]))
+                    )
+                  ),
       selected = input[[el]]
     )
   })
@@ -130,14 +136,16 @@ lapply(list("gcol1", "gcol2", "cvcol1", "cvcol2"), function(el) {
 
 # similarly for the case of two files
 lapply(list("gcol1_2", "gcol2_2", "cvcol1_2", "cvcol2_2"), function(el) {
-  observeEvent(sapply(list("gcol1_2", "gcol2_2", "cvcol1_2", "cvcol2_2")[-which(list("gcol1_2", "gcol2_2", "cvcol1_2", "cvcol2_2") == el)], function(x) input[[x]]), {
+  
+  all_inputs <- list("gcol1_2", "gcol2_2", "cvcol1_2", "cvcol2_2")
+  observeEvent(c(sapply(all_inputs[-which(all_inputs == el)], function(x) input[[x]]), f_data_2()), {
     req(input$fdata_id_col_2, f_data_2())
 
     revals[[el]] <- input[[el]]
     updateSelectInput(session, el,
       choices = c("None", setdiff(
         colnames(f_data_2()),
-        c(input$fdata_id_col_2, sapply(list("gcol1_2", "gcol2_2", "cvcol1_2", "cvcol2_2")[-which(list("gcol1_2", "gcol2_2", "cvcol1_2", "cvcol2_2") == el)], function(x) input[[x]]))
+        c(input$fdata_id_col_2, sapply(all_inputs[-which(all_inputs == el)], function(x) input[[x]]))
       )),
       selected = input[[el]]
     )
@@ -148,106 +156,6 @@ lapply(list("gcol1_2", "gcol2_2", "cvcol1_2", "cvcol2_2"), function(el) {
 observeEvent(input$group_designation, {
   makegroup()
 
-  if (two_lipids()) {
-    req(objects$uploaded_omicsData, objects$uploaded_omicsData_2, f_data(), f_data_2())
-
-    if (input$usevizsampnames == "Yes") {
-      if (input$customsampnames_opts == "first_n") {
-        args_2 <- list(firstn = input$first_n_2)
-      }
-      else if (input$customsampnames_opts == "range") {
-        args_2 <- list(from = input$range_low_2, to = input$range_high_2)
-      }
-      else if (input$customsampnames_opts == "split") {
-        args_2 <- list(delim = input$delimiter_2, components = as.numeric(input$split_el_2))
-      }
-    }
-
-    # replace fdata and fdata cname, then check data integrity
-    objects$uploaded_omicsData$f_data <- f_data()
-    objects$uploaded_omicsData_2$f_data <- f_data_2()
-    attr(objects$uploaded_omicsData, "cnames")$fdata_cname <- input$fdata_id_col
-    attr(objects$uploaded_omicsData_2, "cnames")$fdata_cname <- input$fdata_id_col_2
-
-    objects$omicsData <- objects$uploaded_omicsData <- tryCatch(
-      {
-        tmp <- group_designation(objects$uploaded_omicsData,
-          main_effects = main_effects(),
-          covariates = covariates()
-        )
-
-        if (input$usevizsampnames == "Yes") {
-          tmp <- do.call(custom_sampnames, args = c(omicsData = list(tmp), args))
-        }
-
-        tmp
-      },
-      error = function(e) {
-        msg <- paste0("Something went wrong grouping your omicsData object \n System error:  ", e)
-        message(msg)
-        revals$warnings_groups$obj_1 <<- sprintf("<p style = 'color:red'>%s</p>", msg)
-        tmp <- objects$omicsData
-        attr(tmp, "group_DF") <- NULL
-        tmp
-      }
-    )
-
-    objects$omicsData_2 <- objects$uploaded_omicsData_2 <- tryCatch(
-      {
-        tmp <- group_designation(objects$uploaded_omicsData_2,
-          main_effects = main_effects_2(),
-          covariates = covariates_2()
-        )
-
-        if (input$usevizsampnames == "Yes") {
-          tmp <- do.call(custom_sampnames, args = c(omicsData = list(tmp), args_2))
-        }
-
-        tmp
-      },
-      error = function(e) {
-        msg <- paste0("Something went wrong grouping your second omicsData object \n System error:  ", e)
-        message(msg)
-        revals$warnings_groups$obj_2 <<- sprintf("<p style = 'color:red'>%s</p>", msg)
-        tmp <- objects$uploaded_omicsData_2
-        attr(tmp, "group_DF") <- NULL
-        tmp
-      }
-    )
-  }
-  else {
-    req(objects$uploaded_omicsData, f_data())
-
-    objects$uploaded_omicsData$f_data <- f_data()
-    attr(objects$uploaded_omicsData, "cnames")$fdata_cname <- input$fdata_id_col
-
-    objects$omicsData <- objects$uploaded_omicsData <- tryCatch(
-      {
-        tmp <- group_designation(objects$uploaded_omicsData,
-          main_effects = main_effects(),
-          covariates = covariates()
-        )
-
-        if (input$usevizsampnames == "Yes") {
-          tmp <- do.call(custom_sampnames, args = c(omicsData = list(tmp), args))
-        }
-
-        tmp
-      },
-      error = function(e) {
-        msg <- paste0("Something went wrong grouping your omicsData object \n System error:  ", e)
-        message(msg)
-        revals$warnings_groups$obj_1 <<- sprintf("<p style = 'color:red'>%s</p>", msg)
-        tmp <- objects$uploaded_omicsData
-        attr(tmp, "group_DF") <- NULL
-        tmp
-      }
-    )
-  }
-
-  # cond1 <- is.null(attributes(objects$uploaded_omicsData)$group_DF)
-  # cond2 <- !is.null(objects$uploaded_omicsData_2) & is.null(attributes(objects$uploaded_omicsData_2)$group_DF)
-  
   cond1 <- is.null(attributes(objects$omicsData)$group_DF)
   cond2 <- !is.null(objects$omicsData_2) & is.null(attributes(objects$omicsData_2)$group_DF)
 
@@ -339,6 +247,8 @@ observe({
   fdata_idcol1 <- if (length(input$fdata_id_col) == 0) "__NULLSELECT__" else input$fdata_id_col
   fdata_idcol2 <- if (length(input$fdata_id_col_2) == 0) "__NULLSELECT__" else input$fdata_id_col_2
 
+  req(!is.null(f_data()))
+  
   if (two_lipids()) {
     cond_files <- !is.null(input$file_fdata) & !is.null(input$file_fdata_2)
     cond_idcol_fdata <- all(isTRUE(input$fdata_id_col %in% colnames(f_data())), isTRUE(input$fdata_id_col_2 %in% colnames(f_data_2())))

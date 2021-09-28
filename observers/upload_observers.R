@@ -43,7 +43,8 @@ makeobject <- function(use_iso = T){
       object_fn(
         e_data = edata, e_meta = emeta, f_data = fdata,
         edata_cname = edata_cname, emeta_cname = emeta_cname, fdata_cname = "SampleId",
-        data_scale = data_scale, norm_info = list(is_normalized = norm_info)
+        data_scale = data_scale, norm_info = list(is_normalized = norm_info),
+        check.names = F
       ) %>%
         edata_replace(na_replace, NA)
     },
@@ -151,6 +152,7 @@ observeEvent(input$done_idcols, {
 #'@details disable if they try to log transform data with zeros.  Store an
 #'indicator that is TRUE if all is well.
 observe({
+  req(!is.null(e_data_has_zeros()))
   isolate(revals$warnings_upload$bad_transform <- NULL)
   
   cond <- e_data_has_zeros() & 
@@ -181,6 +183,7 @@ observe({
   # 2 file lipid conditions:
   # two emeta files uploaded
   # all 4 files contain the id column
+  
   if (two_lipids()) {
     req(!is.null(input$id_col) & !is.null(input$id_col_2))
     cond_files <- (!is.null(input$file_emeta) & !is.null(input$file_emeta_2))
@@ -210,7 +213,8 @@ observe({
   # emeta is uploaded
   # protein column is in the columns of e_meta that are NOT the id column
   # both files contain id column
-  else if (input$datatype == "pep" & isTRUE(input$proteins_yn == "TRUE")) {
+  else if (!is.null(input$datatype) && !is.null(input$proteins_yn) && 
+           input$datatype == "pep" && isTRUE(input$proteins_yn == "TRUE")) {
     req(!is.null(input$id_col))
     # req(!is.null(input$protein_column)) ## Doesn't load if cond_shared_ids is false
     cond_files <- !is.null(input$file_emeta)
@@ -391,11 +395,11 @@ observeEvent(input$makeobject, {
         fluidRow(
           column(10,
             align = "center", offset = 1,
-            HTML('<h4 style= "color:#1A5276">Your data has been successfully reference normalized. 
-                      Future processing will be performaed on the reference normalized data.</h4>'),
+            HTML('<h4 style= "color:#1A5276">Your data has been successfully uploaded! 
+                      Future processing will be performed on the uploaded data.</h4>'),
             hr(),
             actionButton("upload_dismiss", "Review results", width = "75%"),
-            actionButton("goto_groups", "Continue to Groups Tab", style = "margin:5px;width:75%")
+            actionButton("goto_groups", "Continue to Groups", style = "margin:5px;width:75%")
           )
         ),
         footer = NULL
@@ -403,6 +407,7 @@ observeEvent(input$makeobject, {
     )
 
     updateCollapse(session, "upload_preview_collapse", open = "summary_boxplots")
+    updateCollapse(session, "upload_collapse_left", close = c("columnids", "meta_collapse"))
     revals$upload_summary <- summary(objects$omicsData)
     revals$upload_summary_2 <- if (two_lipids()) summary(objects$omicsData_2) else NULL
   }
@@ -420,7 +425,7 @@ observe({
 })
 
 observe({
-  cond_fdata2exists <- isTRUE(nrow(f_data_2()) > 0)
+  cond_fdata2exists <- !is.null(f_data_2()) && nrow(f_data_2()) > 0
 
   toggleElement("toggle_fdata", condition = two_lipids() & cond_fdata2exists)
 })

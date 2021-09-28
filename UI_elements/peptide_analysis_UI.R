@@ -1,6 +1,7 @@
 # main plot display which takes in the plot object that is created immediately after imd_anova() is run
 output$peptide_statistics_mainplot <- renderPlot({
   req(!is.null(plots$peptide_statistics_mainplot))
+  # browser()
   p <- plots$peptide_statistics_mainplot
   if (inherits(p, "list")) {
     p <- gridExtra::arrangeGrob(p[[1]], p[[2]], ncol = 2)
@@ -72,6 +73,15 @@ output$peptide_statistics_tab_sidepanel <- renderUI({
           id = "peptide_apply_imdanova_jswrapper", 
           class= "tooltip-wrapper",
           bsButton("peptide_apply_imdanova", "Perform iMd-ANOVA", style = "primary")
+        ),
+        br(), br(),
+        hidden(
+          div(
+            "Conducting analysis, please wait...",
+            id = "peptide_analysis_busy",
+            class = "fadein-out",
+            style = "color:deepskyblue;font-weight:bold;margin-bottom:5px"
+          )
         )
       )
     )

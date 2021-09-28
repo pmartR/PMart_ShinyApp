@@ -29,9 +29,13 @@ inspect_norm <- function(omicsData, subset_fn, norm_fn, params) {
   # plot by group if the object has group assignments
   if (!is.null(attributes(omicsData)$group_DF)) {
     # dataframe with group information
-    loc_df <- attributes(omicsData)$group_DF %>% left_join(loc_params, by = setNames("ind", get_fdata_cname(omicsData)))
+    loc_df <- attributes(omicsData)$group_DF %>% 
+      left_join(loc_params, by = setNames("ind", get_fdata_cname(omicsData)))
     # 'x' at the location parameter for each sample
-    append_locs <- geom_point(data = loc_df, aes(x = !!rlang::sym(get_fdata_cname(omicsData)), y = VAL__, size = 7), shape = 7, color = "red")
+    append_locs <- geom_point(data = loc_df, 
+                              aes(x = !!rlang::sym(get_fdata_cname(omicsData)), 
+                                  y = VAL__, size = 7), 
+                              shape = 7, color = "red")
     # boxplots of location parameters by group
     loc_boxplot <- loc_df %>% ggplot() +
       geom_boxplot(aes(x = Group, y = VAL__, fill = Group)) +
@@ -72,7 +76,8 @@ inspect_norm <- function(omicsData, subset_fn, norm_fn, params) {
 
   p <- plot(norm_object, color_by = "Group", order_by = "Group") #### Remove legend on left plot when combined
 
-  norm_modal_ba_plots <- list(p[[1]] + append_locs + loc_legend, p[[2]])
+  # norm_modal_ba_plots <- list(p[[1]] + append_locs + loc_legend, p[[2]])        ###################### New change with updates
+  norm_modal_ba_plots <- list(p)
 
   return(list(p_location = p_location, p_scale = p_scale, loc_boxplot = loc_boxplot, scale_boxplot = scale_boxplot, norm_modal_ba_plots = norm_modal_ba_plots))
 }

@@ -197,7 +197,7 @@ assign_ref_uploads <- function(tabname) {
         "NMR_ref_done_idcols",
         style = "primary",
         div(
-          "Apply reference normalization",
+          "Apply Reference Normalization",
           icon("ok-sign", lib = "glyphicon")
         )
       )
@@ -209,12 +209,24 @@ assign_ref_uploads <- function(tabname) {
       if(cond_disable_apply) apply_button <- disabled(apply_button)
       if(cond_disable_reset) reset_button <- disabled(reset_button)
       
-      return(div(apply_button, reset_button))
+      return(div(apply_button, br(), reset_button))
     })
   } else {
     ## Upload
     output[["Isobaric_fdata_upload_UI"]] <- renderUI({
 
+      if(get_data_scale(objects$omicsData) == "abundance"){
+        out <- list(
+          disabled(radioGroupButtons(
+            paste0(tabname, "_ref_samps"),
+            "Does intensity data contain reference samples?",
+            choices = c("Yes", "No"),
+            selected = "No"
+          )),
+          br(),
+          strong("Data must be on the log-scale for reference normalization.")
+        )
+      } else {
         out <- list(
           radioGroupButtons(
             paste0(tabname, "_ref_samps"),
@@ -223,7 +235,11 @@ assign_ref_uploads <- function(tabname) {
             selected = character(0)
           )
         )
+      }
+      
       do.call(tagList, out)
+      
+      
     })
     output[["Isobaric_fdata_cname_UI"]] <- renderUI({
 
@@ -360,7 +376,7 @@ assign_ref_uploads <- function(tabname) {
         paste0(tabname, "_ref_done_idcols"),
         style = "primary",
         div(
-          "Apply reference normalization",
+          "Apply Reference Normalization",
           icon("ok-sign", lib = "glyphicon")
         )
       )
@@ -370,7 +386,7 @@ assign_ref_uploads <- function(tabname) {
       if(cond_disable_apply) apply_button <- disabled(apply_button)
       if(cond_disable_reset) reset_button <- disabled(reset_button)
       
-      return(div( apply_button, reset_button))
+      return(div( apply_button, br(), reset_button))
       
     })
   }
@@ -414,7 +430,6 @@ assign_ref_uploads <- function(tabname) {
 
   output[[paste0(tabname, "_ref_head_edata")]] <- renderDT(
     {
-      
       
       if(inherits(objects$omicsData, "nmrData")){
         cond <- attr(objects$omicsData, "nmr_info")$norm_info$is_normalized
@@ -625,11 +640,12 @@ assign_ref_uploads <- function(tabname) {
       temp <- as.isobaricpepData(
         e_data = edata, e_meta = emeta, f_data = fdata,
         edata_cname = edata_cname, emeta_cname = emeta_cname, fdata_cname = fdata_cname,
-        data_scale = data_scale, norm_info = list(is_normalized = norm_info)
+        data_scale = data_scale, norm_info = list(is_normalized = norm_info),
+        check.names = F
       ) %>%
         edata_replace(na_replace, NA)
       
-      if(data_scale != transform){
+      if(!("Select one" %in% c(data_scale, transform)) && data_scale != transform){
         temp <- edata_transform(temp, data_scale = transform)
       }
       

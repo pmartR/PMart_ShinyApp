@@ -133,6 +133,16 @@ list(
       ))
     }
   }),
+  
+  # pro question in emeta upload sub-panel
+  output$emeta_pro_UI <- renderUI({
+    req(!is.null(input$file_emeta$name) && input$emeta_yn == "TRUE" && input$datatype == 'pep')
+    radioGroupButtons(
+      "proteins_yn",
+      "Does your biomolecule information file contain peptide to protein mappings?",
+      choices = c("Yes" = "TRUE", "No" = "FALSE")
+    )
+  }),
 
   # emeta upload sub-panel
   output$emeta_UI <- renderUI({
@@ -189,16 +199,17 @@ list(
   }),
 
   # boxplots collapse panel UI elements
-  output$omicsData_upload_boxplot <- renderPlot({
+  output$omicsData_upload_boxplot <- renderPlotly({
     req(!is.null(objects$uploaded_omicsData))
-    p <- plot(objects$uploaded_omicsData, bw_theme = TRUE) + theme(axis.text.x = element_blank())
+    
+    p <- plot(objects$omicsData, bw_theme = TRUE, interactive = T) #+ theme(axis.text.x = element_blank())
     plots$last_plot <- p
     return(p)
   }),
 
-  output$omicsData_2_upload_boxplot <- renderPlot({
+  output$omicsData_2_upload_boxplot <- renderPlotly({
     req(!is.null(objects$uploaded_omicsData_2))
-    p <- plot(objects$uploaded_omicsData_2, bw_theme = TRUE) + theme(axis.text.x = element_blank())
+    p <- plot(objects$uploaded_omicsData_2, bw_theme = TRUE, interactive = T) #+ theme(axis.text.x = element_blank())
     plots$last_plot_2 <- p
     return(p)
   }),
@@ -216,18 +227,18 @@ list(
       tagList(
         div(id = "upload_boxplots_1", 
             style = "border-style:solid;border-width:1px;", 
-            withSpinner(plotOutput("omicsData_upload_boxplot"))
+            withSpinner(plotlyOutput("omicsData_upload_boxplot"))
             ),
         div(id = "upload_boxplots_2", 
             style = "border-style:solid;border-width:1px;", 
-            withSpinner(plotOutput("omicsData_2_upload_boxplot"))
+            withSpinner(plotlyOutput("omicsData_2_upload_boxplot"))
             )
       )
     }
     else {
       div(id = "upload_boxplots_1", 
           style = "border-style:solid;border-width:1px;", 
-          withSpinner(plotOutput("omicsData_upload_boxplot"))
+          withSpinner(plotlyOutput("omicsData_upload_boxplot"))
           )
     }
   }),

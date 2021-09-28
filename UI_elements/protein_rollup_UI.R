@@ -240,7 +240,7 @@ list(
   
   output[["rollup_plot_UI"]] <- renderUI({
     if(is.null(plots$rollup_plot)){
-      return("Please run protein roll-up to veiw results")
+      return("Please run protein roll-up to view results")
     } else {
       return(withSpinner(plotOutput("rollup_plot")))
     }
@@ -249,6 +249,7 @@ list(
   # plot of prodata after rollup
   output$rollup_plot <- renderPlot({
     req(!is.null(objects$omicsData), cancelOutput = TRUE)
+    # browser()
     plots$last_plot <- plots$rollup_plot
     plots$rollup_plot
   }),
