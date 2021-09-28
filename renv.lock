@@ -5,6 +5,10 @@
       {
         "Name": "CRAN",
         "URL": "http://cran.rstudio.com"
+      },
+      {
+        "Name": "BioCsoft",
+        "URL": "https://bioconductor.org/packages/3.13/bioc"
       }
     ]
   },
@@ -15,6 +19,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "a7d6660c869d4f41f856504828af4645"
+    },
+    "colourpicker": {
+      "Package": "colourpicker",
+      "Version": "1.1.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "fe0cb3d8854c168aef827aeab4b3b473"
     },
     "dplyr": {
       "Package": "dplyr",
@@ -37,6 +48,25 @@
       "Repository": "CRAN",
       "Hash": "7d7f283939f563670a697165b2cf5560"
     },
+    "mapDataAccess": {
+      "Package": "mapDataAccess",
+      "Version": "0.0.0.10",
+      "Source": "GitLab",
+      "RemoteType": "gitlab",
+      "RemoteHost": "code.emsl.pnl.gov",
+      "RemoteRepo": "mapdataaccess-lib",
+      "RemoteUsername": "multiomics-analyses",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "7ebcb9d01287d0a035b6d05438c871b81caf6081",
+      "Hash": "1327b96da7ae2591f9f1c8d6ad7b5f21"
+    },
+    "markdown": {
+      "Package": "markdown",
+      "Version": "1.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "61e4a10781dd00d7d81dd06ca9b94e95"
+    },
     "plotly": {
       "Package": "plotly",
       "Version": "4.9.4.1",
@@ -53,8 +83,8 @@
       "RemoteRepo": "pmartR",
       "RemoteUsername": "pmartR",
       "RemoteRef": "HEAD",
-      "RemoteSha": "780974dbf3f6921c79e1ef2ecc4d049938561495",
-      "Hash": "b1f877c4b02d4a6000057add2069d321"
+      "RemoteSha": "5f54436973e7660853bc20527f5f8d412dadc2b9",
+      "Hash": "0ac7ee13a44f994744fcbf05652c83c0"
     },
     "purrr": {
       "Package": "purrr",

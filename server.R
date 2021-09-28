@@ -162,4 +162,19 @@ shinyServer(function(session, input, output) {
     },
     contentType = "application/zip"
   )
+  
+  if (MAP) {
+    
+    # Connect to map data access library
+    library(mapDataAccess)
+    
+    # Soure MAP-specific functionality (reading from header, etc)
+    source("MAP_Functions.R", local = TRUE)
+    
+    # Create a reactive value to hold MAP-specific objects
+    MapConnect <- reactiveValues(MapConnect = map_data_connection("./cfg/minio_config_local.yml"),
+                                 Project = NULL, StoredProject = NULL)
+    
+  }
+  
 })

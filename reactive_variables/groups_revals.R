@@ -1,9 +1,27 @@
 f_data <- reactive({
-  # Error handling: Need file_emeta to be valid
-  req(input$file_fdata$datapath)
-  # Load file
-  filename <- input$file_fdata$datapath
-  read.csv(filename, stringsAsFactors = FALSE, check.names = F)
+  
+  # MAP-specific version
+  if (MAP) {
+    
+    ## UPDATED FOR MAP ##
+    req(input$file_fdata)
+    
+    # Disable input widget
+    disable(id = "file_fdata")
+    
+    # Return data 
+    return(MapConnect$Project$Data$f_data)
+    
+  } else {
+    
+    # Error handling: Need file_emeta to be valid
+    req(input$file_fdata$datapath)
+    # Load file
+    filename <- input$file_fdata$datapath
+    read.csv(filename, stringsAsFactors = FALSE)
+    
+  }
+
 })
 
 f_data_2 <- reactive({

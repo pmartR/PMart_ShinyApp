@@ -3,7 +3,6 @@
 !global.R
 !helper_functions.R
 !filter_names.csv
-!renv.lock
 !server.R
 !ui.R
 !UI_helper_functions.R

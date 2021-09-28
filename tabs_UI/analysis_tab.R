@@ -37,12 +37,11 @@ statistics_UI <- function() {
         bsCollapsePanel("Plots",
           value = "statistics_plots",
           radioGroupButtons("imdanova_plot_type", "Plot type", choices = c("Bar" = "bar", "Volcano" = "volcano")),
-          withSpinner(plotOutput("statistics_mainplot"))
+          withSpinner(uiOutput("statistics_mainplot"))
         ),
         bsCollapsePanel("Plot Options",
           value = "statistics_plot_opts",
-          uiOutput("statistics_plot_options"),
-          uiOutput("statistics_apply_style")
+          uiOutput("statistics_plot_options")
         ),
         bsCollapsePanel("Tables",
           value = "statistics_tables",

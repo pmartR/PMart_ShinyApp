@@ -1,6 +1,9 @@
-# UI panel for ggplot axes options
-style_UI <- function(pagename) {
+#'@details UI panel for ggplot axes options with optional prepended elements.
+#'@param pagename The name of the page or the string to prepend to each input name
+#'@param ... Extra shiny elements to prepend to the axes options UI.
+style_UI <- function(pagename, ...) {
   tagList(
+    ...,
     splitLayout(textInput(paste0(pagename, "_xlab"), "X-axis label"),
       textInput(paste0(pagename, "_ylab"), "Y-axis label"),
       numericInput(paste0(pagename, "_x_fontsize"), "X-axis font size", value = 11),
@@ -20,6 +23,32 @@ style_UI <- function(pagename) {
   )
 }
 
+#'@details A helper to make an inline set of colorpicker inputs
+#'@param cpicker_args list of lists, each sub-element being a list of arguments
+#'passed to one instance of colourpicker::pickerInput
+#'@param ... Extra UI elements to put at the front of the inline div
+inline_cpickers <- function(cpicker_args, ...) {
+  cpickers = purrr::map(cpicker_args, function(x) do.call(colourpicker::colourInput, x))
+  do.call(
+    div,
+    c(
+      list(...),
+      list(class = "inline-wrapper-1"),
+      cpickers
+    )
+  )
+}
+
+#'@details Create one button or two inline buttons that will be used to update
+#'the axes styling of a one or two ggplots.
+#'
+#'@param pagename A prefix for input ID's, which is usually the name of the page
+#'that shiny is on
+#'@param two_lipids Boolean indicating if there are two lipid datasets active 
+#'and thus two plots to be updated.
+#'@param two_plots Boolean indicating if there are two plots for some other
+#'reason than that there are two datasets.
+#'@param flip_button Whether to include a checkboxgroupbutton to flip the axes
 apply_style_UI <- function(pagename, two_lipids, two_plots, flip_button = FALSE) {
   if (flip_button) {
     fbtn <- div(checkboxGroupButtons(paste0(pagename, "_flip_axes"), "",
