@@ -271,7 +271,6 @@ list(
   }),
   ##
 
-  ### Why are the group values left out here? Redundant with graphs sure
   # grouped data summaries
   output$omicsData_groups_summary <- renderDT(revals$groups_summary[1:6, ], rownames = T, options = list(dom = "t")),
   output$omicsData_groups_summary_2 <- renderDT(revals$groups_summary_2[1:6, ], rownames = T, options = list(dom = "t")),

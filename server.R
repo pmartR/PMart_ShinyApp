@@ -110,10 +110,10 @@ shinyServer(function(session, input, output) {
         style = "position:absolute;z-index:9999;bottom:10px;left:10px;",
         actionButton("Browser", "whats wrong!?!?", style = "background:deepskyblue")
       )
-    # }
-    # else {
-    #   return(NULL)
-    # }
+    }
+    else {
+      return(NULL)
+    }
   })
 
   observeEvent(input$Browser, {
