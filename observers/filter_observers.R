@@ -85,7 +85,6 @@ apply_filt <- function(){
       return(NULL)
     },
     error = function(e) {
-      # browser()
       return(paste0("Something went wrong applying your filters:  \n System error:  ", e))
     }
   )
