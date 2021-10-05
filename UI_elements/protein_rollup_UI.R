@@ -4,19 +4,12 @@ list(
   output[["bpquant_options"]] <- renderUI({
     pro_class <- inherits(objects$omicsData, "proData")
     
-    ## 
-    # if (pro_class) {
-    #   data <- objects$omicsData_pre_rollup
-    # } else {
+    ## Note: only used for fdata info so don't need pep version
       data <- objects$omicsData
-    #}
     
     stats <- objects$peptide_imdanova_res
-# <<<<<<< HEAD
     group_info <- pmartR:::get_group_DF(data)
-# =======
-#     group_info <- pmartR:::get_group_table(data)
-# >>>>>>> f5b829a (Reset, Isobaric, NMR additions)
+
     comp_info <- attr(stats, "comparisons")
     
     l1 <- nrow(unique(data$f_data[attr(group_info, "main_effects")]))
@@ -109,11 +102,7 @@ list(
     }
     
     stats <- objects$peptide_imdanova_res
-# <<<<<<< HEAD
     group_info <- pmartR:::get_group_DF(data)
-# =======
-#     group_info <- pmartR:::get_group_table(data)
-# >>>>>>> f5b829a (Reset, Isobaric, NMR additions)
     comp_info <- attr(stats, "comparisons")
     
     l1 <- nrow(unique(data$f_data[attr(group_info, "main_effects")]))

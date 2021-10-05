@@ -28,12 +28,10 @@ upload_UI <- function() {
                   "Lipids" = "lip"
                 )
               ),
-              br(),
-              
+
               bsButton("upload_to_datareqs", "See data requirements", icon = blueq),
-              br()
             ), 
-            
+            br(), br(),
             conditionalPanel(
               "input.datatype=='pep'",
               radioGroupButtons("labeled_yn", "Is this labeled peptide data?",

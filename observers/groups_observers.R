@@ -1,4 +1,4 @@
-# toggle fdata id col select if f_data() exists
+
 makegroup <- function(){
   
   req(!is.null(objects$omicsData) && !is.null(f_data()))

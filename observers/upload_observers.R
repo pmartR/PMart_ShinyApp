@@ -495,7 +495,7 @@ observeEvent(input$goto_groups, {
 })
 
 observeEvent(input$goto_reference, {
-  updateTabsetPanel(session, "top_page", selected = "Reference")
+  updateTabsetPanel(session, "top_page", selected = "reference_tab")
   removeModal()
 })
 #

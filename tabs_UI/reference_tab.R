@@ -4,6 +4,7 @@ reference_UI <- function() {
   tabPanel(
     class = "collapse_page",
     "Reference",
+    value = "reference_tab",
     uiOutput("reference_data_ui")
   )
 }
@@ -98,7 +99,9 @@ upload_reference <- function(tabname) {
           ) # End collapse panel
         
       ), # parent collapse
-      uiOutput("NMR_ref_done_idcols_UI")
+      uiOutput("NMR_ref_done_idcols_UI"),
+      br(),
+      uiOutput("warnings_reference")
     ) # column 4
   }
   

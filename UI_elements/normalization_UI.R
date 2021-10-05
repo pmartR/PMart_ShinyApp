@@ -49,7 +49,7 @@ list(
   }),
 
   # plot.normres modal plot showing location parameters ### Requires pmartR update
-  output$norm_modal_ba_plots <- renderPlot({
+  output$norm_modal_ba_plots <- renderPlotly({
     
     # browser()
     if (inherits(plots$norm_modal_ba_plots, "list") && !is.null(plots$norm_modal_ba_plots[[1]])) {
@@ -59,13 +59,13 @@ list(
     }
     else {
       plots$last_plot <- plots$norm_modal_ba_plots
-      return(plot(plots$norm_modal_ba_plots))
+      return(plots$norm_modal_ba_plots)
     }
   }),
 
   # plot.normres modal plot showing location parameters
-  output$norm_modal_ba_plots_2 <- renderPlot({
-    browser()
+  output$norm_modal_ba_plots_2 <- renderPlotly({
+    # browser()
     if (inherits(plots$norm_modal_ba_plots_2, "list")) {
       p <- gridExtra::arrangeGrob(plots$norm_modal_ba_plots_2[[1]], plots$norm_modal_ba_plots_2[[2]], ncol = 2)
       plots$last_plot_2 <- p
@@ -87,22 +87,22 @@ list(
 
   # scale parameter boxplot
   output$norm_modal_scale_boxplot <- renderPlot({
-    browser()
+    # browser()
     validate(need(!is.null(plots$scale_boxplot), "No scale boxplot"))
     plots$scale_boxplot
   }),
 
   # location parameter boxplot
   output$norm_modal_loc_boxplot_2 <- renderPlot({
-    browser()
+    # browser()
     validate(need(!is.null(plots$loc_boxplot_2), "No location boxplot"))
     plots$loc_boxplot_2
   }),
 
   # scale parameter boxplot
   output$norm_modal_scale_boxplot_2 <- renderPlot({
-    browser()
-    ?validate(need(!is.null(plots$scale_boxplot_2), "No scale boxplot"))
+    # browser()
+    validate(need(!is.null(plots$scale_boxplot_2), "No scale boxplot"))
     plots$scale_boxplot_2
   }),
 
@@ -111,12 +111,12 @@ list(
     if (input$norm_modal_plot_select == "ba") {
       if (!is.null(objects$omicsData_2)) {
         tagList(
-          withSpinner(plotOutput("norm_modal_ba_plots")),
-          withSpinner(plotOutput("norm_modal_ba_plots_2"))
+          withSpinner(plotlyOutput("norm_modal_ba_plots")),
+          withSpinner(plotlyOutput("norm_modal_ba_plots_2"))
         )
       }
       else {
-        withSpinner(plotOutput("norm_modal_ba_plots"))
+        withSpinner(plotlyOutput("norm_modal_ba_plots"))
       }
     }
     else if (input$norm_modal_plot_select == "fac") {

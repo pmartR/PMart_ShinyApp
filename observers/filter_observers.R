@@ -85,7 +85,7 @@ apply_filt <- function(){
       return(NULL)
     },
     error = function(e) {
-      browser()
+      # browser()
       return(paste0("Something went wrong applying your filters:  \n System error:  ", e))
     }
   )
@@ -360,53 +360,7 @@ observeEvent(input$add_rmdfilt, {
     revals$warnings_filter$rmdfilt1 <- revals$warnings_filter$rmdfilt2 <- objects$filters$rmdfilt <- objects$filters$rmdfilt_2 <- NULL
   }
   
-  ## Ipmart version
-  # metric_vars = apply(objects$filters$rmdfilt[,attr(objects$filters$rmdfilt, "metrics")], 2, var)
-  # cond_zerovars <- any(metric_vars == 0)
-  # cond_no_missing <- attr(omicsData_objects[[name]], "data_info")$num_miss_obs == 0 & 
-  #   "Proportion_Missing" %in% input[[sprintf("%s_rmd_metrics", name)]]
-  # cond = cond_zerovars | cond_no_missing
-  # 
-  # reset_metrics <- if(cond_no_missing) {
-  #   union("Proportion_Missing", names(metric_vars)[which(metric_vars == 0)])
-  # } else names(metric_vars)[which(metric_vars == 0)]
-  # reset_metrics <- gsub("Corr$", "Correlation", reset_metrics)
-  # 
-  # ## Remove effect
-  # updatePrettySwitch(
-  #   session, sprintf("%s_add_rmdfilt", name), 
-  #   value = !cond)
-  # 
-  # 
-  # show_add_tooltip(
-  #   session, sprintf("%s_rmd_novariance_warn_icon", name),
-  #   condition = cond,
-  #   tooltip_text = sprintf(
-  #     ttext[["RMDFILT_NO_VARIANCE"]], 
-  #     paste(reset_metrics, collapse = " | ")
-  #   )
-  # )
-  # 
-  # # deselect the offending zero-variance selection
-  # if (cond) {
-  #   new_selections <- setdiff(input[[sprintf("%s_rmd_metrics", name)]], reset_metrics)
-  #   updatePickerInput(
-  #     session, 
-  #     inputId = sprintf("%s_rmd_metrics", name),
-  #     selected = new_selections
-  #   )
-  #   
-  #   return()
-  # } 
-  
-
-  # rmdfilt_exists <- !is.null(objects$filters$rmdfilt) & (!is.null(objects$filters$rmdfilt_2) | is.null(objects$uploaded_omicsData_2))
-  # 
-  # toggle("rmdfilt_exists", condition = rmdfilt_exists, anim = TRUE)
-  # toggleState("pvalue_threshold", condition = !rmdfilt_exists)
-  # toggleCssClass("pvalue_threshold", "grey_text", condition = rmdfilt_exists)
-  # toggleState("rmd_metrics", condition = !rmdfilt_exists)
-  # toggleCssClass(class = "grey_disabled", condition = rmdfilt_exists, selector = "button[data-id='rmd_metrics']")
+ 
 })
 
 # create customfilt object

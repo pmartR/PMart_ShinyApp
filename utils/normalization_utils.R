@@ -74,10 +74,11 @@ inspect_norm <- function(omicsData, subset_fn, norm_fn, params) {
 
   # store a plot list in reactive variable
 
-  p <- plot(norm_object, color_by = "Group", order_by = "Group") #### Remove legend on left plot when combined
+  p <- plot(norm_object, color_by = "Group", order_by = "Group", interactive = T) #### Remove legend on left plot when combined
 
   # norm_modal_ba_plots <- list(p[[1]] + append_locs + loc_legend, p[[2]])        ###################### New change with updates
-  norm_modal_ba_plots <- list(p)
+  # norm_modal_ba_plots <- list(p)
+  norm_modal_ba_plots <- p
 
   return(list(p_location = p_location, p_scale = p_scale, loc_boxplot = loc_boxplot, scale_boxplot = scale_boxplot, norm_modal_ba_plots = norm_modal_ba_plots))
 }

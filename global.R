@@ -40,6 +40,7 @@ ttext_ <- list(
   "TABDISABLE_NOT_PEP" = "Tab disabled because either you are not analyzing peptide data or your object does not exist.",
   "TABDISABLE_NOT_PEP_NO_EMETA" = "Tab disabled because either you are not analyzing peptide data, you did not include a biomolecule information file, or your object does not exist",
   "TABDISABLE_PEP_NO_EMETA" = "Tab disabled because you uploaded peptide data with no biomolecule information file.  Peptide-level statistics are still available.",
+  "TABDISABLE_NOT_REF" = "Tab disabled because reference normalization is only available for NMR data or labeled peptide data",
   "REFERENCE_DISABLED_ROW" = "Disabled entries contain missing values in some samples. These might be due to NAs generated in log transformation or replacement of values less than or equal to zero.",
   "REFERENCE_DISABLED_COL" = "Disabled entries are non-numeric."
 ) 

@@ -98,7 +98,8 @@ assign_ref_uploads <- function(tabname) {
           ))
         )
       } else if (input$NMR_reference_source == "Column in Group File (e.g. sample concentration)") {
-        df <- objects$omicsData$f_data
+  
+        df <- f_data()
         # Only colplete, numeric columns are valid
         disabled <- unlist(apply(df, 2, function(col) any(is.na(as.numeric(col)))))
 
@@ -386,7 +387,8 @@ assign_ref_uploads <- function(tabname) {
       if(cond_disable_apply) apply_button <- disabled(apply_button)
       if(cond_disable_reset) reset_button <- disabled(reset_button)
       
-      return(div( apply_button, br(), reset_button))
+      return( div(class = "inline-wrapper-1", apply_button, reset_button))
+      # return(div( apply_button, br(), reset_button)) #### If the text is still too big after making the buttons smaller across pages
       
     })
   }
@@ -720,6 +722,11 @@ assign_ref_uploads <- function(tabname) {
 
   output[[paste0(tabname, "_ref_no_bp_post")]] <- renderText("Normalization has not been applied")
 
+  
+  output$warnings_reference <- renderUI({
+    HTML(paste(revals$warnings_reference, collapse = ""))
+  })
+  
   output[[paste0(tabname, "_ref_upload_boxplots_post")]] <- renderPlotly({
     
 
@@ -757,15 +764,3 @@ assign_ref_uploads <- function(tabname) {
     return(p)
   })
 }
-
-# output[["reference_data_ui"]] <- renderUI({
-# 
-#   req(!is.null(objects$omicsData))
-# 
-#   tabname <- ifelse(inherits(objects$omicsData, "nmrData"), "NMR", "Isobaric")
-# 
-#   assign_ref_uploads(tabname)
-# 
-#   upload_reference(tabname)
-# 
-# })

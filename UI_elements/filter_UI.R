@@ -164,7 +164,7 @@ list(
   output$filter_mainplot_2 <- renderPlot({
     if (inherits(plots$filter_mainplot_2, "list")) {
       
-      browser()
+      # browser()
       p <- gridExtra::arrangeGrob(plots$filter_mainplot_2[[1]], plots$filter_mainplot_2[[2]], ncol = 2)
       plots$last_plot_2 <- p
       grid::grid.draw(p)

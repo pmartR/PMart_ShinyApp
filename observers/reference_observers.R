@@ -60,61 +60,79 @@ refnorm <- function(){
   })
   
   if (tab == "Isobaric") {
-    Fdata_group_col <- input[[paste0(tab, "_ref_group")]]
-    Fdata_ref_col <- input[[paste0(tab, "_ref_col")]]
-    Ref_notation <- input[[paste0(tab, "_ref_notation")]]
     
-    subtr <- which(colnames(objects$omicsData$e_data) == get_edata_cname(objects$omicsData))
-    
-    fdata_cname <- which(map_lgl(1:ncol(f_data()), function(col) {
-      all(colnames(objects$omicsData$e_data)[-subtr] %in% f_data()[[col]])
-    }))
-    fdata_cname <- colnames(f_data())[fdata_cname]
-    
-    applied_norm <- as.isobaricpepData(
-      e_data = objects$omicsData$e_data,
-      f_data = f_data(),
-      e_meta = objects$omicsData$e_meta,
-      edata_cname = get_edata_cname(objects$omicsData),
-      fdata_cname = fdata_cname,
-      emeta_cname = get_emeta_cname(objects$omicsData),
-      data_scale = get_data_scale(objects$omicsData),
-      is_normalized = get_data_norm(objects$omicsData),
-      isobaric_norm = get_isobaric_norm(objects$omicsData),
-      check.names = F
-    )
-    
-    objects$omicsData <- normalize_isobaric(applied_norm,
-                                            exp_cname = Fdata_group_col,
-                                            refpool_cname = Fdata_ref_col,
-                                            refpool_notation = Ref_notation,
-                                            apply_norm = TRUE
+    applied_norm <- tryCatch({
+        Fdata_group_col <- input[[paste0(tab, "_ref_group")]]
+        Fdata_ref_col <- input[[paste0(tab, "_ref_col")]]
+        Ref_notation <- input[[paste0(tab, "_ref_notation")]]
+        
+        subtr <- which(colnames(objects$omicsData$e_data) == get_edata_cname(objects$omicsData))
+        
+        fdata_cname <- which(map_lgl(1:ncol(f_data()), function(col) {
+          all(colnames(objects$omicsData$e_data)[-subtr] %in% f_data()[[col]])
+        }))
+        fdata_cname <- colnames(f_data())[fdata_cname]
+
+        applied_norm <- as.isobaricpepData(
+          e_data = objects$omicsData$e_data,
+          f_data = f_data(),
+          e_meta = objects$omicsData$e_meta,
+          edata_cname = get_edata_cname(objects$omicsData),
+          fdata_cname = fdata_cname,
+          emeta_cname = get_emeta_cname(objects$omicsData),
+          data_scale = get_data_scale(objects$omicsData),
+          is_normalized = get_data_norm(objects$omicsData),
+          isobaric_norm = get_isobaric_norm(objects$omicsData),
+          check.names = F
+        )
+        
+        applied_norm <- normalize_isobaric(applied_norm,
+                                           exp_cname = Fdata_group_col,
+                                           refpool_cname = Fdata_ref_col,
+                                           refpool_notation = Ref_notation,
+                                           apply_norm = TRUE
+        )
+        applied_norm
+      },
+      error = function(e) {
+        msg <- paste0("Something went wrong reference normalizing your omicsData object.  \n System error:  ", e)
+        message(msg)
+        revals$warnings_reference$bad_norm <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+        objects$omicsData
+      }
     )
     
   } else if (tab == "NMR") {
-    
-    # tryCatch({
-    if (input$NMR_reference_source == "Row in Data File (e.g. metabolite)") {
-      objects$omicsData <- normalize_nmr(objects$omicsData,
-                                         apply_norm = TRUE,
-                                         backtransform = TRUE,
-                                         metabolite_name = input$NMR_picker_reference
-      )
-    } else {
-      objects$omicsData$f_data[[input$NMR_picker_reference]] <-
-        as.numeric(objects$omicsData$f_data[[input$NMR_picker_reference]])
-      
-      objects$omicsData <- normalize_nmr(objects$omicsData,
-                                         apply_norm = TRUE,
-                                         backtransform = TRUE,
-                                         sample_property_cname = input$NMR_picker_reference
-      )
-    }
-    # },
-    # error = function(e) browser()
-    # )
+
+    applied_norm <- tryCatch({
+      if (input$NMR_reference_source == "Row in Data File (e.g. metabolite)") {
+        applied_norm <- normalize_nmr(objects$omicsData,
+                                           apply_norm = TRUE,
+                                           backtransform = TRUE,
+                                           metabolite_name = input$NMR_picker_reference
+        )
+      } else {
+        objects$omicsData$f_data[[input$NMR_picker_reference]] <-
+          as.numeric(f_data()[[input$NMR_picker_reference]])
+        
+        applied_norm <- normalize_nmr(objects$omicsData,
+                                           apply_norm = TRUE,
+                                           backtransform = TRUE,
+                                           sample_property_cname = input$NMR_picker_reference
+        )
+      }
+      applied_norm
+    },
+    error = function(e){
+      msg <- paste0("Something went wrong reference normalizing your omicsData object.  \n System error:  ", e)
+      message(msg)
+      revals$warnings_reference$bad_norm <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+      objects$omicsData
+    })
     
   }
+  
+  objects$omicsData <- applied_norm
 }
 
 observeEvent(c(input$groups_dismiss, input$goto_reference), {

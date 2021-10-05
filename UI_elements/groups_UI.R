@@ -152,16 +152,6 @@ list(
        type = "bar"
      ) %>% layout(yaxis = list(title = "Number of samples"),
                   xaxis = list(title = "Group"))
-    
-    # # custom barplot
-    # p <- attributes(objects$uploaded_omicsData)$group_DF %>%
-    #   group_by(Group) %>%
-    #   mutate(n = n()) %>%
-    #   ggplot(aes(x = Group, y = n)) +
-    #   geom_bar(aes(fill = Group), position = "dodge", stat = "identity") +
-    #   geom_text(aes(label = n), position = position_dodge(width = 1), vjust = -0.25) +
-    #   ylab("Number of samples") +
-    #   theme_bw()
 
     plots$last_plot <- p
 
@@ -182,14 +172,6 @@ list(
       ) %>% layout(yaxis = list(title = "Number of samples"),
                    xaxis = list(title = "Group"))
     
-    # p <- attributes(objects$uploaded_omicsData_2)$group_DF %>%
-    #   group_by(Group) %>%
-    #   mutate(n = n()) %>%
-    #   ggplot(aes(x = Group, y = n)) +
-    #   geom_bar(aes(fill = Group), position = "dodge", stat = "identity") +
-    #   geom_text(aes(label = n), position = position_dodge(width = 1), vjust = -0.25) +
-    #   ylab("Number of samples") +
-    #   theme_bw()
 
     plots$last_plot_2 <- p
 
@@ -289,7 +271,6 @@ list(
   }),
   ##
 
-  ### Why are the group values left out here? Redundant with graphs sure
   # grouped data summaries
   output$omicsData_groups_summary <- renderDT(revals$groups_summary[1:6, ], rownames = T, options = list(dom = "t")),
   output$omicsData_groups_summary_2 <- renderDT(revals$groups_summary_2[1:6, ], rownames = T, options = list(dom = "t")),
