@@ -1,7 +1,7 @@
 # main plot display which takes in the plot object that is created immediately after imd_anova() is run
 output$statistics_mainplot <- renderUI({
   req(!is.null(plots$statistics_mainplot))
-  # browser()
+
   p <- plots$statistics_mainplot
   plots$last_plot <- p
   if (inherits(p, "plotly")) {

@@ -23,6 +23,47 @@ style_UI <- function(pagename, ...) {
   )
 }
 
+#'@details plot updating function for UI panel for axes options with optional prepended elements.
+#'@param pagename The name of the page or the string to prepend to each input name
+#'@param plot Plotly vizualization to update
+add_plot_styling <- function(pagename, plot) {
+  filter_xangle <- if (is_empty(input[[paste0(pagename, "_xangle")]]) |
+                       is.na(input[[paste0(pagename, "_xangle")]])) 0 else input[[paste0(pagename, "_xangle")]]
+  filter_yangle <- if (is_empty(input[[paste0(pagename, "_yangle")]]) |
+                       is.na(input[[paste0(pagename, "_yangle")]])) 0 else input[[paste0(pagename, "_yangle")]]
+  
+  plot %>% plotly::layout(
+    xaxis = list(
+      title = list(
+        text = input[[paste0(pagename, "_xlab")]], 
+        font = list(
+          size = input[[paste0(pagename, "_x_fontsize")]]
+          )
+        ),
+      tickangle = input[[paste0(pagename, "_xangle")]],
+      tickfont = list(size = input[[paste0(pagename, "_x_ticksize")]])
+      ),
+    yaxis = list(
+      title = list(
+        text = input[[paste0(pagename, "_ylab")]], 
+        font = list(
+          size = input[[paste0(pagename, "filter_y_fontsize")]]
+          ),
+        tickangle = input[[paste0(pagename, "_yangle")]],
+        tickfont = list(
+          size = input[[paste0(pagename, "_y_ticksize")]]
+          )
+        ),
+      title = list(
+        text = input[[paste0(pagename, "_title")]], 
+        font = list(
+          size = input[[paste0(pagename, "_title_fontsize")]]
+          )
+        )
+      )
+    )
+}
+
 #'@details A helper to make an inline set of colorpicker inputs
 #'@param cpicker_args list of lists, each sub-element being a list of arguments
 #'passed to one instance of colourpicker::pickerInput

@@ -46,18 +46,18 @@ list(
       tagList(
         div(id = "qc_plots_1", 
             style = "border-style:solid;border-width:1px;", 
-            withSpinner(plotOutput("omicsData_plot"))
+            withSpinner(plotlyOutput("omicsData_plot"))
             ),
         div(id = "qc_plots_2", 
             style = "border-style:solid;border-width:1px;",
-            withSpinner(plotOutput("omicsData_plot_2"))
+            withSpinner(plotlyOutput("omicsData_plot_2"))
             )
       )
     }
     else {
       div(id = "qc_plots_1", 
           style = "border-style:solid;border-width:1px;", 
-          withSpinner(plotOutput("omicsData_plot"))
+          withSpinner(plotlyOutput("omicsData_plot"))
           )
     }
   }),
@@ -84,7 +84,7 @@ list(
 
   #### MAIN PANEL, BOTH PLOTS ####
 
-  output$omicsData_plot <- renderPlot({
+  output$omicsData_plot <- renderPlotly({
     req(!is.null(objects$omicsData))
     input$qc_apply_style_plot_1
 
@@ -113,12 +113,14 @@ list(
       )
     }
 
-    p <- p + isolate(qc_plot_style()) + isolate(qc_xlab()) + isolate(qc_ylab()) + isolate(qc_title()) + qc_flip()
-    plots$last_plot <- p
+    p <- p + isolate(qc_plot_style()) + 
+      isolate(qc_xlab()) + isolate(qc_ylab()) + 
+      isolate(qc_title()) + qc_flip()
+    plots$last_plot <- p  %>% ggplotly()
     return(p)
   }),
 
-  output$omicsData_plot_2 <- renderPlot({
+  output$omicsData_plot_2 <- renderPlotly({
     req(!is.null(objects$omicsData_2))
     input$qc_apply_style_plot_2
 
@@ -153,8 +155,10 @@ list(
     }
 
     
-    p <- p + isolate(qc_plot_style()) + isolate(qc_xlab()) + isolate(qc_ylab()) + isolate(qc_title()) + qc_flip()
-    plots$last_plot_2 <- p
+    p <- p + isolate(qc_plot_style()) + 
+      isolate(qc_xlab()) + isolate(qc_ylab()) + 
+      isolate(qc_title()) + qc_flip()
+    plots$last_plot_2 <- p  %>% ggplotly()
     return(p)
   }),
 

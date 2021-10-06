@@ -148,7 +148,7 @@ list(
   }),
 
   # Top filter plot
-  output$filter_mainplot <- renderPlot({
+  output$filter_mainplot <- renderPlotly({
     if (inherits(plots$filter_mainplot, "list")) {
       p <- gridExtra::arrangeGrob(plots$filter_mainplot[[1]], plots$filter_mainplot[[2]], ncol = 2)
       plots$last_plot <- p
@@ -161,11 +161,12 @@ list(
   }),
 
   # other filter plot for lipid data
-  output$filter_mainplot_2 <- renderPlot({
+  output$filter_mainplot_2 <- renderPlotly({
     if (inherits(plots$filter_mainplot_2, "list")) {
       
       # browser()
-      p <- gridExtra::arrangeGrob(plots$filter_mainplot_2[[1]], plots$filter_mainplot_2[[2]], ncol = 2)
+      p <- gridExtra::arrangeGrob(plots$filter_mainplot_2[[1]], 
+                                  plots$filter_mainplot_2[[2]], ncol = 2)
       plots$last_plot_2 <- p
       grid::grid.draw(p)
     }
@@ -178,12 +179,12 @@ list(
   # plot one or both UI elements
   output$filter_dynamic_mainplot <- renderUI({
     if (!is.null(objects$omicsData) & is.null(objects$omicsData_2)) {
-      withSpinner(plotOutput("filter_mainplot"))
+      withSpinner(plotlyOutput("filter_mainplot"))
     }
     else if (any(!is.null(objects$omicsData), !is.null(objects$omicsData_2))) {
       tagList(
-        withSpinner(plotOutput("filter_mainplot")),
-        withSpinner(plotOutput("filter_mainplot_2"))
+        withSpinner(plotlyOutput("filter_mainplot")),
+        withSpinner(plotlyOutput("filter_mainplot_2"))
       )
     }
   }),
