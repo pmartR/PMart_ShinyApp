@@ -75,12 +75,16 @@ observeEvent(input$makezipfile, {
     if (length(plots_marked_for_death) > 0) {
       for (i in plots_marked_for_death) {
         plot_name <- plots$plot_table[i, 1]
-        #  fname <- paste0(plot_name, ".png") # create a plot name ##### in case we keep any ggplot?
-        fname <- paste0(plot_name, '.html') #create a plot name
-        fs <- c(fs, fname) # create running list of names, we will navigate to the temp directory in the download handler
-        saveWidget(plots$allplots[[i]], file.path(tempdir(), fname),
-                   selfcontained = T)
-        # ggsave(file.path(tempdir(), fname), plot = plots$allplots[[i]]) ##### in case we keep any ggplot?
+        
+        if(inherits(plots$allplots[[i]], "plotly")){
+          fname <- paste0(plot_name, '.html') #create a plot name
+          saveWidget(plots$allplots[[i]], file.path(tempdir(), fname),
+                     selfcontained = T)
+        } else {
+          fname <- paste0(plot_name, ".png")  # create a plot name
+          ggsave(file.path(tempdir(), fname), plot = plots$allplots[[i]])
+        }
+        fs <- c(fs, fname) 
         incProgress(1 / total_files, detail = sprintf("%s done..", plot_name))
       }
     }

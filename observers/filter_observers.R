@@ -636,22 +636,27 @@ observeEvent(c(input$plot_imdanovafilt, input$min_nonmiss_anova, input$min_nonmi
 observeEvent(input$filter_apply_style_plot_1, {
   
   if (inherits(plots$filter_mainplot, "list")) {
-    plots$filter_mainplot[[1]] <- add_plot_styling("filter", plots$filter_mainplot[[1]])
+    plots$filter_mainplot[[1]] <- add_plot_styling(input, 
+                                                   "filter",
+                                                   plots$filter_mainplot[[1]])
   }
   else {
-    plots$filter_mainplot <- add_plot_styling("filter", plots$filter_mainplot)
+    plots$filter_mainplot <- add_plot_styling(input, "filter", plots$filter_mainplot)
   }
 })
 
 # ...second plot
 observeEvent(input$filter_apply_style_plot_2, {
-  layout_plotly <- add_plot_styling()
 
   if (inherits(plots$filter_mainplot, "list")) {
-    plots$filter_mainplot[[2]] <- plots$filter_mainplot[[2]] %>% layout_plotly
+    plots$filter_mainplot[[2]] <- add_plot_styling(input, 
+                                                   "filter",
+                                                   plots$filter_mainplot[[2]])
   }
   else {
-    plots$filter_mainplot_2 <- plots$filter_mainplot_2 %>% layout_plotly
+    plots$filter_mainplot_2 <- add_plot_styling(input, 
+                                                "filter",
+                                                plots$filter_mainplot_2)
   }
 })
 
