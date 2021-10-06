@@ -68,10 +68,6 @@ observeEvent(input$makezipfile, {
 
   plots_marked_for_death <- which(plots$plot_table[, 2] == dt_checkmark)
   tables_marked_for_death <- which(table_use[, 2] == dt_checkmark)
-
-  ## Temp remove plotly
-  keep <- !map_lgl(plots$allplots[plots_marked_for_death], inherits, "plotly")
-  plots_marked_for_death <- plots_marked_for_death[keep]
   
   total_files <- length(c(plots_marked_for_death, tables_marked_for_death))
 
@@ -79,9 +75,12 @@ observeEvent(input$makezipfile, {
     if (length(plots_marked_for_death) > 0) {
       for (i in plots_marked_for_death) {
         plot_name <- plots$plot_table[i, 1]
-        fname <- paste0(plot_name, ".png") # create a plot name
+        #  fname <- paste0(plot_name, ".png") # create a plot name ##### in case we keep any ggplot?
+        fname <- paste0(plot_name, '.html') #create a plot name
         fs <- c(fs, fname) # create running list of names, we will navigate to the temp directory in the download handler
-        ggsave(file.path(tempdir(), fname), plot = plots$allplots[[i]])
+        saveWidget(plots$allplots[[i]], file.path(tempdir(), fname),
+                   selfcontained = T)
+        # ggsave(file.path(tempdir(), fname), plot = plots$allplots[[i]]) ##### in case we keep any ggplot?
         incProgress(1 / total_files, detail = sprintf("%s done..", plot_name))
       }
     }

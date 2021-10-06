@@ -41,7 +41,8 @@ inspect_norm <- function(omicsData, subset_fn, norm_fn, params) {
       geom_boxplot(aes(x = Group, y = VAL__, fill = Group)) +
       ylab("Location Parameter Value") +
       ggtitle("Location parameter values for chosen normalization, by group") +
-      theme_bw()
+      theme_bw() 
+    loc_boxplot <- ggplotly(loc_boxplot)
 
     # same as above but for scale
     if (!is.null(params$scale)) {
@@ -51,6 +52,7 @@ inspect_norm <- function(omicsData, subset_fn, norm_fn, params) {
         ylab("Scale Parameter Value") +
         ggtitle("Scale parameter values for chosen normalization, by group") + 
         theme_bw()
+      scale_boxplot <- ggplotly(scale_boxplot)
     }
     else {
       scale_boxplot <- NULL

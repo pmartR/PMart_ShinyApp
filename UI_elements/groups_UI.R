@@ -195,7 +195,7 @@ list(
     else {
       div(id = "sample_barplots_1", 
           style = "border-style:solid;border-width:1px;", 
-          withSpinner(plotOutput("group_barplots_1"))
+          withSpinner(plotlyOutput("group_barplots_1"))
           )
     }
   }),
