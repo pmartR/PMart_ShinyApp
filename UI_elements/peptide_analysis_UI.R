@@ -376,7 +376,6 @@ output$peptide_statistics_plot_options <- renderUI({
         ),
         uiOutput("peptide_statistics_apply_style")
       )
-    )
   )
 })
 
