@@ -150,9 +150,7 @@ observeEvent(
   {
     req(!is.null(objects$imdanova_res))
     
-    interactive = if (is.null(input$stats_interactive_yn)) {
-      FALSE
-    } else
+    interactive <- !is.null(input$stats_interactive_yn) && 
       as.logical(input$stats_interactive_yn)
     
     fc_colors = if (all(map_lgl(
@@ -166,31 +164,23 @@ observeEvent(
       c(
         input$imd_down_cpicker,
         input$imd_nonsig_cpicker,
-        input$imd_imd_up_cpicker
+        input$imd_up_cpicker
       )
-    } else
-      c("red", "black", "green")
+    } else c("red", "black", "green")
     
     tryCatch({
-      if (input$imdanova_plot_type == "volcano") {
-        temp <- objects$imdanova_res
-        plots$statistics_mainplot <- plot(
-          temp,
-          plot_type = input$imdanova_plot_type,
-          fc_threshold = input$imd_plot_fc_thresh,
-          fc_colors = fc_colors,
-          bw_theme = TRUE,
-          interactive = interactive
-        )
-      } else {
-        plots$statistics_mainplot <- plot(
-          objects$imdanova_res,
-          plot_type = input$imdanova_plot_type,
-          bw_theme = TRUE,
-          fc_colors = fc_colors,
-          interactive = interactive
-        )
-      }
+      
+      fc_threshold <- if (input$imdanova_plot_type == "volcano") input$imd_plot_fc_thresh else NULL
+      
+      plots$statistics_mainplot <- plot(
+        objects$imdanova_res,
+        plot_type = input$imdanova_plot_type,
+        fc_threshold = fc_threshold,
+        fc_colors = fc_colors,
+        bw_theme = TRUE,
+        interactive = interactive
+      )
+      
       updateCollapse(session, "statistics_collapse_main", open = "statistics_plots")
     },
     error = function(e) {
@@ -209,15 +199,17 @@ observeEvent(
 
 # ...first plot...
 observeEvent(input$statistics_apply_style_plot_1, {
- 
+  
   if (inherits(plots$statistics_mainplot, "list")) {
     plots$statistics_mainplot[[1]] <- add_plot_styling(
+      input,
       "statistics", 
       plots$statistics_mainplot[[1]]
     )
  }
   else {
     plots$statistics_mainplot <- add_plot_styling(
+      input,
       "statistics", 
       plots$statistics_mainplot
     )
@@ -229,12 +221,14 @@ observeEvent(input$statistics_apply_style_plot_2, {
   
   if (inherits(plots$statistics_mainplot, "list")) {
     plots$statistics_mainplot[[2]] <- add_plot_styling(
+      input,
       "statistics", 
       plots$statistics_mainplot[[2]]
     )
   }
   else {
     plots$statistics_mainplot_2 <- add_plot_styling(
+      input,
       "statistics", 
       plots$statistics_mainplot_2
     )

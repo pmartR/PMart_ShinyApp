@@ -162,9 +162,8 @@ observeEvent(
   {
     req(!is.null(objects$peptide_imdanova_res))
     
-    interactive = if (is.null(input$peptide_stats_interactive_yn)){
-      FALSE
-    } else as.logical(input$peptide_stats_interactive_yn)
+    interactive = !is.null(input$peptide_stats_interactive_yn) && 
+      as.logical(input$peptide_stats_interactive_yn)
     
     fc_colors = if (all(map_lgl(
       list(
@@ -183,27 +182,18 @@ observeEvent(
       c("red", "black", "green")
     
     tryCatch({
-      if (input$peptide_imdanova_plot_type == "volcano") {
-        temp <- objects$peptide_imdanova_res
-        plots$peptide_statistics_mainplot <-
-          plot(
-            temp,
-            fc_threshold = input$peptide_imd_plot_fc_thresh,
-            fc_colors = fc_colors,
-            plot_type = input$peptide_imdanova_plot_type,
-            interactive = interactive,
-            bw_theme = TRUE
-          )
-      } else {
-        plots$peptide_statistics_mainplot <-
-          plot(
-            objects$peptide_imdanova_res,
-            fc_colors = fc_colors,
-            plot_type = input$peptide_imdanova_plot_type,
-            interactive = interactive,
-            bw_theme = TRUE
-          )
-      }
+      
+      fc_threshold <- if (input$imdanova_plot_type == "volcano") input$peptide_imd_plot_fc_thresh else NULL
+      
+      plots$peptide_statistics_mainplot <-
+        plot(
+          objects$peptide_imdanova_res,
+          fc_threshold = fc_threshold,
+          fc_colors = fc_colors,
+          plot_type = input$peptide_imdanova_plot_type,
+          interactive = interactive,
+          bw_theme = TRUE
+        )
       
       updateCollapse(session, "peptide_statistics_collapse_main", open = "peptide_statistics_plots")
     },
@@ -227,12 +217,14 @@ observeEvent(input$peptide_statistics_apply_style_plot_1, {
   
   if (inherits(plots$peptide_statistics_mainplot, "list")) {
     plots$peptide_statistics_mainplot[[1]] <- add_plot_styling(
+      input,
       "peptide_statistics", 
       plots$peptide_statistics_mainplot[[1]]
       )
 }
   else {
     plots$peptide_statistics_mainplot <- add_plot_styling(
+      input,
       "peptide_statistics", 
       plots$peptide_statistics_mainplot
     )

@@ -208,7 +208,8 @@ observeEvent(input$apply_rollup, {
       updateCollapse(session, "rollup_mainpanel", open = "rollup_summary", 
                      close = c("rollup_opts", "isoform_identification"))
       revals$rollup_summary <- summary(objects$omicsData)
-      plots$rollup_plot <- plot(objects$omicsData, bw_theme = TRUE, interactive = T)
+      plots$rollup_plot <- plot(objects$omicsData, bw_theme = TRUE, interactive = T, 
+                                color_by = "Group", order_by = "Group")
       
       showModal(
         modalDialog(
