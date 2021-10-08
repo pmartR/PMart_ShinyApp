@@ -14,6 +14,7 @@ library(colourpicker)
 library(shinycssloaders)
 library(plotly)
 library(shinyalert)
+library(reshape2)
 
 ######## GLOBAL VALUES ##########
 
@@ -21,7 +22,7 @@ library(shinyalert)
 MAP <- ifelse(Sys.getenv("MAP_VERSION") == "1", TRUE, FALSE)
 
 # static objects
-filter_names <- read.csv("./filter_names.csv", stringsAsFactors = F)
+filter_names <- read.csv("./filter_names.csv", stringsAsFactors = F, check.names = F)
 dt_checkmark <- '<span class="glyphicon glyphicon-ok" style="color:deepskyblue"></span>'
 dt_minus <- '<span class="glyphicon glyphicon-minus"></span>'
 blueq = icon("question-sign", lib="glyphicon", style = "color:deepskyblue;")
@@ -38,7 +39,10 @@ ttext_ <- list(
   "ROLLUP_DISABLE_INFO" = "Your data has already been rolled up to the protein level, if you would like to revert to the peptide level, go back to the filter page and re-apply your filters (you may need to re-do other steps that happened after the filter tab.)",
   "TABDISABLE_NOT_PEP" = "Tab disabled because either you are not analyzing peptide data or your object does not exist.",
   "TABDISABLE_NOT_PEP_NO_EMETA" = "Tab disabled because either you are not analyzing peptide data, you did not include a biomolecule information file, or your object does not exist",
-  "TABDISABLE_PEP_NO_EMETA" = "Tab disabled because you uploaded peptide data with no biomolecule information file.  Peptide-level statistics are still available."
+  "TABDISABLE_PEP_NO_EMETA" = "Tab disabled because you uploaded peptide data with no biomolecule information file.  Peptide-level statistics are still available.",
+  "TABDISABLE_NOT_REF" = "Tab disabled because reference normalization is only available for NMR data or labeled peptide data",
+  "REFERENCE_DISABLED_ROW" = "Disabled entries contain missing values in some samples. These might be due to NAs generated in log transformation or replacement of values less than or equal to zero.",
+  "REFERENCE_DISABLED_COL" = "Disabled entries are non-numeric."
 ) 
 
 #'@details info text NOT displayed in tooltips.  Usually in warnings UI elements

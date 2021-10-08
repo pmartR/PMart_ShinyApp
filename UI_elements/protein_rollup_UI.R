@@ -4,15 +4,12 @@ list(
   output[["bpquant_options"]] <- renderUI({
     pro_class <- inherits(objects$omicsData, "proData")
     
-    ## 
-    # if (pro_class) {
-    #   data <- objects$omicsData_pre_rollup
-    # } else {
+    ## Note: only used for fdata info so don't need pep version
       data <- objects$omicsData
-    #}
     
     stats <- objects$peptide_imdanova_res
     group_info <- pmartR:::get_group_DF(data)
+
     comp_info <- attr(stats, "comparisons")
     
     l1 <- nrow(unique(data$f_data[attr(group_info, "main_effects")]))
@@ -93,6 +90,7 @@ list(
   # Icon manipulations
   output[["bpquant_apply_icon_UI"]] <- renderUI({
     
+    req(!is.null(attr(objects$omicsData, "group_DF")))
     # input$bpquant
     
     pro_class <- inherits(objects$omicsData, "proData")
@@ -231,7 +229,7 @@ list(
   
   output[["rollup_plot_UI"]] <- renderUI({
     if(is.null(plots$rollup_plot)){
-      return("Please run protein roll-up to veiw results")
+      return("Please run protein roll-up to view results")
     } else {
       return(withSpinner(plotOutput("rollup_plot")))
     }
