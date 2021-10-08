@@ -261,8 +261,6 @@ output$statistics_plot_options <- renderUI({
       conditionalPanel("input.stats_interactive_yn == 'TRUE'",
                        tipify(blueexcl, ttext_[["IMD_INTERACTIVE_MANY_POINTS"]]))
     ),
-    conditionalPanel(
-      "input.stats_interactive_yn == 'FALSE'",
       tagList(
         style_UI(
           "statistics",
@@ -271,7 +269,6 @@ output$statistics_plot_options <- renderUI({
         ),
         uiOutput("statistics_apply_style")
       )
-    )
   )
 })
 

@@ -168,10 +168,10 @@ observeEvent(
       )
     } else c("red", "black", "green")
     
+    fc_threshold <- if(input$imdanova_plot_type == "volcano") input$imd_plot_fc_thresh else NULL
+    
     tryCatch({
-      
-      fc_threshold <- if (input$imdanova_plot_type == "volcano") input$imd_plot_fc_thresh else NULL
-      
+
       plots$statistics_mainplot <- plot(
         objects$imdanova_res,
         plot_type = input$imdanova_plot_type,
@@ -200,18 +200,22 @@ observeEvent(
 # ...first plot...
 observeEvent(input$statistics_apply_style_plot_1, {
   
+  comps <- get_comparisons(objects$imdanova_res)
+  
   if (inherits(plots$statistics_mainplot, "list")) {
     plots$statistics_mainplot[[1]] <- add_plot_styling(
       input,
       "statistics", 
-      plots$statistics_mainplot[[1]]
+      plots$statistics_mainplot[[1]],
+      subplot = nrow(comps) > 1
     )
  }
   else {
     plots$statistics_mainplot <- add_plot_styling(
       input,
       "statistics", 
-      plots$statistics_mainplot
+      plots$statistics_mainplot,
+      subplot = nrow(comps) > 1
     )
  }
 })
@@ -219,18 +223,22 @@ observeEvent(input$statistics_apply_style_plot_1, {
 # ...second plot
 observeEvent(input$statistics_apply_style_plot_2, {
   
+  comps <- get_comparisons(objects$imdanova_res)
+  
   if (inherits(plots$statistics_mainplot, "list")) {
     plots$statistics_mainplot[[2]] <- add_plot_styling(
       input,
       "statistics", 
-      plots$statistics_mainplot[[2]]
+      plots$statistics_mainplot[[2]],
+      subplot = nrow(comps) > 1
     )
   }
   else {
     plots$statistics_mainplot_2 <- add_plot_styling(
       input,
       "statistics", 
-      plots$statistics_mainplot_2
+      plots$statistics_mainplot_2,
+      subplot = nrow(comps) > 1
     )
   }
 })

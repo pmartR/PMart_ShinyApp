@@ -268,9 +268,6 @@ output$peptide_statistics_plot_options <- renderUI({
       conditionalPanel("input.peptide_stats_interactive_yn == 'TRUE'",
                        tipify(blueexcl, ttext_[["IMD_INTERACTIVE_MANY_POINTS"]]))
     ),
-    conditionalPanel(
-      "input.peptide_stats_interactive_yn != 'TRUE'",
-      
       tagList(
         style_UI(
           "peptide_statistics",
@@ -279,7 +276,6 @@ output$peptide_statistics_plot_options <- renderUI({
         ),
         uiOutput("peptide_statistics_apply_style")
       )
-    )
   )
 })
 
