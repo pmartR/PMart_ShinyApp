@@ -70,9 +70,17 @@ list(
           f_data_keep <- setdiff(object_samples, union(f_data_remove, rmd_removed_samps)) # **
         }
         
+        #
         e_data_remove = objects$filters$customfilt$e_data_remove
+        e_meta_remove = objects$filters$customfilt$e_meta_remove
+        
+        #' construct divs containing info about what was removed by the custom filter
         e_data_remove_div <- if(length(e_data_remove) > 0) {
-            tags$p("Biomolecules Removed: ", div(style = "overflow-x:auto", paste(e_data_remove, collapse = " | ")))
+          tagList(tags$p(
+            "Biomolecules Removed: ",
+            div(style = "overflow-x:auto", paste(e_data_remove, collapse = " | ")),
+            div(sprintf("Total: %s", length(e_data_remove)))
+          ))
         } else {
           NULL
         }
@@ -86,14 +94,26 @@ list(
           NULL
         }
         
+        e_meta_remove_div <- if(length(e_meta_remove) > 0) {
+          tagList(tags$p(
+            "Biomolecules removed by association with extra biomolecule information:",
+            div(style = "overflow-x:auto", paste(e_meta_remove, collapse = " | ")),
+            div(sprintf("Total: %s", length(e_meta_remove)))
+          ))
+        } else {
+          NULL
+        }
+        
         divs[[i]] <- tagList(
           tags$b("Custom Filter:"),
           f_data_remove_div,
           hr(),
           e_data_remove_div,
+          hr(),
+          e_meta_remove_div,
           hr()
         )
-        # cv filter
+      # cv filter
       } else if (grepl("cvfilt", names(objects$filters)[i])) {
         n_removed <- sum(objects$filters[[i]]$CV > input$cv_threshold, na.rm=T)
         divs[[i]] <- tagList(
@@ -101,7 +121,7 @@ list(
           tags$p("CV threshold: ", input$cv_threshold, "| Biomolecules removed: ", n_removed),
           hr()
         )
-        # imd filter
+      # imd filter
       } else if (grepl("imdanovafilt", names(objects$filters)[i])) {
         
         mng <- if(is.na(input$min_nonmiss_gtest)) NULL else input$min_nonmiss_gtest
