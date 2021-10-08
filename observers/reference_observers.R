@@ -32,6 +32,7 @@ success_modal_no_input <-
     footer = NULL
   )
 
+#'@details Applies reference normalization inplace to isobaric or NMR omicsData.
 refnorm <- function(){
   
   ## Tab sort

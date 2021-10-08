@@ -64,7 +64,7 @@ list(
 
   # plot.normres modal plot showing location parameters
   output$norm_modal_ba_plots_2 <- renderPlotly({
-    
+
     if (inherits(plots$norm_modal_ba_plots_2, "list")) {
       p <- gridExtra::arrangeGrob(plots$norm_modal_ba_plots_2[[1]], plots$norm_modal_ba_plots_2[[2]], ncol = 2)
       plots$last_plot_2 <- p

@@ -163,10 +163,8 @@ list(
   # other filter plot for lipid data
   output$filter_mainplot_2 <- renderPlotly({
     if (inherits(plots$filter_mainplot_2, "list")) {
-      
-      # browser()
-      p <- gridExtra::arrangeGrob(plots$filter_mainplot_2[[1]], 
-                                  plots$filter_mainplot_2[[2]], ncol = 2)
+
+      p <- gridExtra::arrangeGrob(plots$filter_mainplot_2[[1]], plots$filter_mainplot_2[[2]], ncol = 2)
       plots$last_plot_2 <- p
       grid::grid.draw(p)
     }

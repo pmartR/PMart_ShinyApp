@@ -4,7 +4,7 @@
 # 3) If failed, display a warning message and return the old value of the filter (NULL if no filter was created yet)
 # 4) Do (1-3) for the second object if present
 
-
+#'@details Applies filters inplace to omicsData objects. 
 apply_filt <- function(){
   # stats results are no longer valid, remove them
   objects$imdanova_res <- NULL

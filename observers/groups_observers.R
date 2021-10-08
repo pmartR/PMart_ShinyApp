@@ -1,4 +1,4 @@
-
+#'@details Applies pmartR::group_designation inplace to omicsData objects.
 makegroup <- function(){
   
   req(!is.null(objects$omicsData) && !is.null(f_data()))
@@ -92,6 +92,7 @@ makegroup <- function(){
   )
 }
 
+# toggle fdata id col select if f_data() exists
 observe({
   req(f_data())
   toggleElement("js_fdata_id_col", condition = !is.null(f_data()))
