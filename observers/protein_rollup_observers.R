@@ -50,6 +50,10 @@ observeEvent(input[["bpquant"]], {
   updateTabsetPanel(session, "rollup_mainpanel",
                     selected = "BPQuant Results"
   )
+  
+  show("isoidicon")
+  updateCollapse(session, "rollup_sidebar", close = "isoform_identification")
+  
   updatePrettySwitch(session, "bpquant_lock", value = TRUE)
   
   pro_class <- inherits(objects$omicsData, "proData")
@@ -140,6 +144,7 @@ observeEvent(input[["bpquant_lock"]], {
             enable("bpquant_max_prot")
             enable("bpquant_comps")
             updateRadioButtons(session, "bpquant_apply", selected = "No")
+            hide("isoidicon")
           } else {
             updatePrettySwitch(session, "bpquant_lock", value = TRUE)
           }
@@ -151,6 +156,7 @@ observeEvent(input[["bpquant_lock"]], {
       enable("bpquant_max_prot")
       enable("bpquant_comps")
       disable("bpquant")
+      hide("isoidicon")
       updateRadioButtons(session, "bpquant_apply", selected = "No")
     }
   }
@@ -174,15 +180,33 @@ observeEvent(input$apply_rollup, {
       if (input$which_rollup == "qrollup") thresh <- input$qrollup_thresh else thresh <- NULL
       if (input$bpquant_apply == "Yes") isores <- objects$bpquant else isores <- NULL
       
+      if(input$which_rollup == "zrollup"){
+        single_pep = T
+        single_observation = T
+      } else {
+        single_pep = FALSE
+        single_observation = FALSE
+      }
+      
+      ## Catch for all NA peptides
+      if(input$which_rollup == "rrollup" && 
+         !("moleculeFilt" %in% unlist(map(pmartR::get_filters(objects$omicsData), 1)))){
+        objects$omicsData <- applyFilt(molecule_filter(objects$omicsData), objects$omicsData, min_num = 1)
+      }
+      
       objects$omicsData <- protein_quant(
         objects$omicsData,
         method = input$which_rollup,
         combine_fn = input$which_combine_fn,
         isoformRes = isores,
-        qrollup_thresh = thresh
+        qrollup_thresh = thresh,
+        single_pep = single_pep,
+        single_observation = single_observation
       )
       
-      updateCollapse(session, "rollup_mainpanel", open = "rollup_summary")
+      show("prorollicon")
+      updateCollapse(session, "rollup_mainpanel", open = "rollup_summary", 
+                     close = c("rollup_opts", "isoform_identification"))
       revals$rollup_summary <- summary(objects$omicsData)
       plots$rollup_plot <- plot(objects$omicsData, bw_theme = TRUE)
       

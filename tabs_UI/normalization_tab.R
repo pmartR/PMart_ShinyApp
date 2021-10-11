@@ -5,8 +5,11 @@ normalization_UI <- function() {
     column(
       4,
       bsCollapse(
-        id = "normalization_sidebar", open = "normalize_global_sidebar",
-        bsCollapsePanel("Global Normalization",
+        id = "normalization_sidebar", 
+        open = "normalize_global_sidebar",
+        bsCollapsePanel(
+          div("Global Normalization", 
+              hidden(div(id = "ok_normalization", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))),
           value = "normalize_global_sidebar",
           hidden(radioGroupButtons("spans_or_manual", "Use SPANS or manually select a Normalization?", choices = c("Manual" = "manual", "SPANS" = "spans"))),
           # spans sub-collapse
@@ -56,9 +59,10 @@ normalization_UI <- function() {
             )
           ),
           hr(),
-          hidden(bsButton("apply_normalization", "Apply normalization"))
+          hidden(bsButton("apply_normalization", "Apply normalization", style = "primary"))
         )
       ),
+      disabled(bsButton("reset_normalization", "Remove normalization", style = "primary")),
       uiOutput("warnings_normalize")
     ),
     column(

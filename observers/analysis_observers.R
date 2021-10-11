@@ -61,7 +61,10 @@ observeEvent(get_swap_vals(), {
 
 # make statres object
 observeEvent(input$apply_imdanova, {
-  req(!is.null(objects$omicsData), input$top_page == "statistics_tab")
+  req(!is.null(objects$omicsData) && input$top_page == "statistics_tab" && !is.null(comp_df_holder$comp_df))
+  
+  shinyjs::show("analysis_busy")
+  on.exit(hide("analysis_busy"))
   
   tryCatch(
     {
@@ -75,6 +78,14 @@ observeEvent(input$apply_imdanova, {
         pval_thresh = input$pval_thresh
       )
       
+      show("stats-statistics-ok")
+      show("imdanova_groups_ok")
+      show("imdanova_settings_ok")
+
+      updateCollapse(session, "statistics_collapse_left", close = c("stats-statistics-options"))
+      updateCollapse(session, "imdanova-sidepanel-options", 
+                     close = c("imdanova-specify-comparisons", "imdanova-select-settings"))
+
       # success modal if all is well
       showModal(
         modalDialog(

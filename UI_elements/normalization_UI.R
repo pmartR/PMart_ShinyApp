@@ -40,16 +40,18 @@ list(
   ),
 
   # spans score plot
-  output$spans_plot <- renderPlot({
+  output$spans_plot <- renderPlotly({
     req(!is.null(objects$spans_res))
-    p <- plot(objects$spans_res)
+    p <- plot(objects$spans_res, interactive = T
+              )
     plots$last_plot <- p
     return(p)
   }),
 
-  # plot.normres modal plot showing location parameters
-  output$norm_modal_ba_plots <- renderPlot({
-    if (inherits(plots$norm_modal_ba_plots, "list")) {
+  # plot.normres modal plot showing location parameters ### Requires pmartR update
+  output$norm_modal_ba_plots <- renderPlotly({
+    
+    if (inherits(plots$norm_modal_ba_plots, "list") && !is.null(plots$norm_modal_ba_plots[[1]])) {
       p <- gridExtra::arrangeGrob(plots$norm_modal_ba_plots[[1]], plots$norm_modal_ba_plots[[2]], ncol = 2)
       plots$last_plot <- p
       grid::grid.draw(p)
@@ -61,7 +63,8 @@ list(
   }),
 
   # plot.normres modal plot showing location parameters
-  output$norm_modal_ba_plots_2 <- renderPlot({
+  output$norm_modal_ba_plots_2 <- renderPlotly({
+
     if (inherits(plots$norm_modal_ba_plots_2, "list")) {
       p <- gridExtra::arrangeGrob(plots$norm_modal_ba_plots_2[[1]], plots$norm_modal_ba_plots_2[[2]], ncol = 2)
       plots$last_plot_2 <- p
@@ -103,12 +106,12 @@ list(
     if (input$norm_modal_plot_select == "ba") {
       if (!is.null(objects$omicsData_2)) {
         tagList(
-          withSpinner(plotOutput("norm_modal_ba_plots")),
-          withSpinner(plotOutput("norm_modal_ba_plots_2"))
+          withSpinner(plotlyOutput("norm_modal_ba_plots")),
+          withSpinner(plotlyOutput("norm_modal_ba_plots_2"))
         )
       }
       else {
-        withSpinner(plotOutput("norm_modal_ba_plots"))
+        withSpinner(plotlyOutput("norm_modal_ba_plots"))
       }
     }
     else if (input$norm_modal_plot_select == "fac") {

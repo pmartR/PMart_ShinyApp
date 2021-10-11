@@ -4,6 +4,151 @@
 # 3) If failed, display a warning message and return the old value of the filter (NULL if no filter was created yet)
 # 4) Do (1-3) for the second object if present
 
+#'@details Applies filters inplace to omicsData objects. 
+apply_filt <- function(){
+  # stats results are no longer valid, remove them
+  objects$imdanova_res <- NULL
+  
+  tryCatch(
+    {
+      # make temp objects and clear summaries
+      tmp <- objects$uploaded_omicsData
+      tmp2 <- objects$uploaded_omicsData_2
+      revals$filter_summary <- revals$filter_summary_2 <- NULL
+      # molecule filter
+      if (!is.null(objects$filters$molfilt) & is.null(attributes(tmp)$filters$moleculeFilt)) {
+        tmp <- applyFilt(objects$filters$molfilt, tmp, min_num = input$mol_min_num)
+        if (!is.null(objects$filters$molfilt_2) & is.null(attributes(tmp2)$filters$moleculeFilt)) {
+          tmp2 <- applyFilt(objects$filters$molfilt_2, tmp2, min_num = input$mol_min_num)
+        }
+      }
+      # proteomics filter
+      if (inherits(tmp, "pepData")) {
+        if (isTRUE(!is.null(objects$filters$profilt) & is.null(attributes(tmp)$filters$proteomicsFilt))) {
+          tmp <- applyFilt(objects$filters$profilt, tmp, min_num_peps = input$min_num_peps, degen_peps = input$degen_peps)
+        }
+      }
+      # cv filter
+      if (!is.null(objects$filters$cvfilt) & is.null(attributes(tmp)$filters$cvFilt)) {
+        tmp <- applyFilt(objects$filters$cvfilt, tmp, cv_threshold = input$cv_threshold)
+        if (!is.null(objects$filters$cvfilt_2) & !is.null(tmp2) & is.null(attributes(tmp2)$filters$cvFilt)) {
+          tmp2 <- applyFilt(objects$filters$cvfilt_2, tmp2, cv_threshold = input$cv_threshold)
+        }
+      }
+
+      # if(e$message == "None of the samples will be removed with the current thresholds.")
+      # imd filter
+      if (!is.null(objects$filters$imdanovafilt) & 
+          is.null(attributes(tmp)$filters$imdanovaFilt)) {
+        tmp <- applyFilt(objects$filters$imdanovafilt, 
+                         tmp, 
+                         min_nonmiss_anova = input$min_nonmiss_anova, 
+                         min_nonmiss_gtest = input$min_nonmiss_gtest
+                         )
+        if (!is.null(objects$filters$imdanovafilt_2) & 
+            !is.null(tmp2) & 
+            is.null(attributes(tmp2)$filters$imdanovaFilt)) {
+          tmp2 <- applyFilt(objects$filters$imdanovafilt_2, 
+                            tmp2, 
+                            min_nonmiss_anova = input$min_nonmiss_anova, 
+                            min_nonmiss_gtest = input$min_nonmiss_gtest)
+        }
+      }
+      
+      #### SAMPLE FILTERS ####
+      
+      # rMd filter
+      if (!is.null(objects$filters$rmdfilt) & is.null(attributes(tmp)$filters$rmdFilt)) {
+        tmp <- applyFilt(objects$filters$rmdfilt, tmp, pvalue_threshold = input$pvalue_threshold)
+        if (!is.null(objects$filters$rmdfilt_2) & !is.null(tmp2)) {
+          tmp2 <- applyFilt(objects$filters$rmdfilt_2, tmp2, pvalue_threshold = input$pvalue_threshold)
+        }
+      }
+      
+      # custom filter samples
+      if (!is.null(objects$filters$customfilt)) {
+        # get the intersect in case these samples were removed by previous sample filters e.g. rMd
+        drop_samples1 <- intersect(objects$filters$customfilt$f_data_remove, tmp$f_data[, get_fdata_cname(tmp)])
+        if (length(drop_samples1) > 0) tmp <- applyFilt(custom_filter(tmp, f_data_remove = drop_samples1), tmp)
+      }
+      if (!is.null(objects$filters$customfilt_2) & !is.null(tmp2)) {
+        drop_samples2 <- intersect(objects$filters$customfilt_2$f_data_remove, tmp2$f_data[, get_fdata_cname(tmp)])
+        if (length(drop_samples2) > 0) tmp2 <- applyFilt(custom_filter(tmp2, f_data_remove = drop_samples2), tmp2)
+      }
+      
+      # store saved objects and remove temp objects, tmp2 will be null if there is only one dataset
+      objects$omicsData <- tmp
+      objects$omicsData_2 <- tmp2
+      revals$filter_summary <- summary(tmp)
+      if (!is.null(tmp2)) revals$filter_summary_2 <- summary(tmp2)
+      rm(tmp, tmp2)
+      return(NULL)
+    },
+    error = function(e) {
+      return(paste0("Something went wrong applying your filters:  \n System error:  ", e))
+    }
+  )
+}
+
+##### Unselect all Filters
+observeEvent(input$reset_filters, {
+  objects$filters <- NULL
+})
+
+### Toggle icons/switches
+observe({
+  # check if molfilt was created
+  input$reset_filters
+  molfilt_exists <- !is.null(objects$filters$molfilt) & (!is.null(objects$filters$molfilt_2) | is.null(objects$uploaded_omicsData_2))
+  
+  # toggle('remove_molfilt', condition = !is.null(objects$filters$molfilt), anim = TRUE)
+  toggle("molfilt_exists", condition = molfilt_exists, anim = TRUE)
+  toggleState("mol_min_num", condition = !molfilt_exists)
+  toggleCssClass("mol_min_num", "grey_text", condition = molfilt_exists)
+  
+  cvfilt_exists <- !is.null(objects$filters$cvfilt) & (!is.null(objects$filters$cvfilt_2) | is.null(objects$uploaded_omicsData_2))
+  
+  # toggle('remove_cvfilt', condition = !is.null(objects$filters$cvfilt), anim = TRUE)
+  toggle("cvfilt_exists", condition = !is.null(objects$filters$cvfilt) & (!is.null(objects$filters$cvfilt_2) | is.null(objects$uploaded_omicsData_2)), anim = TRUE)
+  toggleState("cv_threshold", condition = !cvfilt_exists)
+  toggleCssClass("cv_threshold", "grey_text", condition = cvfilt_exists)
+  
+  # toggle('remove_profilt', condition = !is.null(objects$filters$profilt), anim = TRUE)
+  toggle("profilt_exists", condition = !is.null(objects$filters$profilt), anim = TRUE)
+  toggleState("min_num_peps", condition = is.null(objects$filters$profilt))
+  toggleCssClass("min_num_peps", "grey_text", condition = !is.null(objects$filters$profilt))
+  toggleState("degen_peps", condition = is.null(objects$filters$profilt))
+  toggleCssClass("degen_peps", condition = !is.null(objects$filters$profilt))
+  
+  imdanovafilt_exists <- !is.null(objects$filters$imdanovafilt) & 
+    (!is.null(objects$filters$imdanovafilt_2) | is.null(objects$uploaded_omicsData_2))
+  
+  # toggle('remove_imdanovafilt', condition = !is.null(objects$filters$imdanovafilt), anim = TRUE)
+  toggle("imdanovafilt_exists", condition = imdanovafilt_exists, anim = TRUE)
+  toggleState("min_nonmiss_anova", condition = !imdanovafilt_exists)
+  toggleCssClass("min_nonmiss_anova", "grey_text", condition = imdanovafilt_exists)
+  toggleState("min_nonmiss_gtest", condition = !imdanovafilt_exists)
+  toggleCssClass("min_nonmiss_gtest", "grey_text", condition = imdanovafilt_exists)
+  
+  rmdfilt_exists <- !is.null(objects$filters$rmdfilt) & (!is.null(objects$filters$rmdfilt_2) | is.null(objects$uploaded_omicsData_2))
+  
+  toggle("rmdfilt_exists", condition = rmdfilt_exists, anim = TRUE)
+  toggleState("pvalue_threshold", condition = !rmdfilt_exists)
+  toggleCssClass("pvalue_threshold", "grey_text", condition = rmdfilt_exists)
+  toggleState("rmd_metrics", condition = !rmdfilt_exists)
+  toggleCssClass(class = "grey_disabled", condition = rmdfilt_exists, selector = "button[data-id='rmd_metrics']")
+  
+  customfilt_exists <- !is.null(objects$filters$customfilt) | !is.null(objects$filters$customfilt_2)
+  
+  toggle("customfilt_exists", condition = customfilt_exists, anim = TRUE)
+  toggleState("remove_or_keep", condition = !customfilt_exists)
+  toggleState("fdata_customfilt_choices", condition = !customfilt_exists)
+  toggleState("fdata_customfilt_choices_2", condition = !customfilt_exists)
+  toggleCssClass(class = "grey_disabled", condition = customfilt_exists, selector = "button[data-id='fdata_customfilt_choices']")
+  toggleCssClass(class = "grey_disabled", condition = customfilt_exists, selector = "button[data-id='fdata_customfilt_choices_2']")
+  
+})
+
 # create molfilt objects
 observeEvent(input$add_molfilt, {
   molfilt_exists <- !is.null(objects$filters$molfilt) & (!is.null(objects$filters$molfilt_2) | is.null(objects$uploaded_omicsData_2))
@@ -37,14 +182,14 @@ observeEvent(input$add_molfilt, {
   else {
     revals$warnings_filter$molecule_filter_1 <- revals$warnings_filter$molecule_filter2 <- objects$filters$molfilt <- objects$filters$molfilt_2 <- NULL
   }
-
-  # check if molfilt was created
-  molfilt_exists <- !is.null(objects$filters$molfilt) & (!is.null(objects$filters$molfilt_2) | is.null(objects$uploaded_omicsData_2))
-
-  # toggle('remove_molfilt', condition = !is.null(objects$filters$molfilt), anim = TRUE)
-  toggle("molfilt_exists", condition = molfilt_exists, anim = TRUE)
-  toggleState("mol_min_num", condition = !molfilt_exists)
-  toggleCssClass("mol_min_num", "grey_text", condition = molfilt_exists)
+# 
+#   # check if molfilt was created
+#   molfilt_exists <- !is.null(objects$filters$molfilt) & (!is.null(objects$filters$molfilt_2) | is.null(objects$uploaded_omicsData_2))
+# 
+#   # toggle('remove_molfilt', condition = !is.null(objects$filters$molfilt), anim = TRUE)
+#   toggle("molfilt_exists", condition = molfilt_exists, anim = TRUE)
+#   toggleState("mol_min_num", condition = !molfilt_exists)
+#   toggleCssClass("mol_min_num", "grey_text", condition = molfilt_exists)
 })
 
 # create cvfilt objects
@@ -91,12 +236,12 @@ observeEvent(input$add_cvfilt, {
     revals$warnings_filter$cv_filter1 <- revals$warnings_filter$cv_filter2 <- objects$filters$cvfilt <- objects$filters$cvfilt_2 <- NULL
   }
 
-  cvfilt_exists <- !is.null(objects$filters$cvfilt) & (!is.null(objects$filters$cvfilt_2) | is.null(objects$uploaded_omicsData_2))
-
-  # toggle('remove_cvfilt', condition = !is.null(objects$filters$cvfilt), anim = TRUE)
-  toggle("cvfilt_exists", condition = !is.null(objects$filters$cvfilt) & (!is.null(objects$filters$cvfilt_2) | is.null(objects$uploaded_omicsData_2)), anim = TRUE)
-  toggleState("cv_threshold", condition = !cvfilt_exists)
-  toggleCssClass("cv_threshold", "grey_text", condition = cvfilt_exists)
+  # cvfilt_exists <- !is.null(objects$filters$cvfilt) & (!is.null(objects$filters$cvfilt_2) | is.null(objects$uploaded_omicsData_2))
+  # 
+  # # toggle('remove_cvfilt', condition = !is.null(objects$filters$cvfilt), anim = TRUE)
+  # toggle("cvfilt_exists", condition = !is.null(objects$filters$cvfilt) & (!is.null(objects$filters$cvfilt_2) | is.null(objects$uploaded_omicsData_2)), anim = TRUE)
+  # toggleState("cv_threshold", condition = !cvfilt_exists)
+  # toggleCssClass("cv_threshold", "grey_text", condition = cvfilt_exists)
 })
 
 # create profilt object
@@ -167,21 +312,24 @@ observeEvent(input$add_imdanovafilt, {
     revals$warnings_filter$imdanovafilt1 <- revals$warnings_filter$imdanovafilt2 <- objects$filters$imdanovafilt <- objects$filters$imdanovafilt_2 <- NULL
   }
 
-  imdanovafilt_exists <- !is.null(objects$filters$imdanovafilt) & (!is.null(objects$filters$imdanovafilt_2) | is.null(objects$uploaded_omicsData_2))
+  imdanovafilt_exists <- !is.null(objects$filters$imdanovafilt) & 
+    (!is.null(objects$filters$imdanovafilt_2) | is.null(objects$uploaded_omicsData_2))
 
-  # toggle('remove_imdanovafilt', condition = !is.null(objects$filters$imdanovafilt), anim = TRUE)
-  toggle("imdanovafilt_exists", condition = imdanovafilt_exists, anim = TRUE)
-  toggleState("min_nonmiss_anova", condition = !imdanovafilt_exists)
-  toggleCssClass("min_nonmiss_anova", "grey_text", condition = imdanovafilt_exists)
-  toggleState("min_nonmiss_gtest", condition = !imdanovafilt_exists)
-  toggleCssClass("min_nonmiss_gtest", "grey_text", condition = imdanovafilt_exists)
+  # # toggle('remove_imdanovafilt', condition = !is.null(objects$filters$imdanovafilt), anim = TRUE)
+  # toggle("imdanovafilt_exists", condition = imdanovafilt_exists, anim = TRUE)
+  # toggleState("min_nonmiss_anova", condition = !imdanovafilt_exists)
+  # toggleCssClass("min_nonmiss_anova", "grey_text", condition = imdanovafilt_exists)
+  # toggleState("min_nonmiss_gtest", condition = !imdanovafilt_exists)
+  # toggleCssClass("min_nonmiss_gtest", "grey_text", condition = imdanovafilt_exists)
 })
 
 # create rmdfilt object
 observeEvent(input$add_rmdfilt, {
-  rmdfilt_exists <- !is.null(objects$filters$rmdfilt) & (!is.null(objects$filters$rmdfilt_2) | is.null(objects$uploaded_omicsData_2))
+  rmdfilt_exists <- !is.null(objects$filters$rmdfilt) & 
+    (!is.null(objects$filters$rmdfilt_2) | is.null(objects$uploaded_omicsData_2))
 
   if (!rmdfilt_exists) {
+    
     objects$filters$rmdfilt <- tryCatch(
       {
         revals$warnings_filter$rmdfilt1 <<- NULL
@@ -210,14 +358,8 @@ observeEvent(input$add_rmdfilt, {
   else {
     revals$warnings_filter$rmdfilt1 <- revals$warnings_filter$rmdfilt2 <- objects$filters$rmdfilt <- objects$filters$rmdfilt_2 <- NULL
   }
-
-  rmdfilt_exists <- !is.null(objects$filters$rmdfilt) & (!is.null(objects$filters$rmdfilt_2) | is.null(objects$uploaded_omicsData_2))
-
-  toggle("rmdfilt_exists", condition = rmdfilt_exists, anim = TRUE)
-  toggleState("pvalue_threshold", condition = !rmdfilt_exists)
-  toggleCssClass("pvalue_threshold", "grey_text", condition = rmdfilt_exists)
-  toggleState("rmd_metrics", condition = !rmdfilt_exists)
-  toggleCssClass(class = "grey_disabled", condition = rmdfilt_exists, selector = "button[data-id='rmd_metrics']")
+  
+ 
 })
 
 # create customfilt object
@@ -257,14 +399,14 @@ observeEvent(input$add_customfilt, {
     revals$warnings_filter$customfilt1 <- revals$warnings_filter$customfilt2 <- objects$filters$customfilt <- objects$filters$customfilt_2 <- NULL
   }
 
-  customfilt_exists <- !is.null(objects$filters$customfilt) | !is.null(objects$filters$customfilt_2)
-
-  toggle("customfilt_exists", condition = customfilt_exists, anim = TRUE)
-  toggleState("remove_or_keep", condition = !customfilt_exists)
-  toggleState("fdata_customfilt_choices", condition = !customfilt_exists)
-  toggleState("fdata_customfilt_choices_2", condition = !customfilt_exists)
-  toggleCssClass(class = "grey_disabled", condition = customfilt_exists, selector = "button[data-id='fdata_customfilt_choices']")
-  toggleCssClass(class = "grey_disabled", condition = customfilt_exists, selector = "button[data-id='fdata_customfilt_choices_2']")
+  # customfilt_exists <- !is.null(objects$filters$customfilt) | !is.null(objects$filters$customfilt_2)
+  # 
+  # toggle("customfilt_exists", condition = customfilt_exists, anim = TRUE)
+  # toggleState("remove_or_keep", condition = !customfilt_exists)
+  # toggleState("fdata_customfilt_choices", condition = !customfilt_exists)
+  # toggleState("fdata_customfilt_choices_2", condition = !customfilt_exists)
+  # toggleCssClass(class = "grey_disabled", condition = customfilt_exists, selector = "button[data-id='fdata_customfilt_choices']")
+  # toggleCssClass(class = "grey_disabled", condition = customfilt_exists, selector = "button[data-id='fdata_customfilt_choices_2']")
 })
 
 
@@ -284,7 +426,11 @@ observeEvent(c(input$plot_rmdfilt, input$rmd_metrics, input$pvalue_threshold, in
     # store plot object in reactive variable
     plots$filter_mainplot <- tryCatch(
       {
-        p <- plot(rmd_filter(objects$uploaded_omicsData, metrics = input$rmd_metrics), pvalue_threshold = input$pvalue_threshold, sampleID = sampleID1, bw_theme = TRUE)
+        p <- plot(rmd_filter(objects$uploaded_omicsData, 
+                             metrics = input$rmd_metrics),
+                  pvalue_threshold = input$pvalue_threshold, 
+                  sampleID = sampleID1, bw_theme = TRUE#, interactive = T
+                  )
 
         # block for displaying sample names if we are plotting all samples
         if (is.null(sampleID1)) {
@@ -309,7 +455,8 @@ observeEvent(c(input$plot_rmdfilt, input$rmd_metrics, input$pvalue_threshold, in
       plots$filter_mainplot_2 <- tryCatch(
         {
           p <- plot(rmd_filter(objects$uploaded_omicsData_2, metrics = input$rmd_metrics),
-            pvalue_threshold = input$pvalue_threshold, sampleID = sampleID2, bw_theme = TRUE
+            pvalue_threshold = input$pvalue_threshold, sampleID = sampleID2, 
+            bw_theme = TRUE#, interactive = T
           )
 
           if (is.null(sampleID2)) {
@@ -340,7 +487,10 @@ observeEvent(c(input$plot_profilt, input$min_num_peps, input$degen_peps),
 
     plots$filter_mainplot <- tryCatch(
       {
-        plot(proteomics_filter(objects$uploaded_omicsData), min_num_peps = as.numeric(input$min_num_peps), bw_theme = TRUE)
+        plot(proteomics_filter(objects$uploaded_omicsData), 
+             min_num_peps = as.numeric(input$min_num_peps), 
+             bw_theme = TRUE#, interactive = T
+             )
       },
       error = function(e) {
         msg <- paste0("Something went wrong making your proteomics filter plot \n System error: ", e)
@@ -360,7 +510,9 @@ observeEvent(c(input$plot_molfilt, input$mol_min_num),
 
     plots$filter_mainplot <- tryCatch(
       {
-        plot(molecule_filter(objects$uploaded_omicsData), min_num = input$mol_min_num, bw_theme = TRUE)
+        plot(molecule_filter(objects$uploaded_omicsData), 
+             min_num = input$mol_min_num, bw_theme = TRUE#, interactive = T
+             )
       },
       error = function(e) {
         msg <- paste0("Something went wrong making your molecule filter plot \n System error: ", e)
@@ -372,7 +524,10 @@ observeEvent(c(input$plot_molfilt, input$mol_min_num),
     if (!is.null(objects$uploaded_omicsData_2)) {
       plots$filter_mainplot_2 <- tryCatch(
         {
-          plot(molecule_filter(objects$uploaded_omicsData_2), min_num = input$mol_min_num, bw_theme = TRUE)
+          plot(molecule_filter(objects$uploaded_omicsData_2), 
+               min_num = input$mol_min_num, 
+               bw_theme = TRUE#, interactive = T
+               )
         },
         error = function(e) {
           msg <- paste0("Something went wrong making your second molecule filter plot \n System error: ", e)
@@ -388,12 +543,15 @@ observeEvent(c(input$plot_molfilt, input$mol_min_num),
 # cv filter plot
 observeEvent(c(input$plot_cvfilt, input$cv_threshold),
   {
-    req(input$plot_cvfilt > 0)
+    req(input$plot_cvfilt > 0 && !is.na(input$cv_threshold))
     revals$warnings_filter$cvfilt_plot <- revals$warnings_filter$cvfilt_plot_2 <- NULL
     
     plots$filter_mainplot <- tryCatch(
       {
-        plot(cv_filter(objects$uploaded_omicsData), cv_threshold = input$cv_threshold, bw_theme = TRUE)
+        plot(cv_filter(objects$uploaded_omicsData),
+             cv_threshold = input$cv_threshold,
+             bw_theme = TRUE#, interactive = T
+             )
       },
       error = function(e) {
         msg <- paste0("Something went wrong making your CV filter plot \n System error: ", e)
@@ -405,7 +563,10 @@ observeEvent(c(input$plot_cvfilt, input$cv_threshold),
     if (!is.null(objects$uploaded_omicsData_2)) {
       plots$filter_mainplot_2 <- tryCatch(
         {
-          plot(cv_filter(objects$uploaded_omicsData_2), cv_threshold = input$cv_threshold, bw_theme = TRUE)
+          plot(cv_filter(objects$uploaded_omicsData_2), 
+               cv_threshold = input$cv_threshold, 
+               bw_theme = TRUE#, interactive = T
+               )
         },
         error = function(e) {
           msg <- paste0("Something went wrong making your second CV filter plot \n System error: ", e)
@@ -426,7 +587,11 @@ observeEvent(c(input$plot_imdanovafilt, input$min_nonmiss_anova, input$min_nonmi
 
     plots$filter_mainplot <- tryCatch(
       {
-        plot(imdanova_filter(objects$uploaded_omicsData), min_nonmiss_anova = input$min_nonmiss_anova, min_nonmiss_gtest = input$min_nonmiss_gtest, bw_theme = TRUE)
+        plot(imdanova_filter(objects$uploaded_omicsData), 
+             min_nonmiss_anova = input$min_nonmiss_anova, 
+             min_nonmiss_gtest = input$min_nonmiss_gtest, 
+             bw_theme = TRUE#, interactive = T
+             )
       },
       error = function(e) {
         msg <- paste0("Something went wrong making your iMd-ANOVA filter plot \n System error: ", e)
@@ -438,7 +603,11 @@ observeEvent(c(input$plot_imdanovafilt, input$min_nonmiss_anova, input$min_nonmi
     if (!is.null(objects$uploaded_omicsData_2)) {
       plots$filter_mainplot_2 <- tryCatch(
         {
-          plot(imdanova_filter(objects$uploaded_omicsData_2), min_nonmiss_anova = input$min_nonmiss_anova, min_nonmiss_gtest = input$min_nonmiss_gtest, bw_theme = TRUE)
+          plot(imdanova_filter(objects$uploaded_omicsData_2), 
+               min_nonmiss_anova = input$min_nonmiss_anova, 
+               min_nonmiss_gtest = input$min_nonmiss_gtest, 
+               bw_theme = TRUE#, interactive = T
+               )
         },
         error = function(e) {
           msg <- paste0("Something went wrong making your second iMd-ANOVA filter plot \n System error: ", e)
@@ -522,77 +691,7 @@ observeEvent(input$review_filters, {
 #################
 observeEvent(input$apply_filters, {
   req(!is.null(objects$uploaded_omicsData))
-  
-  # stats results are no longer valid, remove them
-  objects$imdanova_res <- NULL
-  
-  tryCatch(
-    {
-      # make temp objects and clear summaries
-      tmp <- objects$uploaded_omicsData
-      tmp2 <- objects$uploaded_omicsData_2
-      revals$filter_summary <- revals$filter_summary_2 <- NULL
-      # molecule filter
-      if (!is.null(objects$filters$molfilt) & is.null(attributes(tmp)$filters$moleculeFilt)) {
-        tmp <- applyFilt(objects$filters$molfilt, tmp, min_num = input$mol_min_num)
-        if (!is.null(objects$filters$molfilt_2) & is.null(attributes(tmp2)$filters$moleculeFilt)) {
-          tmp2 <- applyFilt(objects$filters$molfilt_2, tmp2, min_num = input$mol_min_num)
-        }
-      }
-      # proteomics filter
-      if (class(tmp) == "pepData") {
-        if (isTRUE(!is.null(objects$filters$profilt) & is.null(attributes(tmp)$filters$proteomicsFilt))) {
-          tmp <- applyFilt(objects$filters$profilt, tmp, min_num_peps = input$min_num_peps, degen_peps = input$degen_peps)
-        }
-      }
-      # cv filter
-      if (!is.null(objects$filters$cvfilt) & is.null(attributes(tmp)$filters$cvFilt)) {
-        tmp <- applyFilt(objects$filters$cvfilt, tmp, cv_threshold = input$cv_threshold)
-        if (!is.null(objects$filters$cvfilt_2) & !is.null(tmp2) & is.null(attributes(tmp2)$filters$cvFilt)) {
-          tmp2 <- applyFilt(objects$filters$cvfilt_2, tmp2, cv_threshold = input$cv_threshold)
-        }
-      }
-      # imd filter
-      if (!is.null(objects$filters$imdanovafilt) & is.null(attributes(tmp)$filters$imdanovaFilt)) {
-        tmp <- applyFilt(objects$filters$imdanovafilt, tmp, min_nonmiss_anova = input$min_nonmiss_anova, min_nonmiss_gtest = input$min_nonmiss_gtest)
-        if (!is.null(objects$filters$imdanovafilt_2) & !is.null(tmp2) & is.null(attributes(tmp2)$filters$imdanovaFilt)) {
-          tmp2 <- applyFilt(objects$filters$imdanovafilt_2, tmp2, min_nonmiss_anova = input$min_nonmiss_anova, min_nonmiss_gtest = input$min_nonmiss_gtest)
-        }
-      }
-
-      #### SAMPLE FILTERS ####
-
-      # rMd filter
-      if (!is.null(objects$filters$rmdfilt) & is.null(attributes(tmp)$filters$rmdFilt)) {
-        tmp <- applyFilt(objects$filters$rmdfilt, tmp, pvalue_threshold = input$pvalue_threshold)
-        if (!is.null(objects$filters$rmdfilt_2) & !is.null(tmp2)) {
-          tmp2 <- applyFilt(objects$filters$rmdfilt_2, tmp2, pvalue_threshold = input$pvalue_threshold)
-        }
-      }
-
-      # custom filter samples
-      if (!is.null(objects$filters$customfilt)) {
-        # get the intersect in case these samples were removed by previous sample filters e.g. rMd
-        drop_samples1 <- intersect(objects$filters$customfilt$f_data_remove, tmp$f_data[, get_fdata_cname(tmp)])
-        if (length(drop_samples1) > 0) tmp <- applyFilt(custom_filter(tmp, f_data_remove = drop_samples1), tmp)
-      }
-      if (!is.null(objects$filters$customfilt_2) & !is.null(tmp2)) {
-        drop_samples2 <- intersect(objects$filters$customfilt_2$f_data_remove, tmp2$f_data[, get_fdata_cname(tmp)])
-        if (length(drop_samples2) > 0) tmp2 <- applyFilt(custom_filter(tmp2, f_data_remove = drop_samples2), tmp2)
-      }
-
-      # store saved objects and remove temp objects, tmp2 will be null if there is only one dataset
-      objects$omicsData <- tmp
-      objects$omicsData_2 <- tmp2
-      revals$filter_summary <- summary(tmp)
-      if (!is.null(tmp2)) revals$filter_summary_2 <- summary(tmp2)
-      rm(tmp, tmp2)
-      res <- NULL
-    },
-    error = function(e) {
-      res <<- paste0("Something went wrong applying your filters:  \n System error:  ", e)
-    }
-  )
+  res <- apply_filt()
 
   # two logicals that are TRUE is something went wrong, used to determine if success modal appears
   error_msg <- is.character(res)
@@ -625,14 +724,14 @@ observeEvent(input$apply_filters, {
     cond_text2 <- if (is.null(objects$omicsData_2)) "" else "Object2:  "
 
     filters1 <- filter_names %>% # filter_names is a global variable defined in server.R
-      filter(attribute %in% names(attributes(objects$omicsData)$filters)) %>%
+      filter(attribute %in% map_chr(attributes(objects$omicsData)$filters, 1)) %>%
       pluck("text") %>%
       paste(collapse = ", ")
 
     # ... second object
     if (!is.null(objects$omicsData_2)) {
       filters2 <- filter_names %>%
-        filter(attribute %in% names(attributes(objects$omicsData_2)$filters)) %>%
+        filter(attribute %in% map_chr(attributes(objects$omicsData_2)$filters, 1)) %>%
         pluck("text") %>%
         paste(collapse = ", ")
       filters2_div <- tagList(HTML(paste0(cond_text2, filters2)), hr())
@@ -640,6 +739,21 @@ observeEvent(input$apply_filters, {
       filters2 <- filters2_div <- NULL
     }
 
+    if(inherits(objects$omicsData, "nmrData")){
+      buttons <- div(
+        actionButton("filter_dismiss", "Stay on this tab", width = "75%"),
+        actionButton("goto_norm", "Continue to Normalization (optional)", 
+                     style = "margin-top:5px;width:75%"),
+        actionButton("goto_stats_filter", "Continue to Statistics", 
+                     style = "margin-top:5px;width:75%")
+      )
+    } else {
+      buttons <- div(
+        actionButton("filter_dismiss", "Stay on this tab", width = "75%"),
+        actionButton("goto_norm", "Continue to Normalization", style = "margin-top:5px;width:75%")
+      )
+    }
+    
     showModal(
       modalDialog(
         title = "Filters Applied",
@@ -650,8 +764,7 @@ observeEvent(input$apply_filters, {
             HTML(paste0(cond_text1, filters1)),
             hr(),
             filters2_div,
-            actionButton("filter_dismiss", "Stay on this tab", width = "75%"),
-            actionButton("goto_norm", "Continue to normalization", style = "margin-top:5px;width:75%")
+            buttons
           )
         ),
         footer = NULL
@@ -671,7 +784,7 @@ observeEvent(input$allow_reapply_filters, {
 ###
 
 observeEvent(reactiveValuesToList(objects), {
-  req(!is.null(objects$filters))
+  # req(!is.null(objects$filters))
   cond_molfilts <- any(c("molfilt", "cvfilt", "imdanovafilt", "profilt") %in% names(objects$filters))
   cond_sampfilts <- any(c("rmdfilt", "customfilt") %in% names(objects$filters))
 
@@ -681,6 +794,11 @@ observeEvent(reactiveValuesToList(objects), {
 
 observeEvent(input$goto_norm, {
   updateTabsetPanel(session, "top_page", selected = "normalization_tab")
+  removeModal()
+})
+
+observeEvent(input$goto_stats_filter, {
+  updateTabsetPanel(session, "top_page", selected = "statistics_tab")
   removeModal()
 })
 

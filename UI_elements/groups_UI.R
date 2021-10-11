@@ -76,7 +76,21 @@ list(
 
   # id column(s) for new fdata if they choose to do grouping
   output$fdata_id_col <- renderUI({
+    
+    matching_col_n <- map_int(1:ncol(f_data()), function(col) {
+      sum(f_data()[[col]] %in% colnames(objects$omicsData$e_data))
+    })
+    
+    matching_col <- colnames(f_data())[which(matching_col_n == max(matching_col_n))[1]]
+    
     if (two_lipids()) {
+      
+      matching_col_n2 <- map_int(1:ncol(f_data()), function(col) {
+        sum(f_data()[[col]] %in% colnames(objects$omicsData$e_data))
+      })
+      
+      matching_col2 <- colnames(f_data())[which(matching_col_n2 == max(matching_col_n2))[1]]
+      
       tagList(
         splitLayout(cellArgs = list(style = "text-align:center"), "Dataset 1", "Dataset 2"),
         br(style = "padding:2px"),
@@ -85,21 +99,25 @@ list(
           column(
             6,
             pickerInput("fdata_id_col", NULL,
-              choices = colnames(f_data())
+              choices = colnames(f_data()),
+              selected = matching_col
             )
           ),
           column(
             6,
             pickerInput("fdata_id_col_2", NULL,
-              choices = colnames(f_data_2())
+              choices = colnames(f_data_2()),
+              selected = matching_col2
             )
           )
         )
       )
     }
     else {
+      
       pickerInput("fdata_id_col", "Which column in your grouping file indicates sample names?",
-        choices = colnames(f_data())
+        choices = colnames(f_data()),
+        selected = matching_col
       )
     }
   }),
@@ -122,18 +140,18 @@ list(
   ## Group barplots
   # first create two outputs.....
   # 1.
-  output$group_barplots_1 <- renderPlot({
-    req(!is.null(attributes(objects$uploaded_omicsData)$group_DF))
+  output$group_barplots_1 <- renderPlotly({
+    req(!is.null(attributes(objects$omicsData)$group_DF))
 
     # custom barplot
-    p <- attributes(objects$uploaded_omicsData)$group_DF %>%
-      group_by(Group) %>%
-      mutate(n = n()) %>%
-      ggplot(aes(x = Group, y = n)) +
-      geom_bar(aes(fill = Group), position = "dodge", stat = "identity") +
-      geom_text(aes(label = n), position = position_dodge(width = 1), vjust = -0.25) +
-      ylab("Number of samples") +
-      theme_bw()
+    p <- as.data.frame(get_group_table(objects$omicsData)) %>%
+     plot_ly(
+       x = ~group,
+       y = ~Freq,
+       color = ~group,
+       type = "bar"
+     ) %>% layout(yaxis = list(title = "Number of samples"),
+                  xaxis = list(title = "Group"))
 
     plots$last_plot <- p
 
@@ -141,17 +159,19 @@ list(
   }),
 
   # 2.
-  output$group_barplots_2 <- renderPlot({
-    req(!is.null(attributes(objects$uploaded_omicsData_2)$group_DF))
-
-    p <- attributes(objects$uploaded_omicsData_2)$group_DF %>%
-      group_by(Group) %>%
-      mutate(n = n()) %>%
-      ggplot(aes(x = Group, y = n)) +
-      geom_bar(aes(fill = Group), position = "dodge", stat = "identity") +
-      geom_text(aes(label = n), position = position_dodge(width = 1), vjust = -0.25) +
-      ylab("Number of samples") +
-      theme_bw()
+  output$group_barplots_2 <- renderPlotly({
+    req(!is.null(attributes(objects$omicsData_2)$group_DF))
+    
+    # custom barplot
+    p <- as.data.frame(get_group_table(objects$omicsData_2)) %>%
+      plot_ly(
+        x = ~group,
+        y = ~Freq,
+        color = ~group,
+        type = "bar"
+      ) %>% layout(yaxis = list(title = "Number of samples"),
+                   xaxis = list(title = "Group"))
+    
 
     plots$last_plot_2 <- p
 
@@ -164,11 +184,11 @@ list(
       tagList(
         div(id = "sample_barplots_1", 
             style = "border-style:solid;border-width:1px;", 
-            withSpinner(plotOutput("group_barplots_1"))
+            withSpinner(plotlyOutput("group_barplots_1"))
             ),
         div(id = "sample_barplots_2", 
             style = "border-style:solid;border-width:1px;", 
-            withSpinner(plotOutput("group_barplots_2"))
+            withSpinner(plotlyOutput("group_barplots_2"))
             )
       )
     }
@@ -273,6 +293,8 @@ list(
       )
     )
   }),
+  
+  outputOptions(output, "grouped_data_summary", suspendWhenHidden = FALSE),
   #
 
   # group tab warnings
@@ -282,6 +304,7 @@ list(
 
   #### UI blocks for main effects and covariates
   output$group_col1 <- renderUI({
+    req(!is.null(f_data()))
     pickerInput("gcol1", "Select first main effect",
       choices = c(
         "None",
@@ -293,6 +316,7 @@ list(
   }),
 
   output$group_col2 <- renderUI({
+    req(!is.null(f_data()))
     pickerInput("gcol2", "Select second main effect",
       choices = c(
         "None",
@@ -303,6 +327,7 @@ list(
   }),
 
   output$cv_col1 <- renderUI({
+    req(!is.null(f_data()))
     pickerInput("cvcol1", "Select first covariate",
       choices = c(
         "None",
@@ -313,6 +338,7 @@ list(
   }),
 
   output$cv_col2 <- renderUI({
+    req(!is.null(f_data()))
     pickerInput("cvcol2", "Select second covariate",
       choices = c(
         "None",
@@ -324,6 +350,7 @@ list(
 
   #### Second set of UI blocks for main effects and covariates for lipid data
   output$group_col1_2 <- renderUI({
+    req(!is.null(f_data_2()))
     pickerInput("gcol1_2", "Select first main effect",
       choices = c(
         "None",
@@ -334,6 +361,7 @@ list(
   }),
 
   output$group_col2_2 <- renderUI({
+    req(!is.null(f_data_2()))
     pickerInput("gcol2_2", "Select second main effect",
       choices = c(
         "None",
@@ -344,6 +372,7 @@ list(
   }),
 
   output$cv_col1_2 <- renderUI({
+    req(!is.null(f_data_2()))
     pickerInput("cvcol1_2", "Select first covariate",
       choices = c(
         "None",
@@ -354,6 +383,7 @@ list(
   }),
 
   output$cv_col2_2 <- renderUI({
+    req(!is.null(f_data_2()))
     pickerInput("cvcol2_2", "Select second covariate",
       choices = c(
         "None",

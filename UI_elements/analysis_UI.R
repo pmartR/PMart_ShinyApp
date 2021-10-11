@@ -65,7 +65,16 @@ output$statistics_tab_sidepanel <- renderUI({
         uiOutput("imdanova_test_method_UI"),
         uiOutput("imdanova_pval_adjust_UI"),
         numericInput("pval_thresh", "Significance threshold", value = 0.05, step = 0.01),
-        bsButton("apply_imdanova", "Perform iMd-ANOVA", style = "primary")
+        bsButton("apply_imdanova", "Perform iMd-ANOVA", style = "primary"),
+        br(), br(),
+        hidden(
+          div(
+            "Conducting analysis, please wait...",
+            id = "peptide_analysis_busy",
+            class = "fadein-out",
+            style = "color:deepskyblue;font-weight:bold;margin-bottom:5px"
+          )
+        )
       )
     )
   }

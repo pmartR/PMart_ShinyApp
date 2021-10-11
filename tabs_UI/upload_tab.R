@@ -28,19 +28,36 @@ upload_UI <- function() {
                   "Lipids" = "lip"
                 )
               ),
-              bsButton("upload_to_datareqs", "See data requirements", icon = blueq)
-            ), 
+
+              bsButton("upload_to_datareqs", "See data requirements", icon = blueq),
+            ),
+            conditionalPanel(
+              "input.datatype=='pep'",
+              radioGroupButtons("labeled_yn", "Is this labeled peptide data?",
+                                choices = c("Yes" = "iso", "No" = "pep"), selected = "pep"
+              )
+            ),
+            
+            conditionalPanel(
+              "input.datatype=='metab'",
+              radioGroupButtons("metab_type", "Which type of instrumentation?",
+                                choices = c("LC/MS or GC/MS" = "metab", "NMR" = "nmr"), selected = "FALSE"
+              )
+            ),
+            
             conditionalPanel(
               "input.datatype=='lip'",
               radioGroupButtons("twolipids_yn", "Separate files for positive and negative ionization?",
                 choices = c("Yes" = "TRUE", "No" = "FALSE")
               )
             ),
-            hidden(div(
-              id = "edata_UI_parent",
-              uiOutput("edata_UI")
-            ))
-            ),
+             
+          hidden(div(
+            id = "edata_UI_parent",
+            uiOutput("edata_UI")
+          ))
+          ),
+
             # specify various data info sub-collapse div
             bsCollapsePanel(div(
               "Specify ID Columns and Data Values",
@@ -51,15 +68,7 @@ upload_UI <- function() {
               id = "js_id_col",
               uiOutput("id_col")
             )),
-            conditionalPanel(
-              "input.datatype=='pep'",
-              radioGroupButtons(
-                "labeled_yn",
-                "Is this labeled peptide data?",
-                choices = c("Yes" = "TRUE", "No" = "FALSE"),
-                selected = "FALSE"
-              )
-            ),
+
             hidden(div(
               id = "js_datascale",
               uiOutput("datascale_UI"),
@@ -74,13 +83,14 @@ upload_UI <- function() {
                 title = ttext_[["MISSING_DATA_REPLACE"]]
               )
             )),
-            conditionalPanel(
-              "input.labeled_yn == 'FALSE'",
+          
+            # conditionalPanel(
+            #   "input.labeled_yn == 'pep'",
               hidden(div(
                 id = "js_normalized_yn",
                 uiOutput("normalized_UI")
-              ))
-            ),
+              )),
+            # ),
             div(id = "donebutton", style = "float:right", actionButton("done_idcols", div("I'm done specifying values", icon("ok-sign", lib = "glyphicon"))))
             ),
             # upload e_meta and specify protein column sub-collapse div
@@ -90,18 +100,13 @@ upload_UI <- function() {
             ),
             value = "meta_collapse",
             uiOutput("emeta_yn"),
-            conditionalPanel(
-              "input.emeta_yn=='TRUE' && input.datatype=='pep'",
-              radioGroupButtons(
-                "proteins_yn",
-                "Does your biomolecule information file contain peptide to protein mappings?",
-                choices = c("Yes" = "TRUE", "No" = "FALSE")
-              ), 
-            ),
             hidden(div(
               id = "js_emeta_UI",
               uiOutput("emeta_UI")
             )),
+            
+              uiOutput("emeta_pro_UI"),
+            
             div(
               id = "js_promap",
               uiOutput("promap_UI")

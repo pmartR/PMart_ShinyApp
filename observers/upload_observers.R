@@ -1,3 +1,115 @@
+## For filling omicsData stuff here and for resetting
+makeobject <- function(use_iso = T){
+  
+  req(e_data(), f_data_upload())
+  
+  ## two lipid inputs
+  if (two_lipids()) {
+    req(e_data_2(), f_data_upload_2())
+    edata2 <- e_data_2()
+    emeta2 <- revals$e_meta_2 
+    emeta_cname2 <- colnames(emeta2)[1] #### should emeta cname just be the same regardless? this does force the emeta cname
+    fdata2 <- f_data_upload_2()
+  }
+  
+  ## inputs
+  selection <- input$datatype
+  metab_type <- input$metab_type
+  pep_type <- input$labeled_yn
+  edata <- e_data()
+  edata_cname <- input$id_col
+  emeta <- revals$e_meta
+  emeta_cname <- input$protein_column
+  fdata <- f_data_upload()
+  data_scale <- input$data_scale
+  transform <- input$transform
+  norm_info <- as.logical(as.integer(input$normalized_yn))
+  na_replace <- input$na_symbol
+  
+  # store appropriate function call for data type
+  fn_list <- list("lip" = "as.lipidData", "pep" = "as.pepData", 
+                  "iso" = "as.isobaricpepData", "pro" = "as.proData", 
+                  "metab" = "as.metabData", "nmr" = "as.nmrData")
+  
+  if(selection == "metab") selection <- metab_type
+  if(selection == "pep" && use_iso) selection <- pep_type
+  
+  object_fn <- get(fn_list[[selection]])
+  revals$warnings_upload <- NULL
+  
+  # create first object
+  objects$uploaded_omicsData <- objects$omicsData <- tryCatch(
+    {
+      object_fn(
+        e_data = edata, e_meta = emeta, f_data = fdata,
+        edata_cname = edata_cname, emeta_cname = emeta_cname, fdata_cname = "SampleId",
+        data_scale = data_scale, norm_info = list(is_normalized = norm_info),
+        check.names = F
+      ) %>%
+        edata_replace(na_replace, NA)
+    },
+    error = function(e) {
+      msg <- paste0("Something went wrong processing your omicsData object \n System error:  ", e)
+      revals$warnings_upload$badupload <- sprintf("<p style = color:red>%s</p>", msg)
+      NULL
+    }
+  )
+  
+  # create second object for lipid data
+  if (two_lipids()) {
+    objects$uploaded_omicsData_2 <- objects$omicsData_2 <- tryCatch(
+      {
+        object_fn(
+          e_data = edata2, e_meta = emeta2, f_data = fdata2,
+          edata_cname = edata_cname, emeta_cname = emeta_cname2,
+          fdata_cname = "SampleId",
+          data_scale = data_scale, norm_info = list(is_normalized = norm_info)
+        ) %>%
+          edata_replace(na_replace, NA)
+      },
+      error = function(e) {
+        msg <- paste0("Something went wrong processing the second object \n System error:  ", e)
+        revals$warnings_upload$badupload_2 <<- sprintf("<p style = color:red>%s</p>", msg)
+        NULL
+      }
+    )
+  }
+  else {
+    objects$omicsData_2 <- objects$uploaded_omicsData_2 <- NULL
+  }
+  
+  # transform data objects
+  if (!is.null(objects$uploaded_omicsData) & transform != "Select one") {
+    if (attr(objects$uploaded_omicsData, "data_info")$data_scale != transform) {
+      objects$omicsData <- objects$uploaded_omicsData <- tryCatch(
+        {
+          edata_transform(objects$uploaded_omicsData, data_scale = transform)
+        },
+        error = function(e) {
+          msg <- paste0("Something went wrong processing your omicsData object \n System error:  ", e)
+          revals$warnings_upload$bad_transform <<- sprintf("<p style = color:red>%s</p>", msg)
+          NULL
+        }
+      )
+    }
+  }
+  
+  if (!is.null(objects$uploaded_omicsData_2) & transform != "Select one") {
+    if (attr(objects$uploaded_omicsData_2, "data_info")$data_scale != transform) {
+      objects$omicsData_2 <- objects$uploaded_omicsData_2 <- tryCatch(
+        {
+          edata_transform(objects$uploaded_omicsData_2, data_scale = transform)
+        },
+        error = function(e) {
+          msg <- paste0("Something went wrong processing the second object \n System error:  ", e)
+          revals$warnings_upload$bad_transform_2 <<- sprintf("<p style = color:red>%s</p>", msg)
+          NULL
+        }
+      )
+    }
+  }
+}
+
 # highlight dropdown and hide file uploads if they havent specified a data type
 observeEvent(input$datatype, {
   cond <- (input$datatype != "none")
@@ -40,6 +152,7 @@ observeEvent(input$done_idcols, {
 #'@details disable if they try to log transform data with zeros.  Store an
 #'indicator that is TRUE if all is well.
 observe({
+  req(!is.null(e_data_has_zeros()))
   isolate(revals$warnings_upload$bad_transform <- NULL)
   
   cond <- e_data_has_zeros() & 
@@ -70,6 +183,7 @@ observe({
   # 2 file lipid conditions:
   # two emeta files uploaded
   # all 4 files contain the id column
+  
   if (two_lipids()) {
     req(!is.null(input$id_col) & !is.null(input$id_col_2))
     cond_files <- (!is.null(input$file_emeta) & !is.null(input$file_emeta_2))
@@ -99,7 +213,8 @@ observe({
   # emeta is uploaded
   # protein column is in the columns of e_meta that are NOT the id column
   # both files contain id column
-  else if (input$datatype == "pep" & isTRUE(input$proteins_yn == "TRUE")) {
+  else if (!is.null(input$datatype) && !is.null(input$proteins_yn) && 
+           input$datatype == "pep" && isTRUE(input$proteins_yn == "TRUE")) {
     req(!is.null(input$id_col))
     # req(!is.null(input$protein_column)) ## Doesn't load if cond_shared_ids is false
     cond_files <- !is.null(input$file_emeta)
@@ -157,118 +272,134 @@ observe({
 
 # make data and display success message on successful objects$omicsData object creation
 observeEvent(input$makeobject, {
-  if (two_lipids()) {
-    req(e_data(), e_data_2(), f_data_upload(), f_data_upload_2())
-  }
-  else {
-    req(e_data(), f_data_upload())
-  }
-
-  # store appropriate function call for data type
-  fn_list <- list("lip" = "as.lipidData", "pep" = "as.pepData", "pro" = "as.proData", "metab" = "as.metabData")
-  object_fn <- get(fn_list[[input$datatype]])
-  revals$warnings_upload <- NULL
-
-  # create first object
-  objects$uploaded_omicsData <- objects$omicsData <- tryCatch(
-    {
-      object_fn(
-        e_data = e_data(),
-        e_meta = revals$e_meta,
-        f_data = f_data_upload(),
-        edata_cname = input$id_col,
-        emeta_cname = input$protein_column, # this will be the id column if we are not in pepdata land.
-        fdata_cname = "SampleId",
-        data_scale = input$data_scale,
-        norm_info = list(is_normalized = as.logical(as.integer(
-          input$normalized_yn
-        )))
-      ) %>%
-        edata_replace(input$na_symbol, NA)
-    },
-    error = function(e) {
-      msg <- paste0("Something went wrong processing your omicsData object \n System error:  ", e)
-      revals$warnings_upload$badupload <- sprintf("<p style = color:red>%s</p>", msg)
-      NULL
-    }
-  )
-
-  # create second object for lipid data
-  if (two_lipids()) {
-    objects$uploaded_omicsData_2 <- objects$omicsData_2 <- tryCatch(
-      {
-        object_fn(
-          e_data = e_data_2(),
-          e_meta = revals$e_meta_2,
-          f_data = f_data_upload_2(),
-          edata_cname = input$id_col_2,
-          emeta_cname = input$id_col_2,
-          fdata_cname = "SampleId",
-          data_scale = input$data_scale,
-          norm_info = list(is_normalized = input$normalized_yn)
-        ) %>%
-          edata_replace(input$na_symbol, NA)
-      },
-      error = function(e) {
-        msg <- paste0("Something went wrong processing the second object \n System error:  ", e)
-        revals$warnings_upload$badupload_2 <<- sprintf("<p style = color:red>%s</p>", msg)
-        NULL
-      }
-    )
-  }
-  else {
-    objects$omicsData_2 <- objects$uploaded_omicsData_2 <- NULL
-  }
-
-  # transform data objects
-  if (!is.null(objects$uploaded_omicsData) & input$transform != "Select one") {
-    if (attr(objects$uploaded_omicsData, "data_info")$data_scale != input$transform) {
-      objects$omicsData <- objects$uploaded_omicsData <- tryCatch(
-        {
-          edata_transform(objects$uploaded_omicsData, data_scale = input$transform)
-        },
-        error = function(e) {
-          msg <- paste0("Something went wrong processing your omicsData object \n System error:  ", e)
-          revals$warnings_upload$bad_transform <<- sprintf("<p style = color:red>%s</p>", msg)
-          NULL
-        }
-      )
-    }
-  }
-
-  if (!is.null(objects$uploaded_omicsData_2) & input$transform != "Select one") {
-    if (attr(objects$uploaded_omicsData_2, "data_info")$data_scale != input$transform) {
-      objects$omicsData_2 <- objects$uploaded_omicsData_2 <- tryCatch(
-        {
-          edata_transform(objects$uploaded_omicsData_2, data_scale = input$transform)
-        },
-        error = function(e) {
-          msg <- paste0("Something went wrong processing the second object \n System error:  ", e)
-          revals$warnings_upload$bad_transform_2 <<- sprintf("<p style = color:red>%s</p>", msg)
-          NULL
-        }
-      )
-    }
-  }
+# <<<<<<< HEAD
+#   if (two_lipids()) {
+#     req(e_data(), e_data_2(), f_data_upload(), f_data_upload_2())
+#   }
+#   else {
+#     req(e_data(), f_data_upload())
+#   }
+# 
+#   # store appropriate function call for data type
+#   fn_list <- list("lip" = "as.lipidData", "pep" = "as.pepData", "pro" = "as.proData", "metab" = "as.metabData")
+#   object_fn <- get(fn_list[[input$datatype]])
+#   revals$warnings_upload <- NULL
+# 
+#   # create first object
+#   objects$uploaded_omicsData <- objects$omicsData <- tryCatch(
+#     {
+#       object_fn(
+#         e_data = e_data(),
+#         e_meta = revals$e_meta,
+#         f_data = f_data_upload(),
+#         edata_cname = input$id_col,
+#         emeta_cname = input$protein_column, # this will be the id column if we are not in pepdata land.
+#         fdata_cname = "SampleId",
+#         data_scale = input$data_scale,
+#         norm_info = list(is_normalized = as.logical(as.integer(
+#           input$normalized_yn
+#         )))
+#       ) %>%
+#         edata_replace(input$na_symbol, NA)
+#     },
+#     error = function(e) {
+#       msg <- paste0("Something went wrong processing your omicsData object \n System error:  ", e)
+#       revals$warnings_upload$badupload <- sprintf("<p style = color:red>%s</p>", msg)
+#       NULL
+#     }
+#   )
+# 
+#   # create second object for lipid data
+#   if (two_lipids()) {
+#     objects$uploaded_omicsData_2 <- objects$omicsData_2 <- tryCatch(
+#       {
+#         object_fn(
+#           e_data = e_data_2(),
+#           e_meta = revals$e_meta_2,
+#           f_data = f_data_upload_2(),
+#           edata_cname = input$id_col_2,
+#           emeta_cname = input$id_col_2,
+#           fdata_cname = "SampleId",
+#           data_scale = input$data_scale,
+#           norm_info = list(is_normalized = input$normalized_yn)
+#         ) %>%
+#           edata_replace(input$na_symbol, NA)
+#       },
+#       error = function(e) {
+#         msg <- paste0("Something went wrong processing the second object \n System error:  ", e)
+#         revals$warnings_upload$badupload_2 <<- sprintf("<p style = color:red>%s</p>", msg)
+#         NULL
+#       }
+#     )
+#   }
+#   else {
+#     objects$omicsData_2 <- objects$uploaded_omicsData_2 <- NULL
+#   }
+# 
+#   # transform data objects
+#   if (!is.null(objects$uploaded_omicsData) & input$transform != "Select one") {
+#     if (attr(objects$uploaded_omicsData, "data_info")$data_scale != input$transform) {
+#       objects$omicsData <- objects$uploaded_omicsData <- tryCatch(
+#         {
+#           edata_transform(objects$uploaded_omicsData, data_scale = input$transform)
+#         },
+#         error = function(e) {
+#           msg <- paste0("Something went wrong processing your omicsData object \n System error:  ", e)
+#           revals$warnings_upload$bad_transform <<- sprintf("<p style = color:red>%s</p>", msg)
+#           NULL
+#         }
+#       )
+#     }
+#   }
+# 
+#   if (!is.null(objects$uploaded_omicsData_2) & input$transform != "Select one") {
+#     if (attr(objects$uploaded_omicsData_2, "data_info")$data_scale != input$transform) {
+#       objects$omicsData_2 <- objects$uploaded_omicsData_2 <- tryCatch(
+#         {
+#           edata_transform(objects$uploaded_omicsData_2, data_scale = input$transform)
+#         },
+#         error = function(e) {
+#           msg <- paste0("Something went wrong processing the second object \n System error:  ", e)
+#           revals$warnings_upload$bad_transform_2 <<- sprintf("<p style = color:red>%s</p>", msg)
+#           NULL
+#         }
+#       )
+#     }
+#   }
+# =======
+  
+  makeobject(use_iso = F)
+# >>>>>>> f5b829a (Reset, Isobaric, NMR additions)
 
   # store warning message if data did not successfully create
-  revals$warnings_upload$failed_object <- if (is.null(objects$omicsData) | (two_lipids() & is.null(objects$omicsData_2))) "<p style = 'color:grey'>Something went wrong processing your objects$omicsData object(s), please verify all fields are correct.</p>" else NULL
-
+  if(is.null(objects$omicsData) | (two_lipids() & is.null(objects$omicsData_2))){
+    revals$warnings_upload$failed_object <- "<p style = 'color:grey'>Something went wrong processing your objects$omicsData object(s), please verify all fields are correct.</p>"
+  } else revals$warnings_upload$failed_object <- NULL
+  
   cond_one_obj <- !two_lipids() & !is.null(objects$omicsData)
   cond_two_obj <- two_lipids() & !is.null(objects$omicsData_2)
-
+  
   if (cond_one_obj | cond_two_obj) {
+    
+    # if(inherits(objects$omicsData, "nmrData") || 
+    #    (inherits(objects$omicsData, "pepData") && 
+    #     input$labeled_yn == "iso")){
+    #   usebutton <- actionButton("goto_reference", "Continue to Reference Tab", style = "margin:5px;width:75%")
+    # } else {
+    #   usebutton <- actionButton("goto_qc", "Continue to Groups Tab", style = "margin:5px;width:75%")
+    # }
+    
     showModal(
       modalDialog(
         title = "Upload Success",
         fluidRow(
           column(10,
             align = "center", offset = 1,
-            HTML('<h4 style= "color:#1A5276">Your data has been successfully uploaded. 
-                      You may proceed to the subsequent tabs for statistics.</h4>'),
+            HTML('<h4 style= "color:#1A5276">Your data has been successfully uploaded! 
+                      Future processing will be performed on the uploaded data.</h4>'),
             hr(),
             actionButton("upload_dismiss", "Review results", width = "75%"),
-            actionButton("goto_groups", "Continue to Groups Tab", style = "margin:5px;width:75%")
+            actionButton("goto_groups", "Continue to Groups", style = "margin:5px;width:75%")
           )
         ),
         footer = NULL
@@ -276,6 +407,7 @@ observeEvent(input$makeobject, {
     )
 
     updateCollapse(session, "upload_preview_collapse", open = "summary_boxplots")
+    updateCollapse(session, "upload_collapse_left", close = c("columnids", "meta_collapse"))
     revals$upload_summary <- summary(objects$omicsData)
     revals$upload_summary_2 <- if (two_lipids()) summary(objects$omicsData_2) else NULL
   }
@@ -293,7 +425,7 @@ observe({
 })
 
 observe({
-  cond_fdata2exists <- isTRUE(nrow(f_data_2()) > 0)
+  cond_fdata2exists <- !is.null(f_data_2()) && nrow(f_data_2()) > 0
 
   toggleElement("toggle_fdata", condition = two_lipids() & cond_fdata2exists)
 })
@@ -342,7 +474,7 @@ observe({
   }
   else {
     filename <- input$file_emeta_2$datapath
-    revals$e_meta_2 <- read.csv(filename, stringsAsFactors = FALSE)
+    revals$e_meta_2 <- read.csv(filename, stringsAsFactors = FALSE, check.names = F)
   }
 })
 ##
@@ -359,6 +491,11 @@ observeEvent(input$upload_dismiss, {
 
 observeEvent(input$goto_groups, {
   updateTabsetPanel(session, "top_page", selected = "group_samples_tab")
+  removeModal()
+})
+
+observeEvent(input$goto_reference, {
+  updateTabsetPanel(session, "top_page", selected = "reference_tab")
   removeModal()
 })
 #

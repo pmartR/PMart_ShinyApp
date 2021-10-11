@@ -72,6 +72,15 @@ output$peptide_statistics_tab_sidepanel <- renderUI({
           id = "peptide_apply_imdanova_jswrapper", 
           class= "tooltip-wrapper",
           bsButton("peptide_apply_imdanova", "Perform iMd-ANOVA", style = "primary")
+        ),
+        br(), br(),
+        hidden(
+          div(
+            "Conducting analysis, please wait...",
+            id = "peptide_analysis_busy",
+            class = "fadein-out",
+            style = "color:deepskyblue;font-weight:bold;margin-bottom:5px"
+          )
         )
       )
     )

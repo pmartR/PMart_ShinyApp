@@ -34,6 +34,9 @@ ui <- function(request) {
 
       groups_UI(),
 
+      ##### Reference TAB ######
+      reference_UI(),
+      
       #### DATA SUMMARY TAB #####
 
       data_summary_UI(),

@@ -10,7 +10,11 @@ protein_rollup_UI <- function() {
         multiple = TRUE,
         
         bsCollapsePanel(
-          "Isoform Identification",
+          div(
+            "Isoform Identification",
+            hidden(div(id = "isoidicon", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
+          ),
+          # "Isoform Identification",
           value = "isoform_identification",
           
           uiOutput("bpquant_options"),
@@ -30,7 +34,11 @@ protein_rollup_UI <- function() {
         ),
         
         bsCollapsePanel(
-          "Protein Rollup Options",
+          div(
+            "Protein Rollup Options",
+            hidden(div(id = "prorollicon", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
+          ),
+          # "Protein Rollup Options",
           value = "rollup_opts",
           radioGroupButtons(
             "which_rollup",
