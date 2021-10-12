@@ -17,17 +17,16 @@ list(
     # If true, open the project data and put each piece where it belongs 
     if (cond) {
       
+      
       # Get the data that was uploaded, and determine whether it is a project object,
       # or a midpoint object.
       pullData <- get_data(MapConnect$MapConnect, query$data)
       
       # If project in the names, then it's a project object
-      if ("Project" %in% names(pullData)) {
-        
-        # Pull the project object
-        project <- get_data(MapConnect$MapConnect, query$data)
+      if (class(pullData) == "project pmart") {
         
         # Update MAP Connect object (used in upload_UI.R tab)
+        project <- pullData
         MapConnect$Project <- project
         
         # Convert from David's project annotations to Daniel's shorthand
@@ -42,10 +41,12 @@ list(
         updatePickerInput(session, "datatype", selected = theDataType)
         disable(id = "datatype")
         
-      } else {
+      } else if (class(pullData) == "midpoint pmart"){
         
         # If the object isn't a project, then it's a midpoint
         MidPointFile <- pullData
+        
+        browser()
         
         # Ensure this is a pmart app midpoint file
         if (MidPointFile$MidPointFile$`App Name` == "pmart app") {
@@ -169,6 +170,8 @@ list(
     } else {
       Tab <- "normalization_tab"
     }
+    
+    browser()
     
     # Generate pmartRpep midpoint object
     MidPointFile <- list(
