@@ -133,14 +133,6 @@ filter_UI <- function() {
             "Custom Filter",
             hidden(div(id = "ok_custom_filter", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
           ),
-          actionButton(
-            inputId = "add_customfilt",
-            label = div("Add/Remove custom filter", hidden(
-              div(id = "customfilt_exists", style = "color:orange;float:right", icon("ok", lib = "glyphicon"))
-            )), 
-            width = "50%"
-          ), 
-          hr(),
           div(class = "inline-wrapper-1",
             uiOutput("fdata_customfilt"),
             radioGroupButtons("remove_or_keep", label = "Remove or keep these choices?", choices = c("Remove", "Keep"), selected = "Remove")
@@ -150,7 +142,15 @@ filter_UI <- function() {
           hr(),
           h4("Filter by biomolecule information:"),
           uiOutput("emeta_customfilt_which_col"),
-          uiOutput("emeta_customfilt_pickers")
+          uiOutput("emeta_customfilt_pickers"),
+          hr(),
+          actionButton(
+            inputId = "add_customfilt",
+            label = div("Add/Remove custom filter", hidden(
+              div(id = "customfilt_exists", style = "color:orange;float:right", icon("ok", lib = "glyphicon"))
+            )), 
+            width = "50%"
+          )
         )
       ), # parent collapse
       bsButton("review_filters", "Review and apply filters", style = "primary"),

@@ -78,7 +78,7 @@ list(
         e_data_remove_div <- if(length(e_data_remove) > 0) {
           tagList(tags$p(
             "Biomolecules Removed: ",
-            div(style = "overflow-x:auto", paste(e_data_remove, collapse = " | ")),
+            div(style = "overflow-x:auto;max-height:150px", paste(e_data_remove, collapse = " | ")),
             div(sprintf("Total: %s", length(e_data_remove)))
           ))
         } else {
@@ -97,7 +97,7 @@ list(
         e_meta_remove_div <- if(length(e_meta_remove) > 0) {
           tagList(tags$p(
             "Biomolecules removed by association with extra biomolecule information:",
-            div(style = "overflow-x:auto", paste(e_meta_remove, collapse = " | ")),
+            div(style = "overflow-x:auto;max-height:150px", paste(e_meta_remove, collapse = " | ")),
             div(sprintf("Total: %s", length(e_meta_remove)))
           ))
         } else {
@@ -484,7 +484,7 @@ list(
     )
     
     choices1 <- objects$uploaded_omicsData$e_meta %>% 
-      purrr::pluck(input$emeta_customfilt_which_col_1)
+      purrr::pluck(input$emeta_customfilt_which_col_1) %>% unique()
     
     if(two_lipids()){
       validate(
@@ -492,7 +492,7 @@ list(
         need(input$emeta_customfilt_which_col_2, "Select second identifier.")
       )
       choices2 <- objects$uploaded_omicsData_2$e_meta %>% 
-        purrr::pluck(input$emeta_customfilt_which_col_2)
+        purrr::pluck(input$emeta_customfilt_which_col_2) %>% unique()
       
       tagList(
         tags$p("Filter which biomolecule information values:"),
