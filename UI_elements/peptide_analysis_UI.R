@@ -23,8 +23,10 @@ output$peptide_imdanova_plot_type_UI <- renderUI({
     "combined" = c("Bar" = "bar", "Volcano" = "volcano", "Counts Heatmap" = "gheatmap"),
     "anova" = c("Bar" = "bar", "Volcano" = "volcano"),
     "gtest" = c("Bar" = "bar", "Counts Heatmap" = "gheatmap"),
-    c("Bar" = "bar")
+    "__INVALID__"
   )
+  
+  validate(need(choices != "__INVALID__", "If you're seeing this message, someone (maybe us..) messed up and your stats results may be corrupted."))
   
   radioGroupButtons(
     "peptide_imdanova_plot_type",
