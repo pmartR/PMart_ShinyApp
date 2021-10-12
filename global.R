@@ -39,10 +39,11 @@ ttext_ <- list(
   "ROLLUP_DISABLE_INFO" = "Your data has already been rolled up to the protein level, if you would like to revert to the peptide level, go back to the filter page and re-apply your filters (you may need to re-do other steps that happened after the filter tab.)",
   "TABDISABLE_NOT_PEP" = "Tab disabled because either you are not analyzing peptide data or your object does not exist.",
   "TABDISABLE_NOT_PEP_NO_EMETA" = "Tab disabled because either you are not analyzing peptide data, you did not include a biomolecule information file, or your object does not exist",
-  "TABDISABLE_PEP_NO_EMETA" = "Tab disabled because you uploaded peptide data with no biomolecule information file.  Peptide-level statistics are still available.",
   "TABDISABLE_NOT_REF" = "Tab disabled because reference normalization is only available for NMR data or labeled peptide data",
   "REFERENCE_DISABLED_ROW" = "Disabled entries contain missing values in some samples. These might be due to NAs generated in log transformation or replacement of values less than or equal to zero.",
-  "REFERENCE_DISABLED_COL" = "Disabled entries are non-numeric."
+  "REFERENCE_DISABLED_COL" = "Disabled entries are non-numeric.",
+  "TABDISABLE_PEP_NOT_ROLLED_UP" = "This tab is used to perform statistics on peptide data rolled up to the protein level.  Roll up your peptide data in the Protein Rollup tab before using this tab.  To perform stats on the peptide-level data, go to the Peptide Statistics tab.",
+  "TABDISABLE_PEP_NO_EMETA" = "Tab disabled because you uploaded peptide data with no biomolecule information file.  Peptide-level statistics are still available."
 ) 
 
 #'@details info text NOT displayed in tooltips.  Usually in warnings UI elements
