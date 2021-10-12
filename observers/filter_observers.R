@@ -180,15 +180,29 @@ observe({
   toggleState("rmd_metrics", condition = !rmdfilt_exists)
   toggleCssClass(class = "grey_disabled", condition = rmdfilt_exists, selector = "button[data-id='rmd_metrics']")
   
+  # disable custom filter inputs
   customfilt_exists <- !is.null(objects$filters$customfilt) | !is.null(objects$filters$customfilt_2)
   
   toggle("customfilt_exists", condition = customfilt_exists, anim = TRUE)
   toggleState("remove_or_keep", condition = !customfilt_exists)
-  toggleState("fdata_customfilt_choices", condition = !customfilt_exists)
-  toggleState("fdata_customfilt_choices_2", condition = !customfilt_exists)
-  toggleCssClass(class = "grey_disabled", condition = customfilt_exists, selector = "button[data-id='fdata_customfilt_choices']")
-  toggleCssClass(class = "grey_disabled", condition = customfilt_exists, selector = "button[data-id='fdata_customfilt_choices_2']")
   
+  customfilt_pickers__ <- c(
+    "fdata_customfilt_choices",
+    "fdata_customfilt_choices_2",
+    "edata_customfilt_remove_mols_1",
+    "edata_customfilt_remove_mols_2",
+    "emeta_customfilt_which_col_1",
+    "emeta_customfilt_which_col_2",
+    "emeta_customfilt_which_values_1",
+    "emeta_customfilt_which_values_2"
+  )
+  
+  for (picker_id in customfilt_pickers__) {
+    toggleState(picker_id, condition = !customfilt_exists)
+    toggleCssClass(class = "grey_disabled",
+                   condition = customfilt_exists,
+                   selector = sprintf("button[data-id='%s']", picker_id))
+  }
 })
 
 # create molfilt objects

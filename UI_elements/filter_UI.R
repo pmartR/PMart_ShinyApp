@@ -484,7 +484,7 @@ list(
     )
     
     choices1 <- objects$uploaded_omicsData$e_meta %>% 
-      purrr::pluck(input$emeta_customfilt_which_col_1) %>% unique()
+      purrr::pluck(input$emeta_customfilt_which_col_1) %>% unique() %>% sort()
     
     if(two_lipids()){
       validate(
@@ -492,7 +492,7 @@ list(
         need(input$emeta_customfilt_which_col_2, "Select second identifier.")
       )
       choices2 <- objects$uploaded_omicsData_2$e_meta %>% 
-        purrr::pluck(input$emeta_customfilt_which_col_2) %>% unique()
+        purrr::pluck(input$emeta_customfilt_which_col_2) %>% unique() %>% sort()
       
       tagList(
         tags$p("Filter which biomolecule information values:"),
