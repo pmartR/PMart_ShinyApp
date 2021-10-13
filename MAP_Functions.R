@@ -22,12 +22,10 @@ list(
       pullData <- get_data(MapConnect$MapConnect, query$data)
       
       # If project in the names, then it's a project object
-      if ("Project" %in% names(pullData)) {
-        
-        # Pull the project object
-        project <- get_data(MapConnect$MapConnect, query$data)
+      if (class(pullData) == "project pmart") {
         
         # Update MAP Connect object (used in upload_UI.R tab)
+        project <- pullData
         MapConnect$Project <- project
         
         # Convert from David's project annotations to Daniel's shorthand
@@ -42,16 +40,17 @@ list(
         updatePickerInput(session, "datatype", selected = theDataType)
         disable(id = "datatype")
         
-      } else {
+      } else if (class(pullData) == "midpoint pmart"){
         
         # If the object isn't a project, then it's a midpoint
         MidPointFile <- pullData
         
         # Ensure this is a pmart app midpoint file
-        if (MidPointFile$MidPointFile$`App Name` == "pmart app") {
+        if (class(MidPointFile) == "midpoint pmart") {
         
           # Freeze all pages up to "Tab"
-          Tab <- MidPointFile$MidPointFile$Tracking$Tab
+          MapConnect$Midpoint <- MidPointFile
+          Tab <- MidPointFile$Tracking$Tab
           
           message(paste("Loading data through", Tab, "tab"))
           
@@ -74,7 +73,7 @@ list(
           }
           
           # Jump to a specific tab if protein data 
-          if (class(MidPointFile$MidPointFile$`Data Objects`$OmicsData) == "pepData") {
+          if (class(MidPointFile$`Data Objects`$OmicsData) == "pepData") {
             if (Tab == "normalization_tab") {
               js$enableTab("peptide_statistics_tab")
               js$enableTab("protein_rollup_tab")
@@ -88,9 +87,9 @@ list(
           }
           
           # Load omics data 
-          objects$omicsData <- MidPointFile$MidPointFile$`Data Objects`$OmicsData
-          objects$peptide_imdanova_res <-  MidPointFile$MidPointFile$`Data Objects`$OmicsStatsPep
-          objects$imdanova_res <-  MidPointFile$MidPointFile$`Data Objects`$OmicsStats
+          objects$omicsData <- MidPointFile$`Data Objects`$OmicsData
+          objects$peptide_imdanova_res <-  MidPointFile$`Data Objects`$OmicsStatsPep
+          objects$imdanova_res <-  MidPointFile$`Data Objects`$OmicsStats
     
         } else {
           
@@ -145,8 +144,7 @@ list(
     
     # Get all current file names 
     FileNames <- lapply(get_all_data_ids(MapConnect$MapConnect), function(id) {
-      c(get_tags(MapConnect$MapConnect, id)$ProjectName, 
-        get_tags(MapConnect$MapConnect, id)$MidPointName)
+      get_tags(MapConnect$MapConnect, id)$ProjectName
     }) %>% unlist()
     if (input$MidpointName %in% FileNames) {
       sendSweetAlert(session, "File Name is Already in Use", "Please type a different filename to save the data.", 
@@ -170,36 +168,29 @@ list(
       Tab <- "normalization_tab"
     }
     
-    # Generate pmartRpep midpoint object
-    MidPointFile <- list(
-      "MidPointFile" = list(
-        "App Name" = "pmart app",
-        "Data Objects" =
-          list(
-            "OmicsData" = OmicsData,
-            "OmicsStatsPep" = OmicsStatsPep,
-            "OmicsStats" =  OmicsStats
-          ),
-        "Tracking" = 
-          list(
-            "Timestamp" = Sys.time(),
-            "Tab" = Tab,
-            "Original Files" = MapConnect$Project 
-          )
-      )
+    # Get the project data 
+    if (class(MapConnect$Project) != "project pmart") {
+      project <- MapConnect$Midpoint$Tracking$`Original Files`
+    } else {
+      project <- MapConnect$Project
+    }
+
+    # Generate pmartR midpoint object
+    Midpoint <- midpoint_pmart(
+      omics_data = OmicsData,
+      tab = Tab, 
+      project = project,
+      name = input$MidpointName,
+      omics_stats = OmicsStats,
+      omics_stats_pep = OmicsStatsPep
     )
+    
 
     # Export results
-    UUID <- put_data(MapConnect$MapConnect, MidPointFile)
+    UUID <- put_data(MapConnect$MapConnect, Midpoint)
     
     # Add Tags 
-    set_tags(MapConnect$MapConnect, UUID, tags = list(
-      "ProjectName" = input$MidpointName,
-      "DataType" = MidPointFile$MidPointFile$Tracking$`Original Files`$Project$DataType,
-      "ObjectType" = "MidPoint", 
-      "App" = "pmart app",
-      "Tab" = MidPointFile$MidPointFile$Tracking$Tab
-    ))
+    set_tags(MapConnect$MapConnect, UUID, tags = pull_tags_from_object(Midpoint))
     
   })
 

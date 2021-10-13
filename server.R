@@ -173,7 +173,7 @@ shinyServer(function(session, input, output) {
     
     # Create a reactive value to hold MAP-specific objects
     MapConnect <- reactiveValues(MapConnect = map_data_connection("./cfg/minio_config_local.yml"),
-                                 Project = NULL, StoredProject = NULL)
+                                 Project = NULL, Midpoint = NULL)
     
   }
   
