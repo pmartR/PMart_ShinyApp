@@ -2,6 +2,7 @@
 #' table that presents the group comparisons
 observe({
   req(input$imdanova_comparison_method, objects$omicsData)
+  req(!is.null(attr(objects$omicsData,"group_DF")))
   
   if (input$imdanova_comparison_method == "Control to test condition comparisons") {
     control <- input$imdanova_control_group
