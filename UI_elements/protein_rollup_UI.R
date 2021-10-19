@@ -211,9 +211,18 @@ list(
     style_UI("rollup")
   }),
 
+  # inputs for axes labels and sizes
+  output$bpquant_plot_options <- renderUI({
+    style_UI("bpquant")
+  }),
+  
   # apply filter plot style options
   output$rollup_apply_style <- renderUI({
     apply_style_UI("rollup", FALSE, FALSE)
+  }),
+  
+  output$bpquant_apply_style <- renderUI({
+    apply_style_UI("bpquant", FALSE, FALSE)
   }),
 
   output$rollup_data_summary <- renderUI({

@@ -55,12 +55,12 @@ add_plot_styling <- function(input, pagename, plot, subplot = F) {
             tickfont = list(
               size = input[[paste0(pagename, "_y_ticksize")]]
             )
-          ),
-          title = list(
-            text = input[[paste0(pagename, "_title")]], 
-            font = list(
-              size = input[[paste0(pagename, "_title_fontsize")]]
-            )
+          )
+        ),
+        title = list(
+          text = input[[paste0(pagename, "_title")]], 
+          font = list(
+            size = input[[paste0(pagename, "_title_fontsize")]]
           )
         )
       )
