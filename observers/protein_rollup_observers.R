@@ -261,7 +261,7 @@ observeEvent(input$rollup_goto_downloads,{
 })
 
 ## Update plot style
-observeEvent(input$peptide_statistics_apply_style_plot_1, {
+observeEvent(input$bpquant_apply_style_plot_1, {
   
     plots$bpquant <- add_plot_styling(
       input,
@@ -270,7 +270,7 @@ observeEvent(input$peptide_statistics_apply_style_plot_1, {
     )
 })
 
-observeEvent(input$peptide_statistics_apply_style_plot_1, {
+observeEvent(input$rollup_apply_style_plot_1, {
   
   plots$rollup_plot <- add_plot_styling(
     input,

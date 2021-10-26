@@ -50,15 +50,13 @@ add_plot_styling <- function(input, pagename, plot, subplot = F) {
             text = ifelse(subplot, "", input[[paste0(pagename, "_ylab")]]), 
             font = list(
               size = input[[paste0(pagename, "_y_fontsize")]]
+              )
             ),
             tickangle = yangle,
-            tickfont = list(
-              size = input[[paste0(pagename, "_y_ticksize")]]
-            )
-          )
+            tickfont = list(size = input[[paste0(pagename, "_y_ticksize")]])
         ),
         title = list(
-          text = input[[paste0(pagename, "_title")]], 
+          text = ifelse(subplot, "", input[[paste0(pagename, "_title")]]), 
           font = list(
             size = input[[paste0(pagename, "_title_fontsize")]]
           )
@@ -85,7 +83,7 @@ add_plot_styling <- function(input, pagename, plot, subplot = F) {
            input[[paste0(pagename, "_title")]] != ""){
           
           title <- list(
-            text = "SUBPLOT TITLE A",
+            text = input[[paste0(pagename, "_title")]],
             xref = "paper",
             yref = "paper",
             yanchor = "bottom",
