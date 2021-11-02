@@ -181,20 +181,21 @@ observeEvent(
     } else
       c("red", "black", "green")
     
+    color_low = if(isTruthy(input$pep_imd_low_cpicker)) input$pep_imd_low_cpicker else "#132B43"
+    color_high = if(isTruthy(input$pep_imd_high_cpicker)) input$pep_imd_high_cpicker else "#56B1F7"
+    
     tryCatch({
-      
-      fc_threshold <- if (input$imdanova_plot_type == "volcano") input$peptide_imd_plot_fc_thresh else NULL
-      
       plots$peptide_statistics_mainplot <-
         plot(
           objects$peptide_imdanova_res,
-          fc_threshold = fc_threshold,
+          fc_threshold = input$peptide_imd_plot_fc_thresh,
           fc_colors = fc_colors,
           plot_type = input$peptide_imdanova_plot_type,
           interactive = interactive,
-          bw_theme = TRUE
+          bw_theme = TRUE,
+          color_low = color_low,
+          color_high = color_high
         )
-      
       updateCollapse(session, "peptide_statistics_collapse_main", open = "peptide_statistics_plots")
     },
     error = function(e) {

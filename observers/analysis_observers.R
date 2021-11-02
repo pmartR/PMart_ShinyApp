@@ -2,6 +2,7 @@
 #' table that presents the group comparisons
 observe({
   req(input$imdanova_comparison_method, objects$omicsData)
+  req(!is.null(attr(objects$omicsData,"group_DF")))
   
   if (input$imdanova_comparison_method == "Control to test condition comparisons") {
     control <- input$imdanova_control_group
@@ -166,21 +167,23 @@ observeEvent(
         input$imd_nonsig_cpicker,
         input$imd_up_cpicker
       )
-    } else c("red", "black", "green")
-    
-    fc_threshold <- if(input$imdanova_plot_type == "volcano") input$imd_plot_fc_thresh else NULL
+    } else
+      c("red", "black", "green")
+
+    color_low = if(isTruthy(input$imd_low_cpicker)) input$imd_low_cpicker else "#132B43"
+    color_high = if(isTruthy(input$imd_high_cpicker)) input$imd_high_cpicker else "#56B1F7"
     
     tryCatch({
-
       plots$statistics_mainplot <- plot(
         objects$imdanova_res,
         plot_type = input$imdanova_plot_type,
-        fc_threshold = fc_threshold,
-        fc_colors = fc_colors,
         bw_theme = TRUE,
-        interactive = interactive
+        fc_colors = fc_colors,
+        fc_threshold = input$imd_plot_fc_thresh,
+        interactive = interactive,
+        color_low = color_low,
+        color_high = color_high
       )
-      
       updateCollapse(session, "statistics_collapse_main", open = "statistics_plots")
     },
     error = function(e) {

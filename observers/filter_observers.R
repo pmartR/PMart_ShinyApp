@@ -23,7 +23,7 @@ apply_filt <- function(){
         }
       }
       # proteomics filter
-      if (inherits(tmp, "pepData")) {
+      if (class(tmp) == "pepData") {
         if (isTRUE(!is.null(objects$filters$profilt) & is.null(attributes(tmp)$filters$proteomicsFilt))) {
           tmp <- applyFilt(objects$filters$profilt, tmp, min_num_peps = input$min_num_peps, degen_peps = input$degen_peps)
         }
@@ -35,28 +35,16 @@ apply_filt <- function(){
           tmp2 <- applyFilt(objects$filters$cvfilt_2, tmp2, cv_threshold = input$cv_threshold)
         }
       }
-
-      # if(e$message == "None of the samples will be removed with the current thresholds.")
       # imd filter
-      if (!is.null(objects$filters$imdanovafilt) & 
-          is.null(attributes(tmp)$filters$imdanovaFilt)) {
-        tmp <- applyFilt(objects$filters$imdanovafilt, 
-                         tmp, 
-                         min_nonmiss_anova = input$min_nonmiss_anova, 
-                         min_nonmiss_gtest = input$min_nonmiss_gtest
-                         )
-        if (!is.null(objects$filters$imdanovafilt_2) & 
-            !is.null(tmp2) & 
-            is.null(attributes(tmp2)$filters$imdanovaFilt)) {
-          tmp2 <- applyFilt(objects$filters$imdanovafilt_2, 
-                            tmp2, 
-                            min_nonmiss_anova = input$min_nonmiss_anova, 
-                            min_nonmiss_gtest = input$min_nonmiss_gtest)
+      if (!is.null(objects$filters$imdanovafilt) & is.null(attributes(tmp)$filters$imdanovaFilt)) {
+        tmp <- applyFilt(objects$filters$imdanovafilt, tmp, min_nonmiss_anova = input$min_nonmiss_anova, min_nonmiss_gtest = input$min_nonmiss_gtest)
+        if (!is.null(objects$filters$imdanovafilt_2) & !is.null(tmp2) & is.null(attributes(tmp2)$filters$imdanovaFilt)) {
+          tmp2 <- applyFilt(objects$filters$imdanovafilt_2, tmp2, min_nonmiss_anova = input$min_nonmiss_anova, min_nonmiss_gtest = input$min_nonmiss_gtest)
         }
       }
-      
-      #### SAMPLE FILTERS ####
-      
+
+      #### SAMPLE/CUSTOM FILTERS ####
+
       # rMd filter
       if (!is.null(objects$filters$rmdfilt) & is.null(attributes(tmp)$filters$rmdFilt)) {
         tmp <- applyFilt(objects$filters$rmdfilt, tmp, pvalue_threshold = input$pvalue_threshold)
@@ -64,28 +52,82 @@ apply_filt <- function(){
           tmp2 <- applyFilt(objects$filters$rmdfilt_2, tmp2, pvalue_threshold = input$pvalue_threshold)
         }
       }
-      
-      # custom filter samples
+
+      # custom filter
       if (!is.null(objects$filters$customfilt)) {
-        # get the intersect in case these samples were removed by previous sample filters e.g. rMd
-        drop_samples1 <- intersect(objects$filters$customfilt$f_data_remove, tmp$f_data[, get_fdata_cname(tmp)])
-        if (length(drop_samples1) > 0) tmp <- applyFilt(custom_filter(tmp, f_data_remove = drop_samples1), tmp)
-      }
+        # get the intersect in case these samples/biomolecules were removed by previous sample filters e.g. rMd/molecule
+        f_data_remove <-
+          intersect(objects$filters$customfilt$f_data_remove, tmp$f_data[, get_fdata_cname(tmp)]) 
+        if(length(f_data_remove) == 0) f_data_remove <- NULL
+        
+        e_data_remove <- intersect(
+          objects$filters$customfilt$e_data_remove,
+          tmp$e_data[, get_edata_cname(tmp)]
+        ) 
+        if(length(e_data_remove) == 0) e_data_remove <- NULL
+        
+        e_meta_remove <- intersect(
+          objects$filters$customfilt$e_meta_remove,
+          tmp$e_meta[, get_emeta_cname(tmp)]
+        )
+        if(length(e_meta_remove) == 0) e_meta_remove <- NULL
+        
+        cond <- any(sapply(list(f_data_remove, e_data_remove, e_meta_remove), length) > 0)
+        
+        if (cond)
+          tmp <-
+          applyFilt(
+            custom_filter(
+              tmp,
+              f_data_remove = f_data_remove,
+              e_data_remove = e_data_remove,
+              e_meta_remove = e_meta_remove
+            ),
+            tmp
+          )
+      } # custom filter second object ...
       if (!is.null(objects$filters$customfilt_2) & !is.null(tmp2)) {
-        drop_samples2 <- intersect(objects$filters$customfilt_2$f_data_remove, tmp2$f_data[, get_fdata_cname(tmp)])
-        if (length(drop_samples2) > 0) tmp2 <- applyFilt(custom_filter(tmp2, f_data_remove = drop_samples2), tmp2)
+        f_data_remove <-
+          intersect(objects$filters$customfilt_2$f_data_remove, tmp$f_data[, get_fdata_cname(tmp2)]) 
+        if(length(f_data_remove) == 0) f_data_remove <- NULL
+        
+        e_data_remove <- intersect(
+          objects$filters$customfilt_2$e_data_remove,
+          tmp2$e_data[, get_edata_cname(tmp2)]
+        ) 
+        if(length(e_data_remove) == 0) e_data_remove <- NULL
+        
+        e_meta_remove <- intersect(
+          objects$filters$customfilt_2$e_meta_remove,
+          tmp2$e_meta[, get_emeta_cname(tmp2)]
+        )
+        if(length(e_meta_remove) == 0) e_meta_remove <- NULL
+        
+        cond <- any(sapply(list(f_data_remove, e_data_remove, e_meta_remove), length) > 0)
+        
+        if (cond)
+          tmp2 <-
+          applyFilt(
+            custom_filter(
+              tmp2,
+              f_data_remove = f_data_remove,
+              e_data_remove = e_data_remove,
+              e_meta_remove = e_meta_remove
+            ),
+            tmp2
+          )
       }
-      
+
       # store saved objects and remove temp objects, tmp2 will be null if there is only one dataset
       objects$omicsData <- tmp
       objects$omicsData_2 <- tmp2
       revals$filter_summary <- summary(tmp)
       if (!is.null(tmp2)) revals$filter_summary_2 <- summary(tmp2)
       rm(tmp, tmp2)
-      return(NULL)
+      res <- NULL
     },
     error = function(e) {
-      return(paste0("Something went wrong applying your filters:  \n System error:  ", e))
+      res <<- paste0("Something went wrong applying your filters:  \n System error:  ", e)
     }
   )
 }
@@ -138,15 +180,29 @@ observe({
   toggleState("rmd_metrics", condition = !rmdfilt_exists)
   toggleCssClass(class = "grey_disabled", condition = rmdfilt_exists, selector = "button[data-id='rmd_metrics']")
   
+  # disable custom filter inputs
   customfilt_exists <- !is.null(objects$filters$customfilt) | !is.null(objects$filters$customfilt_2)
   
   toggle("customfilt_exists", condition = customfilt_exists, anim = TRUE)
   toggleState("remove_or_keep", condition = !customfilt_exists)
-  toggleState("fdata_customfilt_choices", condition = !customfilt_exists)
-  toggleState("fdata_customfilt_choices_2", condition = !customfilt_exists)
-  toggleCssClass(class = "grey_disabled", condition = customfilt_exists, selector = "button[data-id='fdata_customfilt_choices']")
-  toggleCssClass(class = "grey_disabled", condition = customfilt_exists, selector = "button[data-id='fdata_customfilt_choices_2']")
   
+  customfilt_pickers__ <- c(
+    "fdata_customfilt_choices",
+    "fdata_customfilt_choices_2",
+    "edata_customfilt_remove_mols_1",
+    "edata_customfilt_remove_mols_2",
+    "emeta_customfilt_which_col_1",
+    "emeta_customfilt_which_col_2",
+    "emeta_customfilt_which_values_1",
+    "emeta_customfilt_which_values_2"
+  )
+  
+  for (picker_id in customfilt_pickers__) {
+    toggleState(picker_id, condition = !customfilt_exists)
+    toggleCssClass(class = "grey_disabled",
+                   condition = customfilt_exists,
+                   selector = sprintf("button[data-id='%s']", picker_id))
+  }
 })
 
 # create molfilt objects
@@ -365,14 +421,29 @@ observeEvent(input$add_rmdfilt, {
 # create customfilt object
 observeEvent(input$add_customfilt, {
   customfilt_exists <- !is.null(objects$filters$customfilt) | !is.null(objects$filters$customfilt_2)
-
+  
+  revals$warnings_filter$customfilt <- revals$warnings_filter$customfilt_2 <- NULL
+  
   if (!customfilt_exists) {
     objects$filters$customfilt <- tryCatch(
       {
-        revals$warnings_filter$customfilt <<- NULL
         # removed samples either user specified samples, or in the case of 'Keep', the complement of user specified samples
-        samples_rmv <- if (input$remove_or_keep == "Remove") input$fdata_customfilt_choices else setdiff(sample_names(), input$fdata_customfilt_choices)
-        if (length(samples_rmv) > 0) custom_filter(objects$uploaded_omicsData, f_data_remove = samples_rmv) else NULL
+        samples_rmv <- if (input$remove_or_keep == "Remove"){
+          input$fdata_customfilt_choices
+        } else setdiff(sample_names(), input$fdata_customfilt_choices)
+        
+        if (any(
+          length(samples_rmv) > 0,
+          length(input$edata_customfilt_remove_mols_1) > 0,
+          length(e_meta_remove_rv()) > 0
+        )) {
+          custom_filter(
+            objects$uploaded_omicsData, 
+            f_data_remove = samples_rmv,
+            e_data_remove = input$edata_customfilt_remove_mols_1,
+            e_meta_remove = e_meta_remove_rv()
+          ) 
+        } else NULL
       },
       error = function(e) {
         msg <- paste0("Something went wrong updating your custom sample filter object \n System error:  ", e)
@@ -383,9 +454,22 @@ observeEvent(input$add_customfilt, {
     if (!is.null(objects$uploaded_omicsData_2)) {
       objects$filters$customfilt_2 <- tryCatch(
         {
-          revals$warnings_filter$customfilt_2 <<- NULL
-          samples_rmv <- if (input$remove_or_keep == "Remove") input$fdata_customfilt_choices_2 else setdiff(sample_names_2(), input$fdata_customfilt_choices_2)
-          if (length(samples_rmv) > 0) custom_filter(objects$uploaded_omicsData_2, f_data_remove = samples_rmv) else NULL
+          samples_rmv <- if (input$remove_or_keep == "Remove"){
+            input$fdata_customfilt_choices_2
+          } else setdiff(sample_names_2(), input$fdata_customfilt_choices_2)
+          
+          if (any(
+            length(samples_rmv) > 0,
+            length(input$edata_customfilt_remove_mols_2) > 0,
+            length(e_meta_remove_rv_2()) > 0
+          )) {
+            custom_filter(
+              objects$uploaded_omicsData_2, 
+              f_data_remove = samples_rmv,
+              e_data_remove = input$edata_customfilt_remove_mols_2,
+              e_meta_remove = e_meta_remove_rv_2()
+            ) 
+          } else NULL
         },
         error = function(e) {
           msg <- paste0("Something went wrong updating your second custom sample filter object \n System error:  ", e)

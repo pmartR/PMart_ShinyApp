@@ -13,6 +13,28 @@ output$statistics_mainplot <- renderUI({
   }
 })
 
+#'@details Conditional radiogroupbuttons depending on what plot types are valid
+#'for the analysis that was run.
+output$imdanova_plot_type_UI <- renderUI({
+  validate(need(objects$imdanova_res, "No iMd-ANOVA results found, run iMd-ANOVA from the side panel."))
+  
+  choices = switch(
+    attr(objects$imdanova_res, "statistical_test"),
+    "combined" = c("Bar" = "bar", "Volcano" = "volcano", "Counts Heatmap" = "gheatmap"),
+    "anova" = c("Bar" = "bar", "Volcano" = "volcano"),
+    "gtest" = c("Bar" = "bar", "Counts Heatmap" = "gheatmap"),
+    "__INVALID__"
+  )
+  
+  validate(need(choices != "__INVALID__", "If you're seeing this message, someone (maybe us..) messed up and your stats results may be corrupted."))
+  
+  radioGroupButtons(
+    "imdanova_plot_type",
+    "Plot type",
+    choices = choices
+  )
+})
+
 #'@details returns a different sidepanel of options depending on what stats
 #'statistics was selected.
 output$statistics_tab_sidepanel <- renderUI({
@@ -239,13 +261,21 @@ output$statistics_plot_options <- renderUI({
     list(inputId = "imd_up_cpicker", label = "Positive", value = "green")
   )
   
+  high_low_args <- list(
+    list(inputId = "imd_low_cpicker", label = "Low", value = "#132B43"),
+    list(inputId = "imd_high_cpicker", label = "High", value = "#56B1F7")
+  )
+  
   tagList(
     h4("Main plot content"),
-    conditionalPanel(
-      "input.imdanova_plot_type == 'volcano'",
-      div(
-        class = "inline-wrapper-1",
-        numericInput("imd_plot_fc_thresh", "Fold-change Threshold", value = NULL),
+    div(
+      class = "inline-wrapper-1",
+      conditionalPanel(
+        "['volcano'].includes(input.imdanova_plot_type)",
+        numericInput("imd_plot_fc_thresh", "Fold-change Threshold", value = NULL) 
+      ),
+      conditionalPanel(
+        "['volcano', 'gheatmap'].includes(input.imdanova_plot_type)",
         radioGroupButtons(
           "stats_interactive_yn",
           choices = c("Interactive" = T, "Static" = F),
@@ -253,8 +283,16 @@ output$statistics_plot_options <- renderUI({
         )
       )
     ),
-    h5("Statistical significance/fold change colors"),
-    inline_cpickers(cpicker_args), # UI helper
+    conditionalPanel(
+      "['volcano', 'bar'].includes(input.imdanova_plot_type)",
+      tags$b(h5("Statistical significance/fold change colors")),
+      inline_cpickers(cpicker_args), # UI helper
+    ),
+    conditionalPanel(
+      "['gheatmap'].includes(input.imdanova_plot_type)",
+      tags$b(h5("Low/High count colors")),
+      inline_cpickers(high_low_args), # UI helper
+    ),
     div(
       class = "inline-wrapper-1",
       actionButton("stats_update_plot_content", "Update plot"),
