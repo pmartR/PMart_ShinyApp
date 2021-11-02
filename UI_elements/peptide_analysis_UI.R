@@ -282,3 +282,8 @@ output$peptide_statistics_plot_options <- renderUI({
 output$peptide_statistics_apply_style <- renderUI({
   apply_style_UI("peptide_statistics", FALSE, inherits(plots$peptide_statistics_mainplot, "list"))
 })
+
+output$warnings_peptide_analysis <- renderUI({
+  HTML(paste(revals$warnings_peptide_statistics, collapse = ""))
+})
+

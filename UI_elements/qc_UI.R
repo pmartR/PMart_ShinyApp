@@ -99,24 +99,26 @@ list(
       p <- plot(objects$omicsData,
         order_by = order_by, color_by = color_by,
         use_VizSampNames = use_VizSampNames,
-        bw_theme = TRUE#, interactive = TRUE
+        bw_theme = TRUE
       )
     }
-    else if (input$which_qc_plot %in% c("bar", "scatter")) {
+    else {
       p <- plot(missingval_result(objects$omicsData),
         objects$omicsData,
         order_by = order_by, color_by = color_by,
         plot_type = input$which_qc_plot,
         use_VizSampNames = use_VizSampNames,
         palette = input$qc_colors,
-        bw_theme = TRUE#, interactive = TRUE
+        bw_theme = TRUE
       )
     }
 
     p <- p + isolate(qc_plot_style()) + 
       isolate(qc_xlab()) + isolate(qc_ylab()) + 
       isolate(qc_title()) + qc_flip()
-    plots$last_plot <- p  %>% ggplotly()
+    
+    p <- p %>% ggplotly()
+    plots$last_plot <- p
     return(p)
   }),
 
@@ -136,29 +138,24 @@ list(
       p <- plot(objects$omicsData_2,
         order_by = order_by, color_by = color_by,
         bw_theme = TRUE,
-        use_VizSampNames = use_VizSampNames#, interactive = T
+        use_VizSampNames = use_VizSampNames
       )
     }
-    else if (input$which_qc_plot == "bar") {
+    else {
       p <- plot(missingval_result(objects$omicsData_2),
-        plot_type = input$missingval_type,
+                objects$omicsData_2, 
+        plot_type = input$which_qc_plot,
         use_VizSampNames = use_VizSampNames,
         bw_theme = TRUE,
-        palette = input$qc_colors#, interactive = T
+        palette = input$qc_colors
       )
     }
-    else if (input$which_qc_plot == "scatter") {
-      p <- missingval_scatterplot(objects$omicsData_2,
-        bw_theme = TRUE,
-        palette = input$qc_colors#, interactive = T
-      )
-    }
-
     
     p <- p + isolate(qc_plot_style()) + 
       isolate(qc_xlab()) + isolate(qc_ylab()) + 
       isolate(qc_title()) + qc_flip()
-    plots$last_plot_2 <- p  %>% ggplotly()
+    p <- p  %>% ggplotly()
+    plots$last_plot_2 <- p
     return(p)
   }),
 

@@ -58,12 +58,16 @@ protein_rollup_UI <- function() {
               "Quantile" = "qrollup"
             )
           ),
+          
+          conditionalPanel("input.which_rollup == 'qrollup'",
+                           numericInput("qrollup_thresh", "Quantile cutoff", value = 0)
+          ),
           radioGroupButtons(
             "which_combine_fn",
             "Center By:",
             c("Median" = "median", "Mean" = "mean")
           ),
-          numericInput("qrollup_thresh", "Quantile cutoff", value = 0),
+
           uiOutput("bpquant_apply_icon_UI"),
           hr(),
           div(

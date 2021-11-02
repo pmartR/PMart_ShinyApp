@@ -275,3 +275,7 @@ output$statistics_plot_options <- renderUI({
 output$statistics_apply_style <- renderUI({
   apply_style_UI("statistics", FALSE, inherits(plots$statistics_mainplot, "list"))
 })
+
+output$warnings_analysis <- renderUI({
+  HTML(paste(revals$warnings_statistics, collapse = ""))
+})

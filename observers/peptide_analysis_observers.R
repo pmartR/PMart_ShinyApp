@@ -93,6 +93,22 @@ observeEvent(input$peptide_apply_imdanova, {
                      close = c("peptide_imdanova-specify-comparisons", "peptide_imdanova-select-settings"))
       
       
+      if(is.null(objects$omicsData$e_meta)){
+        buttons <- div(
+          actionButton("pepstats_dismiss", "Review results", width = "75%"),
+          br(), 
+          actionButton("pep_goto_downloads", "Continue to Download Tab", width = "75%")
+        )
+      } else {
+        buttons <- div(
+          actionButton("pepstats_dismiss", "Review results", width = "75%"),
+          br(), 
+          actionButton("goto_rollup", "Continue to Protein Rollup Tab", width = "75%"),
+          br(), 
+          actionButton("pep_goto_downloads", "Continue to Download Tab", width = "75%")
+        )
+      }
+      
       # success modal if all is well
       showModal(
         modalDialog(
@@ -118,11 +134,7 @@ observeEvent(input$peptide_apply_imdanova, {
                        )
                        ),
                      hr(),
-                     actionButton("pepstats_dismiss", "Review results", width = "75%"),
-                     br(), 
-                     actionButton("goto_rollup", "Continue to Protein Rollup Tab", width = "75%"),
-                     br(), 
-                     actionButton("pep_goto_downloads", "Continue to Download Tab", width = "75%")
+                     buttons
               )
             )
           },

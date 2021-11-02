@@ -52,8 +52,9 @@ list(
   output$norm_modal_ba_plots <- renderPlotly({
     
     if (inherits(plots$norm_modal_ba_plots, "list") && !is.null(plots$norm_modal_ba_plots[[1]])) {
-      p <- gridExtra::arrangeGrob(plots$norm_modal_ba_plots[[1]], plots$norm_modal_ba_plots[[2]], ncol = 2)
-      plots$last_plot <- p
+      # p <- gridExtra::arrangeGrob(plots$norm_modal_ba_plots[[1]], plots$norm_modal_ba_plots[[2]], ncol = 2)
+      p <- subplot(plots$norm_modal_ba_plots, shareY = T, titleX = T, titleY = T)
+      # plots$last_plot <- p
       grid::grid.draw(p)
     }
     else {
@@ -66,8 +67,9 @@ list(
   output$norm_modal_ba_plots_2 <- renderPlotly({
 
     if (inherits(plots$norm_modal_ba_plots_2, "list")) {
-      p <- gridExtra::arrangeGrob(plots$norm_modal_ba_plots_2[[1]], plots$norm_modal_ba_plots_2[[2]], ncol = 2)
-      plots$last_plot_2 <- p
+      # p <- gridExtra::arrangeGrob(plots$norm_modal_ba_plots_2[[1]], plots$norm_modal_ba_plots_2[[2]], ncol = 2)
+      p <- subplot(plots$norm_modal_ba_plots_2, shareY = T, titleX = T, titleY = T)
+      # plots$last_plot_2 <- p
       grid::grid.draw(p)
     }
     else {
@@ -104,18 +106,37 @@ list(
   # conditinally display before-after boxplots or boxplots of scale and location parameters.
   output$norm_modal_mainplot <- renderUI({
     if (input$norm_modal_plot_select == "ba") {
+      
+      # p <- gridExtra::arrangeGrob(plots$norm_modal_ba_plots[[1]], 
+      #                             plots$norm_modal_ba_plots[[2]], ncol = 2)
+      p <- subplot(plots$norm_modal_ba_plots, shareY = T, titleX = T, titleY = T)
+      plots$last_plot <- p
+      
       if (!is.null(objects$omicsData_2)) {
         tagList(
           withSpinner(plotlyOutput("norm_modal_ba_plots")),
           withSpinner(plotlyOutput("norm_modal_ba_plots_2"))
         )
+
+        # p <- gridExtra::arrangeGrob(plots$norm_modal_ba_plots_2[[1]], plots$norm_modal_ba_plots_2[[2]], ncol = 2)
+        p <- subplot(plots$norm_modal_ba_plots_2, shareY = T, titleX = T, titleY = T)
+        plots$last_plot_2 <- p
+
       }
       else {
         withSpinner(plotlyOutput("norm_modal_ba_plots"))
       }
     }
     else if (input$norm_modal_plot_select == "fac") {
+      plots_show <- list()
+      plots_show[[1]] <- plots$loc_boxplot
+      plots_show[[2]] <-  plots$scale_boxplot
+      
       if (!is.null(objects$omicsData_2)) {
+        plots_show[[3]] <- plots$loc_boxplot_2
+        plots_show[[4]] <-  plots$scale_boxplot_2
+        plots$last_plot <- subplot(plots_show, nrows = ifelse(length(plots_show) > 1, 2, 1))
+        
         tagList(
           splitLayout(
             withSpinner(plotOutput("norm_modal_loc_boxplot")),
@@ -128,6 +149,7 @@ list(
         )
       }
       else {
+        plots$last_plot <- subplot(plots_show, nrows = ifelse(length(plots_show) > 1, 2, 1))
         splitLayout(
           withSpinner(plotOutput("norm_modal_loc_boxplot")),
           withSpinner(plotOutput("norm_modal_scale_boxplot"))
