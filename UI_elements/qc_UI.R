@@ -99,7 +99,7 @@ list(
       p <- plot(objects$omicsData,
         order_by = order_by, color_by = color_by,
         use_VizSampNames = use_VizSampNames,
-        bw_theme = TRUE#, interactive = TRUE
+        bw_theme = TRUE
       )
     }
     else {
@@ -109,7 +109,7 @@ list(
         plot_type = input$which_qc_plot,
         use_VizSampNames = use_VizSampNames,
         palette = input$qc_colors,
-        bw_theme = TRUE#, interactive = TRUE
+        bw_theme = TRUE
       )
     }
 
@@ -138,7 +138,7 @@ list(
       p <- plot(objects$omicsData_2,
         order_by = order_by, color_by = color_by,
         bw_theme = TRUE,
-        use_VizSampNames = use_VizSampNames#, interactive = T
+        use_VizSampNames = use_VizSampNames
       )
     }
     else {
@@ -147,7 +147,7 @@ list(
         plot_type = input$which_qc_plot,
         use_VizSampNames = use_VizSampNames,
         bw_theme = TRUE,
-        palette = input$qc_colors#, interactive = T
+        palette = input$qc_colors
       )
     }
     
