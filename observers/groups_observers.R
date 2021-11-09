@@ -161,7 +161,6 @@ observeEvent(input$group_designation, {
   cond2 <- !is.null(objects$omicsData_2) & is.null(attributes(objects$omicsData_2)$group_DF)
 
 
-
   if (!cond1 & !cond2) {
     updateCollapse(session, "groups_collapse_left", close = c("fdata_upload", "fdata_columns"))
     shinyjs::show("ok_fdata_idcols")
@@ -256,7 +255,7 @@ observe({
     cond_sample_names <- all(f_data()[[fdata_idcol1]] %in% sample_names(), f_data_2()[[fdata_idcol2]] %in% sample_names_2())
     cond_main_effects <- all(c(length(main_effects()), length(main_effects_2())) != 0, main_effects() %in% colnames(f_data()), main_effects_2() %in% colnames(f_data_2()))
     cond_covariates <- if (all(c(length(covariates()), length(covariates_2())) == 0)) TRUE else all(covariates() %in% colnames(f_data()), covariates_2() %in% colnames(f_data_2()))
-
+    cond_NA_groups <- any(is.na(f_data()[main_effects()])) || any(is.na(f_data_2()[main_effects()]))
     cond <- all(cond_files, cond_idcol_fdata, cond_main_effects, cond_covariates, cond_sample_names)
   }
   # otherwise check:

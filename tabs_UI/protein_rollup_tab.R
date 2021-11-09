@@ -30,6 +30,15 @@ protein_rollup_UI <- function() {
               label = "Unlock/Lock",
               width = "100%"
             )
+          ),
+          br(),
+          hidden(
+            div(
+              "Calculating isoforms, please wait...",
+              id = "isoform_busy",
+              class = "fadein-out",
+              style = "color:deepskyblue;font-weight:bold;margin-bottom:5px"
+            )
           )
         ),
         
@@ -62,6 +71,7 @@ protein_rollup_UI <- function() {
             class = "tooltip-wrapper",
             bsButton("apply_rollup", "Roll-up", style = "primary")
           ),
+          br(),
           hidden(
             div(
               "Applying rollup, please wait...",
@@ -82,37 +92,19 @@ protein_rollup_UI <- function() {
         tabPanel(
           "Rollup Results",
 
-          # bsCollapse(
-            # id = "rollup_mainpanel", multiple = TRUE, open = c("rollup_summary", "rollup_plot_opts"),
-            # bsCollapsePanel("Result Plot",
-                            # value = "rollup_summary",
           br(),
           uiOutput("rollup_plot_UI"),
-                            # withSpinner(plotOutput("rollup_plot")),
+
           br(),
-            # ),
-            # bsCollapsePanel("Plot Options",
-                            # value = "rollup_plot_opts",
+
           wellPanel(
             uiOutput("rollup_plot_options"),
             uiOutput("rollup_apply_style")
           )
-            # )
-          # )
+
         )
       )
-      # bsCollapse(
-      #   id = "rollup_mainpanel", multiple = TRUE, open = c("rollup_summary", "rollup_plot_opts"),
-      #   bsCollapsePanel("Rollup Results",
-      #     value = "rollup_summary",
-      #     withSpinner(plotOutput("rollup_plot"))
-      #   ),
-      #   bsCollapsePanel("Plot Options",
-      #     value = "rollup_plot_opts",
-      #     uiOutput("rollup_plot_options"),
-      #     uiOutput("rollup_apply_style")
-      #   )
-      # )
+
     )
   )
 }

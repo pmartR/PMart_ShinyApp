@@ -50,6 +50,8 @@ refnorm <- function(){
   if(is.null(input[[paste0(tab, "_ref_samps")]]) || 
      input[[paste0(tab, "_ref_samps")]] == "No")  return()
   
+  req(!cond && input[[paste0(tab, "_ref_done_idcols")]] > 0)
+  
   showNotification("Normalizing, please wait....",
                    duration = NULL,
                    closeButton = FALSE,

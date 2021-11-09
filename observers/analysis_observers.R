@@ -62,7 +62,9 @@ observeEvent(get_swap_vals(), {
 
 # make statres object
 observeEvent(input$apply_imdanova, {
-  req(!is.null(objects$omicsData) && input$top_page == "statistics_tab" && !is.null(comp_df_holder$comp_df))
+  req(!is.null(objects$omicsData) && 
+        input$top_page == "statistics_tab" && 
+        !is.null(comp_df_holder$comp_df))
   
   shinyjs::show("analysis_busy")
   on.exit(hide("analysis_busy"))
@@ -149,9 +151,7 @@ observeEvent(
   {
     req(!is.null(objects$imdanova_res))
     
-    interactive = if (is.null(input$stats_interactive_yn)) {
-      FALSE
-    } else
+    interactive <- !is.null(input$stats_interactive_yn) && 
       as.logical(input$stats_interactive_yn)
     
     fc_colors = if (all(map_lgl(
@@ -202,42 +202,46 @@ observeEvent(
 
 # ...first plot...
 observeEvent(input$statistics_apply_style_plot_1, {
-  statistics_xangle <- if (is_empty(input$statistics_xangle) | is.na(input$statistics_xangle)) 0 else input$statistics_xangle
-  statistics_yangle <- if (is_empty(input$statistics_yangle) | is.na(input$statistics_yangle)) 0 else input$statistics_yangle
-
-  theme <- theme(
-    axis.title.x = element_text(size = input$statistics_x_fontsize),
-    axis.title.y = element_text(size = input$statistics_y_fontsize),
-    axis.text.x = element_text(angle = statistics_xangle, size = input$statistics_x_ticksize),
-    axis.text.y = element_text(angle = statistics_yangle, size = input$statistics_y_ticksize),
-    plot.title = element_text(size = input$statistics_title_fontsize)
-  )
-
+  
+  comps <- get_comparisons(objects$imdanova_res)
+  
   if (inherits(plots$statistics_mainplot, "list")) {
-    plots$statistics_mainplot[[1]] <- plots$statistics_mainplot[[1]] + xlab(input$statistics_xlab) + ylab(input$statistics_ylab) + ggtitle(input$statistics_title) + theme
-  }
+    plots$statistics_mainplot[[1]] <- add_plot_styling(
+      input,
+      "statistics", 
+      plots$statistics_mainplot[[1]],
+      subplot = nrow(comps) > 1
+    )
+ }
   else {
-    plots$statistics_mainplot <- plots$statistics_mainplot + xlab(input$statistics_xlab) + ylab(input$statistics_ylab) + ggtitle(input$statistics_title) + theme
-  }
+    plots$statistics_mainplot <- add_plot_styling(
+      input,
+      "statistics", 
+      plots$statistics_mainplot,
+      subplot = nrow(comps) > 1
+    )
+ }
 })
 
 # ...second plot
 observeEvent(input$statistics_apply_style_plot_2, {
-  statistics_xangle <- if (is_empty(input$statistics_xangle) | is.na(input$statistics_xangle)) 0 else input$statistics_xangle
-  statistics_yangle <- if (is_empty(input$statistics_yangle) | is.na(input$statistics_yangle)) 0 else input$statistics_yangle
-
-  theme <- theme(
-    axis.title.x = element_text(size = input$statistics_x_fontsize),
-    axis.title.y = element_text(size = input$statistics_y_fontsize),
-    axis.text.x = element_text(angle = statistics_xangle, size = input$statistics_x_ticksize),
-    axis.text.y = element_text(angle = statistics_yangle, size = input$statistics_y_ticksize),
-    plot.title = element_text(size = input$statistics_title_fontsize)
-  )
-
+  
+  comps <- get_comparisons(objects$imdanova_res)
+  
   if (inherits(plots$statistics_mainplot, "list")) {
-    plots$statistics_mainplot[[2]] <- plots$statistics_mainplot[[2]] + xlab(input$statistics_xlab) + ylab(input$statistics_ylab) + ggtitle(input$statistics_title) + theme
+    plots$statistics_mainplot[[2]] <- add_plot_styling(
+      input,
+      "statistics", 
+      plots$statistics_mainplot[[2]],
+      subplot = nrow(comps) > 1
+    )
   }
   else {
-    plots$statistics_mainplot_2 <- plots$statistics_mainplot_2 + xlab(input$statistics_xlab) + ylab(input$statistics_ylab) + ggtitle(input$statistics_title) + theme
+    plots$statistics_mainplot_2 <- add_plot_styling(
+      input,
+      "statistics", 
+      plots$statistics_mainplot_2,
+      subplot = nrow(comps) > 1
+    )
   }
 })

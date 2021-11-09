@@ -1,6 +1,6 @@
 # toggle display of spans panel if they are in pep/pro land and have chosen to use spans
 observeEvent(c(input$top_page, input$spans_or_manual), {
-  req(input$top_page == "normalization_tab")
+  req(input$top_page == "normalization_tab" && !is.null(objects$omicsData))
 
   is_peppro <- inherits(objects$omicsData, c("pepData", "proData"))
   using_spans <- input$spans_or_manual == "spans" & is_peppro

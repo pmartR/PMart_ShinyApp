@@ -198,7 +198,7 @@ assign_ref_uploads <- function(tabname) {
         "NMR_ref_done_idcols",
         style = "primary",
         div(
-          "Apply Reference Normalization",
+          "Apply reference normalization",
           icon("ok-sign", lib = "glyphicon")
         )
       )
@@ -377,7 +377,7 @@ assign_ref_uploads <- function(tabname) {
         paste0(tabname, "_ref_done_idcols"),
         style = "primary",
         div(
-          "Apply Reference Normalization",
+          "Apply reference normalization",
           icon("ok-sign", lib = "glyphicon")
         )
       )

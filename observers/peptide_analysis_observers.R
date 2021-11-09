@@ -162,9 +162,8 @@ observeEvent(
   {
     req(!is.null(objects$peptide_imdanova_res))
     
-    interactive = if (is.null(input$peptide_stats_interactive_yn)){
-      FALSE
-    } else as.logical(input$peptide_stats_interactive_yn)
+    interactive = !is.null(input$peptide_stats_interactive_yn) && 
+      as.logical(input$peptide_stats_interactive_yn)
     
     fc_colors = if (all(map_lgl(
       list(
@@ -216,43 +215,47 @@ observeEvent(
 
 # ...first plot...
 observeEvent(input$peptide_statistics_apply_style_plot_1, {
-  peptide_statistics_xangle <- if (is_empty(input$peptide_statistics_xangle) | is.na(input$peptide_statistics_xangle)) 0 else input$peptide_statistics_xangle
-  peptide_statistics_yangle <- if (is_empty(input$peptide_statistics_yangle) | is.na(input$peptide_statistics_yangle)) 0 else input$peptide_statistics_yangle
   
-  theme <- theme(
-    axis.title.x = element_text(size = input$peptide_statistics_x_fontsize),
-    axis.title.y = element_text(size = input$peptide_statistics_y_fontsize),
-    axis.text.x = element_text(angle = peptide_statistics_xangle, size = input$peptide_statistics_x_ticksize),
-    axis.text.y = element_text(angle = peptide_statistics_yangle, size = input$peptide_statistics_y_ticksize),
-    plot.title = element_text(size = input$peptide_statistics_title_fontsize)
-  )
+  comps <- get_comparisons(objects$peptide_imdanova_res)
   
   if (inherits(plots$peptide_statistics_mainplot, "list")) {
-    plots$peptide_statistics_mainplot[[1]] <- plots$peptide_statistics_mainplot[[1]] + xlab(input$peptide_statistics_xlab) + ylab(input$peptide_statistics_ylab) + ggtitle(input$peptide_statistics_title) + theme
-  }
+    plots$peptide_statistics_mainplot[[1]] <- add_plot_styling(
+      input,
+      "peptide_statistics", 
+      plots$peptide_statistics_mainplot[[1]],
+      subplot = nrow(comps) > 1
+      )
+}
   else {
-    plots$peptide_statistics_mainplot <- plots$peptide_statistics_mainplot + xlab(input$peptide_statistics_xlab) + ylab(input$peptide_statistics_ylab) + ggtitle(input$peptide_statistics_title) + theme
-  }
+    plots$peptide_statistics_mainplot <- add_plot_styling(
+      input,
+      "peptide_statistics", 
+      plots$peptide_statistics_mainplot,
+      subplot = nrow(comps) > 1
+    )
+}
 })
 
 # ...second plot
 observeEvent(input$peptide_statistics_apply_style_plot_2, {
-  peptide_statistics_xangle <- if (is_empty(input$peptide_statistics_xangle) | is.na(input$peptide_statistics_xangle)) 0 else input$peptide_statistics_xangle
-  peptide_statistics_yangle <- if (is_empty(input$peptide_statistics_yangle) | is.na(input$peptide_statistics_yangle)) 0 else input$peptide_statistics_yangle
   
-  theme <- theme(
-    axis.title.x = element_text(size = input$peptide_statistics_x_fontsize),
-    axis.title.y = element_text(size = input$peptide_statistics_y_fontsize),
-    axis.text.x = element_text(angle = peptide_statistics_xangle, size = input$peptide_statistics_x_ticksize),
-    axis.text.y = element_text(angle = peptide_statistics_yangle, size = input$peptide_statistics_y_ticksize),
-    plot.title = element_text(size = input$peptide_statistics_title_fontsize)
-  )
+  comps <- get_comparisons(objects$peptide_imdanova_res)
   
   if (inherits(plots$peptide_statistics_mainplot, "list")) {
-    plots$peptide_statistics_mainplot[[2]] <- plots$peptide_statistics_mainplot[[2]] + xlab(input$peptide_statistics_xlab) + ylab(input$peptide_statistics_ylab) + ggtitle(input$peptide_statistics_title) + theme
+    plots$peptide_statistics_mainplot[[2]] <- add_plot_styling(
+      input,
+      "peptide_statistics", 
+      plots$peptide_statistics_mainplot[[2]],
+      subplot = nrow(comps) > 1
+    )
   }
   else {
-    plots$peptide_statistics_mainplot_2 <- plots$peptide_statistics_mainplot_2 + xlab(input$peptide_statistics_xlab) + ylab(input$peptide_statistics_ylab) + ggtitle(input$peptide_statistics_title) + theme
+    plots$peptide_statistics_mainplot_2 <- add_plot_styling(
+      input,
+      "peptide_statistics", 
+      plots$peptide_statistics_mainplot_2,
+      subplot = nrow(comps) > 1
+    )
   }
 })
 

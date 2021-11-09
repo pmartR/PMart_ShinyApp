@@ -73,7 +73,7 @@ normalization_UI <- function() {
           value = "spans_mainpanel",
           column(
             6,
-            withSpinner(plotOutput("spans_plot"))
+            withSpinner(plotlyOutput("spans_plot"))
           ),
           column(
             6,
