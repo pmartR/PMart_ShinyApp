@@ -335,37 +335,43 @@ observe({
 
 #'@details store emeta info in an intermediate container that can be NULLED
 observeEvent(input$file_emeta, {
-  revals$e_meta_info <- input$file_emeta
-}, priority = 10)
-
-
-if (MAP) {
-  observe({
-    Sys.sleep(3)
+  if (MAP) {
     if (is.null(MapConnect$Project) == FALSE) {
       revals$e_meta <- MapConnect$Project$Data$e_meta
+      revals$e_meta_info <- list(
+        "name" = basename(MapConnect$Project$Data$e_meta_filename),
+        "datapath" = MapConnect$Project$Data$e_meta_filename
+      )
     }
-  })
-}
+  }
+  else{
+    revals$e_meta_info <- input$file_emeta 
+  }
+}, priority = 10)
 
-
-if (MAP == FALSE) {
-  ## store null values in e_meta if no file chosen since it is not required to make object
-  observe({
-    if(!isTruthy(as.logical(input$emeta_yn))) {
-      revals$e_meta <- NULL
-      revals$e_meta_info <- NULL
-      shinyjs::reset("file_emeta")
-    }
-    else if (is.null(revals$e_meta_info$datapath)) {
-      revals$e_meta <- NULL
-    }
-    else {
-      filename <- revals$e_meta_info$datapath
-      revals$e_meta <- read.csv(filename, stringsAsFactors = FALSE)
-    }
-  })
-}
+## store null values in e_meta if no file chosen since it is not required to make object
+observe({
+  if (MAP) {
+    observe({
+      Sys.sleep(3)
+      if (is.null(MapConnect$Project) == FALSE) {
+        revals$e_meta <- MapConnect$Project$Data$e_meta
+      }
+    })
+  }
+  else if(!isTruthy(as.logical(input$emeta_yn))) {
+    revals$e_meta <- NULL
+    revals$e_meta_info <- NULL
+    shinyjs::reset("file_emeta")
+  }
+  else if (is.null(revals$e_meta_info$datapath)) {
+    revals$e_meta <- NULL
+  }
+  else {
+    filename <- revals$e_meta_info$datapath
+    revals$e_meta <- read.csv(filename, stringsAsFactors = FALSE)
+  }
+})
 
 observe({
   if(!isTruthy(as.logical(input$emeta_yn))) {

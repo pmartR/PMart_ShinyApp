@@ -150,7 +150,7 @@ list(
   
   # pro question in emeta upload sub-panel
   output$emeta_pro_UI <- renderUI({
-    req(!is.null(input$file_emeta$name) && input$emeta_yn == "TRUE" && input$datatype == 'pep')
+    req(!is.null(revals$e_meta_info$name) && input$emeta_yn == "TRUE" && input$datatype == 'pep')
     radioGroupButtons(
       "proteins_yn",
       "Does your biomolecule information file contain peptide to protein mappings?",
