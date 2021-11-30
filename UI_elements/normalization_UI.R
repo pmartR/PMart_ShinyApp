@@ -112,15 +112,14 @@ list(
       plots$last_plot <- p
       
       if (!is.null(objects$omicsData_2)) {
+        # p <- gridExtra::arrangeGrob(plots$norm_modal_ba_plots_2[[1]], plots$norm_modal_ba_plots_2[[2]], ncol = 2)
+        p <- subplot(plots$norm_modal_ba_plots_2, shareY = T, titleX = T, titleY = T)
+        plots$last_plot_2 <- p
+        
         tagList(
           withSpinner(plotlyOutput("norm_modal_ba_plots")),
           withSpinner(plotlyOutput("norm_modal_ba_plots_2"))
         )
-
-        # p <- gridExtra::arrangeGrob(plots$norm_modal_ba_plots_2[[1]], plots$norm_modal_ba_plots_2[[2]], ncol = 2)
-        p <- subplot(plots$norm_modal_ba_plots_2, shareY = T, titleX = T, titleY = T)
-        plots$last_plot_2 <- p
-
       }
       else {
         withSpinner(plotlyOutput("norm_modal_ba_plots"))
