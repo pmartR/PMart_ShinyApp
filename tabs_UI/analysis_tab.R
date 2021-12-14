@@ -27,7 +27,8 @@ statistics_UI <- function() {
           )
         )
       ),
-      uiOutput("statistics_tab_sidepanel")
+      uiOutput("statistics_tab_sidepanel"),
+      uiOutput("warnings_analysis")
     ),
     column(
       8,

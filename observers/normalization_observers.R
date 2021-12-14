@@ -157,11 +157,6 @@ observeEvent(input$execute_spans, {
   )
 })
 
-# disable normalization
-observeEvent(c(input$subset_fn, input$norm_fn, input$los, input$ppp, input$rip), {
-  objects$norm_objects$global_norm <- NULL
-})
-
 
 # disable or enable 'use_selected_spans' if a table row is selected
 observeEvent(c(input$spans_table_rows_selected, objects$spans_res), {
