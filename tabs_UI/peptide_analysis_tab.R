@@ -27,7 +27,8 @@ peptide_statistics_UI <- function() {
                  )
                )
              ),
-             uiOutput("peptide_statistics_tab_sidepanel")
+             uiOutput("peptide_statistics_tab_sidepanel"),
+             uiOutput("warnings_peptide_analysis")
            ),
            column(
              8,
