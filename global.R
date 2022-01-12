@@ -30,20 +30,21 @@ blueexcl = icon("exclamation-sign", lib="glyphicon", style = "color:deepskyblue;
 
 #'@details text displayed in tooltips
 ttext_ <- list(
-  "ABUNDANCE_ZEROS_TO_NA" = "Zeros will be automatically transformed to NA in raw abundance data.",
-  "IMD_INTERACTIVE_MANY_POINTS" = "If your data has many biomolecules, creating an interactive plot may take a while.",
-  "MAIN_EFFECTS_INFO" = "Main effects are the variables of interest, those values across which you want to make comparisons.  Covariates are those values that are not of experimental interest, but must be controlled for in the statistics.",
-  "MISSING_DATA_REPLACE" = "The value specified here will be replaced by NA in the data file.  If missing values are already NA in your data or the missing values are zeros in your abundance data, then you do not have to specify this field.",
-  "RMD_PROP_MISSING_WARNING" = "We advise against using proportion missing as a metric in lipidomics/metabolomics data, as they often have a very low proportion missing.",
-  "RMD_CUSTOM_FILTER_INFO" = "If you want to filter out one or more samples based on inspection of the rMd metrics and not a p-value cutoff, note their names and use a custom sample filter from the sample filters section to remove them.",
-  "ROLLUP_DISABLE_INFO" = "Your data has already been rolled up to the protein level, if you would like to revert to the peptide level, go back to the filter page and re-apply your filters (you may need to re-do other steps that happened after the filter tab.)",
-  "TABDISABLE_NOT_PEP" = "Tab disabled because either you are not analyzing peptide data or your object does not exist.",
-  "TABDISABLE_NOT_PEP_NO_EMETA" = "Tab disabled because either you are not analyzing peptide data, you did not include a biomolecule information file, or your object does not exist",
-  "TABDISABLE_NOT_REF" = "Tab disabled because reference normalization is only available for NMR data or labeled peptide data",
-  "REFERENCE_DISABLED_ROW" = "Disabled entries contain missing values in some samples. These might be due to NAs generated in log transformation or replacement of values less than or equal to zero.",
-  "REFERENCE_DISABLED_COL" = "Disabled entries are non-numeric.",
-  "TABDISABLE_PEP_NOT_ROLLED_UP" = "This tab is used to perform statistics on peptide data rolled up to the protein level.  Roll up your peptide data in the Protein Rollup tab before using this tab.  To perform stats on the peptide-level data, go to the Peptide Statistics tab.",
-  "TABDISABLE_PEP_NO_EMETA" = "Tab disabled because you uploaded peptide data with no biomolecule information file.  Peptide-level statistics are still available."
+  ABUNDANCE_ZEROS_TO_NA = "Zeros will be automatically transformed to NA in raw abundance data.",
+  COVARIATE_TYPE_INFO = "Suppose your covariate has values [1,1,2,2,3,3].  By default, it is treated as a factor variable, but you may want to specify it is numeric.",
+  IMD_INTERACTIVE_MANY_POINTS = "If your data has many biomolecules, creating an interactive plot may take a while.",
+  MAIN_EFFECTS_INFO = "Main effects are the variables of interest, those values across which you want to make comparisons.  Covariates are those values that are not of experimental interest, but must be controlled for in the statistics.",
+  MISSING_DATA_REPLACE = "The value specified here will be replaced by NA in the data file.  If missing values are already NA in your data or the missing values are zeros in your abundance data, then you do not have to specify this field.",
+  RMD_PROP_MISSING_WARNING = "We advise against using proportion missing as a metric in lipidomics/metabolomics data, as they often have a very low proportion missing.",
+  RMD_CUSTOM_FILTER_INFO = "If you want to filter out one or more samples based on inspection of the rMd metrics and not a p-value cutoff, note their names and use a custom sample filter from the sample filters section to remove them.",
+  ROLLUP_DISABLE_INFO = "Your data has already been rolled up to the protein level, if you would like to revert to the peptide level, go back to the filter page and re-apply your filters (you may need to re-do other steps that happened after the filter tab.)",
+  TABDISABLE_NOT_PEP = "Tab disabled because either you are not analyzing peptide data or your object does not exist.",
+  TABDISABLE_NOT_PEP_NO_EMETA = "Tab disabled because either you are not analyzing peptide data, you did not include a biomolecule information file, or your object does not exist",
+  TABDISABLE_NOT_REF = "Tab disabled because reference normalization is only available for NMR data or labeled peptide data",
+  REFERENCE_DISABLED_ROW = "Disabled entries contain missing values in some samples. These might be due to NAs generated in log transformation or replacement of values less than or equal to zero.",
+  REFERENCE_DISABLED_COL = "Disabled entries are non-numeric.",
+  TABDISABLE_PEP_NOT_ROLLED_UP = "This tab is used to perform statistics on peptide data rolled up to the protein level.  Roll up your peptide data in the Protein Rollup tab before using this tab.  To perform stats on the peptide-level data, go to the Peptide Statistics tab.",
+  TABDISABLE_PEP_NO_EMETA = "Tab disabled because you uploaded peptide data with no biomolecule information file.  Peptide-level statistics are still available."
 ) 
 
 #'@details info text NOT displayed in tooltips.  Usually in warnings UI elements
