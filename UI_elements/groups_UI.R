@@ -391,5 +391,54 @@ list(
       ),
       selected = revals$cvcol2_2
     )
+  }),
+  
+  #'@details If covariates are selected, then for each covariate, make a 
+  #'radioGroupButton to specify whether that covariate is continuous or discrete.
+  #' ...
+  output$covariates_type_picker_UI <- renderUI({
+    req(!is.null(f_data()))
+    validate(need(covariates(), "No covariate selected."))
+    
+    tagList(
+      lapply(1:length(covariates()), function(i) {
+        radioGroupButtons(
+          sprintf("cv_type_%s", i),
+          label = covariates()[i],
+          choices = list("Discrete" = "character", "Continuous" = "numeric")
+        )
+      })
+    )
+  }), 
+  
+  #' ... for the second lipid dataset.
+  output$covariates_type_picker_UI_2 <- renderUI({
+    req(!is.null(f_data_2()))
+    validate(need(covariates_2(), "No covariate selected."))
+    
+    tagList(
+      lapply(1:length(covariates_2()), function(i) {
+        radioGroupButtons(
+          sprintf("cv_type_%s_2", i),
+          label = covariates_2()[i],
+          choices = list("Discrete" = "character", "Continuous" = "numeric")
+        )
+      })
+    )
+  }),
+  
+  #'@details UI wrapper for covariates type pickers, mostly to get a title that
+  #'spans the whole sidebar.
+  output$covariates_type_picker_UI_wrapper <- renderUI({
+    req(isTruthy(covariates()) | isTruthy(covariates_2()))
+    
+    tagList(
+      div(
+        tags$p(tags$b("Specify whether covariates are continuous or discrete"), style = "display:inline-block"),
+        tipify(blueq, ttext_[['COVARIATE_TYPE_INFO']])
+      ),
+      fluidSplitLayout(uiOutput("covariates_type_picker_UI"),
+                       uiOutput("covariates_type_picker_UI_2"))
+    )
   })
 )

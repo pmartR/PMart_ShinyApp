@@ -53,7 +53,8 @@ groups_UI <- function() {
               uiOutput("cv_col1_2"),
               uiOutput("cv_col2_2")
             )
-          )
+          ),
+          uiOutput("covariates_type_picker_UI_wrapper")
           )
         ), # parent collapse
         disabled(bsButton("group_designation", "Apply Grouping", style = "primary")),
