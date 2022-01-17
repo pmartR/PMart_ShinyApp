@@ -80,8 +80,8 @@ observeEvent(input$peptide_apply_imdanova, {
         objects$omicsData, 
         comparisons = comps,
         test_method = input$peptide_imdanova_test_method, 
-        pval_adjust = input$peptide_pval_adjust, 
-        pval_thresh = input$peptide_pval_thresh
+        pval_thresh = input$peptide_pval_thresh,
+        covariates = input$peptide_imdanova_covariates_picker
       )
       
       show("peptide_stats-statistics-ok")

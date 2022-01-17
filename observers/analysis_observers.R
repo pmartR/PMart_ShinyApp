@@ -76,9 +76,9 @@ observeEvent(input$apply_imdanova, {
       objects$imdanova_res <- imd_anova(
         objects$omicsData, 
         comparisons = comps,
-        test_method = input$imdanova_test_method, 
-        pval_adjust = input$pval_adjust, 
-        pval_thresh = input$pval_thresh
+        test_method = input$imdanova_test_method,
+        pval_thresh = input$pval_thresh,
+        covariates = input$imdanova_covariates_picker
       )
       
       show("stats-statistics-ok")

@@ -86,6 +86,7 @@ output$statistics_tab_sidepanel <- renderUI({
         value = "imdanova-select-settings",
         uiOutput("imdanova_test_method_UI"),
         uiOutput("imdanova_pval_adjust_UI"),
+        uiOutput("imdanova_covariates_picker_UI"),
         numericInput("pval_thresh", "Significance threshold", value = 0.05, step = 0.01),
         bsButton("apply_imdanova", "Perform iMd-ANOVA", style = "primary"),
         br(), br(),
@@ -177,6 +178,27 @@ output$pairwise_comp_display <- renderDT(
   selection = "none",
   escape = FALSE
 )
+
+#'@details Picker for controlling for covariates indicated in the Groups 
+#'tab.
+output$imdanova_covariates_picker_UI <- renderUI({
+  req(objects$omicsData)
+  covars <- objects$omicsData %>% 
+    attr("group_DF") %>% 
+    attr("covariates")
+  
+  req(!is.null(covars))
+  
+  choices = colnames(covars)[-1]
+  
+  pickerInput(
+    inputId = "imdanova_covariates_picker",
+    label = "Remove covariate effects:",
+    choices = choices,
+    selected = choices,
+    multiple = T
+  )
+})
 
 #'@details Picker for which type of statistical test to use in imd-anova
 output$imdanova_test_method_UI <- renderUI({
