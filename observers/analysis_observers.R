@@ -73,22 +73,32 @@ observeEvent(input$apply_imdanova, {
     {
       comps <- as.data.frame(comp_df_holder$comp_df)[1:2]
       colnames(comps) <- c("Control", "Test")
+      
+      pval_adjust_a = if (!is.null(input$imdanova_pval_adjust_a)) {
+        input$imdanova_pval_adjust_a
+      } else "none"
+      
+      pval_adjust_g = if (!is.null(input$imdanova_pval_adjust_g)) {
+        input$imdanova_pval_adjust_g
+      } else "none"
+      
       objects$imdanova_res <- imd_anova(
-        objects$omicsData, 
+        objects$omicsData,
         comparisons = comps,
         test_method = input$imdanova_test_method,
+        pval_adjust_a = pval_adjust_a,
+        pval_adjust_g = pval_adjust_g,
         pval_thresh = input$pval_thresh,
         covariates = input$imdanova_covariates_picker
       )
       
-      show("stats-statistics-ok")
-      show("imdanova_groups_ok")
-      show("imdanova_settings_ok")
-
-      updateCollapse(session, "statistics_collapse_left", close = c("stats-statistics-options"))
-      updateCollapse(session, "imdanova-sidepanel-options", 
-                     close = c("imdanova-specify-comparisons", "imdanova-select-settings"))
-
+      pval_adjust_modal_text <- switch(
+        input$imdanova_test_method,
+        "combined" = sprintf("ANOVA: %s, G-test: %s", str_to_title(pval_adjust_g), str_to_title(pval_adjust_a)),
+        "anova" = str_to_title(pval_adjust_a),
+        "gtest" = str_to_title(pval_adjust_g)
+      )
+      
       # success modal if all is well
       showModal(
         modalDialog(
@@ -102,13 +112,7 @@ observeEvent(input$apply_imdanova, {
                          input$imdanova_test_method,
                          " test method from pmartR's iMd-ANOVA function. ",
                          "Multiple comparisons P-value correction peformed: ",
-                         switch(input$pval_adjust,
-                                       "tukey" = "Tukey", 
-                                       "dunnet" = "Dunnett",
-                                       "holm" = "Holm",
-                                       "bonferroni" = "Bonferroni",
-                                       "none" = "none"
-                         ),
+                         pval_adjust_modal_text,
                          ". P-value threshold: ",
                          input$pval_thresh
                        )
@@ -122,6 +126,14 @@ observeEvent(input$apply_imdanova, {
           footer = NULL
         )
       )
+      
+      show("stats-statistics-ok")
+      show("imdanova_groups_ok")
+      show("imdanova_settings_ok")
+      
+      updateCollapse(session, "statistics_collapse_left", close = c("stats-statistics-options"))
+      updateCollapse(session, "imdanova-sidepanel-options", 
+                     close = c("imdanova-specify-comparisons", "imdanova-select-settings"))
       
     },
     error = function(e) {

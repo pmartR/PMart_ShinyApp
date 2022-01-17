@@ -35,6 +35,57 @@ output$imdanova_plot_type_UI <- renderUI({
   )
 })
 
+#'@details Pickers for ANOVA/G-test pvalue adjustment.  One or two pickers are
+#'shown depending on if the user chooses the 'combined' option for iMd-ANOVA
+output$imdanova_pval_adjust_UI <- renderUI({
+  validate(need(
+    input$imdanova_test_method %in% c("anova", "gtest", "combined"),
+    "Please select test method."
+  ))
+  
+  # to make things look nice
+  prepend <- if(input$imdanova_test_method == 'combined') {
+    ""
+  } else "Multiple comparisons adjustment "
+  
+  anova_picker <-  pickerInput(
+    "imdanova_pval_adjust_a",
+    sprintf("%s(ANOVA)", prepend),
+    choices = c(
+      "Holm" = "holm",
+      "Bonferroni" = "bonferroni",
+      "Tukey" = "tukey",
+      "Dunnet" = "dunnett",
+      "None" = "none"
+    ),
+    selected = character(0)
+  )
+  
+  gtest_picker <- pickerInput(
+    "imdanova_pval_adjust_g",
+    sprintf("%s(G-test)", prepend),
+    choices = c(
+      "Holm" = "holm",
+      "Bonferroni" = "bonferroni",
+      "None" = "none"
+    ),
+    selected = character(0)
+  )
+  
+  if (input$imdanova_test_method == "anova") {
+    return(anova_picker)
+  }
+  else if (input$imdanova_test_method == "gtest") {
+    return(gtest_picker)
+  } 
+  else if(input$imdanova_test_method == "combined") {
+    return(tagList(
+      tags$b("Multiple comparisons adjustment"),
+      fluidSplitLayout(anova_picker, gtest_picker) 
+    ))
+  }
+})
+
 #'@details returns a different sidepanel of options depending on what stats
 #'statistics was selected.
 output$statistics_tab_sidepanel <- renderUI({
@@ -255,18 +306,6 @@ output$imdanova_test_method_UI <- renderUI({
     )
   )
   
-})
-
-# limit adjustment options depending on test method
-output$imdanova_pval_adjust_UI <- renderUI({
-  req(input$imdanova_test_method)
-  if (input$imdanova_test_method == "anova") {
-    choices <- c("Holm" = "holm", "Bonferroni" = "bonferroni", "Tukey" = "tukey", "Dunnet" = "dunnett", "None" = "none")
-  }
-  else {
-    choices <- c("Holm" = "holm", "Bonferroni" = "bonferroni", "None" = "none")
-  }
-  pickerInput("pval_adjust", "Multiple comparisons adjustment", choices = choices)
 })
 
 # display table output from imd_anova

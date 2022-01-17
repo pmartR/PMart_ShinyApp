@@ -35,6 +35,57 @@ output$peptide_imdanova_plot_type_UI <- renderUI({
   )
 })
 
+#'@details Pickers for ANOVA/G-test pvalue adjustment.  One or two pickers are
+#'shown depending on if the user chooses the 'combined' option for iMd-ANOVA
+output$peptide_imdanova_pval_adjust_UI <- renderUI({
+  validate(need(
+    input$peptide_imdanova_test_method %in% c("anova", "gtest", "combined"),
+    "Please select test method."
+  ))
+  
+  # to make things look nice
+  prepend <- if(input$peptide_imdanova_test_method == 'combined') {
+    ""
+  } else "Multiple comparisons adjustment "
+  
+  anova_picker <-  pickerInput(
+    "peptide_imdanova_pval_adjust_a",
+    sprintf("%s(ANOVA)", prepend),
+    choices = c(
+      "Holm" = "holm",
+      "Bonferroni" = "bonferroni",
+      "Tukey" = "tukey",
+      "Dunnet" = "dunnett",
+      "None" = "none"
+    ),
+    selected = character(0)
+  )
+  
+  gtest_picker <- pickerInput(
+    "peptide_imdanova_pval_adjust_g",
+    sprintf("%s(G-test)", prepend),
+    choices = c(
+      "Holm" = "holm",
+      "Bonferroni" = "bonferroni",
+      "None" = "none"
+    ),
+    selected = character(0)
+  )
+  
+  if (input$peptide_imdanova_test_method == "anova") {
+    return(anova_picker)
+  }
+  else if (input$peptide_imdanova_test_method == "gtest") {
+    return(gtest_picker)
+  } 
+  else if(input$peptide_imdanova_test_method == "combined") {
+    return(tagList(
+      tags$b("Multiple comparisons adjustment"),
+      fluidSplitLayout(anova_picker, gtest_picker) 
+    ))
+  }
+})
+
 #'@details returns a different sidepanel of options depending on what stats
 #'statistics was selected.
 output$peptide_statistics_tab_sidepanel <- renderUI({
@@ -264,18 +315,6 @@ output$peptide_imdanova_test_method_UI <- renderUI({
     )
   )
   
-})
-
-# limit adjustment options depending on test method
-output$peptide_imdanova_pval_adjust_UI <- renderUI({
-  req(input$peptide_imdanova_test_method)
-  if (input$peptide_imdanova_test_method == "anova") {
-    choices <- c("Holm" = "holm", "Bonferroni" = "bonferroni", "Tukey" = "tukey", "Dunnet" = "dunnett", "None" = "none")
-  }
-  else {
-    choices <- c("Holm" = "holm", "Bonferroni" = "bonferroni", "None" = "none")
-  }
-  pickerInput("peptide_pval_adjust", "Multiple comparisons adjustment", choices = choices)
 })
 
 # display table output from imd_anova
