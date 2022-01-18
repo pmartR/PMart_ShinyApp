@@ -25,7 +25,7 @@ apply_filt <- function(){
       # proteomics filter
       if (class(tmp) == "pepData") {
         if (isTRUE(!is.null(objects$filters$profilt) & is.null(attributes(tmp)$filters$proteomicsFilt))) {
-          tmp <- applyFilt(objects$filters$profilt, tmp, min_num_peps = input$min_num_peps, degen_peps = input$degen_peps)
+          tmp <- applyFilt(objects$filters$profilt, tmp, min_num_peps = input$min_num_peps, redundancy = input$degen_peps)
         }
       }
       # cv filter
