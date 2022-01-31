@@ -18,7 +18,7 @@ f_data <- reactive({
     req(input$file_fdata$datapath)
     # Load file
     filename <- input$file_fdata$datapath
-    read.csv(filename, stringsAsFactors = FALSE)
+    read.csv(filename, stringsAsFactors = FALSE, check.names = F)
     
   }
 

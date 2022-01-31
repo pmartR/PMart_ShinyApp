@@ -21,7 +21,7 @@ e_data <- reactive({
     filename <- input$file_edata$datapath
     
     # exportTestValues(e_data = read.csv(filename, stringsAsFactors = FALSE))
-    read.csv(filename, stringsAsFactors = FALSE)  
+    read.csv(filename, stringsAsFactors = FALSE, check.names = F)
     
   }
   

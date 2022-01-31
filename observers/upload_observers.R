@@ -362,7 +362,7 @@ if (MAP == FALSE) {
     }
     else {
       filename <- revals$e_meta_info$datapath
-      revals$e_meta <- read.csv(filename, stringsAsFactors = FALSE)
+      revals$e_meta <- read.csv(filename, stringsAsFactors = FALSE, check.names = F)
     }
   })
 }
