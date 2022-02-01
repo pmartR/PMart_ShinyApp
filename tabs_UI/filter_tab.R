@@ -1,5 +1,6 @@
 filter_UI <- function() {
   tabPanel("Filter",
+    value = "filter_tab",
     class = "collapse_page",
     column(
       4,
@@ -83,8 +84,7 @@ filter_UI <- function() {
                 numericInput("min_num_peps", "Minimum number of peptides mapped to each protein:", 2, step = 1),
                 checkboxInput("degen_peps", "Remove Degenerate Peptides?", TRUE)
               )
-            ),
-            hr()
+            )
           )
         )
         ), # end biomolecule filter collapse
@@ -93,62 +93,68 @@ filter_UI <- function() {
         bsCollapsePanel(div(
           "Sample Filters",
           hidden(div(id = "ok_meta_filters", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
-        ),
+          ),
         value = "sample_filters",
-        # rmd filter
-        fluidRow(
-          column(
-            5,
-            actionButton(
-              inputId = "add_rmdfilt",
-              label = div(class="flex-inline",
-                "Add/Remove rMd filter", 
-                tipify(
-                  icon("question-sign", lib = "glyphicon", class = "info-right"),
-                  title = ttext_[["RMD_CUSTOM_FILTER_INFO"]]
+          # rmd filter
+          fluidRow(
+            column(
+              5,
+              actionButton(
+                inputId = "add_rmdfilt",
+                label = div(class="flex-inline",
+                  "Add/Remove rMd filter", 
+                  tipify(
+                    icon("question-sign", lib = "glyphicon", class = "info-right"),
+                    title = ttext_[["RMD_CUSTOM_FILTER_INFO"]]
+                  ),
+                  hidden(div(id = "rmdfilt_exists", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
                 ),
-                hidden(div(id = "rmdfilt_exists", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
+                width = "100%"
               ),
-              width = "100%"
+              actionButton("plot_rmdfilt", "Plot this filter", width = "100%")
             ),
-            actionButton("plot_rmdfilt", "Plot this filter", width = "100%")
-          ),
-          column(
-            7,
-            numericInput("pvalue_threshold", "P-value threshold:", 0.001, step = 0.001),
-            div(
-              id = "rmd_metrics_js", 
-              class = "inline-wrapper-1",
-              uiOutput("rmd_metrics_out"),
-              uiOutput("rmd_propmis_warn_icon")
-            ),
-            pickerInput("rmdfilt_plot_type", "Plot everything or inspect certain samples?", choices = c("Plot all samples" = "all", "Select from all samples" = "subset", "Select from outliers" = "outliers")),
-            uiOutput("rmdfilt_plot_type")
-          )
-        ),
-        hr(),
-        # custom filter
-        fluidRow(
-          column(
-            6,
-            actionButton(
-              inputId = "add_customfilt",
-              label = div("Add/Remove custom filter", hidden(
-                div(id = "customfilt_exists", style = "color:orange;float:right", icon("ok", lib = "glyphicon"))
-              )), 
-              width = "100%"
+            column(
+              7,
+              numericInput("pvalue_threshold", "P-value threshold:", 0.001, step = 0.001),
+              div(
+                id = "rmd_metrics_js", 
+                class = "inline-wrapper-1",
+                uiOutput("rmd_metrics_out"),
+                uiOutput("rmd_propmis_warn_icon")
+              ),
+              pickerInput("rmdfilt_plot_type", "Plot everything or inspect certain samples?", choices = c("Plot all samples" = "all", "Select from all samples" = "subset", "Select from outliers" = "outliers")),
+              uiOutput("rmdfilt_plot_type")
             )
-          ),
-          column(
-            6,
-            radioGroupButtons("remove_or_keep", label = "Remove or keep these choices?", choices = c("Remove", "Keep"), selected = "Remove")
           )
         ),
-        uiOutput("fdata_customfilt"),
-        uiOutput("fdata_regex")
+        # custom filter
+        bsCollapsePanel(
+          div(
+            "Custom Filter",
+            hidden(div(id = "ok_custom_filter", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
+          ),
+          div(class = "inline-wrapper-1",
+            uiOutput("fdata_customfilt"),
+            radioGroupButtons("remove_or_keep", label = "Remove or keep these choices?", choices = c("Remove", "Keep"), selected = "Remove")
+          ), 
+          hr(),
+          uiOutput("edata_customfilt_pickers"), 
+          hr(),
+          h4("Filter by biomolecule information:"),
+          uiOutput("emeta_customfilt_which_col"),
+          uiOutput("emeta_customfilt_pickers"),
+          hr(),
+          actionButton(
+            inputId = "add_customfilt",
+            label = div("Add/Remove custom filter", hidden(
+              div(id = "customfilt_exists", style = "color:orange;float:right", icon("ok", lib = "glyphicon"))
+            )), 
+            width = "50%"
+          )
         )
       ), # parent collapse
       bsButton("review_filters", "Review and apply filters", style = "primary"),
+      bsButton("reset_filters", "Unselect all filters", style = "primary"),
       uiOutput("warnings_filter"),
       uiOutput("filter_data_summary", style="margin-top:3px")
     ), # column 4

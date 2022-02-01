@@ -8,12 +8,16 @@ observeEvent(c(objects$omicsData, input$top_page), {
     "apply_rollup"#,
     # "bpquant_lock",
     # "bpquant"
-           )
+   )
   
   req(!is.null(objects$omicsData))
   for (el in ids) {
     toggleState(el, condition = inherits(objects$omicsData, "pepData"))
   }
+  
+  is_rolled_up <- inherits(objects$uploaded_omicsData, "pepData") & inherits(objects$omicsData, "proData")
+  toggleTooltip(session, "apply_rollup_jswrapper", is_rolled_up, tooltip_text = ttext_[["ROLLUP_DISABLE_INFO"]])
+  
 })
 
 
@@ -28,24 +32,30 @@ observeEvent(input[["bpquant"]], {
   
   removeTab("rollup_mainpanel", "BPQuant Results", session = getDefaultReactiveDomain())
   
-  showNotification("Calculating isoforms, please wait...",
-                   duration = NULL,
-                   closeButton = FALSE,
-                   id = "bpquant_note"
-  )
+  shinyjs::show("isoform_busy")
+  on.exit(hide("isoform_busy"))
   
   appendTab(
     "rollup_mainpanel",
     tabPanel(
       "BPQuant Results",
       br(),
-      withSpinner(plotlyOutput("bpquant_res"))
+      withSpinner(plotlyOutput("bpquant_res")),
+      br(),
+      wellPanel(
+        uiOutput("bpquant_plot_options"),
+        uiOutput("bpquant_apply_style")
+      )
     )
   )
   
   updateTabsetPanel(session, "rollup_mainpanel",
                     selected = "BPQuant Results"
   )
+  
+  show("isoidicon")
+  updateCollapse(session, "rollup_sidebar", close = "isoform_identification")
+  
   updatePrettySwitch(session, "bpquant_lock", value = TRUE)
   
   pro_class <- inherits(objects$omicsData, "proData")
@@ -99,15 +109,6 @@ observeEvent(input[["bpquant"]], {
   )
   enable("bpquant_apply")
   
-  # radioGroupButtons(
-  #   "bpquant_apply",
-  #   "Use protein isoforms?",
-  #   choices = c("Yes", "No"),
-  #   selected = isolate(input[["bpquant_apply"]])
-  # )
-  
-  
-  removeNotification("bpquant_note")
 })
 
 # lock/unlock bpquant
@@ -136,6 +137,7 @@ observeEvent(input[["bpquant_lock"]], {
             enable("bpquant_max_prot")
             enable("bpquant_comps")
             updateRadioButtons(session, "bpquant_apply", selected = "No")
+            hide("isoidicon")
           } else {
             updatePrettySwitch(session, "bpquant_lock", value = TRUE)
           }
@@ -147,6 +149,7 @@ observeEvent(input[["bpquant_lock"]], {
       enable("bpquant_max_prot")
       enable("bpquant_comps")
       disable("bpquant")
+      hide("isoidicon")
       updateRadioButtons(session, "bpquant_apply", selected = "No")
     }
   }
@@ -158,11 +161,11 @@ observeEvent(input$apply_rollup, {
   shinyjs::show("rollup_busy")
   on.exit(hide("rollup_busy"))
 
+  objects$omicsData_pre_rollup <- objects$omicsData
+  revals$warnings_rollup$bad_rollup <- NULL
+  
   tryCatch(
     {
-
-      objects$omicsData_pre_rollup <- objects$omicsData
-      
       cname <- get_edata_cname(objects$omicsData)
       objects$omicsData$e_data[[cname]] <- as.character(objects$omicsData$e_data[[cname]]) #### Weird thing with numerics?
       objects$omicsData$e_meta[[cname]] <- as.character(objects$omicsData$e_meta[[cname]])
@@ -170,30 +173,39 @@ observeEvent(input$apply_rollup, {
       if (input$which_rollup == "qrollup") thresh <- input$qrollup_thresh else thresh <- NULL
       if (input$bpquant_apply == "Yes") isores <- objects$bpquant else isores <- NULL
       
+      if(input$which_rollup == "zrollup"){
+        single_pep = T
+        single_observation = T
+      } else {
+        single_pep = FALSE
+        single_observation = FALSE
+      }
+      
+      ## Catch for all NA peptides
+      if(input$which_rollup == "rrollup" && 
+         !("moleculeFilt" %in% unlist(map(pmartR::get_filters(objects$omicsData), 1)))){
+        objects$omicsData <- applyFilt(molecule_filter(objects$omicsData), objects$omicsData, min_num = 1)
+      }
+      
       objects$omicsData <- protein_quant(
         objects$omicsData,
         method = input$which_rollup,
         combine_fn = input$which_combine_fn,
         isoformRes = isores,
-        qrollup_thresh = thresh
+        qrollup_thresh = thresh,
+        single_pep = single_pep,
+        single_observation = single_observation
       )
       
-      # func <- get(input$which_rollup, envir = asNamespace("pmartR"), mode = "function")
-      # if (input$which_rollup == "qrollup") {
-      #   objects$omicsData <- func(objects$omicsData, 
-      #                             input$qrollup_thresh,
-      #                             isoformRes = objects$bpquant,
-      #                             combine_fn = input$which_combine_fn)
-      # }
-      # else {
-      #   objects$omicsData <- func(objects$omicsData, 
-      #                             isoformRes = objects$bpquant,
-      #                             combine_fn = input$which_combine_fn)
-      # }
-
-      updateCollapse(session, "rollup_mainpanel", open = "rollup_summary")
+      show("prorollicon")
+      updateCollapse(session, "rollup_sidebar", open = "rollup_summary", 
+                     close = c("rollup_opts", "isoform_identification"))
+      updateTabsetPanel(session, "rollup_mainpanel",
+                        selected = "Rollup Results"
+      )
       revals$rollup_summary <- summary(objects$omicsData)
-      plots$rollup_plot <- plot(objects$omicsData, bw_theme = TRUE)
+      plots$rollup_plot <- plot(objects$omicsData, bw_theme = TRUE, interactive = T, 
+                                color_by = "Group", order_by = "Group")
       
       showModal(
         modalDialog(
@@ -227,21 +239,42 @@ observeEvent(input$apply_rollup, {
       
     },
     error = function(e) {
-      msg <- paste0("Something went wrong rollup up your pepdata:  \n System error:  ", e)
+      msg <- paste0("Something went wrong rolling up your pepdata:  \n System error:  ", e)
       message(msg)
+      objects$omicsData <- objects$omicsData_pre_rollup
       revals$warnings_rollup$bad_rollup <<- sprintf("<p style = 'color:red'>%s</p>", msg)
       revals$rollup_summary <- NULL
       plots$rollup_plot <- NULL
+      
     }
   )
 })
 
 observeEvent(input$rollup_dismiss, removeModal())
 observeEvent(input$rollup_goto_stats,{
-  updateTabsetPanel(session, "top_page", selected = "Statistics")
+  updateTabsetPanel(session, "top_page", selected = "statistics_tab")
   removeModal()
 })
 observeEvent(input$rollup_goto_downloads,{
-  updateTabsetPanel(session, "top_page", selected = "Download")
+  updateTabsetPanel(session, "top_page", selected = "download_tab")
   removeModal()
+})
+
+## Update plot style
+observeEvent(input$bpquant_apply_style_plot_1, {
+  
+    plots$bpquant <- add_plot_styling(
+      input,
+      "bpquant", 
+      plots$bpquant
+    )
+})
+
+observeEvent(input$rollup_apply_style_plot_1, {
+  
+  plots$rollup_plot <- add_plot_styling(
+    input,
+    "rollup", 
+    plots$rollup_plot
+  )
 })

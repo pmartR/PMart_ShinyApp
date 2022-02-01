@@ -1,6 +1,17 @@
 ui <- function(request) {
   tagList(
     useShinyjs(),
+    shinyjs::extendShinyjs(
+      script = "lib/shinyui.js",
+      functions = c(
+        "isTabdisabled", # For testing purposes
+        "isIconhidden", # For testing purposes
+        "disableTab", # Disables a tab
+        "enableTab", # Enables a tab
+        "disableBtn", # Disables a button
+        "toggleTabInputs" # Toggles state of inputs on a page
+      )
+    ),
     shinyalert::useShinyalert(),
     list(tags$head(HTML('<link rel="icon", href="pmartlogo.png", 
                                  type="image/png" />'))),
@@ -23,6 +34,9 @@ ui <- function(request) {
 
       groups_UI(),
 
+      ##### Reference TAB ######
+      reference_UI(),
+      
       #### DATA SUMMARY TAB #####
 
       data_summary_UI(),
@@ -53,13 +67,20 @@ ui <- function(request) {
     ), # end Navbarpage
 
     ## Plot saving buttons
-    hidden(
+    div(
+      style = "position:absolute;top:3px;right:16px;z-index:1100;",
       div(
-        id = "js_saveplot", style = "position:absolute;top:3px;right:16px;z-index:1100",
-        fluidRow(
-          column(6, bsButton("viewplots", uiOutput("n_saved_plots"), style = "info")),
-          column(6, bsButton("saveplot", "Save Last Plot", style = "info"))
-        )
+        class = "inline-wrapper-1", 
+        bsButton("viewplots", uiOutput("n_saved_plots"), style = "info"),
+        hidden(div(id = "js_saveplot", style = "vertical-align:top",
+          bsButton("saveplot", "Save Last Plot", style = "info")
+        )),
+        # Add UI if MAP is enabled
+        if (MAP) {
+          div(id = "js_midpoint", style = "vertical-align:top",
+              bsButton("exportMid", "Save and Export Progress", style = "success")
+          )
+        } else NULL
       )
     ),
     uiOutput("developer_buttons")

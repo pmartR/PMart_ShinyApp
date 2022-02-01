@@ -1,6 +1,6 @@
 # toggle display of spans panel if they are in pep/pro land and have chosen to use spans
 observeEvent(c(input$top_page, input$spans_or_manual), {
-  req(input$top_page == "Normalization")
+  req(input$top_page == "normalization_tab" && !is.null(objects$omicsData))
 
   is_peppro <- inherits(objects$omicsData, c("pepData", "proData"))
   using_spans <- input$spans_or_manual == "spans" & is_peppro
@@ -11,6 +11,12 @@ observeEvent(c(input$top_page, input$spans_or_manual), {
   toggle("inspect_norm", condition = !using_spans)
   toggle("use_selected_spans", condition = using_spans)
   toggle("apply_normalization", condition = using_spans)
+  
+  if(get_data_norm(objects$omicsData)){
+    updateButton(session,"apply_normalization", label = "Update normalization")
+  } else {
+    updateButton(session,"apply_normalization", label = "Apply normalization")
+  }
 
   if (using_spans) {
     updateCollapse(session, "spans_submenu", open = "use_spans")
@@ -84,7 +90,7 @@ observe({
 
 # warn of bad or empty parameters
 observe({
-  req(input$top_page == "Normalization")
+  req(input$top_page == "normalization_tab")
   isolate(revals$warnings_normalize$empty_params <<- NULL)
   isolate(revals$warnings_normalize$bad_params <<- NULL)
 
@@ -120,7 +126,7 @@ observe({
 
 # when spans is done, lead the user to the next collapse panel and show the plot/table
 observeEvent(objects$spans_res, {
-  updateCollapse(session, "spans_submenu", open = "choose_params")
+  updateCollapse(session, "spans_submenu", open = "choose_params", close = "use_spans")
   updateCollapse(session, "normalization_mainpanel", open = "spans_mainpanel")
 })
 
@@ -151,11 +157,6 @@ observeEvent(input$execute_spans, {
   )
 })
 
-# disable normalization
-observeEvent(c(input$subset_fn, input$norm_fn, input$los, input$ppp, input$rip), {
-  objects$norm_objects$global_norm <- NULL
-})
-
 
 # disable or enable 'use_selected_spans' if a table row is selected
 observeEvent(c(input$spans_table_rows_selected, objects$spans_res), {
@@ -167,7 +168,7 @@ observeEvent(c(input$spans_table_rows_selected, objects$spans_res), {
 # update the parameter selections with those of the selected row
 observeEvent(input$use_selected_spans, {
   ### updating tons of inputs
-  req(!is.null(objects$spans_res))
+  req(!is.null(objects$spans_res) && input$use_selected_spans > 0)
 
   ind <- input$spans_table_rows_selected
   row <- objects$spans_res[ind, ]
@@ -218,9 +219,12 @@ observeEvent(input$subset_fn, {
 
 # apply normalize_global with current params to objects$omicsData
 observeEvent(c(input$apply_normalization, input$apply_normalization_modal), {
-  req(input$top_page == "Normalization", any(c(input$apply_normalization, input$apply_normalization_modal) > 0))
+  req(input$top_page == "normalization_tab", any(c(input$apply_normalization, input$apply_normalization_modal) > 0))
   ####
   removeModal()
+
+  show("ok_normalization")
+  updateCollapse(session, "normalization_sidebar", close = "normalize_global_sidebar")
 
   tryCatch(
     {
@@ -281,6 +285,8 @@ observeEvent(c(input$apply_normalization, input$apply_normalization_modal), {
       )
       # be nice and open the plot panel for them
       updateCollapse(session, "normalization_mainpanel", open = "normdata_mainpanel")
+      
+      enable("reset_normalization")
     },
     error = function(e) {
       msg <- paste0("Something went wrong normalizing your data.  \n System error:  ", e)
@@ -290,14 +296,28 @@ observeEvent(c(input$apply_normalization, input$apply_normalization_modal), {
   )
 })
 
+# reset normalization; really only needed where no normalization desired
+observeEvent(input$reset_normalization, {
+  disable("reset_normalization")
+  ## If not using reference normalized isobaric, make sure to render as pepdata
+  makeobject(use_iso = (inherits(objects$omicsData, "isobaricpepData") && 
+                          !is.null(get_isobaric_norm(objects$omicsData))))
+  refnorm()
+  makegroup()
+  apply_filt()
+  
+  hide("ok_normalization")
+  updateCollapse(session, "normalization_sidebar", open = "normalize_global_sidebar")
+})
+
 # dismiss and move to next tabs
 observeEvent(input$normalization_dismiss, removeModal())
 observeEvent(input$goto_statistics, {
-  updateTabsetPanel(session, "top_page", selected = "Statistics")
+  updateTabsetPanel(session, "top_page", selected = "statistics_tab")
   removeModal()
 })
 observeEvent(input$goto_pepstats, {
-  updateTabsetPanel(session, "top_page", selected = "Peptide Statistics")
+  updateTabsetPanel(session, "top_page", selected = "peptide_statistics_tab")
   removeModal()
 })
 
@@ -313,24 +333,21 @@ observeEvent(input$inspect_norm, {
     enable("inspect_norm")
     hide("analyze_norm_busy")
   })
-
+  
   # initialize parameters
-  if (input$subset_fn %in% c("all", "complete")) {
-    params <- NULL
-  }
-  else if (input$subset_fn == "los") {
-    params <- list(los = input$los)
-  }
-  else if (input$subset_fn == "ppp") {
-    params <- list(ppp = input$ppp)
-  }
-  else if (input$subset_fn == "rip") {
-    params <- list(rip = input$rip)
-  }
-  else if (input$subset_fn == "ppp_rip") {
-    params <- list(ppp_rip = list(ppp = input$ppp, rip = input$rip))
-  }
+  params <- switch(
+    input$subset_fn,
+     all = NULL,
+     complete = NULL,
+     los = list(los = input$los),
+     ppp = list(ppp = input$ppp),
+     rip = list(rip = input$rip),
+     ppp_rip = list(ppp_rip = list(ppp = input$ppp, rip = input$rip))
+    )
 
+  # clear warnings
+  revals$warnings_normalize$bad_inspection_obj1 <- revals$warnings_normalize$bad_inspection_obj2 <- NULL
+  
   # inspect_norm() returns a 4 element list of p_location, p_scale, loc_boxplot, scale_boxplot, norm_modal_ba_plots
   res_1 <- tryCatch(
     {
@@ -381,13 +398,15 @@ observeEvent(input$inspect_norm, {
     location_msg <- tags$b(tags$h4(sprintf("P-value from Kruskal-Wallis test on location parameters%s:  %s", extra_text, round(res_1$p_location, 3))))
     scale_msg <- if (!is.null(res_1$p_scale)) tags$b(tags$h4(sprintf("P-value from Kruskal-Wallis test on scale parameters%s:  %s", extra_text, round(res_1$p_scale, 3)))) else NULL
 
+    text <- ifelse(get_data_norm(objects$omicsData), "Update", "Apply")
+    
     # conditional message/button name depending on if we have a low p-value
     if (any(c(res_1$p_location, res_1$p_scale, res_2$p_location, res_2$p_scale) < 0.05)) {
       proceed_msg <- tagList(tags$b(style = "color:red", "Low p-values suggest your normalization factors are related to a variable of interest.  This may skew your results, consider choosing another method."), hr())
-      button_name <- "Apply normalization anyway"
+      button_name <- paste(text, " normalization anyway", collapse ="")
     }
     else {
-      button_name <- "Apply Normalization"
+      button_name <- paste(text, " normalization", collapse = "")
       proceed_msg <- NULL
     }
 

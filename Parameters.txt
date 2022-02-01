@@ -1,0 +1,2 @@
+Parameter	Local	
+MAP_URL	https://localhost:8300/

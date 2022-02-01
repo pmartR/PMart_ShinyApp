@@ -4,15 +4,12 @@ list(
   output[["bpquant_options"]] <- renderUI({
     pro_class <- inherits(objects$omicsData, "proData")
     
-    ## 
-    # if (pro_class) {
-    #   data <- objects$omicsData_pre_rollup
-    # } else {
+    ## Note: only used for fdata info so don't need pep version
       data <- objects$omicsData
-    #}
     
     stats <- objects$peptide_imdanova_res
-    group_info <- pmartR:::get_group_info(data)
+    group_info <- pmartR:::get_group_DF(data)
+
     comp_info <- attr(stats, "comparisons")
     
     l1 <- nrow(unique(data$f_data[attr(group_info, "main_effects")]))
@@ -93,6 +90,7 @@ list(
   # Icon manipulations
   output[["bpquant_apply_icon_UI"]] <- renderUI({
     
+    req(!is.null(attr(objects$omicsData, "group_DF")))
     # input$bpquant
     
     pro_class <- inherits(objects$omicsData, "proData")
@@ -104,7 +102,7 @@ list(
     }
     
     stats <- objects$peptide_imdanova_res
-    group_info <- pmartR:::get_group_info(data)
+    group_info <- pmartR:::get_group_DF(data)
     comp_info <- attr(stats, "comparisons")
     
     l1 <- nrow(unique(data$f_data[attr(group_info, "main_effects")]))
@@ -189,56 +187,20 @@ list(
     req(!is.null(objects$omicsData), cancelOutput = TRUE)
     plots$last_plot <- plots$bpquant
     plots$bpquant
-    
-    # pro_class <- inherits(objects$omicsData, "proData")
-    # 
-    # # if (pro_class) {
-    # #   data <- objects$omicsData_pre_rollup
-    # # } else {
-    #   data <- objects$omicsData
-    # # }
-    #   
-    # req(!is.null(objects$bpquant), cancelOutput = TRUE)
-    # 
-    # result <- objects$bpquant
-    # plotter <- table(map_dbl(result, function(df) {
-    #   max(unique(df[[3]]))
-    # }))
-    # df <- as.data.frame(plotter, stringsAsFactors = F)
-    # plot_ly(
-    #   df,
-    #   x = ~Var1,
-    #   y = ~Freq,
-    #   type = "bar",
-    #   showlegend = FALSE
-    # ) %>%
-    #   add_text(
-    #     showlegend = FALSE,
-    #     textposition = "top middle",
-    #     data = df,
-    #     x = ~Var1,
-    #     y = ~Freq,
-    #     text = ~ paste(Freq)
-    #   ) %>%
-    #   layout(
-    #     title = "Isoforms Detected",
-    #     xaxis = list(title = "Total Isoforms"),
-    #     yaxis = list(title = "Number of Protein Groups")
-    #   )
   }),
   
   ##  Rollup plot
   
   output[["rollup_plot_UI"]] <- renderUI({
     if(is.null(plots$rollup_plot)){
-      return("Please run protein roll-up to veiw results")
+      return("Please run protein roll-up to view results")
     } else {
-      return(withSpinner(plotOutput("rollup_plot")))
+      return(withSpinner(plotlyOutput("rollup_plot")))
     }
   }),
   
   # plot of prodata after rollup
-  output$rollup_plot <- renderPlot({
+  output$rollup_plot <- renderPlotly({
     req(!is.null(objects$omicsData), cancelOutput = TRUE)
     plots$last_plot <- plots$rollup_plot
     plots$rollup_plot
@@ -249,9 +211,18 @@ list(
     style_UI("rollup")
   }),
 
+  # inputs for axes labels and sizes
+  output$bpquant_plot_options <- renderUI({
+    style_UI("bpquant")
+  }),
+  
   # apply filter plot style options
   output$rollup_apply_style <- renderUI({
     apply_style_UI("rollup", FALSE, FALSE)
+  }),
+  
+  output$bpquant_apply_style <- renderUI({
+    apply_style_UI("bpquant", FALSE, FALSE)
   }),
 
   output$rollup_data_summary <- renderUI({

@@ -22,7 +22,7 @@ shinyServer(function(session, input, output) {
   # misc reactive values
   revals <- reactiveValues(
     warnings_upload = list(), warnings_groups = list(), warnings_transform = list(), warnings_normalize = list(),
-    e_meta = NULL, e_meta_2 = NULL,
+    e_meta = NULL, e_meta_2 = NULL, emeta_info = NULL,
     cvcol1 = NULL, cvcol2 = NULL, gcol1 = NULL, gcol2 = NULL,
     cvcol1_2 = NULL, cvcol2_2 = NULL, gcol1_2 = NULL, gcol2_2 = NULL
   )
@@ -105,7 +105,7 @@ shinyServer(function(session, input, output) {
   # set options("shiny.testmode" = T) to get a developer button
   output$developer_buttons <- renderUI({
 
-    if (isTRUE(getOption("shiny.testmode"))) {
+   if (isTRUE(getOption("shiny.testmode"))) {
       div(
         style = "position:absolute;z-index:9999;bottom:10px;left:10px;",
         actionButton("Browser", "whats wrong!?!?", style = "background:deepskyblue")
@@ -162,4 +162,19 @@ shinyServer(function(session, input, output) {
     },
     contentType = "application/zip"
   )
+  
+  if (MAP) {
+    
+    # Connect to map data access library
+    library(mapDataAccess)
+    
+    # Soure MAP-specific functionality (reading from header, etc)
+    source("MAP_Functions.R", local = TRUE)
+    
+    # Create a reactive value to hold MAP-specific objects
+    MapConnect <- reactiveValues(MapConnect = map_data_connection("./cfg/minio_config_local.yml"),
+                                 Project = NULL, Midpoint = NULL)
+    
+  }
+  
 })

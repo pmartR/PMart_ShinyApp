@@ -1,0 +1,35 @@
+Package: pmartR-shiny
+Title: Preprocessing and analysis of single-omics datasets.
+Version: 0.0.0.1
+Authors@R: 
+    person(given = "Daniel",
+           family = "Claborne",
+           role = c("aut", "cre"),
+           email = "daniel.claborne@pnnl.gov",
+           comment = c(ORCID = "0000-0001-5293-3628"))
+Description: A web GUI for the pmartR R package, built in R-shiny.
+License: BSD + file LICENSE
+Encoding: UTF-8
+Depends:
+  colourpicker,
+  DT,
+  dplyr,
+  ggplot2,
+  gridExtra,
+  mapDataAccess,
+  markdown,
+  plotly,
+  pmartR,
+  purrr,
+  readr,
+  renv,
+  rlang,
+  shiny,
+  shinyBS,
+  shinyWidgets,
+  shinyalert,
+  shinycssloaders,
+  shinyjs,
+  stringr
+
+  

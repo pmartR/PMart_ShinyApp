@@ -1,0 +1,30 @@
+## pmartR-shiny 'base' container.  Installs system and R libraries.
+
+# Install latest version of rocker image
+FROM rocker/shiny:4.1.1
+
+# Load general use libraries
+RUN apt-get update && apt-get install -y \
+    sudo \
+    pandoc \
+    pandoc-citeproc \
+    libssl-dev \
+    libcurl4-openssl-dev \
+    libcairo2-dev \
+    libxt-dev \
+    libssh2-1-dev \
+    libhiredis-dev \
+    libzmq3-dev \
+    libxml2-dev
+    
+WORKDIR /srv/shiny-server/
+
+# only need this to restore
+COPY renv.lock .
+
+# pre-install renv
+RUN R -e "install.packages('renv', repos = 'https://cran.rstudio.com')"
+
+# install all packages listed in renv.lock
+RUN --mount=type=secret,id=gitlab_pat export GITLAB_PAT="$(cat /run/secrets/gitlab_pat)" \
+&& R -e 'renv::restore()'

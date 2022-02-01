@@ -2,7 +2,8 @@
 #' table that presents the group comparisons
 observe({
   req(input$peptide_imdanova_comparison_method, objects$omicsData)
-  
+  req(!is.null(attr(objects$omicsData,"group_DF")))
+
   if (input$peptide_imdanova_comparison_method == "Control to test condition comparisons") {
     control <- input$peptide_imdanova_control_group
     noncontrol <- input$peptide_imdanova_non_control_groups
@@ -64,8 +65,12 @@ observe({
 
 # make statres object
 observeEvent(input$peptide_apply_imdanova, {
-  req(!is.null(objects$omicsData), input$top_page == "Peptide Statistics" &&
-        !is.null( input$peptide_imdanova_test_method))
+  req(!is.null(objects$omicsData), input$top_page == "peptide_statistics_tab" &&
+        !is.null( input$peptide_imdanova_test_method) &&
+        !is.null(comp_df_holder$comp_df))
+  
+  shinyjs::show("peptide_analysis_busy")
+  on.exit(hide("peptide_analysis_busy"))
   
   tryCatch(
     {
@@ -79,6 +84,30 @@ observeEvent(input$peptide_apply_imdanova, {
         pval_thresh = input$peptide_pval_thresh
       )
       
+      show("peptide_stats-statistics-ok")
+      show("peptide_imdanova_groups_ok")
+      show("peptide_imdanova_settings_ok")
+      
+      updateCollapse(session, "peptide_statistics_collapse_left", close = c("peptide_stats-statistics-options"))
+      updateCollapse(session, "peptide_imdanova-sidepanel-options", 
+                     close = c("peptide_imdanova-specify-comparisons", "peptide_imdanova-select-settings"))
+      
+      
+      if(is.null(objects$omicsData$e_meta)){
+        buttons <- div(
+          actionButton("pepstats_dismiss", "Review results", width = "75%"),
+          br(), 
+          actionButton("pep_goto_downloads", "Continue to Download Tab", width = "75%")
+        )
+      } else {
+        buttons <- div(
+          actionButton("pepstats_dismiss", "Review results", width = "75%"),
+          br(), 
+          actionButton("goto_rollup", "Continue to Protein Rollup Tab", width = "75%"),
+          br(), 
+          actionButton("pep_goto_downloads", "Continue to Download Tab", width = "75%")
+        )
+      }
       
       # success modal if all is well
       showModal(
@@ -105,9 +134,7 @@ observeEvent(input$peptide_apply_imdanova, {
                        )
                        ),
                      hr(),
-                     actionButton("pepstats_dismiss", "Review results", width = "75%"),
-                     actionButton("goto_rollup", "Continue to Protein Rollup Tab", width = "75%"),
-                     actionButton("pep_goto_downloads", "Continue to Download Tab", width = "75%")
+                     buttons
               )
             )
           },
@@ -128,83 +155,136 @@ observeEvent(input$peptide_apply_imdanova, {
 
 observeEvent(input$pepstats_dismiss, removeModal())
 observeEvent(input$goto_rollup,{
-  updateTabsetPanel(session, "top_page", selected = "Protein Rollup")
+  updateTabsetPanel(session, "top_page", selected = "protein_rollup_tab")
   removeModal()
 })
 observeEvent(input$pep_goto_downloads,{
-  updateTabsetPanel(session, "top_page", selected = "Download")
+  updateTabsetPanel(session, "top_page", selected = "download_tab")
   removeModal()
 })
 
-# make plot object
-observeEvent(c(objects$peptide_imdanova_res, input$peptide_imdanova_plot_type), {
-  req(!is.null(objects$peptide_imdanova_res))
-  tryCatch(
-    {
-      ### Removal for Class
-      if(input$peptide_imdanova_plot_type == "volcano"){
-        temp <- objects$peptide_imdanova_res
-        attr(temp, "statistical_test") <- "anova"
-        plots$peptide_statistics_mainplot <- plot(temp, 
-                                                  plot_type = input$peptide_imdanova_plot_type, 
-                                                  bw_theme = TRUE)
-      } else {
-        plots$peptide_statistics_mainplot <- plot(objects$peptide_imdanova_res, 
-                                                  plot_type = input$peptide_imdanova_plot_type, 
-                                                  bw_theme = TRUE)
-      }
-      
+#'@details when imd_anova_res object is created or the style is updated, make a 
+#'plot of the object and open the panel that displays it.
+observeEvent(
+  c(
+    objects$peptide_imdanova_res,
+    input$peptide_imdanova_plot_type,
+    input$peptide_stats_update_plot_content
+  ),
+  {
+    req(!is.null(objects$peptide_imdanova_res))
+    
+    interactive = !is.null(input$peptide_stats_interactive_yn) && 
+      as.logical(input$peptide_stats_interactive_yn)
+    
+    fc_colors = if (all(map_lgl(
+      list(
+        input$pep_imd_down_cpicker,
+        input$pep_imd_nonsig_cpicker,
+        input$pep_imd_up_cpicker
+      ),
+      isTruthy
+    ))) {
+      c(
+        input$pep_imd_down_cpicker,
+        input$pep_imd_nonsig_cpicker,
+        input$pep_imd_up_cpicker
+      )
+    } else
+      c("red", "black", "green")
+    
+    color_low = if(isTruthy(input$pep_imd_low_cpicker)) input$pep_imd_low_cpicker else "#132B43"
+    color_high = if(isTruthy(input$pep_imd_high_cpicker)) input$pep_imd_high_cpicker else "#56B1F7"
+    
+    tryCatch({
+      plots$peptide_statistics_mainplot <-
+        plot(
+          objects$peptide_imdanova_res,
+          fc_threshold = input$peptide_imd_plot_fc_thresh,
+          fc_colors = fc_colors,
+          plot_type = input$peptide_imdanova_plot_type,
+          interactive = interactive,
+          bw_theme = TRUE,
+          color_low = color_low,
+          color_high = color_high
+        )
       updateCollapse(session, "peptide_statistics_collapse_main", open = "peptide_statistics_plots")
     },
     error = function(e) {
-      msg <- paste0("Something went wrong plotting your imdanovaRes object.  \n System error:  ", e)
+      msg <-
+        paste0("Something went wrong plotting your imdanovaRes object.  \n System error:  ",
+               e)
       message(msg)
-      revals$warnings_peptide_statistics$bad_imdanova_plot <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+      revals$warnings_peptide_statistics$bad_imdanova_plot <<-
+        sprintf("<p style = 'color:red'>%s</p>", msg)
       plots$peptide_statistics_mainplot <- NULL
-    }
-  )
-})
+    })
+  },
+  priority = 5
+)
 
 # apply plot styling to...
 
 # ...first plot...
 observeEvent(input$peptide_statistics_apply_style_plot_1, {
-  peptide_statistics_xangle <- if (is_empty(input$peptide_statistics_xangle) | is.na(input$peptide_statistics_xangle)) 0 else input$peptide_statistics_xangle
-  peptide_statistics_yangle <- if (is_empty(input$peptide_statistics_yangle) | is.na(input$peptide_statistics_yangle)) 0 else input$peptide_statistics_yangle
   
-  theme <- theme(
-    axis.title.x = element_text(size = input$peptide_statistics_x_fontsize),
-    axis.title.y = element_text(size = input$peptide_statistics_y_fontsize),
-    axis.text.x = element_text(angle = peptide_statistics_xangle, size = input$peptide_statistics_x_ticksize),
-    axis.text.y = element_text(angle = peptide_statistics_yangle, size = input$peptide_statistics_y_ticksize),
-    plot.title = element_text(size = input$peptide_statistics_title_fontsize)
-  )
+  comps <- get_comparisons(objects$peptide_imdanova_res)
   
   if (inherits(plots$peptide_statistics_mainplot, "list")) {
-    plots$peptide_statistics_mainplot[[1]] <- plots$peptide_statistics_mainplot[[1]] + xlab(input$peptide_statistics_xlab) + ylab(input$peptide_statistics_ylab) + ggtitle(input$peptide_statistics_title) + theme
-  }
+    plots$peptide_statistics_mainplot[[1]] <- add_plot_styling(
+      input,
+      "peptide_statistics", 
+      plots$peptide_statistics_mainplot[[1]],
+      subplot = nrow(comps) > 1
+      )
+}
   else {
-    plots$peptide_statistics_mainplot <- plots$peptide_statistics_mainplot + xlab(input$peptide_statistics_xlab) + ylab(input$peptide_statistics_ylab) + ggtitle(input$peptide_statistics_title) + theme
-  }
+    plots$peptide_statistics_mainplot <- add_plot_styling(
+      input,
+      "peptide_statistics", 
+      plots$peptide_statistics_mainplot,
+      subplot = nrow(comps) > 1
+    )
+}
 })
 
 # ...second plot
 observeEvent(input$peptide_statistics_apply_style_plot_2, {
-  peptide_statistics_xangle <- if (is_empty(input$peptide_statistics_xangle) | is.na(input$peptide_statistics_xangle)) 0 else input$peptide_statistics_xangle
-  peptide_statistics_yangle <- if (is_empty(input$peptide_statistics_yangle) | is.na(input$peptide_statistics_yangle)) 0 else input$peptide_statistics_yangle
   
-  theme <- theme(
-    axis.title.x = element_text(size = input$peptide_statistics_x_fontsize),
-    axis.title.y = element_text(size = input$peptide_statistics_y_fontsize),
-    axis.text.x = element_text(angle = peptide_statistics_xangle, size = input$peptide_statistics_x_ticksize),
-    axis.text.y = element_text(angle = peptide_statistics_yangle, size = input$peptide_statistics_y_ticksize),
-    plot.title = element_text(size = input$peptide_statistics_title_fontsize)
-  )
+  comps <- get_comparisons(objects$peptide_imdanova_res)
   
   if (inherits(plots$peptide_statistics_mainplot, "list")) {
-    plots$peptide_statistics_mainplot[[2]] <- plots$peptide_statistics_mainplot[[2]] + xlab(input$peptide_statistics_xlab) + ylab(input$peptide_statistics_ylab) + ggtitle(input$peptide_statistics_title) + theme
+    plots$peptide_statistics_mainplot[[2]] <- add_plot_styling(
+      input,
+      "peptide_statistics", 
+      plots$peptide_statistics_mainplot[[2]],
+      subplot = nrow(comps) > 1
+    )
   }
   else {
-    plots$peptide_statistics_mainplot_2 <- plots$peptide_statistics_mainplot_2 + xlab(input$peptide_statistics_xlab) + ylab(input$peptide_statistics_ylab) + ggtitle(input$peptide_statistics_title) + theme
+    plots$peptide_statistics_mainplot_2 <- add_plot_styling(
+      input,
+      "peptide_statistics", 
+      plots$peptide_statistics_mainplot_2,
+      subplot = nrow(comps) > 1
+    )
   }
+})
+
+#'@details disable the imd-anova button if we are not analyzing pepData.  If the
+#'data has been rolled up, show a tooltip explaining as such.
+# disable inputs if we are not working with pepdata
+observeEvent(c(objects$omicsData, input$top_page, input$peptide_apply_imdanova), {
+  ids <- c(
+    "peptide_apply_imdanova"
+  )
+  
+  req(!is.null(objects$omicsData))
+  for (el in ids) {
+    toggleState(el, condition = inherits(objects$omicsData, "pepData"))
+  }
+  
+  is_rolled_up <- inherits(objects$uploaded_omicsData, "pepData") & inherits(objects$omicsData, "proData")
+  toggleTooltip(session, "peptide_apply_imdanova_jswrapper", is_rolled_up, tooltip_text = ttext_[["ROLLUP_DISABLE_INFO"]])
+  
 })

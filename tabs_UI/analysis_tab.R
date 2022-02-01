@@ -1,8 +1,10 @@
 statistics_UI <- function() {
   tabPanel("Statistics",
+    value = "statistics_tab",
     class = "collapse_page",
     column(
       4,
+      inlineCSS("#statistics_collapse_left {margin-bottom:5px;}"),
       bsCollapse(
         id = "statistics_collapse_left", multiple = TRUE, open = "stats-statistics-options",
         bsCollapsePanel(
@@ -25,7 +27,8 @@ statistics_UI <- function() {
           )
         )
       ),
-      uiOutput("statistics_tab_sidepanel")
+      uiOutput("statistics_tab_sidepanel"),
+      uiOutput("warnings_analysis")
     ),
     column(
       8,
@@ -35,13 +38,12 @@ statistics_UI <- function() {
         id = "statistics_collapse_main", multiple = TRUE,
         bsCollapsePanel("Plots",
           value = "statistics_plots",
-          radioGroupButtons("imdanova_plot_type", "Plot type", choices = c("Bar" = "bar", "Volcano" = "volcano")),
-          withSpinner(plotOutput("statistics_mainplot"))
+          uiOutput("imdanova_plot_type_UI"), 
+          withSpinner(uiOutput("statistics_mainplot"))
         ),
         bsCollapsePanel("Plot Options",
           value = "statistics_plot_opts",
-          uiOutput("statistics_plot_options"),
-          uiOutput("statistics_apply_style")
+          uiOutput("statistics_plot_options")
         ),
         bsCollapsePanel("Tables",
           value = "statistics_tables",

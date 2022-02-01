@@ -1,5 +1,6 @@
 groups_UI <- function() {
   tabPanel("Group Samples",
+    value = "group_samples_tab",
     class = "collapse_page",
     fluidRow(
       column(
@@ -56,6 +57,7 @@ groups_UI <- function() {
           )
         ), # parent collapse
         disabled(bsButton("group_designation", "Apply Grouping", style = "primary")),
+        disabled(bsButton("group_reset", "Reset Grouping", style = "primary")),
         br(),
         br(),
         uiOutput("warnings_groups"),

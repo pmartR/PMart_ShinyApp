@@ -1,12 +1,30 @@
 e_data <- reactive({
-  # Error handling: Need file_edata path
-  req(input$file_edata$datapath)
-
-  # Load file
-  filename <- input$file_edata$datapath
-
-  # exportTestValues(e_data = read.csv(filename, stringsAsFactors = FALSE))
-  read.csv(filename, stringsAsFactors = FALSE)
+  
+  # This function has a MAP version
+  if (MAP) {
+    
+    # Error handling: Need edata
+    req(input$file_edata)
+    
+    # Disable input widget
+    disable(id = "file_edata")
+    
+    # Return data 
+    return(MapConnect$Project$Data$e_data)
+    
+  } else {
+  
+    # Error handling: Need file_edata path
+    req(input$file_edata$datapath)
+    
+    # Load file
+    filename <- input$file_edata$datapath
+    
+    # exportTestValues(e_data = read.csv(filename, stringsAsFactors = FALSE))
+    read.csv(filename, stringsAsFactors = FALSE, check.names = F)
+    
+  }
+  
 })
 
 e_data_2 <- reactive({
@@ -17,7 +35,7 @@ e_data_2 <- reactive({
   filename <- input$file_edata_2$datapath
 
   # exportTestValues(e_data = read.csv(filename, stringsAsFactors = FALSE))
-  read.csv(filename, stringsAsFactors = FALSE)
+  read.csv(filename, stringsAsFactors = FALSE, check.names = F)
 })
 
 # indicator to check whether there are zeros in the data
@@ -33,30 +51,36 @@ e_data_has_zeros <- reactive({
 # Object: Emeta column names
 # Note: created when emeta is loaded/updated
 emeta_cnames <- reactive({
+  req(!is.null(revals$e_meta))
   colnames(revals$e_meta)
 })
 
 emeta_cnames_2 <- reactive({
+  req(!is.null(revals$e_meta_2))
   colnames(revals$e_meta_2)
 })
 
 # Object: Get list of column names of Edata
 # Note: created when e_data is uploaded
 edata_cnames <- reactive({
+  req(!is.null(revals$e_data()))
   colnames(e_data())
 })
 
 edata_cnames_2 <- reactive({
+  req(!is.null(revals$e_data_2()))
   colnames(e_data_2())
 })
 
 # Object: Sample names from e_data
 # Note: This object is created when e_data and edata_id are entered
 sample_names <- reactive({
+  req(!is.null(input$id_col) && !is.null(e_data()))
   setdiff(names(e_data()), input$id_col)
 })
 
 sample_names_2 <- reactive({
+  req(!is.null(input$id_col_2) && !is.null(e_data_2()))
   setdiff(names(e_data_2()), input$id_col_2)
 })
 # End sample_names #
@@ -75,5 +99,6 @@ f_data_upload_2 <- reactive({
 })
 
 two_lipids <- reactive({
-  input$datatype == "lip" & isTRUE(input$twolipids_yn == "TRUE")
+  !is.null(input$datatype) && input$datatype == "lip" && 
+    !is.null(input$twolipids_yn) && isTRUE(input$twolipids_yn == "TRUE")
 })

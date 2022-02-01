@@ -4,7 +4,7 @@ list(
     req(!is.null(objects$omicsData))
     choices <- colnames(objects$omicsData$f_data %>% dplyr::select(-one_of(attributes(objects$omicsData)$cnames$fdata_cname)))
     pickerInput("qc_order_by", NULL,
-      choices = c("Select one", choices, "Group Levels" = "group_DF"),
+      choices = c("Select one", choices, "Group Levels" = "Group"),
       selected = all_inputs()$qc_order_by,
       options = pickerOptions(dropupAuto = FALSE)
     )
@@ -14,7 +14,7 @@ list(
     req(!is.null(objects$omicsData_2))
     choices <- colnames(objects$omicsData_2$f_data %>% dplyr::select(-one_of(attributes(objects$omicsData_2)$cnames$fdata_cname)))
     pickerInput("qc_order_by_2", NULL,
-      choices = c("Select one(dataset 2)" = "Select one", choices, "Group Levels" = "group_DF"),
+      choices = c("Select one(dataset 2)" = "Select one", choices, "Group Levels" = "Group"),
       selected = all_inputs()$qc_order_by_2
     )
   }),
@@ -25,7 +25,7 @@ list(
     req(!is.null(objects$omicsData))
     choices <- colnames(objects$omicsData$f_data %>% dplyr::select(-one_of(attributes(objects$omicsData)$cnames$fdata_cname)))
     pickerInput("qc_color_by", NULL,
-      choices = c("Select one", choices, "Group Levels" = "group_DF"),
+      choices = c("Select one", choices, "Group Levels" = "Group"),
       selected = all_inputs()$qc_color_by
     )
   }),
@@ -34,7 +34,7 @@ list(
     req(!is.null(objects$omicsData_2))
     choices <- colnames(objects$omicsData_2$f_data %>% dplyr::select(-one_of(attributes(objects$omicsData_2)$cnames$fdata_cname)))
     pickerInput("qc_color_by_2", NULL,
-      choices = c("Select one (dataset 2)" = "Select one", choices, "Group Levels" = "group_DF"),
+      choices = c("Select one (dataset 2)" = "Select one", choices, "Group Levels" = "Group"),
       selected = all_inputs()$qc_color_by_2
     )
   }),
@@ -46,18 +46,18 @@ list(
       tagList(
         div(id = "qc_plots_1", 
             style = "border-style:solid;border-width:1px;", 
-            withSpinner(plotOutput("omicsData_plot"))
+            withSpinner(plotlyOutput("omicsData_plot"))
             ),
         div(id = "qc_plots_2", 
             style = "border-style:solid;border-width:1px;",
-            withSpinner(plotOutput("omicsData_plot_2"))
+            withSpinner(plotlyOutput("omicsData_plot_2"))
             )
       )
     }
     else {
       div(id = "qc_plots_1", 
           style = "border-style:solid;border-width:1px;", 
-          withSpinner(plotOutput("omicsData_plot"))
+          withSpinner(plotlyOutput("omicsData_plot"))
           )
     }
   }),
@@ -84,46 +84,45 @@ list(
 
   #### MAIN PANEL, BOTH PLOTS ####
 
-  output$omicsData_plot <- renderPlot({
+  output$omicsData_plot <- renderPlotly({
     req(!is.null(objects$omicsData))
     input$qc_apply_style_plot_1
 
     # commonly used params
     use_VizSampNames <- "VizSampNames" %in% colnames(objects$omicsData$f_data)
-
+    
+    order_by <- if (isTRUE(input$qc_order_by == "Select one")) NULL else input$qc_order_by
+    color_by <- if (isTRUE(input$qc_color_by == "Select one")) NULL else input$qc_color_by
+    
     # ifelse chain for which type of plot
     if (input$which_qc_plot == "boxplots") {
-      # specific boxplot options
-      order_by <- if (isTRUE(input$qc_order_by == "Select one")) NULL else input$qc_order_by
-      color_by <- if (isTRUE(input$qc_color_by == "Select one")) NULL else input$qc_color_by
-
       p <- plot(objects$omicsData,
         order_by = order_by, color_by = color_by,
         use_VizSampNames = use_VizSampNames,
         bw_theme = TRUE
       )
     }
-    else if (input$which_qc_plot == "missingval_bar") {
+    else {
       p <- plot(missingval_result(objects$omicsData),
-        type = input$missingval_type,
+        objects$omicsData,
+        order_by = order_by, color_by = color_by,
+        plot_type = input$which_qc_plot,
         use_VizSampNames = use_VizSampNames,
         palette = input$qc_colors,
         bw_theme = TRUE
       )
     }
-    else if (input$which_qc_plot == "missingval_scatter") {
-      p <- missingval_scatterplot(objects$omicsData,
-        palette = input$qc_colors,
-        bw_theme = TRUE
-      )
-    }
 
-    p <- p + isolate(qc_plot_style()) + isolate(qc_xlab()) + isolate(qc_ylab()) + isolate(qc_title()) + qc_flip()
+    p <- p + isolate(qc_plot_style()) + 
+      isolate(qc_xlab()) + isolate(qc_ylab()) + 
+      isolate(qc_title()) + qc_flip()
+    
+    p <- p %>% ggplotly()
     plots$last_plot <- p
     return(p)
   }),
 
-  output$omicsData_plot_2 <- renderPlot({
+  output$omicsData_plot_2 <- renderPlotly({
     req(!is.null(objects$omicsData_2))
     input$qc_apply_style_plot_2
 
@@ -142,22 +141,20 @@ list(
         use_VizSampNames = use_VizSampNames
       )
     }
-    else if (input$which_qc_plot == "missingval_bar") {
+    else {
       p <- plot(missingval_result(objects$omicsData_2),
-        type = input$missingval_type,
+                objects$omicsData_2, 
+        plot_type = input$which_qc_plot,
         use_VizSampNames = use_VizSampNames,
         bw_theme = TRUE,
         palette = input$qc_colors
       )
     }
-    else if (input$which_qc_plot == "missingval_scatter") {
-      p <- missingval_scatterplot(objects$omicsData_2,
-        bw_theme = TRUE,
-        palette = input$qc_colors
-      )
-    }
-
-    p <- p + isolate(qc_plot_style()) + isolate(qc_xlab()) + isolate(qc_ylab()) + isolate(qc_title()) + qc_flip()
+    
+    p <- p + isolate(qc_plot_style()) + 
+      isolate(qc_xlab()) + isolate(qc_ylab()) + 
+      isolate(qc_title()) + qc_flip()
+    p <- p  %>% ggplotly()
     plots$last_plot_2 <- p
     return(p)
   }),

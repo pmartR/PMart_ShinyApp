@@ -2,6 +2,7 @@
 #' table that presents the group comparisons
 observe({
   req(input$imdanova_comparison_method, objects$omicsData)
+  req(!is.null(attr(objects$omicsData,"group_DF")))
   
   if (input$imdanova_comparison_method == "Control to test condition comparisons") {
     control <- input$imdanova_control_group
@@ -61,7 +62,12 @@ observeEvent(get_swap_vals(), {
 
 # make statres object
 observeEvent(input$apply_imdanova, {
-  req(!is.null(objects$omicsData), input$top_page == "Statistics")
+  req(!is.null(objects$omicsData) && 
+        input$top_page == "statistics_tab" && 
+        !is.null(comp_df_holder$comp_df))
+  
+  shinyjs::show("analysis_busy")
+  on.exit(hide("analysis_busy"))
   
   tryCatch(
     {
@@ -75,6 +81,14 @@ observeEvent(input$apply_imdanova, {
         pval_thresh = input$pval_thresh
       )
       
+      show("stats-statistics-ok")
+      show("imdanova_groups_ok")
+      show("imdanova_settings_ok")
+
+      updateCollapse(session, "statistics_collapse_left", close = c("stats-statistics-options"))
+      updateCollapse(session, "imdanova-sidepanel-options", 
+                     close = c("imdanova-specify-comparisons", "imdanova-select-settings"))
+
       # success modal if all is well
       showModal(
         modalDialog(
@@ -122,78 +136,112 @@ observeEvent(input$apply_imdanova, {
 
 observeEvent(input$stats_dismiss, removeModal())
 observeEvent(input$goto_downloads,{
-  updateTabsetPanel(session, "top_page", selected = "Download")
+  updateTabsetPanel(session, "top_page", selected = "download_tab")
   removeModal()
 })
 
-# make plot object
-observeEvent(c(objects$imdanova_res, input$imdanova_plot_type), {
-  req(!is.null(objects$imdanova_res))
-  tryCatch(
-    {
-      ### Removal for Class
-      if(input$imdanova_plot_type == "volcano"){
-        temp <- objects$imdanova_res
-        attr(temp, "statistical_test") <- "anova"
-        plots$statistics_mainplot <- plot(temp, 
-                                                  plot_type = input$imdanova_plot_type, 
-                                                  bw_theme = TRUE)
-      } else {
-      plots$statistics_mainplot <- plot(objects$imdanova_res, 
-                                        plot_type = input$imdanova_plot_type, 
-                                        bw_theme = TRUE)
-      }
+#'@details when imd_anova_res object is created or the style is updated, make a 
+#'plot of the object and open the panel that displays it.
+observeEvent(
+  c(
+    objects$imdanova_res,
+    input$imdanova_plot_type,
+    input$stats_update_plot_content
+  ),
+  {
+    req(!is.null(objects$imdanova_res))
+    
+    interactive <- !is.null(input$stats_interactive_yn) && 
+      as.logical(input$stats_interactive_yn)
+    
+    fc_colors = if (all(map_lgl(
+      list(
+        input$imd_down_cpicker,
+        input$imd_nonsig_cpicker,
+        input$imd_up_cpicker
+      ),
+      isTruthy
+    ))) {
+      c(
+        input$imd_down_cpicker,
+        input$imd_nonsig_cpicker,
+        input$imd_up_cpicker
+      )
+    } else
+      c("red", "black", "green")
+
+    color_low = if(isTruthy(input$imd_low_cpicker)) input$imd_low_cpicker else "#132B43"
+    color_high = if(isTruthy(input$imd_high_cpicker)) input$imd_high_cpicker else "#56B1F7"
+    
+    tryCatch({
+      plots$statistics_mainplot <- plot(
+        objects$imdanova_res,
+        plot_type = input$imdanova_plot_type,
+        bw_theme = TRUE,
+        fc_colors = fc_colors,
+        fc_threshold = input$imd_plot_fc_thresh,
+        interactive = interactive,
+        color_low = color_low,
+        color_high = color_high
+      )
       updateCollapse(session, "statistics_collapse_main", open = "statistics_plots")
     },
     error = function(e) {
-      msg <- paste0("Something went wrong plotting your imdanovaRes object.  \n System error:  ", e)
+      msg <-
+        paste0("Something went wrong plotting your imdanovaRes object.  \n System error:  ",
+               e)
       message(msg)
-      revals$warnings_statistics$bad_imdanova_plot <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+      revals$warnings_statistics$bad_imdanova_plot <<-
+        sprintf("<p style = 'color:red'>%s</p>", msg)
       plots$statistics_mainplot <- NULL
-    }
-  )
-})
+    })
+  }
+)
 
 # apply plot styling to...
 
 # ...first plot...
 observeEvent(input$statistics_apply_style_plot_1, {
-  statistics_xangle <- if (is_empty(input$statistics_xangle) | is.na(input$statistics_xangle)) 0 else input$statistics_xangle
-  statistics_yangle <- if (is_empty(input$statistics_yangle) | is.na(input$statistics_yangle)) 0 else input$statistics_yangle
-
-  theme <- theme(
-    axis.title.x = element_text(size = input$statistics_x_fontsize),
-    axis.title.y = element_text(size = input$statistics_y_fontsize),
-    axis.text.x = element_text(angle = statistics_xangle, size = input$statistics_x_ticksize),
-    axis.text.y = element_text(angle = statistics_yangle, size = input$statistics_y_ticksize),
-    plot.title = element_text(size = input$statistics_title_fontsize)
-  )
-
+  
+  comps <- get_comparisons(objects$imdanova_res)
+  
   if (inherits(plots$statistics_mainplot, "list")) {
-    plots$statistics_mainplot[[1]] <- plots$statistics_mainplot[[1]] + xlab(input$statistics_xlab) + ylab(input$statistics_ylab) + ggtitle(input$statistics_title) + theme
-  }
+    plots$statistics_mainplot[[1]] <- add_plot_styling(
+      input,
+      "statistics", 
+      plots$statistics_mainplot[[1]],
+      subplot = nrow(comps) > 1
+    )
+ }
   else {
-    plots$statistics_mainplot <- plots$statistics_mainplot + xlab(input$statistics_xlab) + ylab(input$statistics_ylab) + ggtitle(input$statistics_title) + theme
-  }
+    plots$statistics_mainplot <- add_plot_styling(
+      input,
+      "statistics", 
+      plots$statistics_mainplot,
+      subplot = nrow(comps) > 1
+    )
+ }
 })
 
 # ...second plot
 observeEvent(input$statistics_apply_style_plot_2, {
-  statistics_xangle <- if (is_empty(input$statistics_xangle) | is.na(input$statistics_xangle)) 0 else input$statistics_xangle
-  statistics_yangle <- if (is_empty(input$statistics_yangle) | is.na(input$statistics_yangle)) 0 else input$statistics_yangle
-
-  theme <- theme(
-    axis.title.x = element_text(size = input$statistics_x_fontsize),
-    axis.title.y = element_text(size = input$statistics_y_fontsize),
-    axis.text.x = element_text(angle = statistics_xangle, size = input$statistics_x_ticksize),
-    axis.text.y = element_text(angle = statistics_yangle, size = input$statistics_y_ticksize),
-    plot.title = element_text(size = input$statistics_title_fontsize)
-  )
-
+  
+  comps <- get_comparisons(objects$imdanova_res)
+  
   if (inherits(plots$statistics_mainplot, "list")) {
-    plots$statistics_mainplot[[2]] <- plots$statistics_mainplot[[2]] + xlab(input$statistics_xlab) + ylab(input$statistics_ylab) + ggtitle(input$statistics_title) + theme
+    plots$statistics_mainplot[[2]] <- add_plot_styling(
+      input,
+      "statistics", 
+      plots$statistics_mainplot[[2]],
+      subplot = nrow(comps) > 1
+    )
   }
   else {
-    plots$statistics_mainplot_2 <- plots$statistics_mainplot_2 + xlab(input$statistics_xlab) + ylab(input$statistics_ylab) + ggtitle(input$statistics_title) + theme
+    plots$statistics_mainplot_2 <- add_plot_styling(
+      input,
+      "statistics", 
+      plots$statistics_mainplot_2,
+      subplot = nrow(comps) > 1
+    )
   }
 })

@@ -33,17 +33,31 @@ list(
       )
     }
     else {
-      div(
-        id = "js_file_edata",
-        fileInput("file_edata", "Upload CSV Data File",
-          multiple = FALSE,
-          accept = c(
-            "text/csv",
-            "text/comma-separated-values,text/plain",
-            ".csv"
+      
+      if (MAP) {
+
+        div(
+          id = "js_file_edata",
+          textInput("file_edata", "Uploaded CSV Data File", 
+                    value = MapConnect$Project$Data$e_data_filename %>% strsplit("/") %>% unlist() %>% tail(1))
+        )
+        
+      } else {
+        
+        div(
+          id = "js_file_edata",
+          fileInput("file_edata", "Upload CSV Data File",
+                    multiple = FALSE,
+                    accept = c(
+                      "text/csv",
+                      "text/comma-separated-values,text/plain",
+                      ".csv"
+                    )
           )
         )
-      )
+        
+      }
+    
     }
   }),
 
@@ -68,9 +82,18 @@ list(
 
   # select data scale
   output$datascale_UI <- renderUI({
-    pickerInput("data_scale", "On what scale is your data?",
-      choices = list("Raw intensity" = "abundance", "Log base 2" = "log2", "Log base 10" = "log10", "Natural log" = "log"),
-      selected = "abundance"
+    div(class = "inline-wrapper-1",
+      pickerInput("data_scale", "On what scale is your data?",
+        choices = list("Raw intensity" = "abundance", "Log base 2" = "log2", "Log base 10" = "log10", "Natural log" = "log"),
+        selected = "abundance"
+      ),
+      conditionalPanel(
+        "input.data_scale == 'abundance'",
+        tipify(
+          blueexcl,
+          title = gsub("\n", " ", ttext_[["ABUNDANCE_ZEROS_TO_NA"]])
+        )
+      )
     )
   }),
 
@@ -91,20 +114,10 @@ list(
   # do they have an emeta file to upload?
   output$emeta_yn <- renderUI({
     req(input$datatype, input$datatype != "none")
-    if (input$datatype != "pep") {
-      radioGroupButtons("emeta_yn",
-        "Do you have a file containing extra biomolecule information?",
-        choices = c("Yes" = T, "No" = F)
-      )
-    }
-    else {
-      hidden(
-        radioGroupButtons("emeta_yn",
-          "Do you have a file containing extra biomolecule information?",
-          choices = c("Yes" = T, "No" = F), selected = "Yes"
-        )
-      )
-    }
+    radioGroupButtons("emeta_yn",
+      "Do you have a file containing extra biomolecule information?",
+      choices = c("Yes" = T, "No" = F)
+    )
   }),
 
   # select which column contains protein ID
@@ -121,7 +134,7 @@ list(
                  toString(colnames(revals$e_meta)))
         )
       )
-    } else if (input$datatype == "pep" & input$proteins_yn == "TRUE") {
+    } else if (input$datatype == "pep" & isTRUE(as.logical(input$proteins_yn))) {
       choices <- colnames(revals$e_meta)[-which(colnames(revals$e_meta) == input$id_col)]
       pickerInput("protein_column", "Which column in your biomolecule file contains protein identifiers?",
         choices = c("Select a column", choices), selected = "Select a column"
@@ -130,24 +143,47 @@ list(
     else {
       choices <- colnames(revals$e_meta)
       hidden(pickerInput("protein_column", "Which column in your biomolecule file contains protein identifiers?",
-        choices = choices, selected = choices[1]
+        choices = choices, selected = input$id_col # this should exist in choices
       ))
     }
+  }),
+  
+  # pro question in emeta upload sub-panel
+  output$emeta_pro_UI <- renderUI({
+    req(!is.null(input$file_emeta$name) && input$emeta_yn == "TRUE" && input$datatype == 'pep')
+    radioGroupButtons(
+      "proteins_yn",
+      "Does your biomolecule information file contain peptide to protein mappings?",
+      choices = c("Yes" = "TRUE", "No" = "FALSE")
+    )
   }),
 
   # emeta upload sub-panel
   output$emeta_UI <- renderUI({
-    title_upload_div <- div(
-      id = "js_file_emeta",
-      fileInput("file_emeta", "Upload CSV Biomolecule Information File",
-        multiple = FALSE,
-        accept = c(
-          "text/csv",
-          "text/comma-separated-values,text/plain",
-          ".csv"
+    
+    if (MAP) {
+      
+      title_upload_div <- disabled(div(
+        id = "js_file_emeta",
+        textInput("file_emeta", "Uploaded CSV Biomolecule Information File", 
+                  value = MapConnect$Project$Data$e_meta_filename %>% strsplit("/") %>% unlist() %>% tail(1))
+      ))
+      
+    } else {
+      
+      title_upload_div <- div(
+        id = "js_file_emeta",
+        fileInput("file_emeta", "Upload CSV Biomolecule Information File",
+                  multiple = FALSE,
+                  accept = c(
+                    "text/csv",
+                    "text/comma-separated-values,text/plain",
+                    ".csv"
+                  )
         )
       )
-    )
+      
+    }
 
     if (two_lipids()) {
       tagList(
@@ -181,26 +217,26 @@ list(
         )
       )
     }
-    else if (input$datatype == "pep" & isTRUE(input$proteins_yn == "TRUE")) {
+    else if (isTRUE(as.logical(input$emeta_yn))) {
       title_upload_div
     }
     else {
-      req(as.logical(input$emeta_yn))
-      title_upload_div
+      hidden(title_upload_div)
     }
   }),
 
   # boxplots collapse panel UI elements
-  output$omicsData_upload_boxplot <- renderPlot({
+  output$omicsData_upload_boxplot <- renderPlotly({
     req(!is.null(objects$uploaded_omicsData))
-    p <- plot(objects$uploaded_omicsData, bw_theme = TRUE) + theme(axis.text.x = element_blank())
+    
+    p <- plot(objects$omicsData, bw_theme = TRUE, interactive = T) #+ theme(axis.text.x = element_blank())
     plots$last_plot <- p
     return(p)
   }),
 
-  output$omicsData_2_upload_boxplot <- renderPlot({
+  output$omicsData_2_upload_boxplot <- renderPlotly({
     req(!is.null(objects$uploaded_omicsData_2))
-    p <- plot(objects$uploaded_omicsData_2, bw_theme = TRUE) + theme(axis.text.x = element_blank())
+    p <- plot(objects$uploaded_omicsData_2, bw_theme = TRUE, interactive = T) #+ theme(axis.text.x = element_blank())
     plots$last_plot_2 <- p
     return(p)
   }),
@@ -218,18 +254,18 @@ list(
       tagList(
         div(id = "upload_boxplots_1", 
             style = "border-style:solid;border-width:1px;", 
-            withSpinner(plotOutput("omicsData_upload_boxplot"))
+            withSpinner(plotlyOutput("omicsData_upload_boxplot"))
             ),
         div(id = "upload_boxplots_2", 
             style = "border-style:solid;border-width:1px;", 
-            withSpinner(plotOutput("omicsData_2_upload_boxplot"))
+            withSpinner(plotlyOutput("omicsData_2_upload_boxplot"))
             )
       )
     }
     else {
       div(id = "upload_boxplots_1", 
           style = "border-style:solid;border-width:1px;", 
-          withSpinner(plotOutput("omicsData_upload_boxplot"))
+          withSpinner(plotlyOutput("omicsData_upload_boxplot"))
           )
     }
   }),
