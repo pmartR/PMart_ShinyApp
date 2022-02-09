@@ -1,12 +1,12 @@
 ## Functionality that was added for MAP 
-## Last Updated: 2021_09_14
+## Last Updated: Feb 8th, 2022
 
 list(
   
   # Read parameters file for URL 
   Parameters <- read.table("./Parameters.txt", header = TRUE),
   
-  observe({
+  observeEvent(input$`__startup__`, {
     
     # Parse the query string at the url header
     query <- parseQueryString(session$clientData$url_search)
@@ -17,12 +17,18 @@ list(
     # If true, open the project data and put each piece where it belongs 
     if (cond) {
       
+      # Create a loading screen
+      html(
+        "loading-gray-overlay", 
+        "<div class='fadein-out busy relative-centered', style='font-size:xx-large'>Loading MAP data...</div>"
+      )
+      
       # Get the data that was uploaded, and determine whether it is a project object,
       # or a midpoint object.
       pullData <- get_data(MapConnect$MapConnect, query$data)
       
       # If project in the names, then it's a project object
-      if (class(pullData) == "project pmart") {
+      if (class(pullData) == "project omic") {
         
         # Update MAP Connect object (used in upload_UI.R tab)
         project <- pullData
@@ -102,8 +108,13 @@ list(
     
     }
     
+    # Exit loading screen
+    on.exit({
+      Sys.sleep(1)
+      hide("loading-gray-overlay")
+    })
     
-  }), 
+  }, priority = -10, ignoreNULL = FALSE, once = TRUE), 
   
   # Set an observer to enable / disable the "Save and Export Progress" button
   observe({
@@ -169,7 +180,7 @@ list(
     }
     
     # Get the project data 
-    if (class(MapConnect$Project) != "project pmart") {
+    if (class(MapConnect$Project) != "project omic") {
       project <- MapConnect$Midpoint$Tracking$`Original Files`
     } else {
       project <- MapConnect$Project

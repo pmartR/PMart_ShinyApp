@@ -172,9 +172,11 @@ shinyServer(function(session, input, output) {
     source("MAP_Functions.R", local = TRUE)
     
     # Create a reactive value to hold MAP-specific objects
-    MapConnect <- reactiveValues(MapConnect = map_data_connection("./cfg/minio_config_local.yml"),
+    MapConnect <- reactiveValues(MapConnect = map_data_connection("./cfg/minio_config.yml"),
                                  Project = NULL, Midpoint = NULL)
     
+  } else {
+    hide(id = "loading-gray-overlay")
   }
   
 })
