@@ -17,18 +17,19 @@ list(
     # If true, open the project data and put each piece where it belongs 
     if (cond) {
       
-      # Create a loading screen
-      html(
-        "loading-gray-overlay", 
-        "<div class='fadein-out busy relative-centered', style='font-size:xx-large'>Loading MAP data...</div>"
-      )
-      
       # Get the data that was uploaded, and determine whether it is a project object,
       # or a midpoint object.
       pullData <- get_data(MapConnect$MapConnect, query$data)
       
       # If project in the names, then it's a project object
       if (class(pullData) == "project omic") {
+        
+        # Create a loading screen
+        html(
+          "loading-gray-overlay", 
+          paste("<div class='fadein-out busy relative-centered', style='font-size:xx-large'>", "Loading", 
+                 pullData$Project$DataType, "data...</div>")
+        )
         
         # Update MAP Connect object (used in upload_UI.R tab)
         project <- pullData
@@ -46,10 +47,20 @@ list(
         updatePickerInput(session, "datatype", selected = theDataType)
         disable(id = "datatype")
         
+        # If metabolomics, select the appropriate data type and disable choices 
+        if (theDataType == "metab") {
+          DataType <- pullData$Project$DataType
+          if (pullData$Project$DataType == "Metabolomics-NMR") {
+            updateRadioGroupButtons(session, "metab_type", selected = "nmr")
+          } else {updateRadioGroupButtons(session, "metab_type", selected = "metab")}
+        }
+        
       } else if (class(pullData) == "midpoint pmart"){
         
         # If the object isn't a project, then it's a midpoint
         MidPointFile <- pullData
+        
+        browser()
         
         # Ensure this is a pmart app midpoint file
         if (class(MidPointFile) == "midpoint pmart") {
@@ -110,7 +121,7 @@ list(
     
     # Exit loading screen
     on.exit({
-      Sys.sleep(1)
+      Sys.sleep(2)
       hide("loading-gray-overlay")
     })
     
@@ -186,6 +197,8 @@ list(
       project <- MapConnect$Project
     }
 
+    browser()
+    
     # Generate pmartR midpoint object
     Midpoint <- midpoint_pmart(
       omics_data = OmicsData,
