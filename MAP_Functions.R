@@ -55,12 +55,22 @@ list(
           } else {updateRadioGroupButtons(session, "metab_type", selected = "metab")}
         }
         
+        # If isobaric, check that this is labeled peptide data 
+        if (grepl("Isobaric", project$Project$DataType)) {
+          updateRadioGroupButtons(session, "labeled_yn", selected = "iso")
+        }
+        
       } else if (class(pullData) == "midpoint pmart"){
         
         # If the object isn't a project, then it's a midpoint
         MidPointFile <- pullData
         
-        browser()
+        # Create a loading screen
+        html(
+          "loading-gray-overlay", 
+          paste("<div class='fadein-out busy relative-centered', style='font-size:xx-large'>", "Loading midpoint", 
+                MidPointFile$Tracking$`Original Files`$Project$DataType, "data...</div>")
+        )
         
         # Ensure this is a pmart app midpoint file
         if (class(MidPointFile) == "midpoint pmart") {
@@ -196,8 +206,6 @@ list(
     } else {
       project <- MapConnect$Project
     }
-
-    browser()
     
     # Generate pmartR midpoint object
     Midpoint <- midpoint_pmart(
