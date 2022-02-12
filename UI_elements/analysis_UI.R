@@ -255,7 +255,8 @@ output$imdanova_covariates_picker_UI <- renderUI({
 output$imdanova_test_method_UI <- renderUI({
   req(objects$omicsData)
   
-  filt_method <- attributes(objects$omicsData)$filters$imdanovaFilt$filter_method
+  filt_method <- get_filters(objects$omicsData, "imdanovaFilt", "method") %>% 
+    unlist()
   
   if (is.null(filt_method) || length(filt_method) == 2) {
     groupsizes <- pmartR:::get_group_table(objects$omicsData)
