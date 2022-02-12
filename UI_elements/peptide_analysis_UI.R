@@ -267,7 +267,7 @@ output$peptide_imdanova_test_method_UI <- renderUI({
   filt_method <- get_filters(objects$omicsData, "imdanovaFilt", "method") %>% 
     unlist()
   
-  if (is.null(filt_method) || length(filt_method) == 2) {
+  if (is.null(filt_method) || 'combined' %in% filt_method) {
     groupsizes <- pmartR:::get_group_table(objects$omicsData)
     groupsizes <- groupsizes[groupsizes > 1]
     groupsizes <- groupsizes[names(groupsizes) %in% unlist(comp_df_holder$comp_df[1:2])]
