@@ -31,9 +31,18 @@ list(
     
     string_list <- c(
       "Specified group size(s) insufficent for isoform detection.",
-      "Peptide-level IMD/ANOVA has not been run.",
+      "Peptide-level ANOVA or combined IMD-ANOVA (G-test only is insufficient) has not been run.",
       "Insufficent number of comparisons used in IMD/ANOVA."
     )
+    
+    #' ANOVA must have been run on stats.  Kind of a janky way of determining 
+    #' it, we just expect the columns 'P_value_A_<comparison>' to be in the 
+    #' column names.
+    expected_anova_cols <- paste0("P_value_A_", attr(stats, "comparisons"))
+    has_anova_cols <- all(expected_anova_cols %in% colnames(stats))
+    
+    # makes a full "imd-anova was properly run" condition
+    cond2 <- cond2 | !has_anova_cols 
     
     if (cond1 || cond2 || cond3) {
       out <- div(
@@ -43,7 +52,7 @@ list(
         
         tags$ul(
           tags$li("At least one main effect specified with at 3+ groups OR two main effects specified with 2+ groups"),
-          tags$li("IMD/ANOVA statistics have been computed on the peptide level"),
+          tags$li("ANOVA or combined IMD-ANOVA (G-test only is insufficient) statistics have been computed on the peptide level"),
           tags$li("3+ unique pairwise comparisons specified for IMD/ANOVA statistics")
         ),
         

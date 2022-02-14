@@ -24,10 +24,13 @@ makegroup <- function(){
         tmp <- objects$omicsData_2
         tmp$f_data <- f_data_2()
         attr(tmp, "cnames")$fdata_cname <- input$fdata_id_col_2
-        # pmartR:::verify_data_info(tmp)  ###################### New check function?
+        
+        cov_type = c(input$cv_type_1_2, input$cv_type_2_2)
+        
         tmp <- group_designation(tmp,
                                  main_effects = main_effects_2(),
-                                 covariates = covariates_2()
+                                 covariates = covariates_2(),
+                                 cov_type = cov_type
         )
         
         if (input$usevizsampnames == "Yes") {
@@ -69,10 +72,13 @@ makegroup <- function(){
       ref_catch <- f_data()[[input$fdata_id_col]] %in% colnames(objects$omicsData$e_data)
       tmp$f_data <- f_data()[ref_catch,]
       attr(tmp, "cnames")$fdata_cname <- input$fdata_id_col
-      # pmartR:::verify_data_info(tmp)  ###################### New check function?
+      
+      cov_type = c(input$cv_type_1, input$cv_type_2)
+      
       tmp <- group_designation(tmp,
                                main_effects = main_effects(),
-                               covariates = covariates()
+                               covariates = covariates(),
+                               cov_type = cov_type
       )
       
       if (input$usevizsampnames == "Yes") {

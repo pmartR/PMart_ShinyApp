@@ -16,38 +16,36 @@ apply_filt <- function(){
       tmp2 <- objects$uploaded_omicsData_2
       revals$filter_summary <- revals$filter_summary_2 <- NULL
       # molecule filter
-      if (!is.null(objects$filters$molfilt) & is.null(attributes(tmp)$filters$moleculeFilt)) {
+      if (!is.null(objects$filters$molfilt)) {
         tmp <- applyFilt(objects$filters$molfilt, tmp, min_num = input$mol_min_num)
-        if (!is.null(objects$filters$molfilt_2) & is.null(attributes(tmp2)$filters$moleculeFilt)) {
+        if (!is.null(objects$filters$molfilt_2)) {
           tmp2 <- applyFilt(objects$filters$molfilt_2, tmp2, min_num = input$mol_min_num)
         }
       }
       # proteomics filter
       if (class(tmp) == "pepData") {
-        if (isTRUE(!is.null(objects$filters$profilt) & is.null(attributes(tmp)$filters$proteomicsFilt))) {
-          tmp <- applyFilt(objects$filters$profilt, tmp, min_num_peps = input$min_num_peps, degen_peps = input$degen_peps)
+        if (isTRUE(!is.null(objects$filters$profilt))) {
+          tmp <- applyFilt(objects$filters$profilt, tmp, min_num_peps = input$min_num_peps, redundancy = input$degen_peps)
         }
       }
       # cv filter
-      if (!is.null(objects$filters$cvfilt) & is.null(attributes(tmp)$filters$cvFilt)) {
+      if (!is.null(objects$filters$cvfilt)) {
         tmp <- applyFilt(objects$filters$cvfilt, tmp, cv_threshold = input$cv_threshold)
-        if (!is.null(objects$filters$cvfilt_2) & !is.null(tmp2) & is.null(attributes(tmp2)$filters$cvFilt)) {
+        if (!is.null(objects$filters$cvfilt_2) & !is.null(tmp2)) {
           tmp2 <- applyFilt(objects$filters$cvfilt_2, tmp2, cv_threshold = input$cv_threshold)
         }
       }
 
       # if(e$message == "None of the samples will be removed with the current thresholds.")
       # imd filter
-      if (!is.null(objects$filters$imdanovafilt) & 
-          is.null(attributes(tmp)$filters$imdanovaFilt)) {
+      if (!is.null(objects$filters$imdanovafilt)) {
         tmp <- applyFilt(objects$filters$imdanovafilt, 
                          tmp, 
                          min_nonmiss_anova = input$min_nonmiss_anova, 
                          min_nonmiss_gtest = input$min_nonmiss_gtest
                          )
         if (!is.null(objects$filters$imdanovafilt_2) & 
-            !is.null(tmp2) & 
-            is.null(attributes(tmp2)$filters$imdanovaFilt)) {
+            !is.null(tmp2)) {
           tmp2 <- applyFilt(objects$filters$imdanovafilt_2, 
                             tmp2, 
                             min_nonmiss_anova = input$min_nonmiss_anova, 
@@ -58,7 +56,7 @@ apply_filt <- function(){
       #### SAMPLE/CUSTOM FILTERS ####
       
       # rMd filter
-      if (!is.null(objects$filters$rmdfilt) & is.null(attributes(tmp)$filters$rmdFilt)) {
+      if (!is.null(objects$filters$rmdfilt)) {
         tmp <- applyFilt(objects$filters$rmdfilt, tmp, pvalue_threshold = input$pvalue_threshold)
         if (!is.null(objects$filters$rmdfilt_2) & !is.null(tmp2)) {
           tmp2 <- applyFilt(objects$filters$rmdfilt_2, tmp2, pvalue_threshold = input$pvalue_threshold)

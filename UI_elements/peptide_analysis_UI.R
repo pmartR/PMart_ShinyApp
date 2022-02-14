@@ -35,6 +35,57 @@ output$peptide_imdanova_plot_type_UI <- renderUI({
   )
 })
 
+#'@details Pickers for ANOVA/G-test pvalue adjustment.  One or two pickers are
+#'shown depending on if the user chooses the 'combined' option for iMd-ANOVA
+output$peptide_imdanova_pval_adjust_UI <- renderUI({
+  validate(need(
+    input$peptide_imdanova_test_method %in% c("anova", "gtest", "combined"),
+    "Please select test method."
+  ))
+  
+  # to make things look nice
+  prepend <- if(input$peptide_imdanova_test_method == 'combined') {
+    ""
+  } else "Multiple comparisons adjustment "
+  
+  anova_picker <-  pickerInput(
+    "peptide_imdanova_pval_adjust_a",
+    sprintf("%s(ANOVA)", prepend),
+    choices = c(
+      "Holm" = "holm",
+      "Bonferroni" = "bonferroni",
+      "Tukey" = "tukey",
+      "Dunnet" = "dunnett",
+      "None" = "none"
+    ),
+    selected = character(0)
+  )
+  
+  gtest_picker <- pickerInput(
+    "peptide_imdanova_pval_adjust_g",
+    sprintf("%s(G-test)", prepend),
+    choices = c(
+      "Holm" = "holm",
+      "Bonferroni" = "bonferroni",
+      "None" = "none"
+    ),
+    selected = character(0)
+  )
+  
+  if (input$peptide_imdanova_test_method == "anova") {
+    return(anova_picker)
+  }
+  else if (input$peptide_imdanova_test_method == "gtest") {
+    return(gtest_picker)
+  } 
+  else if(input$peptide_imdanova_test_method == "combined") {
+    return(tagList(
+      tags$b("Multiple comparisons adjustment"),
+      fluidSplitLayout(anova_picker, gtest_picker) 
+    ))
+  }
+})
+
 #'@details returns a different sidepanel of options depending on what stats
 #'statistics was selected.
 output$peptide_statistics_tab_sidepanel <- renderUI({
@@ -89,6 +140,7 @@ output$peptide_statistics_tab_sidepanel <- renderUI({
         value = "peptide_imdanova-select-settings",
         uiOutput("peptide_imdanova_test_method_UI"),
         uiOutput("peptide_imdanova_pval_adjust_UI"),
+        uiOutput("peptide_imdanova_covariates_picker_UI"),
         numericInput("peptide_pval_thresh", "Significance threshold", value = 0.05, step = 0.01),
         div(
           id = "peptide_apply_imdanova_jswrapper", 
@@ -185,13 +237,37 @@ output$peptide_pairwise_comp_display <- renderDT(
   escape = FALSE
 )
 
+#'@details Picker for controlling for covariates indicated in the Groups 
+#'tab.
+output$peptide_imdanova_covariates_picker_UI <- renderUI({
+  req(objects$omicsData)
+  req(inherits(objects$omicsData, "pepData"), cancelOutput = T)
+  
+  covars <- objects$omicsData %>% 
+    attr("group_DF") %>% 
+    attr("covariates")
+  
+  req(!is.null(covars))
+  
+  choices = colnames(covars)[-1]
+  
+  pickerInput(
+    inputId = "peptide_imdanova_covariates_picker",
+    label = "Remove covariate effects:",
+    choices = choices,
+    selected = choices,
+    multiple = T
+  )
+})
+
 #'@details Picker for which type of statistical test to use in imd-anova
 output$peptide_imdanova_test_method_UI <- renderUI({
   req(objects$omicsData)
   
-  filt_method <- attributes(objects$omicsData)$filters$imdanovaFilt$filter_method
+  filt_method <- get_filters(objects$omicsData, "imdanovaFilt", "method") %>% 
+    unlist()
   
-  if (is.null(filt_method) || length(filt_method) == 2) {
+  if (is.null(filt_method) || 'combined' %in% filt_method) {
     groupsizes <- pmartR:::get_group_table(objects$omicsData)
     groupsizes <- groupsizes[groupsizes > 1]
     groupsizes <- groupsizes[names(groupsizes) %in% unlist(comp_df_holder$comp_df[1:2])]
@@ -240,18 +316,6 @@ output$peptide_imdanova_test_method_UI <- renderUI({
     )
   )
   
-})
-
-# limit adjustment options depending on test method
-output$peptide_imdanova_pval_adjust_UI <- renderUI({
-  req(input$peptide_imdanova_test_method)
-  if (input$peptide_imdanova_test_method == "anova") {
-    choices <- c("Holm" = "holm", "Bonferroni" = "bonferroni", "Tukey" = "tukey", "Dunnet" = "dunnett", "None" = "none")
-  }
-  else {
-    choices <- c("Holm" = "holm", "Bonferroni" = "bonferroni", "None" = "none")
-  }
-  pickerInput("peptide_pval_adjust", "Multiple comparisons adjustment", choices = choices)
 })
 
 # display table output from imd_anova
