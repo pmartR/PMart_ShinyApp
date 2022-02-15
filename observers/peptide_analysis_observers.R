@@ -72,6 +72,8 @@ observeEvent(input$peptide_apply_imdanova, {
   shinyjs::show("peptide_analysis_busy")
   on.exit(hide("peptide_analysis_busy"))
   
+  revals$warnings_peptide_statistics$bad_imdanova <- NULL
+  
   tryCatch(
     {
       comps <- as.data.frame(comp_df_holder$comp_df)[1:2]
@@ -207,6 +209,8 @@ observeEvent(
     
     color_low = if(isTruthy(input$pep_imd_low_cpicker)) input$pep_imd_low_cpicker else "#132B43"
     color_high = if(isTruthy(input$pep_imd_high_cpicker)) input$pep_imd_high_cpicker else "#56B1F7"
+    
+    revals$warnings_peptide_statistics$bad_imdanova_plot <- NULL
     
     tryCatch({
       plots$peptide_statistics_mainplot <-
