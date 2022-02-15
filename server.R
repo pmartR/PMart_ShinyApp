@@ -7,7 +7,7 @@ shinyServer(function(session, input, output) {
     "Data File (e_data)" = list("objects", "omicsData", "e_data"),
     "Sample Info (f_data)" = list("objects", "omicsData", "f_data"),
     "Biomolecule Information (e_meta)" = list("objects", "omicsData", "e_meta"),
-    "iMd-Anova Table" = list("objects", "imdanova_res", "Full_results")
+    "iMd-Anova Table" = list("objects", "imdanova_res")
   )
   
   resources_locations_peprollup <- list(
@@ -15,8 +15,8 @@ shinyServer(function(session, input, output) {
     "Peptide Data File (e_data)" = list("objects", "omicsData_pre_rollup", "e_data"),
     "Sample Info (f_data)" = list("objects", "omicsData", "f_data"),
     "Biomolecule Information (e_meta)" = list("objects", "omicsData", "e_meta"),
-    "Protein iMd-Anova Table" = list("objects", "imdanova_res", "Full_results"),
-    "Peptide iMd-Anova Table" = list("objects", "peptide_imdanova_res", "Full_results")
+    "Protein iMd-Anova Table" = list("objects", "imdanova_res"),
+    "Peptide iMd-Anova Table" = list("objects", "peptide_imdanova_res")
   )
   
   # misc reactive values

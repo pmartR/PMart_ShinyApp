@@ -320,7 +320,7 @@ output$peptide_imdanova_test_method_UI <- renderUI({
 
 # display table output from imd_anova
 output$peptide_statistics_summary_table <- renderDT({
-  objects$peptide_imdanova_res[["Full_results"]]
+  objects$peptide_imdanova_res
 }, options = list(scrollX =TRUE))
 
 #'@details UI created with the helper function style_UI to edit plot options
