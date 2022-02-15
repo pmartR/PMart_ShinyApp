@@ -5,46 +5,23 @@ list(
     pro_class <- inherits(objects$omicsData, "proData")
     
     ## Note: only used for fdata info so don't need pep version
-      data <- objects$omicsData
+    data <- objects$omicsData
     
     stats <- objects$peptide_imdanova_res
     group_info <- pmartR:::get_group_DF(data)
 
     comp_info <- attr(stats, "comparisons")
     
-    l1 <- nrow(unique(data$f_data[attr(group_info, "main_effects")]))
-    l2 <- ifelse(
-      !is.null(attr(group_info, "covariates")),
-      nrow(unique(data$f_data[attr(group_info, "covariates")])),
-      0
-    )
-    if (l1 == 1) l1 <- 0 # Not valid if it doesn't actually have multiple levels
-    if (l2 == 1) l2 <- 0 # Not valid if it doesn't actually have multiple levels
-    
-    cond1 <- l1 + l2 < 3
-    cond2 <- is.null(stats)
-    if (is.null(nrow(comp_info))) {
-      cond3 <- cond2 || length(comp_info) < 3
-    } else {
-      cond3 <- cond2 || nrow(comp_info) < 3
-    }
+    bpquant_conds <- unlist(bpquant_valid()[c("cond1", "cond2", "cond3", "cond4")])
     
     string_list <- c(
       "Specified group size(s) insufficent for isoform detection.",
       "Peptide-level ANOVA or combined IMD-ANOVA (G-test only is insufficient) has not been run.",
-      "Insufficent number of comparisons used in IMD/ANOVA."
+      "Insufficent number of comparisons used in IMD/ANOVA.",
+      "ANOVA-only statistics were run and not all molecules had > 3 nonmissing observations in all groups, either filter down to relevant molecules or re-run statistics with a different method"
     )
     
-    #' ANOVA must have been run on stats.  Kind of a janky way of determining 
-    #' it, we just expect the columns 'P_value_A_<comparison>' to be in the 
-    #' column names.
-    expected_anova_cols <- paste0("P_value_A_", attr(stats, "comparisons"))
-    has_anova_cols <- all(expected_anova_cols %in% colnames(stats))
-    
-    # makes a full "imd-anova was properly run" condition
-    cond2 <- cond2 | !has_anova_cols 
-    
-    if (cond1 || cond2 || cond3) {
+    if (any(bpquant_conds)) {
       out <- div(
         "Isoform identification is computed using  BPQuant, which requires the following:",
         br(),
@@ -53,11 +30,12 @@ list(
         tags$ul(
           tags$li("At least one main effect specified with at 3+ groups OR two main effects specified with 2+ groups"),
           tags$li("ANOVA or combined IMD-ANOVA (G-test only is insufficient) statistics have been computed on the peptide level"),
-          tags$li("3+ unique pairwise comparisons specified for IMD/ANOVA statistics")
+          tags$li("3+ unique pairwise comparisons specified for IMD/ANOVA statistics"),
+          tags$li("If only ANOVA has been run, all groups must have > 3 nonmissing observations across all peptides")
         ),
         
         br(),
-        p(paste(string_list[c(cond1, cond2, cond3)], collapse = " "), style = "color:red")
+        p(paste(string_list[bpquant_conds], collapse = " "), style = "color:red")
       )
       return(out)
     } else {
@@ -110,31 +88,10 @@ list(
       data <- objects$omicsData
     }
     
-    stats <- objects$peptide_imdanova_res
-    group_info <- pmartR:::get_group_DF(data)
-    comp_info <- attr(stats, "comparisons")
+    bpquant_conds <- bpquant_valid()[c("cond1", "cond2", "cond3", "cond4")]
     
-    l1 <- nrow(unique(data$f_data[attr(group_info, "main_effects")]))
-    l2 <- ifelse(
-      !is.null(attr(group_info, "covariates")),
-      nrow(unique(data$f_data[attr(group_info, "covariates")])),
-      0
-    )
-    if (l1 == 1) l1 <- 0 # Not valid if it doesn't actually have multiple levels
-    if (l2 == 1) l2 <- 0 # Not valid if it doesn't actually have multiple levels
-    
-    
-    cond1 <- l1 + l2 < 3
-    cond2 <- is.null(stats)
-    if (is.null(nrow(comp_info))) {
-      cond3 <- cond2 || length(comp_info) < 3
-    } else {
-      cond3 <- cond2 || nrow(comp_info) < 3
-    }
-    
-    if (any(c(cond1, cond2, cond3))) {
+    if (any(bpquant_conds)) {
       text <- "Conditions for Isoform Identification have not been met"
-      
       
       return(
         disabled(radioGroupButtons(
