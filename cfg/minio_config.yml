@@ -1,21 +1,21 @@
 # Local run
 
-type: minio
-endpoint: localhost:9000 
-access_key: minioadmin
-secret_key: minioadmin
-bucket: map
-secure: False
-python_venv: /Users/degn400/miniconda/envs/venv/
-verbose: true
-
-# Compose run
-
 #type: minio
-#endpoint: minio-map:9000
+#endpoint: localhost:9000
 #access_key: minioadmin
 #secret_key: minioadmin
 #bucket: map
 #secure: False
-#python_venv: /venv 
+#python_venv: /Users/degn400/miniconda/envs/venv/
 #verbose: true
+
+# Compose run
+
+type: minio
+endpoint: minio-map:9000
+access_key: minioadmin
+secret_key: minioadmin
+bucket: map
+secure: False
+python_venv: /venv
+verbose: true

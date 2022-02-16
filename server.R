@@ -169,7 +169,7 @@ shinyServer(function(session, input, output) {
     library(mapDataAccess)
     
     # Soure MAP-specific functionality (reading from header, etc)
-    source("MAP_Functions.R", local = TRUE)
+    source("./MAP_Functions.R", local = TRUE)
     
     # Create a reactive value to hold MAP-specific objects
     MapConnect <- reactiveValues(MapConnect = map_data_connection("./cfg/minio_config.yml"),

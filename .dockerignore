@@ -6,6 +6,9 @@
 !server.R
 !ui.R
 !UI_helper_functions.R
+!MAP_Functions.R
+!Parameters.txt
+!requirements.txt
 
 !observers
 !reactive_variables
