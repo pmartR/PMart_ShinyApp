@@ -5,7 +5,7 @@
 ARG base_tag=1.1
 
 # Install latest version of rocker image
-FROM code-registry.emsl.pnl.gov/multiomics-analyses/pmart_standalone/base:base_tag
+FROM code-registry.emsl.pnl.gov/multiomics-analyses/pmart_standalone/base:$base_tag
 
 COPY . .
 
