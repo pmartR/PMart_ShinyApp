@@ -527,15 +527,7 @@ observeEvent(c(input$plot_rmdfilt, input$rmd_metrics, input$pvalue_threshold, in
                   pvalue_threshold = input$pvalue_threshold, 
                   sampleID = sampleID1, bw_theme = TRUE, interactive = T
                   )
-
-        # block for displaying sample names if we are plotting all samples
-        if (is.null(sampleID1)) {
-          p <- p + theme(axis.text.x = element_text(angle = 45))
-          if ("VizSampNames" %in% colnames(objects$uploaded_omicsData$f_data)) {
-            p <- p + scale_x_discrete(labels = objects$uploaded_omicsData$f_data$VizSampNames)
-          }
-        }
-
+        
         p
       },
       error = function(e) {
@@ -554,14 +546,7 @@ observeEvent(c(input$plot_rmdfilt, input$rmd_metrics, input$pvalue_threshold, in
             pvalue_threshold = input$pvalue_threshold, sampleID = sampleID2, 
             bw_theme = TRUE, interactive = T
           )
-
-          if (is.null(sampleID2)) {
-            p <- p + theme(axis.text.x = element_text(angle = 45))
-            if ("VizSampNames" %in% colnames(objects$uploaded_omicsData_2$f_data)) {
-              p <- p + scale_x_discrete(labels = objects$uploaded_omicsData_2$f_data$VizSampNames)
-            }
-          }
-
+          
           p
         },
         error = function(e) {
