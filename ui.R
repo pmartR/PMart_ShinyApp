@@ -21,6 +21,14 @@ ui <- function(request) {
         title = "", windowTitle = "pmartR"
       )
     ),
+    
+    div(
+      id = "loading-gray-overlay",
+      class = "loading-mask",
+      div(class = "fadein-out busy relative-centered", style = "font-size:xx-large", "Loading app resources...")
+    ), 
+    
+    
     navbarPage(
       title = tags$span(tags$img(src = "pmartlogo.png", style = "max-height:100%"), "pmartR"),
       id = "top_page", theme = "pmartR.css",

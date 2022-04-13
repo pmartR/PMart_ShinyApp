@@ -39,9 +39,9 @@ upload_UI <- function() {
             ),
             
             conditionalPanel(
-              "input.datatype=='metab'",
-              radioGroupButtons("metab_type", "Which type of instrumentation?",
-                                choices = c("LC/MS or GC/MS" = "metab", "NMR" = "nmr"), selected = "FALSE"
+              "input.datatype=='metab'", 
+                radioGroupButtons("metab_type", "Which type of instrumentation?",
+                                  choices = c("LC/MS or GC/MS" = "metab", "NMR" = "nmr"), selected = "FALSE"
               )
             ),
             

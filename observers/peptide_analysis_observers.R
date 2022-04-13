@@ -66,32 +66,36 @@ observe({
 # make statres object
 observeEvent(input$peptide_apply_imdanova, {
   req(!is.null(objects$omicsData), input$top_page == "peptide_statistics_tab" &&
-        !is.null( input$peptide_imdanova_test_method) &&
+        !is.null(input$peptide_imdanova_test_method) &&
         !is.null(comp_df_holder$comp_df))
   
   shinyjs::show("peptide_analysis_busy")
   on.exit(hide("peptide_analysis_busy"))
   
+  revals$warnings_peptide_statistics$bad_imdanova <- NULL
+  
   tryCatch(
     {
       comps <- as.data.frame(comp_df_holder$comp_df)[1:2]
       colnames(comps) <- c("Control", "Test")
+      
+      pval_adjust_a = if (!is.null(input$peptide_imdanova_pval_adjust_a)) {
+        input$peptide_imdanova_pval_adjust_a
+      } else "none"
+      
+      pval_adjust_g = if (!is.null(input$peptide_imdanova_pval_adjust_g)) {
+        input$peptide_imdanova_pval_adjust_g
+      } else "none"
+      
       objects$peptide_imdanova_res <- imd_anova(
         objects$omicsData, 
         comparisons = comps,
         test_method = input$peptide_imdanova_test_method, 
-        pval_adjust = input$peptide_pval_adjust, 
-        pval_thresh = input$peptide_pval_thresh
+        pval_adjust_a = pval_adjust_a,
+        pval_adjust_g = pval_adjust_g,
+        pval_thresh = input$peptide_pval_thresh,
+        covariates = input$peptide_imdanova_covariates_picker
       )
-      
-      show("peptide_stats-statistics-ok")
-      show("peptide_imdanova_groups_ok")
-      show("peptide_imdanova_settings_ok")
-      
-      updateCollapse(session, "peptide_statistics_collapse_left", close = c("peptide_stats-statistics-options"))
-      updateCollapse(session, "peptide_imdanova-sidepanel-options", 
-                     close = c("peptide_imdanova-specify-comparisons", "peptide_imdanova-select-settings"))
-      
       
       if(is.null(objects$omicsData$e_meta)){
         buttons <- div(
@@ -109,6 +113,13 @@ observeEvent(input$peptide_apply_imdanova, {
         )
       }
       
+      pval_adjust_modal_text <- switch(
+        input$peptide_imdanova_test_method,
+        "combined" = sprintf("ANOVA: %s, G-test: %s", str_to_title(pval_adjust_g), str_to_title(pval_adjust_a)),
+        "anova" = str_to_title(pval_adjust_a),
+        "gtest" = str_to_title(pval_adjust_g)
+      )
+
       # success modal if all is well
       showModal(
         modalDialog(
@@ -122,13 +133,7 @@ observeEvent(input$peptide_apply_imdanova, {
                          input$peptide_imdanova_test_method,
                          " test method from pmartR's iMd-ANOVA function. ",
                          "Multiple comparisons P-value correction peformed: ",
-                         switch(input$peptide_pval_adjust,
-                                "tukey" = "Tukey", 
-                                "dunnet" = "Dunnett",
-                                "holm" = "Holm",
-                                "bonferroni" = "Bonferroni",
-                                "none" = "none"
-                                ),
+                         pval_adjust_modal_text,
                          ". P-value threshold: ",
                          input$peptide_pval_thresh
                        )
@@ -141,6 +146,15 @@ observeEvent(input$peptide_apply_imdanova, {
           footer = NULL
         )
       )
+      
+      # Show success checkmarks and update collapse panels if everything succeeds.
+      show("peptide_stats-statistics-ok")
+      show("peptide_imdanova_groups_ok")
+      show("peptide_imdanova_settings_ok")
+      
+      updateCollapse(session, "peptide_statistics_collapse_left", close = c("peptide_stats-statistics-options"))
+      updateCollapse(session, "peptide_imdanova-sidepanel-options", 
+                     close = c("peptide_imdanova-specify-comparisons", "peptide_imdanova-select-settings"))
       
     },
     error = function(e) {
@@ -195,6 +209,8 @@ observeEvent(
     
     color_low = if(isTruthy(input$pep_imd_low_cpicker)) input$pep_imd_low_cpicker else "#132B43"
     color_high = if(isTruthy(input$pep_imd_high_cpicker)) input$pep_imd_high_cpicker else "#56B1F7"
+    
+    revals$warnings_peptide_statistics$bad_imdanova_plot <- NULL
     
     tryCatch({
       plots$peptide_statistics_mainplot <-

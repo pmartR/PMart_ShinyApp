@@ -150,7 +150,7 @@ list(
   
   # pro question in emeta upload sub-panel
   output$emeta_pro_UI <- renderUI({
-    req(!is.null(input$file_emeta$name) && input$emeta_yn == "TRUE" && input$datatype == 'pep')
+    req(!is.null(input$file_emeta) && input$emeta_yn == "TRUE" && input$datatype == 'pep')
     radioGroupButtons(
       "proteins_yn",
       "Does your biomolecule information file contain peptide to protein mappings?",
@@ -162,11 +162,18 @@ list(
   output$emeta_UI <- renderUI({
     
     if (MAP) {
+      fname_tmp = MapConnect$Project$Data$e_meta_filename
+      fname_tmp = if(is.null(fname_tmp)) {
+        "No e_meta file found - indicate no e_meta."
+      } else {
+        fname_tmp %>% 
+          strsplit("/") %>% unlist() %>% tail(1)
+      }
       
       title_upload_div <- disabled(div(
         id = "js_file_emeta",
         textInput("file_emeta", "Uploaded CSV Biomolecule Information File", 
-                  value = MapConnect$Project$Data$e_meta_filename %>% strsplit("/") %>% unlist() %>% tail(1))
+                  value = fname_tmp)
       ))
       
     } else {

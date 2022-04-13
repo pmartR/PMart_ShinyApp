@@ -44,6 +44,13 @@ observeEvent(input$mark_table_download, {
   else {
     table_use[input$download_tables_table_rows_selected, 2] <- dt_minus
   }
+  
+  if(is.null(objects$omicsData_pre_rollup)){
+    tables$tables_table <- table_use
+  } else {
+    tables$revenge_of_tables_table <- table_use
+  }
+  
 })
 ###
 

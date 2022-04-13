@@ -6,9 +6,12 @@
 !server.R
 !ui.R
 !UI_helper_functions.R
+!MAP_Functions.R
+!Parameters.txt
 
 !observers
 !reactive_variables
 !UI_elements
 !tabs_UI
 !www
+!utils

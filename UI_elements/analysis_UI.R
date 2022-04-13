@@ -35,6 +35,57 @@ output$imdanova_plot_type_UI <- renderUI({
   )
 })
 
+#'@details Pickers for ANOVA/G-test pvalue adjustment.  One or two pickers are
+#'shown depending on if the user chooses the 'combined' option for iMd-ANOVA
+output$imdanova_pval_adjust_UI <- renderUI({
+  validate(need(
+    input$imdanova_test_method %in% c("anova", "gtest", "combined"),
+    "Please select test method."
+  ))
+  
+  # to make things look nice
+  prepend <- if(input$imdanova_test_method == 'combined') {
+    ""
+  } else "Multiple comparisons adjustment "
+  
+  anova_picker <-  pickerInput(
+    "imdanova_pval_adjust_a",
+    sprintf("%s(ANOVA)", prepend),
+    choices = c(
+      "Holm" = "holm",
+      "Bonferroni" = "bonferroni",
+      "Tukey" = "tukey",
+      "Dunnet" = "dunnett",
+      "None" = "none"
+    ),
+    selected = character(0)
+  )
+  
+  gtest_picker <- pickerInput(
+    "imdanova_pval_adjust_g",
+    sprintf("%s(G-test)", prepend),
+    choices = c(
+      "Holm" = "holm",
+      "Bonferroni" = "bonferroni",
+      "None" = "none"
+    ),
+    selected = character(0)
+  )
+  
+  if (input$imdanova_test_method == "anova") {
+    return(anova_picker)
+  }
+  else if (input$imdanova_test_method == "gtest") {
+    return(gtest_picker)
+  } 
+  else if(input$imdanova_test_method == "combined") {
+    return(tagList(
+      tags$b("Multiple comparisons adjustment"),
+      fluidSplitLayout(anova_picker, gtest_picker) 
+    ))
+  }
+})
+
 #'@details returns a different sidepanel of options depending on what stats
 #'statistics was selected.
 output$statistics_tab_sidepanel <- renderUI({
@@ -86,6 +137,7 @@ output$statistics_tab_sidepanel <- renderUI({
         value = "imdanova-select-settings",
         uiOutput("imdanova_test_method_UI"),
         uiOutput("imdanova_pval_adjust_UI"),
+        uiOutput("imdanova_covariates_picker_UI"),
         numericInput("pval_thresh", "Significance threshold", value = 0.05, step = 0.01),
         bsButton("apply_imdanova", "Perform iMd-ANOVA", style = "primary"),
         br(), br(),
@@ -178,13 +230,35 @@ output$pairwise_comp_display <- renderDT(
   escape = FALSE
 )
 
+#'@details Picker for controlling for covariates indicated in the Groups 
+#'tab.
+output$imdanova_covariates_picker_UI <- renderUI({
+  req(objects$omicsData)
+  covars <- objects$omicsData %>% 
+    attr("group_DF") %>% 
+    attr("covariates")
+  
+  req(!is.null(covars))
+  
+  choices = colnames(covars)[-1]
+  
+  pickerInput(
+    inputId = "imdanova_covariates_picker",
+    label = "Remove covariate effects:",
+    choices = choices,
+    selected = choices,
+    multiple = T
+  )
+})
+
 #'@details Picker for which type of statistical test to use in imd-anova
 output$imdanova_test_method_UI <- renderUI({
   req(objects$omicsData)
   
-  filt_method <- attributes(objects$omicsData)$filters$imdanovaFilt$filter_method
+  filt_method <- get_filters(objects$omicsData, "imdanovaFilt", "method") %>% 
+    unlist()
   
-  if (is.null(filt_method) || length(filt_method) == 2) {
+  if (is.null(filt_method) || 'combined' %in% filt_method) {
     groupsizes <- pmartR:::get_group_table(objects$omicsData)
     groupsizes <- groupsizes[groupsizes > 1]
     groupsizes <- groupsizes[names(groupsizes) %in% unlist(comp_df_holder$comp_df[1:2])]
@@ -235,21 +309,9 @@ output$imdanova_test_method_UI <- renderUI({
   
 })
 
-# limit adjustment options depending on test method
-output$imdanova_pval_adjust_UI <- renderUI({
-  req(input$imdanova_test_method)
-  if (input$imdanova_test_method == "anova") {
-    choices <- c("Holm" = "holm", "Bonferroni" = "bonferroni", "Tukey" = "tukey", "Dunnet" = "dunnett", "None" = "none")
-  }
-  else {
-    choices <- c("Holm" = "holm", "Bonferroni" = "bonferroni", "None" = "none")
-  }
-  pickerInput("pval_adjust", "Multiple comparisons adjustment", choices = choices)
-})
-
 # display table output from imd_anova
 output$statistics_summary_table <- renderDT({
-  objects$imdanova_res[["Full_results"]]
+  objects$imdanova_res
 }, options = list(scrollX =TRUE))
 
 #'@details UI created with the helper function style_UI to edit plot options

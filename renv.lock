@@ -57,8 +57,8 @@
       "RemoteRepo": "mapdataaccess-lib",
       "RemoteUsername": "multiomics-analyses",
       "RemoteRef": "HEAD",
-      "RemoteSha": "7ebcb9d01287d0a035b6d05438c871b81caf6081",
-      "Hash": "1327b96da7ae2591f9f1c8d6ad7b5f21"
+      "RemoteSha": "a7bd1520b973fd46c4335dc16bc6e01e4402f2d5",
+      "Hash": "4eec5d23f35b4ee1aaecf13cd68c7153"
     },
     "markdown": {
       "Package": "markdown",
@@ -76,15 +76,15 @@
     },
     "pmartR": {
       "Package": "pmartR",
-      "Version": "0.9.0",
+      "Version": "0.10.0",
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteRepo": "pmartR",
       "RemoteUsername": "pmartR",
       "RemoteRef": "HEAD",
-      "RemoteSha": "5f54436973e7660853bc20527f5f8d412dadc2b9",
-      "Hash": "0ac7ee13a44f994744fcbf05652c83c0"
+      "RemoteSha": "a72c91994a9cfe81903d24d70361b9ed80f63c10",
+      "Hash": "524890ea7b7605a582f9dc9a208bc7fb"
     },
     "purrr": {
       "Package": "purrr",
@@ -107,12 +107,19 @@
       "Repository": "CRAN",
       "Hash": "30e5eba91b67f7f4d75d31de14bbfbdc"
     },
-    "rlang": {
-      "Package": "rlang",
-      "Version": "0.4.11",
+    "reshape2": {
+      "Package": "reshape2",
+      "Version": "1.4.4",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "515f341d3affe0de9e4a7f762efb0456"
+      "Hash": "bb5996d0bd962d214a11140d77589917"
+    },
+    "rlang": {
+      "Package": "rlang",
+      "Version": "1.0.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "3bf0219f19d9f5b3c682acbb3546a151"
     },
     "shiny": {
       "Package": "shiny",

@@ -258,3 +258,25 @@ buttonInput <- function(FUN, len, id, ...) {
   }
   inputs
 }
+
+#'@description If you dont like splitLayout, have two shiny tags separated into
+#'columns within a fluidRow.
+#'
+#'@param col1_content/col2_content Shiny tags in the first and second column
+#'within the fluidRow
+#'@param width1/width2 The widths of the first and second column respectively.
+#'
+#'@returns A fluidrow with two columns containing col1_content and col2_content
+#'
+fluidSplitLayout <- function(col1_content, col2_content, width1 = 6, width2 = 6) {
+  fluidRow(
+    column(
+      width1,
+      col1_content
+    ),
+    column(
+      width2,
+      col2_content
+    )
+  )
+}

@@ -7,7 +7,7 @@ shinyServer(function(session, input, output) {
     "Data File (e_data)" = list("objects", "omicsData", "e_data"),
     "Sample Info (f_data)" = list("objects", "omicsData", "f_data"),
     "Biomolecule Information (e_meta)" = list("objects", "omicsData", "e_meta"),
-    "iMd-Anova Table" = list("objects", "imdanova_res", "Full_results")
+    "iMd-Anova Table" = list("objects", "imdanova_res")
   )
   
   resources_locations_peprollup <- list(
@@ -15,8 +15,8 @@ shinyServer(function(session, input, output) {
     "Peptide Data File (e_data)" = list("objects", "omicsData_pre_rollup", "e_data"),
     "Sample Info (f_data)" = list("objects", "omicsData", "f_data"),
     "Biomolecule Information (e_meta)" = list("objects", "omicsData", "e_meta"),
-    "Protein iMd-Anova Table" = list("objects", "imdanova_res", "Full_results"),
-    "Peptide iMd-Anova Table" = list("objects", "peptide_imdanova_res", "Full_results")
+    "Protein iMd-Anova Table" = list("objects", "imdanova_res"),
+    "Peptide iMd-Anova Table" = list("objects", "peptide_imdanova_res")
   )
   
   # misc reactive values
@@ -169,12 +169,14 @@ shinyServer(function(session, input, output) {
     library(mapDataAccess)
     
     # Soure MAP-specific functionality (reading from header, etc)
-    source("MAP_Functions.R", local = TRUE)
+    source("./MAP_Functions.R", local = TRUE)
     
     # Create a reactive value to hold MAP-specific objects
-    MapConnect <- reactiveValues(MapConnect = map_data_connection("./cfg/minio_config_local.yml"),
+    MapConnect <- reactiveValues(MapConnect = map_data_connection("./cfg/minio_config.yml"),
                                  Project = NULL, Midpoint = NULL)
     
+  } else {
+    hide(id = "loading-gray-overlay")
   }
   
 })
