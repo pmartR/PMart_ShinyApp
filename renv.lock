@@ -83,8 +83,8 @@
       "RemoteRepo": "pmartR",
       "RemoteUsername": "pmartR",
       "RemoteRef": "HEAD",
-      "RemoteSha": "a72c91994a9cfe81903d24d70361b9ed80f63c10",
-      "Hash": "524890ea7b7605a582f9dc9a208bc7fb"
+      "RemoteSha": "e70c25f2d4d3b5c5872081c1b2a3158f9709a78b",
+      "Hash": "b37a3f35c2e5b39b5e1b118119e9efb3"
     },
     "purrr": {
       "Package": "purrr",
@@ -116,10 +116,10 @@
     },
     "rlang": {
       "Package": "rlang",
-      "Version": "1.0.1",
+      "Version": "1.0.2",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "3bf0219f19d9f5b3c682acbb3546a151"
+      "Hash": "04884d9a75d778aca22c7154b8333ec9"
     },
     "shiny": {
       "Package": "shiny",

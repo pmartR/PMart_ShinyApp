@@ -54,11 +54,11 @@ We build a base container which has all the system libraries and R packages inst
 **To build the base container**, you must provide a gitlab PAT in order to install mapDataAccess and other private git repos.  Assume you have an account that has access to the private gitlab repos in pmart; now generate a personal access token:  https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html.  Put this token in a file next to the Dockerfile, say `.mysecret`  
 
 Now, replacing &lt;tag&gt; with whatever version, run:  
-`docker build -f Dockerfile-base --secret id=gitlab_pat,src=.mysecret -t code-registry.emsl.pnl.gov/multiomics-analyses/pmartr_standalone/base:<tag>` .
+`docker build -f Dockerfile-base --secret id=gitlab_pat,src=.mysecret -t code-registry.emsl.pnl.gov/multiomics-analyses/pmart_standalone/base:<tag>` .
 
 **To build the 'top' container**:  
-Simply make sure Dockerfile refers to the correct base container if you have updated any dependencies and run:  
-`docker build -t code-registry.emsl.pnl.gov/multiomics-analyses/pmartr_standalone:<tag> .`
+Make sure Dockerfile refers to the correct base container or specify the --build-arg base_tag=<your base image tag, i.e. 1.2> in the build command if you have updated any dependencies:  
+`docker build --build-arg base_tag=<your base image tag> -t code-registry.emsl.pnl.gov/multiomics-analyses/pmart_standalone:<tag> .`
 
 If all is well, push new containers to the registry:  `docker push <container_name>:<tag>`
 
