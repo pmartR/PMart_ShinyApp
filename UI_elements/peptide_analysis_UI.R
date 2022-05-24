@@ -140,7 +140,6 @@ output$peptide_statistics_tab_sidepanel <- renderUI({
         value = "peptide_imdanova-select-settings",
         uiOutput("peptide_imdanova_test_method_UI"),
         uiOutput("peptide_imdanova_pval_adjust_UI"),
-        uiOutput("peptide_imdanova_covariates_picker_UI"),
         numericInput("peptide_pval_thresh", "Significance threshold", value = 0.05, step = 0.01),
         div(
           id = "peptide_apply_imdanova_jswrapper", 
@@ -236,29 +235,6 @@ output$peptide_pairwise_comp_display <- renderDT(
   selection = "none",
   escape = FALSE
 )
-
-#'@details Picker for controlling for covariates indicated in the Groups 
-#'tab.
-output$peptide_imdanova_covariates_picker_UI <- renderUI({
-  req(objects$omicsData)
-  req(inherits(objects$omicsData, "pepData"), cancelOutput = T)
-  
-  covars <- objects$omicsData %>% 
-    attr("group_DF") %>% 
-    attr("covariates")
-  
-  req(!is.null(covars))
-  
-  choices = colnames(covars)[-1]
-  
-  pickerInput(
-    inputId = "peptide_imdanova_covariates_picker",
-    label = "Remove covariate effects:",
-    choices = choices,
-    selected = choices,
-    multiple = T
-  )
-})
 
 #'@details Picker for which type of statistical test to use in imd-anova
 output$peptide_imdanova_test_method_UI <- renderUI({
