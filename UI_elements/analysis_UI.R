@@ -143,7 +143,7 @@ output$statistics_tab_sidepanel <- renderUI({
         hidden(
           div(
             "Conducting analysis, please wait...",
-            id = "peptide_analysis_busy",
+            id = "analysis_busy",
             class = "fadein-out",
             style = "color:deepskyblue;font-weight:bold;margin-bottom:5px"
           )

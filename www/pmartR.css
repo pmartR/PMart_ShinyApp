@@ -40,6 +40,11 @@
   align-items:baseline;
 }
 
+.relative-centered {
+  position: relative;
+  top: 40%;
+}
+
 .inline_top{
   display:inline-block;
   vertical-align:top;
@@ -137,6 +142,12 @@
   animation-iteration-count:infinite;
   animation-fill-mode:both;
   animation-direction:alternate;
+}
+
+.busy {
+  color:deepskyblue;
+  font-weight:bold;
+  margin:5px 0;
 }
 
 @keyframes clicked_bow {
