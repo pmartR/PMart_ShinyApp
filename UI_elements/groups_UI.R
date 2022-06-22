@@ -495,9 +495,9 @@ list(
   
   output$pairing_denom_col_2 <- renderUI({
     req(!is.null(f_data_2()))
-    validate(need(isTruthy(input$pair_group_col2 != "None"), "Choose a pair grouping column"))
+    validate(need(isTruthy(input$pair_group_col_2 != "None"), "Choose a pair grouping column"))
     
-    choices = unique(f_data_2()[[input$pair_group_col2]])
+    choices = unique(f_data_2()[[input$pair_group_col_2]])
     
     pickerInput("pair_denom_col_2", "Which pair id represents the denominator",
                 choices = choices,

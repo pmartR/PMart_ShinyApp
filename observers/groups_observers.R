@@ -242,7 +242,22 @@ observe({
     
     cond_covariates <- if (all(c(length(covariates()), length(covariates_2())) == 0)) TRUE else all(covariates() %in% colnames(f_data()), covariates_2() %in% colnames(f_data_2()))
     cond_NA_groups <- any(is.na(f_data()[main_effects()])) || any(is.na(f_data_2()[main_effects()]))
-    cond <- all(cond_files, cond_idcol_fdata, cond_main_effects, cond_covariates, cond_sample_names)
+    
+    cond_pairs1 <- if (isTruthy(input$pair_id_col != "None")) {
+      isTruthy(input$pair_group_col != "None") & isTruthy(input$pair_denom_col != "None")
+    } else {
+      TRUE
+    }
+    
+    cond_pairs2 <- if (isTruthy(input$pair_id_col_2 != "None")) {
+      isTruthy(input$pair_group_col_2 != "None") & isTruthy(input$pair_denom_col_2 != "None")
+    } else {
+      TRUE
+    }
+    
+    cond_pairs <- cond_pairs1 & cond_pairs2
+    
+    cond <- all(cond_files, cond_idcol_fdata, cond_main_effects, cond_covariates, cond_sample_names, cond_pairs)
   }
   # otherwise check:
   # input column exists in fdata
@@ -261,8 +276,13 @@ observe({
     cond_iso_nrm <- inherits(objects$omicsData, "pepData") && 
                         input$labeled_yn == "iso"
     
+    cond_pairs <- if (isTruthy(input$pair_id_col != "None")) {
+      isTruthy(input$pair_group_col != "None") & isTruthy(input$pair_denom_col != "None")
+    } else {
+      TRUE
+    }
 
-    cond <- all(cond_files, cond_idcol_fdata, cond_main_effects, cond_covariates, cond_sample_names)
+    cond <- all(cond_files, cond_idcol_fdata, cond_main_effects, cond_covariates, cond_sample_names, cond_pairs)
   }
 
   revals$warnings_groups$files <- if (!cond_files) "<p style = 'color:grey'>No f_data uploaded or one file missing.</p>" else NULL
@@ -272,7 +292,7 @@ observe({
   revals$warnings_groups$covariates <- if (!cond_covariates) "<p style = 'color:grey'>Specified covariates not found in one or more grouping files.</p>" else NULL
   revals$warnings_groups$NA_groups <- if(cond_NA_groups) "<p style = 'color:grey'>Specified main effect(s) are not assigned for all samples; samples with missing main effect(s) will be removed. </p>" else NULL
   revals$warnings_groups$reference <- if(cond_NA_groups && cond_iso_nrm) "<p style = 'color:grey'>Note: Reference samples without assigned main effect(s) will still be available for downstream reference normalization.</p>" else NULL
-  
+  revals$warnings_groups$pairs <- if(!cond_pairs) "<p style = 'color:grey'>Please enter all pairing information.</p>" else NULL
   
   groups_not_applied <- is.null(attributes(objects$omicsData)$group_DF)
   
