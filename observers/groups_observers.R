@@ -27,10 +27,17 @@ makegroup <- function(){
         
         cov_type = c(input$cv_type_1_2, input$cv_type_2_2)
         
+        pair_id = if(isTRUE(input$pair_id_col_2 == "None") | !isTruthy(input$pair_id_col_2)) NULL else input$pair_id_col_2
+        pair_group = if(isTRUE(input$pair_group_col_2 == "None") | !isTruthy(input$pair_group_col_2)) NULL else input$pair_group_col_2
+        pair_denom = if(isTRUE(input$pair_denom_col_2 == "None") | !isTruthy(input$pair_denom_col_2)) NULL else input$pair_denom_col_2
+        
         tmp <- group_designation(tmp,
                                  main_effects = main_effects_2(),
                                  covariates = covariates_2(),
-                                 cov_type = cov_type
+                                 cov_type = cov_type,
+                                 pair_id = pair_id,
+                                 pair_group = pair_group,
+                                 pair_denom = pair_denom
         )
         
         if (input$usevizsampnames == "Yes") {
@@ -75,10 +82,17 @@ makegroup <- function(){
       
       cov_type = c(input$cv_type_1, input$cv_type_2)
       
+      pair_id = if(isTRUE(input$pair_id_col == "None") | !isTruthy(input$pair_id_col)) NULL else input$pair_id_col
+      pair_group = if(isTRUE(input$pair_group_col == "None") | !isTruthy(input$pair_group_col)) NULL else input$pair_group_col
+      pair_denom = if(isTRUE(input$pair_denom_col == "None") | !isTruthy(input$pair_denom_col)) NULL else input$pair_denom_col
+      
       tmp <- group_designation(tmp,
                                main_effects = main_effects(),
                                covariates = covariates(),
-                               cov_type = cov_type
+                               cov_type = cov_type,
+                               pair_id = pair_id,
+                               pair_group = pair_group,
+                               pair_denom = pair_denom
       )
       
       if (input$usevizsampnames == "Yes") {
@@ -119,44 +133,6 @@ observeEvent(c(input$file_fdata, input$file_fdata_2), {
   }
 
   toggle("ok_fdata_upload", condition = cond)
-})
-
-# create 4 observers which maintain mutual exclusivity of main effects and covariates
-lapply(list("gcol1", "gcol2", "cvcol1", "cvcol2"), function(el) {
-  all_inputs <- list("gcol1", "gcol2", "cvcol1", "cvcol2")
-  observeEvent(c(sapply(all_inputs[-which(all_inputs == el)], function(x) input[[x]]), f_data()), {
-    req(!is.null(input$fdata_id_col) && !is.null(f_data()))
-
-    revals[[el]] <- input[[el]]
-    updateSelectInput(session, el,
-      choices = c("None", 
-                  setdiff(
-                    colnames(f_data()),
-                    c(input$fdata_id_col, 
-                      sapply(all_inputs[-which(all_inputs == el)], function(x) input[[x]]))
-                    )
-                  ),
-      selected = input[[el]]
-    )
-  })
-})
-
-# similarly for the case of two files
-lapply(list("gcol1_2", "gcol2_2", "cvcol1_2", "cvcol2_2"), function(el) {
-  
-  all_inputs <- list("gcol1_2", "gcol2_2", "cvcol1_2", "cvcol2_2")
-  observeEvent(c(sapply(all_inputs[-which(all_inputs == el)], function(x) input[[x]]), f_data_2()), {
-    req(input$fdata_id_col_2, f_data_2())
-
-    revals[[el]] <- input[[el]]
-    updateSelectInput(session, el,
-      choices = c("None", setdiff(
-        colnames(f_data_2()),
-        c(input$fdata_id_col_2, sapply(all_inputs[-which(all_inputs == el)], function(x) input[[x]]))
-      )),
-      selected = input[[el]]
-    )
-  })
 })
 
 # apply group designation
@@ -259,7 +235,11 @@ observe({
     cond_files <- !is.null(input$file_fdata) & !is.null(input$file_fdata_2)
     cond_idcol_fdata <- all(isTRUE(input$fdata_id_col %in% colnames(f_data())), isTRUE(input$fdata_id_col_2 %in% colnames(f_data_2())))
     cond_sample_names <- all(f_data()[[fdata_idcol1]] %in% sample_names(), f_data_2()[[fdata_idcol2]] %in% sample_names_2())
+    cond_pairs <- all(isTRUE(input$pair_col %in% colnames(f_data())), isTRUE(input$pair_col_2 %in% colnames(f_data_2())))
+    
     cond_main_effects <- all(c(length(main_effects()), length(main_effects_2())) != 0, main_effects() %in% colnames(f_data()), main_effects_2() %in% colnames(f_data_2()))
+    cond_main_effects <- cond_main_effects | cond_pairs # main effect can be left blank if pairing present
+    
     cond_covariates <- if (all(c(length(covariates()), length(covariates_2())) == 0)) TRUE else all(covariates() %in% colnames(f_data()), covariates_2() %in% colnames(f_data_2()))
     cond_NA_groups <- any(is.na(f_data()[main_effects()])) || any(is.na(f_data_2()[main_effects()]))
     cond <- all(cond_files, cond_idcol_fdata, cond_main_effects, cond_covariates, cond_sample_names)
@@ -271,11 +251,16 @@ observe({
     cond_files <- !is.null(input$file_fdata)
     cond_idcol_fdata <- isTRUE(input$fdata_id_col %in% colnames(f_data()))
     cond_sample_names <- all(f_data()[[fdata_idcol1]] %in% sample_names())
+    cond_pairs <- isTRUE(input$pair_col %in% colnames(f_data()))
+    
     cond_main_effects <- (length(main_effects()) != 0) & all(main_effects() %in% colnames(f_data()))
+    cond_main_effects <- cond_main_effects | cond_pairs # main effect can be left blank if pairing present
+    
     cond_covariates <- if (length(covariates() == 0)) TRUE else all(covariates() %in% colnames(f_data()))
     cond_NA_groups <- any(is.na(f_data()[main_effects()]))
     cond_iso_nrm <- inherits(objects$omicsData, "pepData") && 
                         input$labeled_yn == "iso"
+    
 
     cond <- all(cond_files, cond_idcol_fdata, cond_main_effects, cond_covariates, cond_sample_names)
   }

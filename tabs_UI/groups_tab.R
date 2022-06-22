@@ -28,33 +28,61 @@ groups_UI <- function() {
           )
           ),
           # ID column collapse sub-div
-          bsCollapsePanel(div(
-            "Specify Main Effects and Covariates",
-            tipify(
-              span(style = "color:rgb(0,191,255)", icon("question-sign", lib = "glyphicon")), 
-              title = ttext_[["MAIN_EFFECTS_INFO"]]
+          bsCollapsePanel(
+            div(
+              "Specify Main Effects and Covariates",
+              tipify(
+                span(style = "color:rgb(0,191,255)", icon("question-sign", lib = "glyphicon")), 
+                title = ttext_[["MAIN_EFFECTS_INFO"]]
+              ),
+              hidden(div(id = "ok_fdata_idcols", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
             ),
-            hidden(div(id = "ok_fdata_idcols", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
+            value = "fdata_columns",
+            hidden(div(id = "js_fdata_id_col", uiOutput("fdata_id_col"))),
+            fluidRow(
+              column(
+                6,
+                uiOutput("group_col1"),
+                uiOutput("group_col2"),
+                uiOutput("cv_col1"),
+                uiOutput("cv_col2"),
+                uiOutput("pairing_col_1")
+              ),
+              column(
+                6,
+                uiOutput("group_col1_2"),
+                uiOutput("group_col2_2"),
+                uiOutput("cv_col1_2"),
+                uiOutput("cv_col2_2"),
+                uiOutput("pairing_col_2")
+              )
+            ),
+            uiOutput("covariates_type_picker_UI_wrapper")
           ),
-          value = "fdata_columns",
-          hidden(div(id = "js_fdata_id_col", uiOutput("fdata_id_col"))),
-          fluidRow(
-            column(
-              6,
-              uiOutput("group_col1"),
-              uiOutput("group_col2"),
-              uiOutput("cv_col1"),
-              uiOutput("cv_col2")
+          bsCollapsePanel(
+            div(
+              "Specify Pairing Structure",
+              tipify(
+                span(style = "color:rgb(0,191,255)", icon("question-sign", lib = "glyphicon")), 
+                title = ttext_[["PAIRING_INFO"]]
+              ),
+              hidden(div(id = "ok_fdata_pair_cols", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
             ),
-            column(
-              6,
-              uiOutput("group_col1_2"),
-              uiOutput("group_col2_2"),
-              uiOutput("cv_col1_2"),
-              uiOutput("cv_col2_2")
+            value = "pair_columns",
+            fluidRow(
+              column(
+                6,
+                uiOutput("pairing_id_col"),
+                uiOutput("pairing_group_col"),
+                uiOutput("pairing_denom_col")
+              ),
+              column(
+                6,
+                uiOutput("pairing_id_col_2"),
+                uiOutput("pairing_group_col_2"),
+                uiOutput("pairing_denom_col_2")
+              )
             )
-          ),
-          uiOutput("covariates_type_picker_UI_wrapper")
           )
         ), # parent collapse
         disabled(bsButton("group_designation", "Apply Grouping", style = "primary")),
