@@ -35,6 +35,7 @@ ttext_ <- list(
   IMD_INTERACTIVE_MANY_POINTS = "If your data has many biomolecules, creating an interactive plot may take a while.",
   MAIN_EFFECTS_INFO = "Main effects are the variables of interest, those values across which you want to make comparisons.  Covariates are those values that are not of experimental interest, but must be controlled for in the statistics.",
   MISSING_DATA_REPLACE = "The value specified here will be replaced by NA in the data file.  If missing values are already NA in your data or the missing values are zeros in your abundance data, then you do not have to specify this field.",
+  PAIRING_INFO = "If your samples are paired, three pieces of information are needed:  The column specifying which pairs of samples go together, the column specifying which group or side of the pairing each sample is in, and which group is to be subtracted from the other.",
   RMD_PROP_MISSING_WARNING = "We advise against using proportion missing as a metric in lipidomics/metabolomics data, as they often have a very low proportion missing.",
   RMD_CUSTOM_FILTER_INFO = "If you want to filter out one or more samples based on inspection of the rMd metrics and not a p-value cutoff, note their names and use a custom sample filter from the sample filters section to remove them.",
   ROLLUP_DISABLE_INFO = "Your data has already been rolled up to the protein level, if you would like to revert to the peptide level, go back to the filter page and re-apply your filters (you may need to re-do other steps that happened after the filter tab.)",

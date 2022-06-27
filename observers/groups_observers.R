@@ -221,6 +221,19 @@ observeEvent(sample_names(), {
   toggleState("download_fdata", condition = !is.null(sample_names()))
 })
 
+#'@details Toggle the 'complete' checkmark for pairing structure collapsepanel.
+observeEvent(c(
+  input$pair_id_col, 
+  input$pair_id_col_2,
+  input$pair_group_col,
+  input$pair_group_col_2,
+  input$pair_denom_col,
+  input$pair_denom_col_2
+  ), {
+
+  toggle("ok_fdata_pair_cols", condition = pairs_complete()[['valid']])
+})
+
 # error checking for groups tab
 observe({
   # 2 file lipid conditions:
@@ -235,29 +248,13 @@ observe({
     cond_files <- !is.null(input$file_fdata) & !is.null(input$file_fdata_2)
     cond_idcol_fdata <- all(isTRUE(input$fdata_id_col %in% colnames(f_data())), isTRUE(input$fdata_id_col_2 %in% colnames(f_data_2())))
     cond_sample_names <- all(f_data()[[fdata_idcol1]] %in% sample_names(), f_data_2()[[fdata_idcol2]] %in% sample_names_2())
-    cond_pairs <- all(isTRUE(input$pair_col %in% colnames(f_data())), isTRUE(input$pair_col_2 %in% colnames(f_data_2())))
-    
     cond_main_effects <- all(c(length(main_effects()), length(main_effects_2())) != 0, main_effects() %in% colnames(f_data()), main_effects_2() %in% colnames(f_data_2()))
-    cond_main_effects <- cond_main_effects | cond_pairs # main effect can be left blank if pairing present
+    cond_main_effects <- cond_main_effects | pairs_complete()[["valid"]] # main effect can be left blank if pairing present
     
     cond_covariates <- if (all(c(length(covariates()), length(covariates_2())) == 0)) TRUE else all(covariates() %in% colnames(f_data()), covariates_2() %in% colnames(f_data_2()))
     cond_NA_groups <- any(is.na(f_data()[main_effects()])) || any(is.na(f_data_2()[main_effects()]))
     
-    cond_pairs1 <- if (isTruthy(input$pair_id_col != "None")) {
-      isTruthy(input$pair_group_col != "None") & isTruthy(input$pair_denom_col != "None")
-    } else {
-      TRUE
-    }
-    
-    cond_pairs2 <- if (isTruthy(input$pair_id_col_2 != "None")) {
-      isTruthy(input$pair_group_col_2 != "None") & isTruthy(input$pair_denom_col_2 != "None")
-    } else {
-      TRUE
-    }
-    
-    cond_pairs <- cond_pairs1 & cond_pairs2
-    
-    cond <- all(cond_files, cond_idcol_fdata, cond_main_effects, cond_covariates, cond_sample_names, cond_pairs)
+    cond <- all(cond_files, cond_idcol_fdata, cond_main_effects, cond_covariates, cond_sample_names, pairs_complete()[['pass']])
   }
   # otherwise check:
   # input column exists in fdata
@@ -266,33 +263,26 @@ observe({
     cond_files <- !is.null(input$file_fdata)
     cond_idcol_fdata <- isTRUE(input$fdata_id_col %in% colnames(f_data()))
     cond_sample_names <- all(f_data()[[fdata_idcol1]] %in% sample_names())
-    cond_pairs <- isTRUE(input$pair_col %in% colnames(f_data()))
     
     cond_main_effects <- (length(main_effects()) != 0) & all(main_effects() %in% colnames(f_data()))
-    cond_main_effects <- cond_main_effects | cond_pairs # main effect can be left blank if pairing present
+    cond_main_effects <- cond_main_effects | pairs_complete()[["valid"]] # main effect can be left blank if pairing present
     
     cond_covariates <- if (length(covariates() == 0)) TRUE else all(covariates() %in% colnames(f_data()))
     cond_NA_groups <- any(is.na(f_data()[main_effects()]))
     cond_iso_nrm <- inherits(objects$omicsData, "pepData") && 
                         input$labeled_yn == "iso"
     
-    cond_pairs <- if (isTruthy(input$pair_id_col != "None")) {
-      isTruthy(input$pair_group_col != "None") & isTruthy(input$pair_denom_col != "None")
-    } else {
-      TRUE
-    }
-
-    cond <- all(cond_files, cond_idcol_fdata, cond_main_effects, cond_covariates, cond_sample_names, cond_pairs)
+    cond <- all(cond_files, cond_idcol_fdata, cond_main_effects, cond_covariates, cond_sample_names, pairs_complete()[['pass']])
   }
 
   revals$warnings_groups$files <- if (!cond_files) "<p style = 'color:grey'>No f_data uploaded or one file missing.</p>" else NULL
   revals$warnings_groups$sample_names <- if (!cond_sample_names) "<p style = 'color:grey'>The chosen sample ID columns do not contain the sample names for one or more files</p>" else NULL
   revals$warnings_groups$idcol_fdata <- if (!cond_idcol_fdata) "<p style = 'color:grey'>Selected ID columns were not found in one or more grouping files.</p>" else NULL
-  revals$warnings_groups$main_effects <- if (!cond_main_effects) "<p style = 'color:grey'>No main effect specified or not found in one or more grouping files.</p>" else NULL
+  revals$warnings_groups$main_effects <- if (!cond_main_effects) "<p style = 'color:grey'>No main effect or pairing structure specified or main effects not found in one or more grouping files.</p>" else NULL
   revals$warnings_groups$covariates <- if (!cond_covariates) "<p style = 'color:grey'>Specified covariates not found in one or more grouping files.</p>" else NULL
   revals$warnings_groups$NA_groups <- if(cond_NA_groups) "<p style = 'color:grey'>Specified main effect(s) are not assigned for all samples; samples with missing main effect(s) will be removed. </p>" else NULL
   revals$warnings_groups$reference <- if(cond_NA_groups && cond_iso_nrm) "<p style = 'color:grey'>Note: Reference samples without assigned main effect(s) will still be available for downstream reference normalization.</p>" else NULL
-  revals$warnings_groups$pairs <- if(!cond_pairs) "<p style = 'color:grey'>Please enter all pairing information.</p>" else NULL
+  revals$warnings_groups$pairs <- if(!pairs_complete()[['pass']]) "<p style = 'color:grey'>Please enter all pairing information.</p>" else NULL
   
   groups_not_applied <- is.null(attributes(objects$omicsData)$group_DF)
   

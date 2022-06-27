@@ -381,6 +381,7 @@ list(
   
   output$pairing_group_col <- renderUI({
     req(!is.null(f_data()))
+    req(isTruthy(input$pair_id_col != "None"))
     pickerInput("pair_group_col", "Select pair group column",
                 choices = c(
                   "None",
@@ -396,11 +397,12 @@ list(
   
   output$pairing_denom_col <- renderUI({
     req(!is.null(f_data()))
+    req(isTruthy(input$pair_id_col != "None"))
     validate(need(isTruthy(input$pair_group_col != "None"), "Choose a pair grouping column"))
     
     choices = unique(f_data()[[input$pair_group_col]])
     
-    pickerInput("pair_denom_col", "Which pair id represents the denominator",
+    pickerInput("pair_denom_col", "Which group id represents the 'denominator'",
                 choices = choices,
                 options = pickerOptions(dropupAuto = FALSE)
     )
@@ -480,6 +482,7 @@ list(
   
   output$pairing_group_col_2 <- renderUI({
     req(!is.null(f_data_2()))
+    req(isTruthy(input$pair_id_col_2 != "None"))
     pickerInput("pair_group_col_2", "Select pair group column",
                 choices = c(
                   "None",
@@ -495,11 +498,12 @@ list(
   
   output$pairing_denom_col_2 <- renderUI({
     req(!is.null(f_data_2()))
+    req(isTruthy(input$pair_id_col_2 != "None"))
     validate(need(isTruthy(input$pair_group_col_2 != "None"), "Choose a pair grouping column"))
     
     choices = unique(f_data_2()[[input$pair_group_col_2]])
     
-    pickerInput("pair_denom_col_2", "Which pair id represents the denominator",
+    pickerInput("pair_denom_col_2", "Which group id represents the denominator",
                 choices = choices,
                 options = pickerOptions(dropupAuto = FALSE)
     )
