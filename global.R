@@ -75,6 +75,20 @@ global_input_choices = list(
 
 NULLSELECT_ = "__nullselect__"
 
+#'@details the data-value (html) attribute of all dropdowns
+TAB_IDS <- list(
+  "upload_and_datareqs",
+  "group_samples_tab",
+  "reference_tab",
+  "data_summary_tab",
+  "filter_tab",
+  "normalization_tab",
+  "peptide_statistics_tab",
+  "protein_rollup_tab",
+  "statistics_tab",
+  "download_tab"
+)
+
 # global observers, modal UI elements, helper functions
 source("UI_helper_functions.R", local = TRUE)
 
