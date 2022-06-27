@@ -82,7 +82,7 @@ list(
           message(paste("Loading data through", Tab, "tab"))
           
           # These tabs will need to be disabled regardless
-          js$disableTab("Upload")
+          js$disableTab("upload_and_datareqs")
           js$disableTab("group_samples_tab")
           js$disableTab("data_summary_tab")
           js$disableTab("filter_tab")
