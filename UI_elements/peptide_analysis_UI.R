@@ -243,52 +243,67 @@ output$peptide_imdanova_test_method_UI <- renderUI({
   filt_method <- get_filters(objects$omicsData, "imdanovaFilt", "method") %>% 
     unlist()
   
+  choices = c(
+    "ANOVA" = "anova",
+    "G-Test" = "gtest",
+    "Combined" = "combined"
+  )
+  
   if (is.null(filt_method) || 'combined' %in% filt_method) {
     groupsizes <- pmartR:::get_group_table(objects$omicsData)
     groupsizes <- groupsizes[groupsizes > 1]
     groupsizes <- groupsizes[names(groupsizes) %in% unlist(comp_df_holder$comp_df[1:2])]
     
-    if (any(groupsizes < 3)) {
-      disabler <- c(
-        "ANOVA" = "anova",
-        "G-Test" = "gtest",
-        "Combined" = "combined"
-      ) %in% c("gtest", "combined")
+    # disable g-test for small group sizes and paired data
+    if (any(groupsizes < 3) | omicsData_paired())  {
+      disabler <- choices %in% c("gtest", "combined")
     } else {
       disabler <- NULL
     }
   } else {
-    disabler <- !(c(
-      "ANOVA" = "anova",
-      "G-Test" = "gtest",
-      "Combined" = "combined"
-    ) %in% filt_method)
+    disabler <- !(choices %in% filt_method)
   }
   
-  choicesOpt <-  list(subtext = c(
-    "Requires 2+ members per group",
-    "Requires 3+ members per group",
-    "Requires 3+ members per group"
-  ))
+  choicesOpt <-  list()
+  content <- NULL
+  
+  disable_reasons <- c(
+    "ANOVA" = "Requires 2+ members per group",
+    "G-Test" = "Requires 3+ members per group.  Cannot be run on paired data.",
+    "Combined" = "Requires 3+ members per group.  Cannot be run on paired data."
+  )
+  
+  disable_reasons <- if(!is.null(disabler)) {
+    disable_reasons[disabler]
+  } else disable_reasons
+  
+  disable_reasons <- lapply(names(disable_reasons), function(name) {
+    sprintf("%s:  %s", name, disable_reasons[name])
+  }) %>% paste(collapse = "&#013;&#010;")
   
   if (is.null(disabler)) {
     invisible()
+    tmp_tooltip = NULL
   } else {
     choicesOpt[['disabled']] = disabler
+    tmp_tooltip = tipify(blueexcl, title = disable_reasons)
   }
   
   return(
-    pickerInput("peptide_imdanova_test_method",
-                "Test method:",
-                c(
-                  "ANOVA" = "anova",
-                  "G-Test" = "gtest",
-                  "Combined" = "combined"
-                ),
-                selected = input$peptide_imdanova_test_method,
-                options = pickerOptions(maxOptions = 1),
-                multiple = TRUE,
-                choicesOpt = choicesOpt
+    div(class = "inline-wrapper-1",
+      pickerInput("peptide_imdanova_test_method",
+                  "Test method:",
+                  c(
+                    "ANOVA" = "anova",
+                    "G-Test" = "gtest",
+                    "Combined" = "combined"
+                  ),
+                  selected = input$peptide_imdanova_test_method,
+                  options = pickerOptions(maxOptions = 1),
+                  multiple = TRUE,
+                  choicesOpt = choicesOpt
+      ),
+      tmp_tooltip
     )
   )
   
