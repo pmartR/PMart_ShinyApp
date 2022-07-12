@@ -1,7 +1,7 @@
 e_data <- reactive({
   
   # This function has a MAP version
-  if (MAP) {
+  if (MAP_ACTIVE) {
     
     # Error handling: Need edata
     req(input$file_edata)

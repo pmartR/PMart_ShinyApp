@@ -19,7 +19,7 @@ library(reshape2)
 ######## GLOBAL VALUES ##########
 
 # Pull app version from global variable
-MAP <- ifelse(Sys.getenv("MAP_VERSION") == "1", TRUE, FALSE)
+MAP_ACTIVE <- ifelse(Sys.getenv("MAP_VERSION") == "1", TRUE, FALSE)
 
 # static objects
 filter_names <- read.csv("./filter_names.csv", stringsAsFactors = F, check.names = F)

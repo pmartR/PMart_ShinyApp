@@ -339,7 +339,7 @@ observeEvent(input$file_emeta, {
 }, priority = 10)
 
 
-if (MAP) {
+if (MAP_ACTIVE) {
   observe({
     Sys.sleep(3)
     if (is.null(MapConnect$Project) == FALSE) {

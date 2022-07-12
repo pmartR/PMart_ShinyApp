@@ -163,7 +163,7 @@ shinyServer(function(session, input, output) {
     contentType = "application/zip"
   )
   
-  if (MAP) {
+  if (MAP_ACTIVE) {
     
     # Connect to map data access library
     library(mapDataAccess)
@@ -171,8 +171,10 @@ shinyServer(function(session, input, output) {
     # Soure MAP-specific functionality (reading from header, etc)
     source("./MAP_Functions.R", local = TRUE)
     
+    cfg_path = if(isTruthy(Sys.getenv("MAP_CONFIG"))) Sys.getenv("MAP_CONFIG") else "./cfg/minio_config.yml"
+    
     # Create a reactive value to hold MAP-specific objects
-    MapConnect <- reactiveValues(MapConnect = map_data_connection("./cfg/minio_config.yml"),
+    MapConnect <- reactiveValues(MapConnect = map_data_connection(cfg_path),
                                  Project = NULL, Midpoint = NULL)
     
   } else {
