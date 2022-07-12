@@ -60,7 +60,7 @@ list(
           updateRadioGroupButtons(session, "labeled_yn", selected = "iso")
         }
         
-      } else if (class(pullData) == "midpoint pmart"){
+      } else if (class(pullData) == "midpoint pmart") {
         
         # If the object isn't a project, then it's a midpoint
         MidPointFile <- pullData
@@ -72,60 +72,56 @@ list(
                 MidPointFile$Tracking$`Original Files`$Project$DataType, "data...</div>")
         )
         
-        # Ensure this is a pmart app midpoint file
-        if (class(MidPointFile) == "midpoint pmart") {
+        # Freeze all pages up to "Tab"
+        MapConnect$Midpoint <- MidPointFile
+        Tab <- MidPointFile$Tracking$Tab
         
-          # Freeze all pages up to "Tab"
-          MapConnect$Midpoint <- MidPointFile
-          Tab <- MidPointFile$Tracking$Tab
-          
-          message(paste("Loading data through", Tab, "tab"))
-          
-          # These tabs will need to be disabled regardless
-          js$disableTab("upload_and_datareqs")
-          js$disableTab("group_samples_tab")
-          js$disableTab("data_summary_tab")
-          js$disableTab("filter_tab")
-          js$disableTab("normalization_tab")
-          
-          # Add additional tabs depending on what kind of data was exported
-          if (Tab %in% c("peptide_statistics_tab", "protein_rollup_tab", "statistics_tab")) {
-            js$disableTab("peptide_statistics_tab")
-          } 
-          if (Tab %in% c("protein_rollup_tab", "statistics_tab")) {
-            js$disableTab("protein_rollup_tab")
-          } 
-          if (Tab == "statistics_tab") {
-            js$disableTab("statistics_tab")
-          }
-          
-          # Jump to a specific tab if protein data 
-          if (class(MidPointFile$`Data Objects`$OmicsData) == "pepData") {
-            if (Tab == "normalization_tab") {
-              js$enableTab("peptide_statistics_tab")
-              js$enableTab("protein_rollup_tab")
-              updateTabsetPanel(session, inputId = "top_page", selected = "peptide_statistics_tab")
-            } else if (Tab == "peptide_statistics_tab") {
-              js$enableTab("protein_rollup_tab")
-              updateTabsetPanel(session, inputId = "top_page", selected = "protein_rollup_tab")
-            }
-          } else {
-            updateTabsetPanel(session, inputId = "top_page", selected = "statistics_tab")
-          }
-          
-          # Load omics data 
-          objects$omicsData <- MidPointFile$`Data Objects`$OmicsData
-          objects$peptide_imdanova_res <-  MidPointFile$`Data Objects`$OmicsStatsPep
-          objects$imdanova_res <-  MidPointFile$`Data Objects`$OmicsStats
-    
-        } else {
-          
-          sendSweetAlert(session, "Wrong MidPoint File Upload!", 
-                         "Please email david.degnan@pnnl.gov if you see this error.", "error")
-          
+        message(paste("Loading data through", Tab, "tab"))
+        
+        # These tabs will need to be disabled regardless
+        js$disableTab("upload_and_datareqs")
+        js$disableTab("group_samples_tab")
+        js$disableTab("data_summary_tab")
+        js$disableTab("filter_tab")
+        js$disableTab("normalization_tab")
+        
+        # Add additional tabs depending on what kind of data was exported
+        if (Tab %in% c("peptide_statistics_tab", "protein_rollup_tab", "statistics_tab")) {
+          js$disableTab("peptide_statistics_tab")
+        } 
+        if (Tab %in% c("protein_rollup_tab", "statistics_tab")) {
+          js$disableTab("protein_rollup_tab")
+        } 
+        if (Tab == "statistics_tab") {
+          js$disableTab("statistics_tab")
         }
         
+        # Jump to a specific tab if protein data 
+        if (class(MidPointFile$`Data Objects`$OmicsData) == "pepData") {
+          if (Tab == "normalization_tab") {
+            js$enableTab("peptide_statistics_tab")
+            js$enableTab("protein_rollup_tab")
+            updateTabsetPanel(session, inputId = "top_page", selected = "peptide_statistics_tab")
+          } else if (Tab == "peptide_statistics_tab") {
+            js$enableTab("protein_rollup_tab")
+            updateTabsetPanel(session, inputId = "top_page", selected = "protein_rollup_tab")
+          }
+        } else {
+          updateTabsetPanel(session, inputId = "top_page", selected = "statistics_tab")
+        }
+        
+        # Load omics data 
+        objects$omicsData <- MidPointFile$`Data Objects`$OmicsData
+        objects$peptide_imdanova_res <-  MidPointFile$`Data Objects`$OmicsStatsPep
+        objects$imdanova_res <-  MidPointFile$`Data Objects`$OmicsStats
+    
+        } else {
+        
+        sendSweetAlert(session, "Uploaded object type not recognized.", 
+                       "Please email david.degnan@pnnl.gov if you see this error.", "error")
+        
       }
+      
     
     }
     

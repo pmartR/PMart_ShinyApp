@@ -60,7 +60,11 @@ observe({
   toggleTab("statistics_tab", condition = !cond2 & !cond3 & omicsdata_exists)
 })
 
+#'@details Disable all tabs until omicsData object exists
 observe({
+  # Midpoints will have enabled necessary tabs
+  req(is.null(MapConnect$Midpoint))
+  
   to_disable_ids <- setdiff(
     TAB_IDS,
     c(
@@ -82,4 +86,4 @@ observe({
     toggleTab(dtab, condition = !is.null(objects$omicsData))
   } 
   
-})
+}, priority = 10)

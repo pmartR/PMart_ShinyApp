@@ -84,7 +84,7 @@ ui <- function(request) {
           bsButton("saveplot", "Save Last Plot", style = "info")
         )),
         # Add UI if MAP is enabled
-        if (MAP) {
+        if (MAP_ACTIVE) {
           div(id = "js_midpoint", style = "vertical-align:top",
               bsButton("exportMid", "Save and Export Progress", style = "success")
           )

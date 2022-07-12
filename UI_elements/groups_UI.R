@@ -41,7 +41,7 @@ list(
     else {
       
       # Add different UI for MAP
-      if (MAP) {
+      if (MAP_ACTIVE) {
         
         # Set FileName to an empty string
         FileName <- ""

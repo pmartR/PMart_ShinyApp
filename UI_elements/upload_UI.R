@@ -34,7 +34,7 @@ list(
     }
     else {
       
-      if (MAP) {
+      if (MAP_ACTIVE) {
 
         div(
           id = "js_file_edata",
@@ -161,7 +161,7 @@ list(
   # emeta upload sub-panel
   output$emeta_UI <- renderUI({
     
-    if (MAP) {
+    if (MAP_ACTIVE) {
       fname_tmp = MapConnect$Project$Data$e_meta_filename
       fname_tmp = if(is.null(fname_tmp)) {
         "No e_meta file found - indicate no e_meta."

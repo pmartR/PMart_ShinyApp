@@ -1,7 +1,7 @@
 f_data <- reactive({
   
   # MAP-specific version
-  if (MAP) {
+  if (MAP_ACTIVE) {
     
     ## UPDATED FOR MAP ##
     req(input$file_fdata)
