@@ -76,15 +76,15 @@
     },
     "pmartR": {
       "Package": "pmartR",
-      "Version": "0.10.0",
+      "Version": "2.0.6",
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteRepo": "pmartR",
       "RemoteUsername": "pmartR",
-      "RemoteRef": "imdCov",
-      "RemoteSha": "50bce66ec4d635cdff19943aa4d41cfa8f43511e",
-      "Hash": "b45a73df2959722ad6564e65b056df87"
+      "RemoteRef": "develop",
+      "RemoteSha": "df9a21fbb48b89271b296bd773ca6fee2f14cca7",
+      "Hash": "7b04b3a1fefd2da4d7a5ec4af42ebd8f"
     },
     "purrr": {
       "Package": "purrr",
