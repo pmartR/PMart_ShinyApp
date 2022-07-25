@@ -255,13 +255,18 @@ output$peptide_imdanova_test_method_UI <- renderUI({
     groupsizes <- groupsizes[names(groupsizes) %in% unlist(comp_df_holder$comp_df[1:2])]
     
     # disable g-test for small group sizes and paired data
-    if (any(groupsizes < 3) | omicsData_paired())  {
+    if (any(groupsizes < 3))  {
       disabler <- choices %in% c("gtest", "combined")
     } else {
-      disabler <- NULL
+      disabler <- rep(F, length(choices))
     }
   } else {
     disabler <- !(choices %in% filt_method)
+  }
+  
+  # disable gtest and combined for paired data
+  if(omicsData_paired()) {
+    disabler = disabler | choices %in% c("gtest", "combined")
   }
   
   choicesOpt <-  list()
@@ -273,7 +278,7 @@ output$peptide_imdanova_test_method_UI <- renderUI({
     "Combined" = "Requires 3+ members per group.  Cannot be run on paired data."
   )
   
-  disable_reasons <- if(!is.null(disabler)) {
+  disable_reasons <- if(any(disabler)) {
     disable_reasons[disabler]
   } else disable_reasons
   
@@ -281,8 +286,7 @@ output$peptide_imdanova_test_method_UI <- renderUI({
     sprintf("%s:  %s", name, disable_reasons[name])
   }) %>% paste(collapse = "&#013;&#010;")
   
-  if (is.null(disabler)) {
-    invisible()
+  if (!any(disabler)) {
     tmp_tooltip = NULL
   } else {
     choicesOpt[['disabled']] = disabler
