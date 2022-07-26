@@ -90,8 +90,7 @@ observeEvent(input$apply_imdanova, {
         test_method = input$imdanova_test_method,
         pval_adjust_a = pval_adjust_a,
         pval_adjust_g = pval_adjust_g,
-        pval_thresh = input$pval_thresh,
-        covariates = input$imdanova_covariates_picker
+        pval_thresh = input$pval_thresh
       )
       
       pval_adjust_modal_text <- switch(

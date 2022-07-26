@@ -43,7 +43,7 @@ makeobject <- function(use_iso = T){
       object_fn(
         e_data = edata, e_meta = emeta, f_data = fdata,
         edata_cname = edata_cname, emeta_cname = emeta_cname, fdata_cname = "SampleId",
-        data_scale = data_scale, norm_info = list(is_normalized = norm_info),
+        data_scale = data_scale, is_normalized = norm_info,
         check.names = F
       ) %>%
         edata_replace(na_replace, NA)
@@ -63,7 +63,7 @@ makeobject <- function(use_iso = T){
           e_data = edata2, e_meta = emeta2, f_data = fdata2,
           edata_cname = edata_cname, emeta_cname = emeta_cname2,
           fdata_cname = "SampleId",
-          data_scale = data_scale, norm_info = list(is_normalized = norm_info)
+          data_scale = data_scale, is_normalized = norm_info
         ) %>%
           edata_replace(na_replace, NA)
       },

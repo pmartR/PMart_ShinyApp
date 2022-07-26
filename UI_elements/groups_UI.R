@@ -302,15 +302,20 @@ list(
     HTML(paste(revals$warnings_groups, collapse = ""))
   }),
 
-  #### UI blocks for main effects and covariates
+  #### UI blocks for main effects, covariates, pairing info
+  
+  # main effects ...
   output$group_col1 <- renderUI({
     req(!is.null(f_data()))
     pickerInput("gcol1", "Select first main effect",
       choices = c(
         "None",
-        setdiff(colnames(f_data()), c(input$fdata_id_col, input$gcol2, input$cvcol1, input$cvcol2))
+        setdiff(
+          colnames(f_data()), 
+          sapply(setdiff(GROUPS_ME_IDS, "gcol1"), function(x) input[[x]])
+        )
       ),
-      selected = revals$gcol1,
+      selected = input$gcol1,
       options = pickerOptions(dropupAuto = FALSE)
     )
   }),
@@ -320,31 +325,86 @@ list(
     pickerInput("gcol2", "Select second main effect",
       choices = c(
         "None",
-        setdiff(colnames(f_data()), c(input$fdata_id_col, input$gcol1, input$cvcol1, input$cvcol2))
+        setdiff(
+          colnames(f_data()), 
+          sapply(setdiff(GROUPS_ME_IDS, "gcol2"), function(x) input[[x]])
+        )
       ),
-      selected = revals$gcol2
+      selected = input$gcol2
     )
   }),
-
+  
+  # ...covariates...
   output$cv_col1 <- renderUI({
     req(!is.null(f_data()))
     pickerInput("cvcol1", "Select first covariate",
       choices = c(
         "None",
-        setdiff(colnames(f_data()), c(input$fdata_id_col, input$gcol1, input$gcol2, input$cvcol2))
+        setdiff(
+          colnames(f_data()), 
+          sapply(setdiff(GROUPS_ME_IDS, "cvcol1"), function(x) input[[x]])
+        )
       ),
-      selected = revals$cvcol1
+      selected = input$cvcol1
     )
   }),
-
+  
   output$cv_col2 <- renderUI({
     req(!is.null(f_data()))
     pickerInput("cvcol2", "Select second covariate",
-      choices = c(
-        "None",
-        setdiff(colnames(f_data()), c(input$fdata_id_col, input$gcol1, input$gcol2, input$cvcol1))
-      ),
-      selected = revals$cvcol2
+                choices = c(
+                  "None",
+                  setdiff(
+                    colnames(f_data()), 
+                    sapply(setdiff(GROUPS_ME_IDS, "cvcol2"), function(x) input[[x]])
+                  )
+                ),
+                selected = input$cvcol2
+    )
+  }),
+  
+  # ...pairs
+  output$pairing_id_col <- renderUI({
+    req(!is.null(f_data()))
+    pickerInput("pair_id_col", "Select pair id column",
+                choices = c(
+                  "None",
+                  setdiff(
+                    colnames(f_data()), 
+                    sapply(setdiff(GROUPS_ME_IDS, "pair_id_col"), function(x) input[[x]])
+                  )
+                ),
+                selected = input$pair_id_col,
+                options = pickerOptions(dropupAuto = FALSE)
+    )
+  }),
+  
+  output$pairing_group_col <- renderUI({
+    req(!is.null(f_data()))
+    req(isTruthy(input$pair_id_col != "None"))
+    pickerInput("pair_group_col", "Select pair group column",
+                choices = c(
+                  "None",
+                  setdiff(
+                    colnames(f_data()), 
+                    sapply(setdiff(GROUPS_ME_IDS, "pair_group_col"), function(x) input[[x]])
+                  )
+                ),
+                selected = input$pair_group_col,
+                options = pickerOptions(dropupAuto = FALSE)
+    )
+  }),
+  
+  output$pairing_denom_col <- renderUI({
+    req(!is.null(f_data()))
+    req(isTruthy(input$pair_id_col != "None"))
+    validate(need(isTruthy(input$pair_group_col != "None"), "Choose a pair grouping column"))
+    
+    choices = unique(f_data()[[input$pair_group_col]])
+    
+    pickerInput("pair_denom_col", "Which group id represents the 'denominator'",
+                choices = choices,
+                options = pickerOptions(dropupAuto = FALSE)
     )
   }),
 
@@ -354,9 +414,12 @@ list(
     pickerInput("gcol1_2", "Select first main effect",
       choices = c(
         "None",
-        setdiff(colnames(f_data_2()), c(input$fdata_id_col_2, input$gcol2_2, input$cvcol1_2, input$cvcol2_2))
+        setdiff(
+          colnames(f_data_2()), 
+          sapply(setdiff(GROUPS_ME_IDS_2, "gcol1_2"), function(x) input[[x]])
+        )
       ),
-      selected = revals$gcol1_2
+      selected = input$gcol1_2
     )
   }),
 
@@ -365,9 +428,12 @@ list(
     pickerInput("gcol2_2", "Select second main effect",
       choices = c(
         "None",
-        setdiff(colnames(f_data_2()), c(input$fdata_id_col_2, input$gcol1_2, input$cvcol1_2, input$cvcol2_2))
+        setdiff(
+          colnames(f_data_2()), 
+          sapply(setdiff(GROUPS_ME_IDS_2, "gcol2_2"), function(x) input[[x]])
+        )
       ),
-      selected = revals$gcol2_2
+      selected = input$gcol2_2
     )
   }),
 
@@ -376,9 +442,12 @@ list(
     pickerInput("cvcol1_2", "Select first covariate",
       choices = c(
         "None",
-        setdiff(colnames(f_data_2()), c(input$fdata_id_col_2, input$gcol1_2, input$gcol2_2, input$cvcol2_2))
+        setdiff(
+          colnames(f_data_2()), 
+          sapply(setdiff(GROUPS_ME_IDS_2, "cvcol1_2"), function(x) input[[x]])
+        )
       ),
-      selected = revals$cvcol1_2
+      selected = input$cvcol1_2
     )
   }),
 
@@ -387,9 +456,56 @@ list(
     pickerInput("cvcol2_2", "Select second covariate",
       choices = c(
         "None",
-        setdiff(colnames(f_data_2()), c(input$fdata_id_col_2, input$gcol1_2, input$gcol2_2, input$cvcol1_2))
+        setdiff(
+          colnames(f_data_2()), 
+          sapply(setdiff(GROUPS_ME_IDS_2, "cvcol2_2"), function(x) input[[x]])
+        )
       ),
-      selected = revals$cvcol2_2
+      selected = input$cvcol2_2
+    )
+  }),
+  
+  output$pairing_id_col_2 <- renderUI({
+    req(!is.null(f_data_2()))
+    pickerInput("pair_id_col_2", "Select pair id column",
+                choices = c(
+                  "None",
+                  setdiff(
+                    colnames(f_data_2()), 
+                    sapply(setdiff(GROUPS_ME_IDS_2, "pair_id_col_2"), function(x) input[[x]])
+                  )
+                ),
+                selected = input$pair_id_col_2,
+                options = pickerOptions(dropupAuto = FALSE)
+    )
+  }),
+  
+  output$pairing_group_col_2 <- renderUI({
+    req(!is.null(f_data_2()))
+    req(isTruthy(input$pair_id_col_2 != "None"))
+    pickerInput("pair_group_col_2", "Select pair group column",
+                choices = c(
+                  "None",
+                  setdiff(
+                    colnames(f_data_2()), 
+                    sapply(setdiff(GROUPS_ME_IDS_2, "pair_group_col_2"), function(x) input[[x]])
+                  )
+                ),
+                selected = input$pair_group_col_2,
+                options = pickerOptions(dropupAuto = FALSE)
+    )
+  }),
+  
+  output$pairing_denom_col_2 <- renderUI({
+    req(!is.null(f_data_2()))
+    req(isTruthy(input$pair_id_col_2 != "None"))
+    validate(need(isTruthy(input$pair_group_col_2 != "None"), "Choose a pair grouping column"))
+    
+    choices = unique(f_data_2()[[input$pair_group_col_2]])
+    
+    pickerInput("pair_denom_col_2", "Which group id represents the denominator",
+                choices = choices,
+                options = pickerOptions(dropupAuto = FALSE)
     )
   }),
   

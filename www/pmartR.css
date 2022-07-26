@@ -40,6 +40,11 @@
   align-items:baseline;
 }
 
+.relative-centered {
+  position: relative;
+  top: 40%;
+}
+
 .inline_top{
   display:inline-block;
   vertical-align:top;
@@ -86,6 +91,28 @@
 .tooltip-wrapper.disabled {
   cursor: not-allowed;
 }
+
+/* Tooltip text */
+.tooltip-wrapper .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 6px;
+ 
+  /* Position the tooltip text - see examples below! */
+  position: absolute;
+  z-index: 1;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip-wrapper:hover .tooltiptext {
+  visibility: visible;
+}
+
+/* end tooltips */
 
 .collapse_page .panel-heading{
   font-weight:bold;
@@ -137,6 +164,12 @@
   animation-iteration-count:infinite;
   animation-fill-mode:both;
   animation-direction:alternate;
+}
+
+.busy {
+  color:deepskyblue;
+  font-weight:bold;
+  margin:5px 0;
 }
 
 @keyframes clicked_bow {

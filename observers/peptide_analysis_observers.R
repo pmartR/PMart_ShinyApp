@@ -93,8 +93,7 @@ observeEvent(input$peptide_apply_imdanova, {
         test_method = input$peptide_imdanova_test_method, 
         pval_adjust_a = pval_adjust_a,
         pval_adjust_g = pval_adjust_g,
-        pval_thresh = input$peptide_pval_thresh,
-        covariates = input$peptide_imdanova_covariates_picker
+        pval_thresh = input$peptide_pval_thresh
       )
       
       if(is.null(objects$omicsData$e_meta)){

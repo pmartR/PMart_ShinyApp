@@ -67,3 +67,54 @@ covariates_2 <- reactive({
     return(covariates_2)
   }
 })
+
+#' @details Booleans to determine the state of pairing structure completion
+#' 
+#' @return List with the following elements:
+#' 
+#' * selected: boolean indicating whether or not the user has selected id columns for pairing
+#' * valid:  boolean indicating if all pairing information has been filled out
+#' * pass: combination of selected and valid, specifically, selected == F OR valid == T
+pairs_complete <- reactive({
+  indicators <- list()
+  
+  if (two_lipids()) {
+    cond_selected1 <- all(
+        isTRUE(input$pair_id_col %in% colnames(f_data())), 
+        isTruthy(input$pair_id_col != "None") 
+    )
+    cond_selected2 <- all(
+        isTRUE(input$pair_id_col_2 %in% colnames(f_data_2())),
+        isTruthy(input$pair_id_col_2 != "None") 
+    )
+    
+    cond_selected = any(cond_selected1, cond_selected2)
+    
+    cond_pairs <- all(
+      cond_selected1,
+      cond_selected2,
+      isTruthy(input$pair_group_col != "None"),
+      isTruthy(input$pair_denom_col != "None"),
+      isTruthy(input$pair_group_col_2 != "None"),
+      isTruthy(input$pair_denom_col_2 != "None")
+    )
+  }
+  else {
+    cond_selected <- all(
+      isTRUE(input$pair_id_col %in% colnames(f_data())),
+      isTruthy(input$pair_id_col != "None")
+    )
+    
+    cond_pairs <- all(
+      cond_selected,
+      isTruthy(input$pair_group_col != "None"), 
+      isTruthy(input$pair_denom_col != "None")
+    )
+  }
+  
+  indicators[["selected"]] = cond_selected
+  indicators[["valid"]] = cond_pairs
+  indicators[["pass"]] = !cond_selected | cond_pairs
+  
+  return(indicators)
+})

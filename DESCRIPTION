@@ -23,6 +23,7 @@ Depends:
   purrr,
   readr,
   renv,
+  reshape2,
   rlang,
   shiny,
   shinyBS,
@@ -32,4 +33,4 @@ Depends:
   shinyjs,
   stringr
 
-  
+

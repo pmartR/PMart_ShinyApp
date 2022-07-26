@@ -17,24 +17,31 @@ RUN apt-get update && apt-get install -y \
     libzmq3-dev \
     libxml2-dev \
     libcurl3-gnutls \
-	vim python3-venv
-    
+	vim python3-venv \
+	automake
+
+USER root 
 WORKDIR /srv/shiny-server/
+
+# Need to set linker flags to install pmartR in linux environment
+RUN mkdir $HOME/.R
+COPY Makevars-docker .
+RUN cp Makevars-docker $HOME/.R/Makevars
 
 # only need this to restore
 COPY renv.lock .
 COPY requirements.txt .
 
 # pre-install renv
-RUN R -e "install.packages('renv', repos = 'https://cran.rstudio.com')"
+ENV RENV_VERSION 0.15.5
+RUN R -e "install.packages('remotes', repos = c(CRAN = 'https://cloud.r-project.org'))"
+RUN R -e "remotes::install_github('rstudio/renv@${RENV_VERSION}')"
 
 # install all packages listed in renv.lock
 RUN --mount=type=secret,id=gitlab_pat export GITLAB_PAT="$(cat /run/secrets/gitlab_pat)" \
 && R -e 'renv::restore()'
 
 # Install python dependencies
-USER root 
-WORKDIR /srv/shiny-server/
 RUN python3 -m venv /venv
 RUN /venv/bin/pip install --upgrade pip
 RUN /venv/bin/pip install -r requirements.txt
