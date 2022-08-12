@@ -63,7 +63,10 @@ observe({
 #'@details Disable all tabs until omicsData object exists
 observe({
   # Midpoints will have enabled necessary tabs
-  req(is.null(MapConnect$Midpoint))
+  if(MAP_ACTIVE){
+    req(exists("MapConnect"))
+    req(is.null(MapConnect$Midpoint)) 
+  }
   
   to_disable_ids <- setdiff(
     TAB_IDS,

@@ -349,7 +349,7 @@ if (MAP_ACTIVE) {
 }
 
 
-if (MAP == FALSE) {
+if (MAP_ACTIVE == FALSE) {
   ## store null values in e_meta if no file chosen since it is not required to make object
   observe({
     if(!isTruthy(as.logical(input$emeta_yn))) {

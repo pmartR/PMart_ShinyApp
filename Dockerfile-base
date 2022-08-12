@@ -41,6 +41,11 @@ RUN R -e "remotes::install_github('rstudio/renv@${RENV_VERSION}')"
 RUN --mount=type=secret,id=gitlab_pat export GITLAB_PAT="$(cat /run/secrets/gitlab_pat)" \
 && R -e 'renv::restore()'
 
+# install commonly updated packages
+RUN --mount=type=secret,id=gitlab_pat export GITLAB_PAT="$(cat /run/secrets/gitlab_pat)" \
+&& R -e "renv::install('gitlab@code.emsl.pnl.gov::multiomics-analyses/mapdataaccess-lib@65977c21bb212fba94ccb9b422dd590aacf5205b')" \
+&& R -e "options(repos=list('CRAN'='https://cran.rstudio.com', 'BioCsoft'='https://bioconductor.org/packages/3.13/bioc'));renv::install('pmartR/pmartR@2d922a3ef3709f5164660210591d15e69ee81f6c')"
+
 # Install python dependencies
 RUN python3 -m venv /venv
 RUN /venv/bin/pip install --upgrade pip
