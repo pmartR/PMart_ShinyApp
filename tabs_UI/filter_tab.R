@@ -1,3 +1,5 @@
+
+
 filter_UI <- function() {
   tabPanel("Filter",
     value = "filter_tab",
@@ -31,40 +33,45 @@ filter_UI <- function() {
 
         hr(),
         # cv filter options
-        fluidRow(
-          column(
-            6,
-            actionButton(
-              inputId = "add_cvfilt",
-              label = div("Add/Remove CV filter", hidden(div(id = "cvfilt_exists", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))),
-              width = "100%"
+        div(
+          id = "cvfilt_UI",
+          fluidRow(
+            column(
+              6,
+              actionButton(
+                inputId = "add_cvfilt",
+                label = div("Add/Remove CV filter", hidden(div(id = "cvfilt_exists", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))),
+                width = "100%"
+              ),
+              actionButton("plot_cvfilt", "Plot this filter", width = "100%")
             ),
-            actionButton("plot_cvfilt", "Plot this filter", width = "100%")
-          ),
-          column(
-            6,
-            uiOutput("cv_threshold_UI")
-          )
-        ),
+            column(
+              6,
+              uiOutput("cv_threshold_UI")
+            )
+          )),
+        
 
         hr(),
         # imd-anova filter options
-        fluidRow(
-          column(
-            6,
-            actionButton(
-              inputId = "add_imdanovafilt",
-              label = div("Add/Remove imd-ANOVA filter", hidden(div(id = "imdanovafilt_exists", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))),
-              width = "100%"
+        div(
+          id = "imdanova_UI",
+          fluidRow(
+            column(
+              6,
+              actionButton(
+                inputId = "add_imdanovafilt",
+                label = div("Add/Remove imd-ANOVA filter", hidden(div(id = "imdanovafilt_exists", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))),
+                width = "100%"
+              ),
+              actionButton("plot_imdanovafilt", "Plot this filter", width = "100%")
             ),
-            actionButton("plot_imdanovafilt", "Plot this filter", width = "100%")
-          ),
-          column(
-            6,
-            numericInput("min_nonmiss_anova", "Minimum number observed to perform ANOVA", 2, step = 1),
-            numericInput("min_nonmiss_gtest", "Minimum number observed to perform G-test", 3, step = 1)
-          )
-        ),
+            column(
+              6,
+              numericInput("min_nonmiss_anova", "Minimum number observed to perform ANOVA", 2, step = 1),
+              numericInput("min_nonmiss_gtest", "Minimum number observed to perform G-test", 3, step = 1)
+            )
+          )),
         hr(),
         # proteomics filter
         div(
@@ -86,7 +93,30 @@ filter_UI <- function() {
               )
             )
           )
-        )
+        ),
+        
+        ## total count filt
+          div(
+            id = "TCfilt_UI",
+            tagList(
+              fluidRow(
+                column(
+                  6,
+                  tags$b("Total Count filter"),
+                  prettySwitch("%s_add_TCfilt",
+                               label = "Add/Remove",
+                               width = "100%"
+                  ),
+                  bsButton(inputId = "preview_TCfilt", "Preview")
+                ),
+                column(
+                  6,
+                  numericInput("min_num_trans", "Minimum number of transcript counts:", 10, step = 1, min = 0)
+                )
+              ),
+              hr()
+            )
+          )
         ), # end biomolecule filter collapse
 
         # sample filters
@@ -95,7 +125,10 @@ filter_UI <- function() {
           hidden(div(id = "ok_meta_filters", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
           ),
         value = "sample_filters",
-          # rmd filter
+
+        # rmd filter
+        div(
+          id = "rmd_UI",
           fluidRow(
             column(
               5,
@@ -125,8 +158,57 @@ filter_UI <- function() {
               pickerInput("rmdfilt_plot_type", "Plot everything or inspect certain samples?", choices = c("Plot all samples" = "all", "Select from all samples" = "subset", "Select from outliers" = "outliers")),
               uiOutput("rmdfilt_plot_type")
             )
-          )
-        ),
+
+          )),
+        hr(),
+        
+        ## RNA_filt - Library
+          div(
+            id = "Libraryfilt_UI",
+            tagList(
+              fluidRow(
+                column(
+                  6,
+                  tags$b("Library size filter"),
+                  prettySwitch(sprintf("%s_add_Libraryfilt", ""),
+                               label = "Add/Remove",
+                               width = "100%"
+                  ),
+                  bsButton(inputId = sprintf("%s_preview_Libraryfilt", ""), "Preview")
+                ),
+                column(
+                  6,
+                  numericInput(sprintf("%s_min_lib_size", ""), "Minimum library size in sample:", value = NULL, step = 1, min = 0)
+                )
+              ),
+              hr()
+            )
+          ),
+        
+        ## RNA_filt - Nonzero
+          div(
+            id = "Nonzerofilt_UI",
+            tagList(
+              fluidRow(
+                column(
+                  6,
+                  tags$b("Non-zero observation filter"),
+                  prettySwitch(sprintf("%s_add_Nonzerofilt", ""),
+                               label = "Add/Remove",
+                               width = "100%"
+                  ),
+                  bsButton(inputId = sprintf("%s_preview_Libraryfilt", ""), "Preview")
+                ),
+                column(
+                  6,numericInput(sprintf("%s_min_nonzero", ""), 
+                                 "Minimum number of nonzero observations:", 
+                                 value = NULL, step = 1, min = 0)
+                )
+              ),
+              hr()
+            ))
+          ),
+        
         # custom filter
         bsCollapsePanel(
           div(

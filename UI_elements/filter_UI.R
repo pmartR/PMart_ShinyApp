@@ -533,32 +533,32 @@ list(
   }),
   
   # Conditional UI for proteomics filter, invisible if the object is not pepData with protein column
-  output$profilt_UI <- renderUI({
-    if (class(objects$omicsData) == "pepData") {
-      tagList(
-        fluidRow(
-          column(
-            6,
-            actionButton("add_profilt",
-              label = div("add/remove proteomics filter", hidden(div(id = "profilt_exists", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))),
-              width = "100%"
-            ),
-            actionButton("plot_profilt", "Plot this filter", width = "100%"),
-            actionButton("remove_profilt", "Remove proteomics filter", width = "100%")
-          ),
-          column(
-            6,
-            numericInput("min_num_peps", "Minimum number of peptides mapped to each protein:", 2, step = 1),
-            checkboxInput("degen_peps", "Remove Degenerate Peptides?", TRUE)
-          )
-        ),
-        hr()
-      )
-    }
-    else {
-      NULL
-    }
-  }),
+  # output$profilt_UI <- renderUI({
+  #   if (class(objects$omicsData) == "pepData") {
+  #     tagList(
+  #       fluidRow(
+  #         column(
+  #           6,
+  #           actionButton("add_profilt",
+  #             label = div("add/remove proteomics filter", hidden(div(id = "profilt_exists", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))),
+  #             width = "100%"
+  #           ),
+  #           actionButton("plot_profilt", "Plot this filter", width = "100%"),
+  #           actionButton("remove_profilt", "Remove proteomics filter", width = "100%")
+  #         ),
+  #         column(
+  #           6,
+  #           numericInput("min_num_peps", "Minimum number of peptides mapped to each protein:", 2, step = 1),
+  #           checkboxInput("degen_peps", "Remove Degenerate Peptides?", TRUE)
+  #         )
+  #       ),
+  #       hr()
+  #     )
+  #   }
+  #   else {
+  #     NULL
+  #   }
+  # }),
 
   # inputs for axes labels and sizes
   output$filter_plot_options <- renderUI({

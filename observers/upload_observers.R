@@ -29,7 +29,8 @@ makeobject <- function(use_iso = T){
   # store appropriate function call for data type
   fn_list <- list("lip" = "as.lipidData", "pep" = "as.pepData", 
                   "iso" = "as.isobaricpepData", "pro" = "as.proData", 
-                  "metab" = "as.metabData", "nmr" = "as.nmrData")
+                  "metab" = "as.metabData", "nmr" = "as.nmrData",
+                  "seq" = "as.seqData")
   
   if(selection == "metab") selection <- metab_type
   if(selection == "pep" && use_iso) selection <- pep_type
@@ -40,13 +41,15 @@ makeobject <- function(use_iso = T){
   # create first object
   objects$uploaded_omicsData <- objects$omicsData <- tryCatch(
     {
-      object_fn(
+      res <- object_fn(
         e_data = edata, e_meta = emeta, f_data = fdata,
         edata_cname = edata_cname, emeta_cname = emeta_cname, fdata_cname = "SampleId",
         data_scale = data_scale, is_normalized = norm_info,
         check.names = F
-      ) %>%
-        edata_replace(na_replace, NA)
+      )
+      
+      if(selection != "seq") res <- res %>% edata_replace(na_replace, NA)
+      res
     },
     error = function(e) {
       msg <- paste0("Something went wrong processing your omicsData object \n System error:  ", e)
@@ -79,7 +82,9 @@ makeobject <- function(use_iso = T){
   }
   
   # transform data objects
-  if (!is.null(objects$uploaded_omicsData) & transform != "Select one") {
+  if (!is.null(objects$uploaded_omicsData) && 
+      length(transform) > 0 &&
+      transform != "Select one") {
     if (attr(objects$uploaded_omicsData, "data_info")$data_scale != transform) {
       objects$omicsData <- objects$uploaded_omicsData <- tryCatch(
         {
@@ -94,7 +99,9 @@ makeobject <- function(use_iso = T){
     }
   }
   
-  if (!is.null(objects$uploaded_omicsData_2) & transform != "Select one") {
+  if (!is.null(objects$uploaded_omicsData_2) &&
+      length(transform) > 0 && 
+      transform != "Select one") {
     if (attr(objects$uploaded_omicsData_2, "data_info")$data_scale != transform) {
       objects$omicsData_2 <- objects$uploaded_omicsData_2 <- tryCatch(
         {
@@ -272,6 +279,7 @@ observe({
 
 # make data and display success message on successful objects$omicsData object creation
 observeEvent(input$makeobject, {
+
   makeobject(use_iso = F)
 
   # store warning message if data did not successfully create

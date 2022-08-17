@@ -341,6 +341,14 @@ observeEvent(input$add_profilt, {
 # hide/show profilt if we are in pepdata land
 observeEvent(objects$uploaded_omicsData, {
   toggle("profilt_UI", condition = inherits(objects$uploaded_omicsData, "pepData"))
+  
+  toggle("TCfilt_UI", condition = inherits(objects$uploaded_omicsData, "seqData"))
+  toggle("Libraryfilt_UI", condition = inherits(objects$uploaded_omicsData, "seqData"))
+  toggle("Nonzerofilt_UI", condition = inherits(objects$uploaded_omicsData, "seqData"))
+  
+  toggle("cvfilt_UI", condition = !inherits(objects$uploaded_omicsData, "seqData"))
+  toggle("imdanova_UI", condition = !inherits(objects$uploaded_omicsData, "seqData"))
+  toggle("rmd_UI", condition = !inherits(objects$uploaded_omicsData, "seqData"))
 })
 
 # create imdanovafilt object

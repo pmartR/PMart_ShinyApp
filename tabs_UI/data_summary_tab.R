@@ -6,7 +6,9 @@ data_summary_UI <- function() {
       column(
         4,
         radioGroupButtons("which_qc_plot", "Choose a Plot Type:",
-          choices = c("Boxplots" = "boxplots", "Missing Values Barplots" = "bar", "Missing Values Scatterplots" = "scatter")
+          choices = c("Boxplots" = "boxplots", 
+                      "Missing Values Barplots" = "bar", 
+                      "Missing Values Scatterplots" = "scatter")
         ),
         bsCollapse(
           id = "qc_collapse", multiple = TRUE, open = c("qc_plot_params"),
