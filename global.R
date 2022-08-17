@@ -31,6 +31,7 @@ blueexcl = icon("exclamation-sign", lib="glyphicon", style = "color:deepskyblue;
 #'@details text displayed in tooltips
 ttext_ <- list(
   "ABUNDANCE_ZEROS_TO_NA" = "Zeros will be automatically transformed to NA in raw abundance data.",
+  "ABUNDANCE_NAS_TO_ZEROS" = "NAs will be automatically transformed to zeros in transcript count data.",
   "IMD_INTERACTIVE_MANY_POINTS" = "If your data has many biomolecules, creating an interactive plot may take a while.",
   "MAIN_EFFECTS_INFO" = "Main effects are the variables of interest, those values across which you want to make comparisons.  Covariates are those values that are not of experimental interest, but must be controlled for in the statistics.",
   "MISSING_DATA_REPLACE" = "The value specified here will be replaced by NA in the data file.  If missing values are already NA in your data or the missing values are zeros in your abundance data, then you do not have to specify this field.",
@@ -40,6 +41,7 @@ ttext_ <- list(
   "TABDISABLE_NOT_PEP" = "Tab disabled because either you are not analyzing peptide data or your object does not exist.",
   "TABDISABLE_NOT_PEP_NO_EMETA" = "Tab disabled because either you are not analyzing peptide data, you did not include a biomolecule information file, or your object does not exist",
   "TABDISABLE_NOT_REF" = "Tab disabled because reference normalization is only available for NMR data or labeled peptide data",
+  "TABDISABLE_SEQDATA" = "Tab disabled because normalization is not supported for transcript data, or your object does not exist.",
   "REFERENCE_DISABLED_ROW" = "Disabled entries contain missing values in some samples. These might be due to NAs generated in log transformation or replacement of values less than or equal to zero.",
   "REFERENCE_DISABLED_COL" = "Disabled entries are non-numeric.",
   "TABDISABLE_PEP_NOT_ROLLED_UP" = "This tab is used to perform statistics on peptide data rolled up to the protein level.  Roll up your peptide data in the Protein Rollup tab before using this tab.  To perform stats on the peptide-level data, go to the Peptide Statistics tab.",
