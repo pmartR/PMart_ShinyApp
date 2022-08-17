@@ -161,7 +161,6 @@ observeEvent(input$group_designation, {
   cond2 <- !is.null(objects$omicsData_2) & is.null(attributes(objects$omicsData_2)$group_DF)
 
 
-
   if (!cond1 & !cond2) {
     updateCollapse(session, "groups_collapse_left", close = c("fdata_upload", "fdata_columns"))
     shinyjs::show("ok_fdata_idcols")

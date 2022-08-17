@@ -26,4 +26,6 @@ e_meta_remove_rv_2 <- reactive({
       dplyr::filter(!!rlang::sym(input$emeta_customfilt_which_col_2) %in% input$emeta_customfilt_which_values_2) %>%
       purrr::pluck(get_emeta_cname(objects$uploaded_omicsData_2)) 
   } else NULL
+
 })
+

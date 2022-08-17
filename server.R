@@ -105,7 +105,9 @@ shinyServer(function(session, input, output) {
   # set options("shiny.testmode" = T) to get a developer button
   output$developer_buttons <- renderUI({
 
+
     #if (isTRUE(getOption("shiny.testmode"))) {
+
       div(
         style = "position:absolute;z-index:9999;bottom:10px;left:10px;",
         actionButton("Browser", "whats wrong!?!?", style = "background:deepskyblue")
@@ -173,7 +175,7 @@ shinyServer(function(session, input, output) {
     
     # Create a reactive value to hold MAP-specific objects
     MapConnect <- reactiveValues(MapConnect = map_data_connection("./cfg/minio_config_local.yml"),
-                                 Project = NULL, StoredProject = NULL)
+                                 Project = NULL, Midpoint = NULL)
     
   }
   
