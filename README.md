@@ -10,7 +10,7 @@ a traditional `omics analysis, are available in the GUI:
 
 - Data upload.  Upload data files, sample information, and biomolecule metadata.  See the data-requirements section for details.
 - Data transformation (raw to log2)
-- Group assignment (main effects and covariates)
+- Group assignment (main effects, covariates, pairing structure)
 - Exploratory data analysis.  PCA, missing-variable plots, correlation heatmaps, and more.
 - Filtering.  Filter biomolecules based on various criteria including minimum non-missing values and coefficient of variation thresholds.  Filter samples based on statistical metrics and other exploratory analyses.
 - Normalization.  Center data using a variety of methods.  Determine appropriate measures automatically using the SPANS procedure for proteomics.
@@ -23,8 +23,11 @@ a traditional `omics analysis, are available in the GUI:
 #### 1.  Using R/Rstudio/Shiny
 Install the required packages.  You can do this either by inspecting the DESCRIPTION file and installing the appropriate packages, or by using `renv`.  
 
-To install package with `renv`, first `install.packages("renv")`.  Then call renv::restore().  This will install all packages contained in the renv.lock file.  See the [renv website](https://rstudio.github.io/renv/articles/renv.html) for more details.
-Then simply call shiny::runApp()
+To install package with `renv`, first `install.packages("renv")`.  Then call `renv::restore()`.  This will install all packages contained in the renv.lock file.  See the [renv website](https://rstudio.github.io/renv/articles/renv.html) for more details.
+
+Some in-development packages are not being tracked in renv.lock (to reduce Docker image build times).  These can be seen in the `install commonly updated packages` section of Dockerfile-base.  You will have to install these separately from the files that will be installed by calling `renv::restore()`.
+
+Once all dependencies are installed, make sure calling `.libPaths()` displays the renv environment, then call `shiny::runApp()`.
 
 #### 2.  Using docker:
 
