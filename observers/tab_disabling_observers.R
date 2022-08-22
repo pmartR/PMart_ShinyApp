@@ -1,9 +1,10 @@
-#'@details disable peptide stats and rollup if e_meta does not exist or if we
+#'@details disable peptide stats, reference and rollup if e_meta does not exist or if we
 #'are not working with pepData.  We will still leave the tabs enabled if we have
 #'rolled up to proData, but for review only.
 observe({
   emeta_exists <- isTruthy(revals$e_meta) | isTruthy(objects$omicsData$e_meta)
   is_pepdata <- inherits(objects$omicsData, "pepData") | inherits(objects$omicsData_pre_rollup, 'pepData')
+  omicsdata_exists <- !is.null(objects$omicsData)
   
   #' First disable the peptide-specific tabs if we don't have e-meta or we are
   #' not analyzing pepdata
@@ -56,5 +57,36 @@ observe({
     selector = ".nav li a[data-value=statistics_tab]"
   )
   
-  toggleTab("statistics_tab", condition = !cond2 & !cond3)
+  toggleTab("statistics_tab", condition = !cond2 & !cond3 & omicsdata_exists)
 })
+
+#'@details Disable all tabs until omicsData object exists
+observe({
+  # Midpoints will have enabled necessary tabs
+  if(MAP_ACTIVE){
+    req(exists("MapConnect"))
+    req(is.null(MapConnect$Midpoint)) 
+  }
+  
+  to_disable_ids <- setdiff(
+    TAB_IDS,
+    c(
+      "upload_and_datareqs",
+      "reference_tab",
+      "protein_rollup_tab",
+      "peptide_statistics_tab"
+    )
+  )
+  
+  for (dtab in to_disable_ids) {
+    toggleTooltip(
+      session, 
+      tooltip_text = "Upload your omicsdata", 
+      condition = is.null(objects$omicsData),
+      selector = sprintf(".nav li a[data-value=%s]", dtab)
+    )
+    
+    toggleTab(dtab, condition = !is.null(objects$omicsData))
+  } 
+  
+}, priority = 10)

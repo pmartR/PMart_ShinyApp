@@ -1,5 +1,6 @@
 upload_UI <- function() {
   navbarMenu("Upload",
+    menuName = "upload_and_datareqs",
     tabPanel("Upload Data",
       value = 'upload_data_tab',
       class = "collapse_page",

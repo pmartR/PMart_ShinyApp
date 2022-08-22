@@ -19,7 +19,7 @@ library(reshape2)
 ######## GLOBAL VALUES ##########
 
 # Pull app version from global variable
-MAP <- ifelse(Sys.getenv("MAP_VERSION") == "1", TRUE, FALSE)
+MAP_ACTIVE <- ifelse(Sys.getenv("MAP_VERSION") == "1", TRUE, FALSE)
 
 # static objects
 filter_names <- read.csv("./filter_names.csv", stringsAsFactors = F, check.names = F)
@@ -99,6 +99,20 @@ GROUPS_ME_IDS_2 <- c(
 )
 
 NULLSELECT_ = "__nullselect__"
+
+#'@details the data-value (html) attribute of all dropdowns
+TAB_IDS <- list(
+  "upload_and_datareqs",
+  "group_samples_tab",
+  "reference_tab",
+  "data_summary_tab",
+  "filter_tab",
+  "normalization_tab",
+  "peptide_statistics_tab",
+  "protein_rollup_tab",
+  "statistics_tab",
+  "download_tab"
+)
 
 # global observers, modal UI elements, helper functions
 source("UI_helper_functions.R", local = TRUE)

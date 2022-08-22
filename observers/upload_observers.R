@@ -339,7 +339,7 @@ observeEvent(input$file_emeta, {
 }, priority = 10)
 
 
-if (MAP) {
+if (MAP_ACTIVE) {
   observe({
     Sys.sleep(3)
     if (is.null(MapConnect$Project) == FALSE) {
@@ -349,7 +349,7 @@ if (MAP) {
 }
 
 
-if (MAP == FALSE) {
+if (MAP_ACTIVE == FALSE) {
   ## store null values in e_meta if no file chosen since it is not required to make object
   observe({
     if(!isTruthy(as.logical(input$emeta_yn))) {

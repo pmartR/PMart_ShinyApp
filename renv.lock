@@ -27,7 +27,11 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "fe0cb3d8854c168aef827aeab4b3b473",
-      "Requirements": []
+      "Requirements": [
+        "ggplot2",
+        "shiny",
+        "shinyjs"
+      ]
     },
     "dplyr": {
       "Package": "dplyr",
@@ -35,7 +39,9 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "36f1ae62f026c8ba9f9b5c9a08c03297",
-      "Requirements": []
+      "Requirements": [
+        "rlang"
+      ]
     },
     "ggplot2": {
       "Package": "ggplot2",
@@ -43,7 +49,9 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "d7566c471c7b17e095dd023b9ef155ad",
-      "Requirements": []
+      "Requirements": [
+        "rlang"
+      ]
     },
     "gridExtra": {
       "Package": "gridExtra",
@@ -51,19 +59,6 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "7d7f283939f563670a697165b2cf5560",
-      "Requirements": []
-    },
-    "mapDataAccess": {
-      "Package": "mapDataAccess",
-      "Version": "0.0.0.10",
-      "Source": "GitLab",
-      "RemoteType": "gitlab",
-      "RemoteHost": "code.emsl.pnl.gov",
-      "RemoteRepo": "mapdataaccess-lib",
-      "RemoteUsername": "multiomics-analyses",
-      "RemoteRef": "HEAD",
-      "RemoteSha": "a7bd1520b973fd46c4335dc16bc6e01e4402f2d5",
-      "Hash": "4eec5d23f35b4ee1aaecf13cd68c7153",
       "Requirements": []
     },
     "markdown": {
@@ -80,20 +75,12 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "af4b92cb3828aa30002e2f945c49c2d7",
-      "Requirements": []
-    },
-    "pmartR": {
-      "Package": "pmartR",
-      "Version": "2.0.6",
-      "Source": "GitHub",
-      "RemoteType": "github",
-      "RemoteHost": "api.github.com",
-      "RemoteRepo": "pmartR",
-      "RemoteUsername": "pmartR",
-      "RemoteRef": "develop",
-      "RemoteSha": "df9a21fbb48b89271b296bd773ca6fee2f14cca7",
-      "Hash": "7b04b3a1fefd2da4d7a5ec4af42ebd8f",
-      "Requirements": []
+      "Requirements": [
+        "dplyr",
+        "ggplot2",
+        "purrr",
+        "rlang"
+      ]
     },
     "purrr": {
       "Package": "purrr",
@@ -101,7 +88,9 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "97def703420c8ab10d8f0e6c72101e02",
-      "Requirements": []
+      "Requirements": [
+        "rlang"
+      ]
     },
     "readr": {
       "Package": "readr",
@@ -109,12 +98,16 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "34807ea4fb5900386ddef904eef8bdb8",
-      "Requirements": []
+      "Requirements": [
+        "rlang"
+      ]
     },
     "renv": {
       "Package": "renv",
       "Version": "0.15.5",
       "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "6a38294e7d12f5d8e656b08c5bd8ae34",
       "Requirements": []
     },
     "reshape2": {
@@ -123,7 +116,9 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "bb5996d0bd962d214a11140d77589917",
-      "Requirements": []
+      "Requirements": [
+        "stringr"
+      ]
     },
     "rlang": {
       "Package": "rlang",
@@ -139,7 +134,9 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "6e3b6ae7fe02b5859e4bb277f218b8ae",
-      "Requirements": []
+      "Requirements": [
+        "rlang"
+      ]
     },
     "shinyBS": {
       "Package": "shinyBS",
@@ -147,7 +144,9 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "f895dafd39733c4a70d425f605a832e7",
-      "Requirements": []
+      "Requirements": [
+        "shiny"
+      ]
     },
     "shinyWidgets": {
       "Package": "shinyWidgets",
@@ -155,7 +154,9 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "7dd5f3ee96c64a47fdbc6e437ff1c7e1",
-      "Requirements": []
+      "Requirements": [
+        "shiny"
+      ]
     },
     "shinyalert": {
       "Package": "shinyalert",
@@ -163,7 +164,9 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "a130b62f6d5533fcc1cab6c8161358d9",
-      "Requirements": []
+      "Requirements": [
+        "shiny"
+      ]
     },
     "shinycssloaders": {
       "Package": "shinycssloaders",
@@ -171,7 +174,9 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "f39bb3c44a9b496723ec7e86f9a771d8",
-      "Requirements": []
+      "Requirements": [
+        "shiny"
+      ]
     },
     "shinyjs": {
       "Package": "shinyjs",
@@ -179,7 +184,9 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "9ddfc91d4280eaa34c2103951538976f",
-      "Requirements": []
+      "Requirements": [
+        "shiny"
+      ]
     },
     "stringr": {
       "Package": "stringr",
