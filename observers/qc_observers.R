@@ -66,6 +66,7 @@ observe({
     # Positions 1,2 correspond to the missing values barplots and scatterplots
     disable(selector = "#which_qc_plot button:eq(1)")
     disable(selector = "#which_qc_plot button:eq(2)")
+    toggleTooltip(session, id = "which_qc_plot_wrapper", tooltip_text = "Missing value plots disabled for RNA-seq data")
   }
 })
 
