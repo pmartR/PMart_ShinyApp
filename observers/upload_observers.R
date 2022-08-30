@@ -23,7 +23,9 @@ makeobject <- function(use_iso = T){
   fdata <- f_data_upload()
   data_scale <- input$data_scale
   transform <- input$transform
-  norm_info <- as.logical(as.integer(input$normalized_yn))
+  is_normalized <- as.logical(as.integer(input$normalized_yn))
+  if(!isTruthy(is_normalized)) is_normalized <- FALSE
+  
   na_replace <- input$na_symbol
   
   # store appropriate function call for data type
@@ -44,7 +46,7 @@ makeobject <- function(use_iso = T){
       res <- object_fn(
         e_data = edata, e_meta = emeta, f_data = fdata,
         edata_cname = edata_cname, emeta_cname = emeta_cname, fdata_cname = "SampleId",
-        data_scale = data_scale, is_normalized = norm_info,
+        data_scale = data_scale, is_normalized = is_normalized,
         check.names = F
       )
       

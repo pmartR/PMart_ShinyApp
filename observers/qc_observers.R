@@ -56,6 +56,19 @@ observeEvent(qc_flip(),
   ignoreInit = TRUE
 )
 
+#'@details Disable options for choosing the plot type on the QC tab.  Currently:
+#' - Disable missing values plots for seqData.
+observe({
+  req(!is.null(objects$omicsData))
+  c(input$which_qc_plot, input$top_page)
+  
+  if(inherits(objects$omicsData, "seqData")) {
+    # Positions 1,2 correspond to the missing values barplots and scatterplots
+    disable(selector = "#which_qc_plot button:eq(1)")
+    disable(selector = "#which_qc_plot button:eq(2)")
+  }
+})
+
 ## Pop-up to continue
 # observeEvent(input$go_to_filter, {
 #   
