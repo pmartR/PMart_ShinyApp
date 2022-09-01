@@ -45,17 +45,50 @@ list(
       attr(objects$filters[[tmp_idx]], "sample_names")[which(objects$filters[[tmp_idx]]$pvalue < input$pvalue_threshold)]
     } else NULL
     
+    rnafilt_libsize_removed_samps <- if(any(grepl("rnafilt_libsize", names(objects$filters)))) {
+      size_library <- if(isTruthy(input$rnafilt_min_lib_size)) input$rnafilt_min_lib_size else NULL
+      tmp_idx = which(grepl("rnafilt_libsize", names(objects$filters))) 
+      tmp_summ <- summary(objects$filters[[tmp_idx]], size_library=size_library)$samples_filtered 
+    } else NULL
+    
+    rnafilt_min_nonzero_removed_samps <- if(any(grepl("rnafilt_min_nonzero", names(objects$filters)))) {
+      min_nonzero <- if(isTruthy(input$rnafilt_min_nonzero)) input$rnafilt_min_nonzero else NULL
+      tmp_idx = which(grepl("rnafilt_min_nonzero", names(objects$filters))) 
+      tmp_summ <- summary(objects$filters[[tmp_idx]], min_nonzero=min_nonzero)$samples_filtered 
+    } else NULL
+    
     # text for first filter object
     for (i in 1:length(objects$filters)) {
-      # rmd filter
-      if (grepl("rmdfilt", names(objects$filters)[i])) {
+      # rna filter (library size) 
+      if (grepl("rnafilt_libsize", names(objects$filters)[i])) {
         divs[[i]] <- tagList(
-          tags$b("rMd Filter:"),
-          tags$p(sprintf("p-value threshold: %s", input$pvalue_threshold)),
-          tags$p(sprintf("Removed Samples: %s", ifelse(length(rmd_removed_samps > 0), paste(rmd_removed_samps, collapse = "&nbsp|&nbsp"), "None"))),
+          tags$b("RNA Filter:"),
+          tags$p(sprintf("Library Size Threshold: %s", input$rnafilt_min_libsize)),
+          tags$p(sprintf("Removed Samples: %s", ifelse(length(rnafilt_libsize_removed_samps > 0), paste(rnafilt_libsize_removed_samps, collapse = " | "), "None"))),
           hr()
         )
       }
+      
+      # rna filter (min nonzero) 
+      else if (grepl("rnafilt_min_nonzero", names(objects$filters)[i])) {
+        divs[[i]] <- tagList(
+          tags$b("RNA Filter:"),
+          tags$p(sprintf("Minimum Nonzero Count Threshold: %s", input$rnafilt_min_nonzero)),
+          tags$p(sprintf("Removed Samples: %s", ifelse(length(rnafilt_min_nonzero_removed_samps > 0), paste(rnafilt_min_nonzero_removed_samps, collapse = " | "), "None"))),
+          hr()
+        )
+      }
+      
+      # rmd filter
+      else if (grepl("rmdfilt", names(objects$filters)[i])) {
+        divs[[i]] <- tagList(
+          tags$b("rMd Filter:"),
+          tags$p(sprintf("p-value threshold: %s", input$pvalue_threshold)),
+          tags$p(sprintf("Removed Samples: %s", ifelse(length(rmd_removed_samps > 0), paste(rmd_removed_samps, collapse = " | "), "None"))),
+          hr()
+        )
+      }
+      
       # custom filter
       else if (grepl("customfilt", names(objects$filters)[i])) {
         # get samples and check whether we are removing or keeping
@@ -113,6 +146,7 @@ list(
           e_meta_remove_div,
           hr()
         )
+        
       # cv filter
       } else if (grepl("cvfilt", names(objects$filters)[i])) {
         n_removed <- sum(objects$filters[[i]]$CV > input$cv_threshold, na.rm=T)
@@ -121,6 +155,7 @@ list(
           tags$p("CV threshold: ", input$cv_threshold, "| Biomolecules removed: ", n_removed),
           hr()
         )
+        
       # imd filter
       } else if (grepl("imdanovafilt", names(objects$filters)[i])) {
         
@@ -140,6 +175,7 @@ list(
           hr()
         )
       }
+      
       # molecule filter
       else if (grepl("molfilt", names(objects$filters)[i])) {
         foo <- summary(objects$filters[[i]], min_num = input$mol_min_num)
@@ -152,6 +188,7 @@ list(
           hr()
         )
       }
+      
       # proteomics filter
       else if (grepl("profilt", names(objects$filters)[i])) {
         foo <- summary(objects$filters[[i]], min_num_peps = input$min_num_peps, degen_peps = input$degen_peps)
@@ -562,7 +599,13 @@ list(
 
   # inputs for axes labels and sizes
   output$filter_plot_options <- renderUI({
-    style_UI("filter")
+    # Placeholder for conditional plot options based on filter type
+    if(FALSE) {
+      extra_UI <- NULL
+    } else {
+      extra_UI <- NULL
+    }
+    style_UI("filter", extra_UI)
   }),
 
   # apply filter plot style options

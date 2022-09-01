@@ -55,6 +55,16 @@ apply_filt <- function(){
       
       #### SAMPLE/CUSTOM FILTERS ####
       
+      ## RNA filter - 1 dataset only
+      # library size
+      if (!is.null(objects$filters$rnafilt_libsize)) {
+        tmp <- applyFilt(objects$filters$rnafilt_libsize, tmp, size_library = input$min_lib_size)
+      }
+      # min-nonzero
+      if (!is.null(objects$filters$rnafilt_min_nonzero)) {
+        tmp <- applyFilt(objects$filters$rnafilt_min_nonzero, tmp, min_nonzero = input$rnafilt_min_nonzero)
+      }
+      
       # rMd filter
       if (!is.null(objects$filters$rmdfilt)) {
         tmp <- applyFilt(objects$filters$rmdfilt, tmp, pvalue_threshold = input$pvalue_threshold)
@@ -62,7 +72,7 @@ apply_filt <- function(){
           tmp2 <- applyFilt(objects$filters$rmdfilt_2, tmp2, pvalue_threshold = input$pvalue_threshold)
         }
       }
-
+      
       # custom filter
       if (!is.null(objects$filters$customfilt)) {
         # get the intersect in case these samples/biomolecules were removed by previous sample filters e.g. rMd/molecule
@@ -147,7 +157,10 @@ observeEvent(input$reset_filters, {
   objects$filters <- NULL
 })
 
-### Toggle icons/switches
+#'@details Toggle icons/switches.  Specifically, show the checkmark the suggests
+#'that a filter has been added, and disable the inputs for that particular 
+#'filter so that they cannot change it before they attempt to apply all the
+#'filters.
 observe({
   # check if molfilt was created
   input$reset_filters
@@ -158,30 +171,42 @@ observe({
   toggleState("mol_min_num", condition = !molfilt_exists)
   toggleCssClass("mol_min_num", "grey_text", condition = molfilt_exists)
   
+  ## CV Filter
   cvfilt_exists <- !is.null(objects$filters$cvfilt) & (!is.null(objects$filters$cvfilt_2) | is.null(objects$uploaded_omicsData_2))
-  
-  # toggle('remove_cvfilt', condition = !is.null(objects$filters$cvfilt), anim = TRUE)
+
   toggle("cvfilt_exists", condition = !is.null(objects$filters$cvfilt) & (!is.null(objects$filters$cvfilt_2) | is.null(objects$uploaded_omicsData_2)), anim = TRUE)
   toggleState("cv_threshold", condition = !cvfilt_exists)
   toggleCssClass("cv_threshold", "grey_text", condition = cvfilt_exists)
   
-  # toggle('remove_profilt', condition = !is.null(objects$filters$profilt), anim = TRUE)
+
+  ## Proteomics Filter
   toggle("profilt_exists", condition = !is.null(objects$filters$profilt), anim = TRUE)
   toggleState("min_num_peps", condition = is.null(objects$filters$profilt))
   toggleCssClass("min_num_peps", "grey_text", condition = !is.null(objects$filters$profilt))
   toggleState("degen_peps", condition = is.null(objects$filters$profilt))
   toggleCssClass("degen_peps", condition = !is.null(objects$filters$profilt))
   
+  ## imd-ANOVA Filter
   imdanovafilt_exists <- !is.null(objects$filters$imdanovafilt) & 
     (!is.null(objects$filters$imdanovafilt_2) | is.null(objects$uploaded_omicsData_2))
-  
-  # toggle('remove_imdanovafilt', condition = !is.null(objects$filters$imdanovafilt), anim = TRUE)
+
   toggle("imdanovafilt_exists", condition = imdanovafilt_exists, anim = TRUE)
   toggleState("min_nonmiss_anova", condition = !imdanovafilt_exists)
   toggleCssClass("min_nonmiss_anova", "grey_text", condition = imdanovafilt_exists)
   toggleState("min_nonmiss_gtest", condition = !imdanovafilt_exists)
   toggleCssClass("min_nonmiss_gtest", "grey_text", condition = imdanovafilt_exists)
   
+  ## RNA filter ...
+  # ... library size ...
+  rnafilt_libsize_exists <- !is.null(objects$filters$rnafilt_libsize)
+  toggle("rnafilt_libsize_exists", condition = rnafilt_libsize_exists, anim = TRUE)
+  toggleState("rnafilt_min_lib_size", condition = !rnafilt_libsize_exists)
+  # ... and minimum nonzero ...
+  rnafilt_min_nonzero_exists <- !is.null(objects$filters$rnafilt_min_nonzero)
+  toggle("rnafilt_min_nonzero_exists", condition = rnafilt_min_nonzero_exists, anim = TRUE)
+  toggleState("rnafilt_min_nonzero", condition = !rnafilt_min_nonzero_exists)
+  
+  ## rMd-Filter
   rmdfilt_exists <- !is.null(objects$filters$rmdfilt) & (!is.null(objects$filters$rmdfilt_2) | is.null(objects$uploaded_omicsData_2))
   
   toggle("rmdfilt_exists", condition = rmdfilt_exists, anim = TRUE)
@@ -190,7 +215,7 @@ observe({
   toggleState("rmd_metrics", condition = !rmdfilt_exists)
   toggleCssClass(class = "grey_disabled", condition = rmdfilt_exists, selector = "button[data-id='rmd_metrics']")
   
-  # disable custom filter inputs
+  ## Custom Filter
   customfilt_exists <- !is.null(objects$filters$customfilt) | !is.null(objects$filters$customfilt_2)
   
   toggle("customfilt_exists", condition = customfilt_exists, anim = TRUE)
@@ -343,8 +368,7 @@ observeEvent(objects$uploaded_omicsData, {
   toggle("profilt_UI", condition = inherits(objects$uploaded_omicsData, "pepData"))
   
   toggle("TCfilt_UI", condition = inherits(objects$uploaded_omicsData, "seqData"))
-  toggle("Libraryfilt_UI", condition = inherits(objects$uploaded_omicsData, "seqData"))
-  toggle("Nonzerofilt_UI", condition = inherits(objects$uploaded_omicsData, "seqData"))
+  toggle("rnafilt_UI", condition = inherits(objects$uploaded_omicsData, "seqData"))
   
   toggle("cvfilt_UI", condition = !inherits(objects$uploaded_omicsData, "seqData"))
   toggle("imdanova_UI", condition = !inherits(objects$uploaded_omicsData, "seqData"))
@@ -401,7 +425,7 @@ observeEvent(input$add_imdanovafilt, {
 observeEvent(input$add_rmdfilt, {
   rmdfilt_exists <- !is.null(objects$filters$rmdfilt) & 
     (!is.null(objects$filters$rmdfilt_2) | is.null(objects$uploaded_omicsData_2))
-
+  browser()
   if (!rmdfilt_exists) {
     
     objects$filters$rmdfilt <- tryCatch(
@@ -434,6 +458,50 @@ observeEvent(input$add_rmdfilt, {
   }
   
  
+})
+
+#'@details Create RNA library size filter
+observeEvent(input$add_rnafilt_libsize, {
+  rnafilt_exists <- !is.null(objects$filters$rnafilt_libsize)
+
+  if (!rnafilt_exists) {
+    objects$filters$rnafilt_libsize <- tryCatch(
+      {
+        revals$warnings_filter$rnafilt_libsize <<- NULL
+        RNA_filter(objects$uploaded_omicsData)
+      },
+      error = function(e) {
+        msg <- paste0("Something went wrong updating your RNA filter object \n System error:  ", e)
+        revals$warnings_filter$rnafilt_libsize <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+        NULL
+      }
+    )
+  }
+  else {
+    revals$warnings_filter$rnafilt <- objects$filters$rnafilt_libsize <- NULL
+  }
+})
+
+#'@details Create RNA minimum nonzero filter
+observeEvent(input$add_rnafilt_min_nonzero, {
+  rnafilt_exists <- !is.null(objects$filters$rnafilt_min_nonzero)
+  
+  if (!rnafilt_exists) {
+    objects$filters$rnafilt_min_nonzero <- tryCatch(
+      {
+        revals$warnings_filter$rnafilt_min_nonzero <<- NULL
+        RNA_filter(objects$uploaded_omicsData)
+      },
+      error = function(e) {
+        msg <- paste0("Something went wrong updating your RNA filter object \n System error:  ", e)
+        revals$warnings_filter$rnafilt_min_nonzero <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+        NULL
+      }
+    )
+  }
+  else {
+    revals$warnings_filter$rnafilt <- objects$filters$rnafilt_min_nonzero <- NULL
+  }
 })
 
 # create customfilt object
@@ -515,6 +583,62 @@ observeEvent(input$add_customfilt, {
 ###############################
 #### Filter plot observers ####
 ###############################
+
+# rnafilter library size plot
+observeEvent(input$plot_rnafilt_libsize, {
+  req(input$plot_rnafilt_libsize > 0)
+  
+  size_library <- if(isTruthy(input$rnafilt_min_lib_size)) input$rnafilt_min_lib_size else NULL
+
+  plots$filter_mainplot <- tryCatch(
+    {
+      revals$warnings_filter$rnafilt_plot <<- NULL
+      
+      p <- plot(
+        filter_obj = RNA_filter(objects$uploaded_omicsData),
+        plot_type = "library",
+        size_library = size_library,
+        interactive = T
+      )
+      
+      p
+    },
+    error = function(e) {
+      msg <- paste0("Something went wrong plotting your rna filter plot \n System error: ", e)
+      revals$warnings_filter$rnafilt_plot <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+      NULL
+    }
+  )
+  
+}, ignoreInit = T)
+
+# rnafilter minimum nonzero plot
+observeEvent(input$plot_rnafilt_min_nonzero, {
+  req(input$plot_rnafilt_min_nonzero > 0)
+  
+  min_nonzero <- if(isTruthy(input$rnafilt_min_nonzero)) input$rnafilt_min_nonzero else NULL
+  
+  plots$filter_mainplot <- tryCatch(
+    {
+      revals$warnings_filter$rnafilt_plot <<- NULL
+      
+      p <- plot(
+        filter_obj = RNA_filter(objects$uploaded_omicsData),
+        plot_type = "biomolecule",
+        min_nonzero = min_nonzero,
+        interactive = T
+      )
+      
+      p
+    },
+    error = function(e) {
+      msg <- paste0("Something went wrong plotting your rna filter plot \n System error: ", e)
+      revals$warnings_filter$rnafilt_plot <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+      NULL
+    }
+  )
+  
+}, ignoreInit = T)
 
 # rmdfilter plot
 observeEvent(c(input$plot_rmdfilt, input$rmd_metrics, input$pvalue_threshold, input$rmd_sample, input$rmdfilt_plot_type),
@@ -802,14 +926,14 @@ observeEvent(input$apply_filters, {
     cond_text1 <- if (is.null(objects$omicsData_2)) "" else "Object1:  "
     cond_text2 <- if (is.null(objects$omicsData_2)) "" else "Object2:  "
 
-    filters1 <- filter_names %>% # filter_names is a global variable defined in server.R
+    filters1 <- FILTER_NAMES %>% # filter_names is a global variable defined in global.R
       filter(attribute %in% map_chr(attributes(objects$omicsData)$filters, 1)) %>%
       pluck("text") %>%
       paste(collapse = ", ")
 
     # ... second object
     if (!is.null(objects$omicsData_2)) {
-      filters2 <- filter_names %>%
+      filters2 <- FILTER_NAMES %>%
         filter(attribute %in% map_chr(attributes(objects$omicsData_2)$filters, 1)) %>%
         pluck("text") %>%
         paste(collapse = ", ")
@@ -823,6 +947,12 @@ observeEvent(input$apply_filters, {
         actionButton("filter_dismiss", "Stay on this tab", width = "75%"),
         actionButton("goto_norm", "Continue to Normalization (optional)", 
                      style = "margin-top:5px;width:75%"),
+        actionButton("goto_stats_filter", "Continue to Statistics", 
+                     style = "margin-top:5px;width:75%")
+      )
+    } else if(inherits(objects$omicsData, "seqData")){
+      buttons <- div(
+        actionButton("filter_dismiss", "Stay on this tab", width = "75%"),
         actionButton("goto_stats_filter", "Continue to Statistics", 
                      style = "margin-top:5px;width:75%")
       )

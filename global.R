@@ -22,7 +22,7 @@ library(reshape2)
 MAP_ACTIVE <- ifelse(Sys.getenv("MAP_VERSION") == "1", TRUE, FALSE)
 
 # static objects
-filter_names <- read.csv("./filter_names.csv", stringsAsFactors = F, check.names = F)
+FILTER_NAMES <- read.csv("./filter_names.csv", stringsAsFactors = F, check.names = F)
 dt_checkmark <- '<span class="glyphicon glyphicon-ok" style="color:deepskyblue"></span>'
 dt_minus <- '<span class="glyphicon glyphicon-minus"></span>'
 blueq = icon("question-sign", lib="glyphicon", style = "color:deepskyblue;")
@@ -39,6 +39,8 @@ ttext_ <- list(
   PAIRING_INFO = "If your samples are paired, three pieces of information are needed:  The column specifying which pairs of samples go together, the column specifying which group or side of the pairing each sample is in, and which group is to be subtracted from the other.",
   RMD_PROP_MISSING_WARNING = "We advise against using proportion missing as a metric in lipidomics/metabolomics data, as they often have a very low proportion missing.",
   RMD_CUSTOM_FILTER_INFO = "If you want to filter out one or more samples based on inspection of the rMd metrics and not a p-value cutoff, note their names and use a custom sample filter from the sample filters section to remove them.",
+  RNA_FILT_LIB_INFO = "Filter samples based on a minimum specified library size, defined as the sum of gene counts in a sample.",
+  RNA_FILT_MIN_NONZERO_INFO = "Filter samples based on a specified minimum number of nonzero gene counts",
   ROLLUP_DISABLE_INFO = "Your data has already been rolled up to the protein level, if you would like to revert to the peptide level, go back to the filter page and re-apply your filters (you may need to re-do other steps that happened after the filter tab.)",
   TABDISABLE_NOT_PEP = "Tab disabled because either you are not analyzing peptide data or your object does not exist.",
   TABDISABLE_NOT_PEP_NO_EMETA = "Tab disabled because either you are not analyzing peptide data, you did not include a biomolecule information file, or your object does not exist",

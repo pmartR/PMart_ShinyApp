@@ -1,3 +1,39 @@
+#' @details helper function to add filter UI for a new filter
+add_filter_UI <- function(filter_name, title, add_btn_title, tooltip_text, ..., colsize_l = 6, colsize_r = 6) {
+  div(
+    id = sprintf("%s_ftab_UI", filter_name),
+    tagList(
+      fluidRow(
+        column(
+          colsize_l,
+          tags$b(title),
+          div(
+            id = sprintf("add_%s_ttip_control", filter_name),
+            actionButton(
+              sprintf("add_%s", filter_name),
+              label = div(class="flex-inline",
+                          add_btn_title, 
+                          tipify(
+                            icon("question-sign", lib = "glyphicon", class = "info-right"),
+                            title = tooltip_text
+                          ),
+                          hidden(div(id = sprintf("%s_exists", filter_name), style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
+              ),
+              width = "100%"
+            ),
+            bsButton(inputId = sprintf("plot_%s", filter_name), "Plot Preview", width = "100%") 
+          )
+        ),
+        column(
+          colsize_r,
+          ...
+        )
+      ),
+      hr()
+    )
+  )
+}
+
 #'@details UI panel for ggplot axes options with optional prepended elements.
 #'@param pagename The name of the page or the string to prepend to each input name
 #'@param ... Extra shiny elements to prepend to the axes options UI.
@@ -219,6 +255,15 @@ toggleTooltip <- function(session, id = NULL, condition = T, tooltip_text = "", 
       sprintf("$('%s').attr('data-original-title', null)", jquery)
     )
   }
+}
+
+#'@details disable/enable sub-elements of a div and display a tooltip based on condition.
+### NOTE:  THIS CANNOT ADD A TOOLTIP TO THE SAME ELEMENT IT DISABLES
+### DISABLED ELEMENTS DO NOT LIKE HAVING TOOLTIPS ADDED TO THEM FOR SOME REASON.
+togglestate_add_tooltip <- function(session, id, condition, tooltip_text, 
+                                    selector=NULL, position="bottom") {
+  toggleState(id = id, condition = condition, selector = selector)
+  toggleTooltip(session, id, !condition, tooltip_text, selector = selector, position= position)
 }
 
 #'@description Convenience function to assign a class to a tab in a shiny 
