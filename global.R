@@ -46,6 +46,7 @@ ttext_ <- list(
   TABDISABLE_NOT_PEP_NO_EMETA = "Tab disabled because either you are not analyzing peptide data, you did not include a biomolecule information file, or your object does not exist",
   TABDISABLE_NOT_REF = "Tab disabled because reference normalization is only available for NMR data or labeled peptide data",
   TABDISABLE_SEQDATA = "Tab disabled because normalization is not supported for transcript data, or your object does not exist.",
+  TOTAL_COUNT_FILT_INFO = "RNA-seq filter which removes transcripts that have total count across all samples less than a specified threshold.",
   REFERENCE_DISABLED_ROW = "Disabled entries contain missing values in some samples. These might be due to NAs generated in log transformation or replacement of values less than or equal to zero.",
   REFERENCE_DISABLED_COL = "Disabled entries are non-numeric.",
   TABDISABLE_PEP_NOT_ROLLED_UP = "This tab is used to perform statistics on peptide data rolled up to the protein level.  Roll up your peptide data in the Protein Rollup tab before using this tab.  To perform stats on the peptide-level data, go to the Peptide Statistics tab.",

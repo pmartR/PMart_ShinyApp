@@ -59,8 +59,20 @@ list(
     
     # text for first filter object
     for (i in 1:length(objects$filters)) {
+      # total count filter
+      if (grepl("^tcfilt$", names(objects$filters)[i])) {
+        tcfilt_summ <- summary(tcfilt, min_count = input$min_num_trans)
+        divs[[i]] <- tagList(
+          tags$b("Total Count Filter:"),
+          tags$p(
+            sprintf("Minimum Count: %s", input$min_num_trans),
+            sprintf("Transcripts Removed: %s", tcfilt_summ$filtered_biomolecules)
+          ),
+          hr()
+        )
+      }
       # rna filter (library size) 
-      if (grepl("rnafilt_libsize", names(objects$filters)[i])) {
+      else if (grepl("rnafilt_libsize", names(objects$filters)[i])) {
         divs[[i]] <- tagList(
           tags$b("RNA Filter:"),
           tags$p(sprintf("Library Size Threshold: %s", input$rnafilt_min_libsize)),

@@ -9,114 +9,101 @@ filter_UI <- function() {
       bsCollapse(
         id = "filter_collapse", multiple = FALSE, open = c("data_filters"),
         # biomolecule filters
-        bsCollapsePanel(div(
-          "Biomolecule Filters",
-          hidden(div(id = "ok_data_filters", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
-        ),
-        value = "data_filters",
-        # molecule filter options
-        fluidRow(
-          column(
-            6,
-            actionButton(
-              inputId = "add_molfilt",
-              label = div("Add/Remove molecule filter", hidden(div(id = "molfilt_exists", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))),
-              width = "100%"
-            ),
-            actionButton("plot_molfilt", "Plot Preview", width = "100%")
+        bsCollapsePanel(
+          div(
+            "Biomolecule Filters",
+            hidden(div(id = "ok_data_filters", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
           ),
-          column(
-            6,
-            numericInput("mol_min_num", "Minimum number observed", 2, step = 1)
-          )
-        ),
-
-        hr(),
-        # cv filter options
-        div(
-          id = "cvfilt_UI",
+          value = "data_filters",
+          # molecule filter options
           fluidRow(
             column(
               6,
               actionButton(
-                inputId = "add_cvfilt",
-                label = div("Add/Remove CV filter", hidden(div(id = "cvfilt_exists", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))),
+                inputId = "add_molfilt",
+                label = div("Add/Remove molecule filter", hidden(div(id = "molfilt_exists", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))),
                 width = "100%"
               ),
-              actionButton("plot_cvfilt", "Plot Preview", width = "100%")
+              actionButton("plot_molfilt", "Plot Preview", width = "100%")
             ),
             column(
               6,
-              uiOutput("cv_threshold_UI")
+              numericInput("mol_min_num", "Minimum number observed", 2, step = 1)
             )
           ),
-          hr()
-        ),
-    
-        # imd-anova filter options
-        div(
-          id = "imdanova_UI",
-          fluidRow(
-            column(
-              6,
-              actionButton(
-                inputId = "add_imdanovafilt",
-                label = div("Add/Remove imd-ANOVA filter", hidden(div(id = "imdanovafilt_exists", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))),
-                width = "100%"
-              ),
-              actionButton("plot_imdanovafilt", "Plot Preview", width = "100%")
-            ),
-            column(
-              6,
-              numericInput("min_nonmiss_anova", "Minimum number observed to perform ANOVA", 2, step = 1),
-              numericInput("min_nonmiss_gtest", "Minimum number observed to perform G-test", 3, step = 1)
-            )
-          ),
-          hr()
-        ),
-        # proteomics filter
-        div(
-          id = "profilt_UI",
-          tagList(
+  
+          hr(),
+          # cv filter options
+          div(
+            id = "cvfilt_UI",
             fluidRow(
               column(
                 6,
-                actionButton("add_profilt",
-                  label = div("Add/Remove proteomics filter", hidden(div(id = "profilt_exists", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))),
+                actionButton(
+                  inputId = "add_cvfilt",
+                  label = div("Add/Remove CV filter", hidden(div(id = "cvfilt_exists", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))),
                   width = "100%"
                 ),
-                actionButton("plot_profilt", "Plot Preview", width = "100%")
+                actionButton("plot_cvfilt", "Plot Preview", width = "100%")
               ),
               column(
                 6,
-                numericInput("min_num_peps", "Minimum number of peptides mapped to each protein:", 2, step = 1),
-                checkboxInput("degen_peps", "Remove Degenerate Peptides?", TRUE)
+                uiOutput("cv_threshold_UI")
               )
-            )
-          )
-        ),
-        
-        ## total count filt
+            ),
+            hr()
+          ),
+      
+          # imd-anova filter options
           div(
-            id = "TCfilt_UI",
+            id = "imdanova_UI",
+            fluidRow(
+              column(
+                6,
+                actionButton(
+                  inputId = "add_imdanovafilt",
+                  label = div("Add/Remove imd-ANOVA filter", hidden(div(id = "imdanovafilt_exists", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))),
+                  width = "100%"
+                ),
+                actionButton("plot_imdanovafilt", "Plot Preview", width = "100%")
+              ),
+              column(
+                6,
+                numericInput("min_nonmiss_anova", "Minimum number observed to perform ANOVA", 2, step = 1),
+                numericInput("min_nonmiss_gtest", "Minimum number observed to perform G-test", 3, step = 1)
+              )
+            ),
+            hr()
+          ),
+          # proteomics filter
+          div(
+            id = "profilt_UI",
             tagList(
               fluidRow(
                 column(
                   6,
-                  tags$b("Total Count filter"),
-                  prettySwitch("%s_add_TCfilt",
-                               label = "Add/Remove",
-                               width = "100%"
+                  actionButton("add_profilt",
+                    label = div("Add/Remove proteomics filter", hidden(div(id = "profilt_exists", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))),
+                    width = "100%"
                   ),
-                  bsButton(inputId = "preview_TCfilt", "Plot Preview")
+                  actionButton("plot_profilt", "Plot Preview", width = "100%")
                 ),
                 column(
                   6,
-                  numericInput("min_num_trans", "Minimum number of transcript counts:", 10, step = 1, min = 0)
+                  numericInput("min_num_peps", "Minimum number of peptides mapped to each protein:", 2, step = 1),
+                  checkboxInput("degen_peps", "Remove Degenerate Peptides?", TRUE)
                 )
-              ),
-              hr()
+              )
             )
+          ),
+          
+          ## total count filt
+          add_filter_UI(
+            filter_name = "tcfilt",
+            title = "Total Count Filter",
+            add_btn_title = "Add/Remove",
+            tooltip_text = ttext_[["TOTAL_COUNT_FILT_INFO"]],
+            numericInput("min_num_trans", "Minimum number of transcript counts:", 10, step = 1, min = 0)
           )
         ), # end biomolecule filter collapse
 

@@ -22,6 +22,12 @@ apply_filt <- function(){
           tmp2 <- applyFilt(objects$filters$molfilt_2, tmp2, min_num = input$mol_min_num)
         }
       }
+      
+      # total count filter
+      if (!is.null(objects$filters$tcfilt)) {
+        tmp <- applyFilt(objects$filters$tcfilt, tmp, min_count = input$min_num_trans)
+      }
+      
       # proteomics filter
       if (class(tmp) == "pepData") {
         if (isTRUE(!is.null(objects$filters$profilt))) {
@@ -196,6 +202,12 @@ observe({
   toggleState("min_nonmiss_gtest", condition = !imdanovafilt_exists)
   toggleCssClass("min_nonmiss_gtest", "grey_text", condition = imdanovafilt_exists)
   
+  ## Total count filter ...
+  tcfilt_exists <- !is.null(objects$filters$tcfilt)
+  toggle("tcfilt_exists", condition = tcfilt_exists, anim = TRUE)
+  toggleState("min_num_trans", condition = !tcfilt_exists)
+  toggleCssClass("min_num_trans", "grey_text", condition = tcfilt_exists)
+  
   ## RNA filter ...
   # ... library size ...
   rnafilt_libsize_exists <- !is.null(objects$filters$rnafilt_libsize)
@@ -273,14 +285,6 @@ observeEvent(input$add_molfilt, {
   else {
     revals$warnings_filter$molecule_filter_1 <- revals$warnings_filter$molecule_filter2 <- objects$filters$molfilt <- objects$filters$molfilt_2 <- NULL
   }
-# 
-#   # check if molfilt was created
-#   molfilt_exists <- !is.null(objects$filters$molfilt) & (!is.null(objects$filters$molfilt_2) | is.null(objects$uploaded_omicsData_2))
-# 
-#   # toggle('remove_molfilt', condition = !is.null(objects$filters$molfilt), anim = TRUE)
-#   toggle("molfilt_exists", condition = molfilt_exists, anim = TRUE)
-#   toggleState("mol_min_num", condition = !molfilt_exists)
-#   toggleCssClass("mol_min_num", "grey_text", condition = molfilt_exists)
 })
 
 # create cvfilt objects
@@ -326,13 +330,6 @@ observeEvent(input$add_cvfilt, {
   else {
     revals$warnings_filter$cv_filter1 <- revals$warnings_filter$cv_filter2 <- objects$filters$cvfilt <- objects$filters$cvfilt_2 <- NULL
   }
-
-  # cvfilt_exists <- !is.null(objects$filters$cvfilt) & (!is.null(objects$filters$cvfilt_2) | is.null(objects$uploaded_omicsData_2))
-  # 
-  # # toggle('remove_cvfilt', condition = !is.null(objects$filters$cvfilt), anim = TRUE)
-  # toggle("cvfilt_exists", condition = !is.null(objects$filters$cvfilt) & (!is.null(objects$filters$cvfilt_2) | is.null(objects$uploaded_omicsData_2)), anim = TRUE)
-  # toggleState("cv_threshold", condition = !cvfilt_exists)
-  # toggleCssClass("cv_threshold", "grey_text", condition = cvfilt_exists)
 })
 
 # create profilt object
@@ -412,13 +409,28 @@ observeEvent(input$add_imdanovafilt, {
 
   imdanovafilt_exists <- !is.null(objects$filters$imdanovafilt) & 
     (!is.null(objects$filters$imdanovafilt_2) | is.null(objects$uploaded_omicsData_2))
+})
 
-  # # toggle('remove_imdanovafilt', condition = !is.null(objects$filters$imdanovafilt), anim = TRUE)
-  # toggle("imdanovafilt_exists", condition = imdanovafilt_exists, anim = TRUE)
-  # toggleState("min_nonmiss_anova", condition = !imdanovafilt_exists)
-  # toggleCssClass("min_nonmiss_anova", "grey_text", condition = imdanovafilt_exists)
-  # toggleState("min_nonmiss_gtest", condition = !imdanovafilt_exists)
-  # toggleCssClass("min_nonmiss_gtest", "grey_text", condition = imdanovafilt_exists)
+#'@details Create total count filter
+observeEvent(input$add_tcfilt, {
+  tcfilt_exists <- !is.null(objects$filters$tcfilt)
+  
+  if (!tcfilt_exists) {
+    objects$filters$tcfilt <- tryCatch(
+      {
+        revals$warnings_filter$tcfilt <<- NULL
+        total_count_filter(objects$uploaded_omicsData)
+      },
+      error = function(e) {
+        msg <- paste0("Something went wrong updating your total count filter object \n System error:  ", e)
+        revals$warnings_filter$tcfilt <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+        NULL
+      }
+    )
+  }
+  else {
+    revals$warnings_filter$tcfilt <- objects$filters$tcfilt <- NULL
+  }
 })
 
 # create rmdfilt object
@@ -585,26 +597,25 @@ observeEvent(input$add_customfilt, {
 ###############################
 
 # rnafilter library size plot
-observeEvent(input$plot_rnafilt_libsize, {
-  req(input$plot_rnafilt_libsize > 0)
+observeEvent(input$plot_tcfilt, {
+  req(input$min_num_trans > 0)
   
-  size_library <- if(isTruthy(input$rnafilt_min_lib_size)) input$rnafilt_min_lib_size else NULL
+  min_num_trans <- if(isTruthy(input$min_num_trans)) input$min_num_trans else NULL
 
   plots$filter_mainplot <- tryCatch(
     {
-      revals$warnings_filter$rnafilt_plot <<- NULL
+      revals$warnings_filter$tcfilt_plot <<- NULL
       
       p <- plot(
-        filter_obj = RNA_filter(objects$uploaded_omicsData),
-        plot_type = "library",
-        size_library = size_library,
+        filter_obj = total_count_filter(objects$uploaded_omicsData),
+        min_count = min_num_trans,
         interactive = T
       )
       
       p
     },
     error = function(e) {
-      msg <- paste0("Something went wrong plotting your rna filter plot \n System error: ", e)
+      msg <- paste0("Something went wrong plotting your total count filter plot \n System error: ", e)
       revals$warnings_filter$rnafilt_plot <<- sprintf("<p style = 'color:red'>%s</p>", msg)
       NULL
     }
