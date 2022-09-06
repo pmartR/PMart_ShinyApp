@@ -360,16 +360,18 @@ observeEvent(input$add_profilt, {
   toggleCssClass("degen_peps", condition = !is.null(objects$filters$profilt))
 })
 
-# hide/show profilt if we are in pepdata land
+#'@details hide/show filters based on if we are processing the correct data type
+#'for example, the proteomics filt is only for peptide level data.
 observeEvent(objects$uploaded_omicsData, {
-  toggle("profilt_UI", condition = inherits(objects$uploaded_omicsData, "pepData"))
+  toggle("profilt_ftab_UI", condition = inherits(objects$uploaded_omicsData, "pepData"))
   
-  toggle("TCfilt_UI", condition = inherits(objects$uploaded_omicsData, "seqData"))
-  toggle("rnafilt_UI", condition = inherits(objects$uploaded_omicsData, "seqData"))
+  # seqData has very specific types of filters that can/cannot be applied
+  toggle("tcfilt_ftab_UI", condition = inherits(objects$uploaded_omicsData, "seqData"))
+  toggle("rnafilt_ftab_UI", condition = inherits(objects$uploaded_omicsData, "seqData"))
   
-  toggle("cvfilt_UI", condition = !inherits(objects$uploaded_omicsData, "seqData"))
-  toggle("imdanova_UI", condition = !inherits(objects$uploaded_omicsData, "seqData"))
-  toggle("rmd_UI", condition = !inherits(objects$uploaded_omicsData, "seqData"))
+  toggle("cvfilt_ftab_UI", condition = !inherits(objects$uploaded_omicsData, "seqData"))
+  toggle("imdanovafilt_ftab_UI", condition = !inherits(objects$uploaded_omicsData, "seqData"))
+  toggle("rmdfilt_ftab_UI", condition = !inherits(objects$uploaded_omicsData, "seqData"))
 })
 
 # create imdanovafilt object
@@ -596,7 +598,7 @@ observeEvent(input$add_customfilt, {
 #### Filter plot observers ####
 ###############################
 
-# rnafilter library size plot
+# total count filter plot
 observeEvent(input$plot_tcfilt, {
   req(input$min_num_trans > 0)
   
@@ -616,6 +618,34 @@ observeEvent(input$plot_tcfilt, {
     },
     error = function(e) {
       msg <- paste0("Something went wrong plotting your total count filter plot \n System error: ", e)
+      revals$warnings_filter$rnafilt_plot <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+      NULL
+    }
+  )
+  
+}, ignoreInit = T)
+
+# rnafilter library size plot
+observeEvent(input$plot_rnafilt_libsize, {
+  req(input$plot_rnafilt_libsize > 0)
+  
+  size_library <- if(isTruthy(input$rnafilt_min_lib_size)) input$rnafilt_min_lib_size else NULL
+  
+  plots$filter_mainplot <- tryCatch(
+    {
+      revals$warnings_filter$rnafilt_plot <<- NULL
+      
+      p <- plot(
+        filter_obj = RNA_filter(objects$uploaded_omicsData),
+        plot_type = "library",
+        size_library = size_library,
+        interactive = T
+      )
+      
+      p
+    },
+    error = function(e) {
+      msg <- paste0("Something went wrong plotting your rna filter plot \n System error: ", e)
       revals$warnings_filter$rnafilt_plot <<- sprintf("<p style = 'color:red'>%s</p>", msg)
       NULL
     }
@@ -1003,10 +1033,12 @@ observeEvent(input$allow_reapply_filters, {
 
 ###
 
+#'@details display the checkbox on the collapsepanel if any filters have been
+#'successfully added.
 observeEvent(reactiveValuesToList(objects), {
   # req(!is.null(objects$filters))
-  cond_molfilts <- any(c("molfilt", "cvfilt", "imdanovafilt", "profilt") %in% names(objects$filters))
-  cond_sampfilts <- any(c("rmdfilt", "customfilt") %in% names(objects$filters))
+  cond_molfilts <- any(c("molfilt", "cvfilt", "imdanovafilt", "profilt", "tcfilt") %in% names(objects$filters))
+  cond_sampfilts <- any(c("rmdfilt", "customfilt", "rnafilt_libsize", "rnafilt_min_nonzero") %in% names(objects$filters))
 
   toggleElement("ok_data_filters", condition = cond_molfilts, anim = TRUE)
   toggleElement("ok_sample_filters", condition = cond_sampfilts, anim = TRUE)

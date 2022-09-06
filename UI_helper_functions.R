@@ -1,22 +1,25 @@
 #' @details helper function to add filter UI for a new filter
-add_filter_UI <- function(filter_name, title, add_btn_title, tooltip_text, ..., colsize_l = 6, colsize_r = 6) {
+add_filter_UI <- function(filter_name, title, tooltip_text, ..., add_btn_title = "Add/Remove", trailing_hr = T, colsize_l = 6, colsize_r = 6) {
   div(
     id = sprintf("%s_ftab_UI", filter_name),
     tagList(
       fluidRow(
         column(
           colsize_l,
-          tags$b(title),
+          div(
+            class = "flex-inline",
+            tags$b(title), 
+            tipify(
+              icon("question-sign", lib = "glyphicon", class = "info-right"),
+              title = tooltip_text
+            )
+          ),
           div(
             id = sprintf("add_%s_ttip_control", filter_name),
             actionButton(
               sprintf("add_%s", filter_name),
               label = div(class="flex-inline",
-                          add_btn_title, 
-                          tipify(
-                            icon("question-sign", lib = "glyphicon", class = "info-right"),
-                            title = tooltip_text
-                          ),
+                          add_btn_title,
                           hidden(div(id = sprintf("%s_exists", filter_name), style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
               ),
               width = "100%"
@@ -28,9 +31,10 @@ add_filter_UI <- function(filter_name, title, add_btn_title, tooltip_text, ..., 
           colsize_r,
           ...
         )
-      ),
-      hr()
-    )
+      )
+    ),
+    
+    if(trailing_hr) hr() else NULL
   )
 }
 
