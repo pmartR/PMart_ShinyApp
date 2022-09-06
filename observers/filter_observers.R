@@ -64,7 +64,7 @@ apply_filt <- function(){
       ## RNA filter - 1 dataset only
       # library size
       if (!is.null(objects$filters$rnafilt_libsize)) {
-        tmp <- applyFilt(objects$filters$rnafilt_libsize, tmp, size_library = input$min_lib_size)
+        tmp <- applyFilt(objects$filters$rnafilt_libsize, tmp, size_library = input$rnafilt_min_lib_size)
       }
       # min-nonzero
       if (!is.null(objects$filters$rnafilt_min_nonzero)) {

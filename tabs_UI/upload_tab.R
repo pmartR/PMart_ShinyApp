@@ -78,7 +78,7 @@ upload_UI <- function() {
             )),
             
             conditionalPanel(
-              "input.labeled_yn == 'seq'",
+              "input.datatype != 'seq'",
               hidden(div(
                 class = "inline-wrapper-1",
                 id = "js_na_symbol",

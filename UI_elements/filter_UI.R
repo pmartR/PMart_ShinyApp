@@ -61,7 +61,7 @@ list(
     for (i in 1:length(objects$filters)) {
       # total count filter
       if (grepl("^tcfilt$", names(objects$filters)[i])) {
-        tcfilt_summ <- summary(tcfilt, min_count = input$min_num_trans)
+        tcfilt_summ <- summary(objects$filters[[i]], min_count = input$min_num_trans)
         divs[[i]] <- tagList(
           tags$b("Total Count Filter:"),
           tags$p(

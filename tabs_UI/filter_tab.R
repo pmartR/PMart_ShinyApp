@@ -23,8 +23,6 @@ filter_UI <- function() {
             numericInput("mol_min_num", "Minimum number observed", 2, step = 1)
           ),
           
-          hr()
-          ,
           # cv filter options
           add_filter_UI(
             filter_name = "cvfilt",
@@ -98,7 +96,6 @@ filter_UI <- function() {
           add_filter_UI(
             filter_name = "rnafilt_libsize",
             title = "RNA-seq filter (Library Size)",
-            add_btn_title = "Add/Remove RNA filter",
             tooltip_text = ttext_[["RNA_FILT_LIB_INFO"]],
             numericInput("rnafilt_min_lib_size", "Minimum library size in sample:", value = NULL, step = 1, min = 0)
           ),
@@ -107,7 +104,6 @@ filter_UI <- function() {
           add_filter_UI(
             filter_name = "rnafilt_min_nonzero",
             title = "RNA-seq filter (Minimum Nonzero)",
-            add_btn_title = "Add/Remove RNA filter",
             trailing_hr = FALSE,
             tooltip_text = ttext_[["RNA_FILT_MIN_NONZERO_INFO"]],
             numericInput("rnafilt_min_nonzero", "Minimum number of nonzero observations:", value = NULL, step = 1, min = 0)

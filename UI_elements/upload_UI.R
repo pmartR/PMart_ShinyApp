@@ -263,11 +263,17 @@ list(
   output$omicsData_upload_boxplot <- renderPlotly({
     req(!is.null(objects$uploaded_omicsData))
     
-    ## If Data type is seq, add transformation
+    plot_args = list(
+      objects$omicsData,
+      "interactive" = TRUE
+    )
     
-    transformation <- if(input$datatype == "seq") "lcpm" else NULL
-    p <- plot(objects$omicsData, bw_theme = TRUE, transformation = transformation,
-              interactive = T) #+ theme(axis.text.x = element_blank())
+    ## If Data type is seq, add transformation
+    if(input$datatype == "seq") {
+      plot_args[["transformation"]] = "lcpm"
+    }
+    
+    p <- do.call(plot, plot_args) 
     plots$last_plot <- p
     return(p)
   }),
