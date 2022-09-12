@@ -203,22 +203,30 @@ list(
       project <- MapConnect$Project
     }
     
-    # Generate pmartR midpoint object
-    Midpoint <- midpoint_pmart(
-      omics_data = OmicsData,
-      tab = Tab, 
-      project = project,
-      name = input$MidpointName,
-      omics_stats = OmicsStats,
-      omics_stats_pep = OmicsStatsPep
-    )
-    
-
-    # Export results
-    UUID <- put_data(MapConnect$MapConnect, Midpoint)
-    
-    # Add Tags 
-    set_tags(MapConnect$MapConnect, UUID, tags = pull_tags_from_object(Midpoint))
+    tryCatch({
+      # Generate pmartR midpoint object
+      Midpoint <- midpoint_pmart(
+        omics_data = OmicsData,
+        tab = Tab, 
+        project = project,
+        name = input$MidpointName,
+        omics_stats = OmicsStats,
+        omics_stats_pep = OmicsStatsPep
+      )
+      
+  
+      # Export results
+      UUID <- put_data(MapConnect$MapConnect, Midpoint)
+      
+      # Add Tags 
+      set_tags(MapConnect$MapConnect, UUID, tags = pull_tags_from_object(Midpoint))
+      }, error = function(e) {
+      shinyalert::shinyalert(
+        title = "Something went wrong exporting your midpoint object!",
+        text = sprintf("System Error:  %s", e),
+        type = "error"
+      )
+    })
     
   })
 
