@@ -112,7 +112,7 @@ shinyServer(function(session, input, output) {
       )
     }
     else {
-      return(NULL)
+       return(NULL)
     }
   })
 

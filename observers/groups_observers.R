@@ -39,11 +39,11 @@ makegroup <- function(){
                                  pair_group = pair_group,
                                  pair_denom = pair_denom
         )
-        
+
         if (input$usevizsampnames == "Yes") {
           tmp <- do.call(custom_sampnames, args = c(omicsData = list(tmp), args_2))
         }
-        
+
         tmp
       },
       error = function(e) {

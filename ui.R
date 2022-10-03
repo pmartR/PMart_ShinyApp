@@ -12,7 +12,6 @@ ui <- function(request) {
         "toggleTabInputs" # Toggles state of inputs on a page
       )
     ),
-    shinyalert::useShinyalert(),
     list(tags$head(HTML('<link rel="icon", href="pmartlogo.png", 
                                  type="image/png" />'))),
     div(

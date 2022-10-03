@@ -188,6 +188,11 @@ observeEvent(
     
     revals$warnings_statistics$bad_imdanova_plot <- NULL
     
+    color_low = if(isTruthy(input$imd_low_cpicker)) input$imd_low_cpicker else "#132B43"
+    color_high = if(isTruthy(input$imd_high_cpicker)) input$imd_high_cpicker else "#56B1F7"
+    
+    revals$warnings_statistics$bad_imdanova_plot <- NULL
+    
     tryCatch({
       plots$statistics_mainplot <- plot(
         objects$imdanova_res,

@@ -1,4 +1,16 @@
 list(
+  #' #'@details Choose which plot type to view.  Disabled for some data types.
+  #' output$which_qc_plot_UI <- renderUI({
+  #'   req(!is.null(objects$omicsData))
+  #'   radioGroupButtons("which_qc_plot", "Choose a Plot Type:",
+  #'                     choices = c("Boxplots" = "boxplots", 
+  #'                                 "Missing Values Barplots" = "bar", 
+  #'                                 "Missing Values Scatterplots" = "scatter")
+  #'   ),
+  #'   
+  #'   disable(selector = "#somevalue button:eq(1)")
+  #' })
+  
   # dropdowns specifying what variable to order boxplots by
   output$qc_order_by <- renderUI({
     req(!is.null(objects$omicsData))
@@ -94,12 +106,14 @@ list(
     order_by <- if (isTRUE(input$qc_order_by == "Select one")) NULL else input$qc_order_by
     color_by <- if (isTRUE(input$qc_color_by == "Select one")) NULL else input$qc_color_by
     
+    transformation <- if(input$datatype == "seq") "lcpm" else NULL
+    
     # ifelse chain for which type of plot
     if (input$which_qc_plot == "boxplots") {
       p <- plot(objects$omicsData,
         order_by = order_by, color_by = color_by,
         use_VizSampNames = use_VizSampNames,
-        bw_theme = TRUE
+        bw_theme = TRUE, transformation = transformation
       )
     }
     else {
