@@ -84,7 +84,7 @@ observeEvent(input$makezipfile, {
         plot_name <- plots$plot_table[i, 1]
         
         if(inherits(plots$allplots[[i]], "plotly")){
-          fname <- paste0(plot_name, '.html') #create a plot name
+          fname <- paste0(gsub(":", " ", plot_name), ".html") #create a plot name
           saveWidget(plots$allplots[[i]], file.path(tempdir(), fname),
                      selfcontained = T)
         } else {
