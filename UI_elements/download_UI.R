@@ -54,5 +54,19 @@ list(
     },
     selection = list(selection = "single", selected = 1),
     escape = FALSE
-  )
+  ),
+  
+  output$download_plot_options_UI <- renderUI({
+    if(length(input$download_plot_table_rows_selected) < 1){
+      return(NULL)
+    } 
+    
+    return (div(
+      bsCollapsePanel("Axes Options",
+                      value = "axes_options",
+                      style_UI("download"),
+                      apply_style_UI("download", FALSE, FALSE)
+      )
+    ))
+  })
 )

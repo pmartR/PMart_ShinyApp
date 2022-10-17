@@ -134,4 +134,13 @@ observeEvent(revals$fs,
   ignoreNULL = FALSE
 )
 
+observeEvent(input$download_apply_style_plot_1, {
+  if(length(input$download_plot_table_rows_selected) < 1){
+    return(NULL)
+  } 
+  
+  plot_name <- plots$plot_table[input$download_plot_table_rows_selected, 1]
+  plots$allplots[[plot_name]] <- add_plot_styling(input, "download", plots$allplots[[plot_name]])
+})
+
 ###
