@@ -79,14 +79,42 @@ observeEvent(input$makezipfile, {
   total_files <- length(c(plots_marked_for_death, tables_marked_for_death))
 
   withProgress(message = "Writing files: ", {
+    # Kaleido bug workaround
+    reticulate::py_run_string("import sys")
+    
+    scope <- kaleido()
+    
     if (length(plots_marked_for_death) > 0) {
       for (i in plots_marked_for_death) {
         plot_name <- plots$plot_table[i, 1]
         
         if(inherits(plots$allplots[[i]], "plotly")){
-          fname <- paste0(gsub(":", " ", plot_name), ".html") #create a plot name
-          saveWidget(plots$allplots[[i]], file.path(tempdir(), fname),
-                     selfcontained = T)
+          save_options <- plots$plot_save_options[[i]]
+          switch(
+            save_options[[1]],
+            
+            "HTML Widget" = {
+              fname <- paste0(gsub(":", " ", plot_name), ".html") #create a plot name
+              saveWidget(plots$allplots[[i]], file.path(tempdir(), fname),
+                         selfcontained = T)
+            },
+            
+            "PNG" = {
+              fname <- paste0(gsub(":", " ", plot_name), ".png")
+              scope$transform(plots$allplots[[i]], file = gsub("\\\\", "/", file.path(tempdir(), fname)), width = save_options[[2]], height = save_options[[3]], scale = save_options[[4]])
+            },
+            
+            "JPG" = {
+              fname <- paste0(gsub(":", " ", plot_name), ".jpg")
+              scope$transform(plots$allplots[[i]], file = gsub("\\\\", "/", file.path(tempdir(), fname)), width = save_options[[2]], height = save_options[[3]], scale = save_options[[4]])
+            },
+            
+            "SVG" = {
+              fname <- paste0(gsub(":", " ", plot_name), ".svg")
+              scope$transform(plots$allplots[[i]], file = gsub("\\\\", "/", file.path(tempdir(), fname)), width = save_options[[2]], height = save_options[[3]], scale = save_options[[4]])
+            }
+          )
+          
         } else {
           fname <- paste0(plot_name, ".png")  # create a plot name
           ggsave(file.path(tempdir(), fname), plot = plots$allplots[[i]])
@@ -95,6 +123,8 @@ observeEvent(input$makezipfile, {
         incProgress(1 / total_files, detail = sprintf("%s done..", plot_name))
       }
     }
+    rm(scope); gc()
+    
     # do.call('pluck', c(list(get('omicsData_postmortem')),list('e_data')))
     if (length(tables_marked_for_death) > 0) {
       for (i in tables_marked_for_death) {
@@ -141,6 +171,60 @@ observeEvent(input$download_apply_style_plot_1, {
   
   plot_name <- plots$plot_table[input$download_plot_table_rows_selected, 1]
   plots$allplots[[plot_name]] <- add_plot_styling(input, "download", plots$allplots[[plot_name]])
+  
+  output$download_image_preview <- renderUI(NULL)
+})
+
+observeEvent(input$download_apply_save_options, {
+  if(length(input$download_plot_table_rows_selected) < 1){
+    return(NULL)
+  } 
+  
+  plot_name <- plots$plot_table[input$download_plot_table_rows_selected, 1]
+  plots$plot_save_options[[plot_name]] <- list(input$download_file_type, input$download_plot_width, input$download_plot_height, input$download_plot_scale)
+
+  output$download_image_preview <- renderUI(NULL)  
+})
+
+observeEvent(input$download_preview_image, {
+  if(length(input$download_plot_table_rows_selected) < 1){
+    return(NULL)
+  } 
+  
+  plot_name <- plots$plot_table[input$download_plot_table_rows_selected, 1]
+  
+  output$download_image_preview <- renderUI("Generating preview...")
+  
+  # Prevent accidental double-clicking (makes it take a lot longer)
+  shinyjs::disable("download_preview_image")
+  
+  image_format <- input$download_file_type
+  image_width <- input$download_plot_width
+  image_height <- input$download_plot_height
+  image_scale <- input$download_plot_scale
+  
+  # HTML Widgets don't get previews (they have the default preview)
+  if (image_format == "HTML Widget") {
+    output$download_image_preview <- renderUI("See Widget preview above.")
+    return(NULL)
+  }
+  
+  if (image_format != "PNG" && image_format != "SVG" && image_format != "JPG") {
+    output$download_image_preview <- renderUI(paste("Error: unknown output format", image_format))
+    return(NULL)
+  }
+  
+  # Kaleido bug workaround
+  reticulate::py_run_string("import sys")
+  
+  scope <- kaleido()
+  scope$transform(plots$allplots[[plot_name]], file = "www/preview.png", width = image_width, height = image_height, scale = image_scale)
+  rm(scope); gc()
+  
+  # Attach the current time at the end of the query so the browser doesn't cache the preview image
+  output$download_image_preview <- renderUI(img(src=paste0("preview.png?", Sys.time())))
+
+  shinyjs::enable("download_preview_image")
 })
 
 ###

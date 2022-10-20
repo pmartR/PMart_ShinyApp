@@ -9,6 +9,7 @@ list(
     plot_name <- plots$plot_table[input$download_plot_table_rows_selected, 1]
     p <- plots$allplots[[plot_name]]
     
+    output$download_image_preview <- renderUI(NULL)
     
     if(inherits(p, c("ggplot", "gtable"))){
       return(withSpinner(plotOutput("download_plot")))
@@ -61,12 +62,36 @@ list(
       return(NULL)
     } 
     
+    plot_name <- plots$plot_table[input$download_plot_table_rows_selected, 1]
+    plot_file_type <- plots$plot_save_options[[plot_name]][[1]]
+    plot_save_width <- plots$plot_save_options[[plot_name]][[2]]
+    plot_save_height <- plots$plot_save_options[[plot_name]][[3]]
+    plot_save_scale <- plots$plot_save_options[[plot_name]][[4]]
+    
     return (div(
       bsCollapsePanel("Axes Options",
                       value = "axes_options",
                       style_UI("download"),
                       apply_style_UI("download", FALSE, FALSE)
-      )
+      ),
+      bsCollapsePanel("Save Options",
+                      value = "save_options",
+                      div(
+                        fluidRow(
+                          column(3, selectInput("download_file_type", "File Type", c("HTML Widget", "PNG", "JPG", "SVG"), c(plot_file_type))),
+                          conditionalPanel(
+                            "input.download_file_type!='HTML Widget'",
+                            column(3, numericInput("download_plot_width", "Width", plot_save_width)),
+                            column(3, numericInput("download_plot_height", "Height", plot_save_height)),
+                            column(3, numericInput("download_plot_scale", "Scale", plot_save_scale, min = 0, step = 0.25))
+                          )
+                        ),
+                        fluidRow(
+                          column(1, actionButton("download_apply_save_options", "Apply")),
+                          column(1, conditionalPanel("input.download_file_type!='HTML Widget'", actionButton("download_preview_image", "Preview")))
+                        ),
+                        div(style="overflow:auto", uiOutput("download_image_preview"))
+                      ))
     ))
   })
 )

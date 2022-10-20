@@ -5,3 +5,5 @@
 .DS_Store
 pmart_standalone.Rproj
 mapDataAccess/
+venv/
+www/preview.png

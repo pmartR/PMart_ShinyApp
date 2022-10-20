@@ -24,6 +24,7 @@ Depends:
   readr,
   renv,
   reshape2,
+  reticulate,
   rlang,
   shiny,
   shinyBS,
