@@ -407,7 +407,7 @@ list(
   }),
   
   # Conditional UI for rmd filter, depends on the sample names in the file(s)
-  output$rmdfilt_plot_type <- renderUI({
+  output$rmdfilt_plot_type_UI <- renderUI({
     req(!is.null(objects$omicsData))
     if (input$rmdfilt_plot_type == "all") {
       NULL

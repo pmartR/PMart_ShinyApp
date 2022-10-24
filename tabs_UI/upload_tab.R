@@ -74,7 +74,7 @@ upload_UI <- function() {
             hidden(div(
               id = "js_datascale",
               uiOutput("datascale_UI"),
-              uiOutput("transform")
+              uiOutput("transform_UI")
             )),
             
             conditionalPanel(

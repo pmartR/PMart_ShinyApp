@@ -118,7 +118,7 @@ list(
   }),
 
   # transform to what scale?
-  output$transform <- renderUI({
+  output$transform_UI <- renderUI({
     
     req(input$datatype != "seq")
     

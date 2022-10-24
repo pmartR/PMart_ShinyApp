@@ -12,7 +12,7 @@ list(
   #' })
   
   # dropdowns specifying what variable to order boxplots by
-  output$qc_order_by <- renderUI({
+  output$qc_order_by_UI <- renderUI({
     req(!is.null(objects$omicsData))
     choices <- colnames(objects$omicsData$f_data %>% dplyr::select(-one_of(attributes(objects$omicsData)$cnames$fdata_cname)))
     pickerInput("qc_order_by", NULL,
@@ -22,7 +22,7 @@ list(
     )
   }),
 
-  output$qc_order_by_2 <- renderUI({
+  output$qc_order_by_2_UI <- renderUI({
     req(!is.null(objects$omicsData_2))
     choices <- colnames(objects$omicsData_2$f_data %>% dplyr::select(-one_of(attributes(objects$omicsData_2)$cnames$fdata_cname)))
     pickerInput("qc_order_by_2", NULL,
@@ -33,7 +33,7 @@ list(
   #
 
   # dropdowns specifying what color to order boxplots by
-  output$qc_color_by <- renderUI({
+  output$qc_color_by_UI <- renderUI({
     req(!is.null(objects$omicsData))
     choices <- colnames(objects$omicsData$f_data %>% dplyr::select(-one_of(attributes(objects$omicsData)$cnames$fdata_cname)))
     pickerInput("qc_color_by", NULL,
@@ -42,7 +42,7 @@ list(
     )
   }),
 
-  output$qc_color_by_2 <- renderUI({
+  output$qc_color_by_2_UI <- renderUI({
     req(!is.null(objects$omicsData_2))
     choices <- colnames(objects$omicsData_2$f_data %>% dplyr::select(-one_of(attributes(objects$omicsData_2)$cnames$fdata_cname)))
     pickerInput("qc_color_by_2", NULL,

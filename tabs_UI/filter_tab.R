@@ -89,7 +89,7 @@ filter_UI <- function() {
               uiOutput("rmd_propmis_warn_icon")
             ),
             pickerInput("rmdfilt_plot_type", "Plot everything or inspect certain samples?", choices = c("Plot all samples" = "all", "Select from all samples" = "subset", "Select from outliers" = "outliers")),
-            uiOutput("rmdfilt_plot_type")
+            uiOutput("rmdfilt_plot_type_UI")
           ),
           
           ## RNA_filt - Library Size
@@ -116,6 +116,7 @@ filter_UI <- function() {
             "Custom Filter",
             hidden(div(id = "ok_custom_filter", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
           ),
+          value = "customfilt",
           div(class = "inline-wrapper-1",
             uiOutput("fdata_customfilt"),
             radioGroupButtons("remove_or_keep", label = "Remove or keep these choices?", choices = c("Remove", "Keep"), selected = "Remove")
