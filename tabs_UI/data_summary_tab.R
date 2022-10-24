@@ -21,16 +21,16 @@ data_summary_UI <- function() {
             tagList(
               div("Order Samples By:", style = "font-weight:bold"),
               fluidRow(
-                column(6, uiOutput("qc_order_by")),
-                column(6, uiOutput("qc_order_by_2"))
+                column(6, uiOutput("qc_order_by_UI")),
+                column(6, uiOutput("qc_order_by_2_UI"))
               )
             ),
             # color selection
             tagList(
               div("Color Samples By:", style = "font-weight:bold"),
               fluidRow(
-                column(6, uiOutput("qc_color_by")),
-                column(6, uiOutput("qc_color_by_2"))
+                column(6, uiOutput("qc_color_by_UI")),
+                column(6, uiOutput("qc_color_by_2_UI"))
               )
             ),
             div(

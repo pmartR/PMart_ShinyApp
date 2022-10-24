@@ -244,13 +244,26 @@ observeEvent(c(input$apply_normalization, input$apply_normalization_modal), {
       else if (input$subset_fn == "ppp_rip") {
         params <- list(ppp_rip = list(ppp = input$ppp, rip = input$rip))
       }
-
+      
+      # __SHINYTEST__
+      if(options("shiny.testmode") == TRUE) {
+        .omicsData_prenorm <- objects$omicsData
+        exportTestValues(
+          omicsData_prenorm = .omicsData_prenorm 
+        ) 
+      }
+      
       objects$omicsData <- normalize_global(objects$omicsData,
         subset_fn = input$subset_fn,
         norm_fn = input$norm_fn,
         backtransform = as.logical(input$backtransform),
         params = params,
         apply_norm = TRUE
+      )
+      
+      # __SHINYTEST__
+      exportTestValues(
+        omicsData_norm = objects$omicsData
       )
 
       if (!is.null(objects$omicsData_2)) {

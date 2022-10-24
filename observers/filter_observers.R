@@ -144,9 +144,26 @@ apply_filt <- function(){
           )
       }
 
+      # __SHINYTEST__
+      if(options("shiny.testmode") == TRUE) {
+        .tmp = tmp
+        .tmp2 = tmp2
+        .omicsData.prefilt = objects$omicsData
+        .omicsData.prefilt.2 = objects$omicsData_2
+        
+        exportTestValues(
+          filters = objects$filters,
+          omicsData_filt = .tmp,
+          omicsData_filt_2 = .tmp2,
+          omicsData = .omicsData.prefilt,
+          omicsData_2 = .omicsData.prefilt.2
+        )
+      }
+      
       # store saved objects and remove temp objects, tmp2 will be null if there is only one dataset
       objects$omicsData <- tmp
       objects$omicsData_2 <- tmp2
+      
       revals$filter_summary <- summary(tmp)
       if (!is.null(tmp2)) revals$filter_summary_2 <- summary(tmp2)
       rm(tmp, tmp2)
