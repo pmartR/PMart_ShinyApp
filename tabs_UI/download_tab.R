@@ -31,6 +31,11 @@ download_UI <- function() {
         style = "float:left",
         bsButton("mark_table_download", "Select/de-select for download", icon = icon("minus"))
       )
+      ),
+      bsCollapsePanel("Generate report", 
+                      textInput("ReportName", "Name Report", "pmartR_Report"), 
+                      pickerInput("ReportType", "Report Type", c("HTML", "PDF"), "HTML"),
+                      downloadButton("Make Report")
       )
     ),
     div(id = "js_zipbutton", style = "float:left", class = "grey_button", bsButton("makezipfile", label = tags$b("Bundle up all selected items"), icon = icon("briefcase"), lib = "glyphicon")),

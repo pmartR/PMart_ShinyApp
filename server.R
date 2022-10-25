@@ -163,6 +163,8 @@ shinyServer(function(session, input, output) {
     contentType = "application/zip"
   )
   
+  source("./generate_markdown.R", local = TRUE)
+  
   if (MAP_ACTIVE) {
     
     # Connect to map data access library

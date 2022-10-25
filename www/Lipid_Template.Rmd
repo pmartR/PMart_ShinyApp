@@ -1,0 +1,309 @@
+---
+params:
+  titleName: "Lipid Template File"
+  lipidData: ""
+  lipidStats: ""
+  pmart_inputs: ""
+title: "`r params$titleName`"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, error = FALSE)
+library(dplyr); library(pmartR); library(knitr); library(DT); library(ggplot2);
+library(data.table); library(patchwork); library(purrr)
+```
+
+```{r Read In Results}
+# This data will be passed to the markdown through shiny
+lipidData <- params$lipidData
+lipidDataAttr <- attributes(lipidData)
+lipidStats <- params$lipidStats
+lipidStatsAttr <- attributes(lipidStats)
+pmart_inputs <- params$pmart_inputs
+```
+
+## Upload Data 
+
+### *Expression Data*
+
+A molecule expression data file called **`r pmart_inputs$file_edata$name`** was uploaded to pmart. 
+The column that designates unique molecules was marked as **`r lipidDataAttr$cnames$edata_cname`.**
+`r if (lipidDataAttr$data_info$data_scale_orig == lipidDataAttr$data_info$data_scale) {"The original scale of the data was **lipidDataAttr$data_info$data_scale_orig** and remained unchanged."} else {paste0("The original scale of the data was **", lipidDataAttr$data_info$data_scale_orig, "** and was changed to **", lipidDataAttr$data_info$data_scale, "**.")}` 
+The value to denote missing data was **`r pmart_inputs$na_symbol`** and the expression data
+**`r ifelse(pmart_inputs$normalized_yn == "0", "was not already", "was already")`** normalized. 
+
+`r if (is.null(lipidDataAttr$cnames$emeta_cname) == FALSE) {paste0("### *Biomolecule Information*\nAn associated biomolecule information file was also uploaded called **", pmart_inputs$file_emeta$name, "** and the molecule identifier column was designated as **", lipidDataAttr$cnames$emeta_cname, "**.")}`
+
+`r if ("Var1" %in% colnames(lipidData$f_data) == FALSE) {paste0("### *Sample Information*\nAn associated sample information file was also uploaded called **", pmart_inputs$file_fdata$name, "**. Trimmed samples names **", ifelse(pmart_inputs$usevizsampnames == "No", "were not", "were"), "** used. The column in the sample information file which indicates sample names was designated as **", lipidDataAttr$cnames$fdata_cname, "**.")}`
+
+`r if (pmart_inputs$ReportCode) {"### *Example Code*"}`
+
+```{r eval = FALSE, echo = pmart_inputs$ReportCode}
+# This is example code of how to generate a lipid data object in R.
+
+# First, load pmartR
+library(pmartR)
+library(pmartRdata)
+library(tidyverse)
+
+# Then, pull the example data 
+data("lipid_edata")
+data("lipid_fdata")
+
+# Generate the lipidomic data object. Note that NA's have been converted to 0's in this step.
+mylipidData <- as.lipidData(e_data = lipid_edata, 
+                            f_data = lipid_fdata, 
+                            edata_cname = "LipidCommonName", 
+                            fdata_cname = "Sample_Name")
+```
+
+`r if (is.null(lipidDataAttr$group_DF) == FALSE) {paste0("## Group Samples\n### *Grouping Information*\nThis table summarizes to which group or covariate each column in the Expression Data belongs.")}`
+
+```{r Grouping Information: Main Effects and Covariates}
+if (is.null(lipidDataAttr$group_DF) == FALSE) {
+  lipidDataAttr$group_DF %>% kable()
+}
+```
+
+## Data Summary
+
+### *Summary Table*
+
+The first column in the table below denotes a property of the lipid data, and the "Data" column
+states that property's value.
+
+```{r Data Summary: Main Table}
+lipidDataSum <- data.frame("Data" = summary(lipidData))
+lipidDataSum %>% kable()
+```
+
+### *Missing Value Table*
+
+In the table below, the first column denotes the sample and the second is the number of missing observations.
+The third column represents the second as a proportion of the total number of observations
+for that sample. 
+
+```{r Data Summary: Missing Value Table}
+lipidData$e_data %>%
+  select(-pmart_inputs$id_col) %>%
+  purrr::map(~sum(is.na(.))) %>%
+  data.frame() %>%
+  t() %>%
+  data.frame() %>%
+  setNames("Missing Observations") %>%
+  mutate(
+    "Proportion Missing" = round(`Missing Observations` / nrow(lipidData$e_data), 3),
+  ) %>% kable()
+```
+
+`r if (pmart_inputs$ReportCode && is.null(lipidDataAttr$group_DF) == FALSE) {"### *Example Code*"}`
+
+```{r eval = FALSE, echo = pmart_inputs$ReportCode, include = is.null(lipidDataAttr$group_DF) == FALSE}
+# This is example code of how to transform, group, and get a summarize the lipid data in R.
+
+# Transform the data
+mylipidData <- edata_transform(omicsData = mylipidData, data_scale = "log2")
+
+# Set group designations
+mylipidData <- group_designation(omicsData = mylipidData, main_effects = "Condition")
+
+# Summarize results
+summary(mylipidData)
+
+# You can also visualize a heatmap or pca
+cor_result(mylipidData) %>% plot()
+dim_reduction(mylipidData) %>% plot()
+```
+
+`r if(length(lipidDataAttr$filters) > 0) {paste0("## Filters\nA total of **", length(lipidDataAttr$filters), "** filter(s) were applied. See the table below for descriptions of the filters and their order.\n\n### *Summary of Applied Filters*")}`
+
+```{r Filter: Table Summarizing Applied Filters}
+#  Put applied filters in a table
+FilterTable <- NULL
+
+if (length(lipidDataAttr$filters) != 0) {
+  
+  # Iterate through all the filters for the table, apply different logic for each filter type
+  FilterTable <- do.call(rbind, lapply(lipidDataAttr$filters, function(filter) {
+    
+    # Molecule Filter
+    if (filter$type == "moleculeFilt") {
+      return(c("Filter" = "Molecule Filter", "Type" = "Biomolecule", "Parameters" = 
+               paste0("Min Number Molecules: ", filter$threshold), 
+               "Summary" = paste0(filter$filtered %>% length(), " biomolecule(s) were filtered."),
+               "First 5 Filtered" = paste0(filter$filtered[1:5][!is.na(filter$filtered[1:5])], collapse = " & ")))
+    } else
+      
+    # CV Filter
+    if (filter$type == "cvFilt") {
+      return(c("Filter" = "CV Filter", "Type" = "Biomolecule", "Parameters" = 
+               paste0("Max CV: ", filter$threshold),
+               "Summary" = paste0(filter$filtered %>% length(), " biomolecule(s) were filtered."),
+               "First 5 Filtered" = paste0(filter$filtered[1:5][!is.na(filter$filtered[1:5])], collapse = " & ")))
+    } else
+      
+    # imd-ANOVA filter
+    if (filter$type == "imdanovaFilt") {
+      return(c("Filter" = "imd-ANOVA Filter", "Type" = "Biomolecule", "Parameters" = 
+               paste0("Min ANOVA: ", filter$threshold$min_nonmiss_anova,
+                      " & Min G-Test: ", filter$threshold$min_nonmiss_gtest),
+               "Summary" = paste0(filter$filtered %>% length(), " biomolecule(s) were filtered."),
+               "First 5 Filtered" = paste0(filter$filtered[1:5][!is.na(filter$filtered[1:5])], collapse = " & ")))
+    } else 
+      
+    # rmd Filter
+    if (filter$type == "rmdFilt") {
+      return(c("Filter" = "rMD Filter", "Type" = "Sample", "Parameters" = 
+                 paste0("P-Value Threshold: ", filter$threshold, " & Metrics Used: ",
+                        pmart_inputs$rmd_metrics %>% paste(collapse = ", ")),
+               "Summary" = paste0(filter$filtered %>% length(), " sample(s) were filtered."),
+               "First 5 Filtered" = paste0(filter$filtered[1:5][!is.na(filter$filtered[1:5])], collapse = " & ")))
+    } else 
+      
+    # Custom filter
+    if (filter$type == "customFilt") {
+      return(c("Filter" = "Custom Filter", "Type" = "Sample or Biomolecule", "Parameters" = "",
+               "Summary" = paste0(filter$filtered$f_data_remove %>% length(), " sample(s) were filtered. ",
+                           filter$filtered$e_data_remove %>% length(), " biomolecule(s) were filtered. ", 
+                           filter$filtered$e_meta_remove %>% length(), " e_meta variable(s) were filtered."),
+               "First 5 Filtered" = paste0(filter$filtered$f_data_remove[1:5][!is.na(filter$filtered$f_data_remove[1:5])], 
+                                           filter$filtered$e_data_remove[1:5][!is.na(filter$filtered$e_data_remove[1:5])],
+                                           filter$filtered$e_meta_remove[1:5][!is.na(filter$filtered$e_meta_remove[1:5])],
+                                           collapse = " & ")))
+      
+    } else {stop(paste0(filter$type, " is not a recognized filter type."))}
+  
+  })) %>% data.table()
+  
+  cbind("Order" = 1:nrow(FilterTable), FilterTable) %>% kable()
+  
+}
+```
+
+`r if ("Molecule Filter" %in% FilterTable$Filter) {paste0("### *Molecule Filter*\nA molecule filter was applied to the data, which removes biomolecule(s), **", lipidDataAttr$cnames$edata_cname, "(s)**, not having at least the minimum number of samples (Min Number Molecules).")}`
+
+`r if ("CV Filter" %in% FilterTable$Filter) {paste0("### *CV Filter*\nA coefficient of variation (CV) filter was applied to the data which removes biomolecule(s), **", lipidDataAttr$cnames$edata_cname, "(s)**, with a CV greater than the threshold (Max CV).")} `
+
+`r if ("imd-ANOVA Filter" %in% FilterTable$Filter) {paste0("### *imd-ANOVA Filter*\nAn ANOVA filter can be applied to the data which removes biomolecule(s), **", lipidDataAttr$cnames$edata_cname, "(s)**, of non-missing values per group (Min ANOVA). Additionaly, an IMD (independence of missing data) filter can be applied to the data, removing biomolecules not having at least a minimum number of non-missing values (Min G-Test) in at least one of the groups.")}`
+
+`r if ("rMD Filter" %in% FilterTable$Filter) {paste0("### *rMD Filter*\nA robust Mahalanobis distance (rMD) filter was applied to the data, removing sample(s), **", lipidDataAttr$cnames$fdata_cname, "(s)**, with an associated rMD p-value of less than the threshold (P-Value Threshold). Metrics used to calculate the p-values are also included (Metrics Used).")}`
+
+`r if ("Custom Filter" %in% FilterTable$Filter) {paste0("### *Custom Filter*\n Custom filters can be used to remove samples, biomolecules or proteins.")}`
+
+`r if (pmart_inputs$ReportCode && length(lipidDataAttr$filters) > 0) {"### *Example Code*"}`
+
+```{r eval = FALSE, echo = pmart_inputs$ReportCode, include = length(lipidDataAttr$filters) > 0}
+# This is example code of how to apply and generate filters. 
+
+# Note: Apply filters only if they make sense given the context of the analysis. You can apply any filter with: 
+applyFilt(filter, mylipidData, other_parameters)
+
+# and visualize any filter with: 
+plot(filter, other_parameters)
+
+# and summarize any filter.
+summary(filter, other_parameters)
+
+# Run the biomolecule filter
+moleculeFilt <- molecule_filter(omicsData = mylipidData)
+plot(moleculeFilt, min_num = 2)
+
+# Run the coefficient of variation filter
+cvFilt <- cv_filter(omicsData = mylipidData)
+plot(cvFilt, cv_threshold = 80)
+
+# Run the imd-ANOVA filter before running an imd-ANOVA (statistical analysis step)
+imdFilt <- imdanova_filter(omicsData = mylipidData)
+plot(imdFilt, min_nonmiss_anova = 2)
+
+# Run a robust Mahalanobis distance filter
+rmdFilt <- rmd_filter(omicsData = mylipidData, metrics = c("MAD", "Skewness", "Correlation"))
+plot(rmdFilt, pvalue_threshold = 0.0001)
+
+# Run a custom filter. This one remove the Infection1 sample. 
+custFilt <- custom_filter(omicsData = mylipidData, f_data_remove = "Infection1")
+```
+
+`r if (lipidDataAttr$data_info$norm_info$is_normalized) {"## Normalization\nLipid data **was** normalized.\n\n### *Manual*"}`
+
+```{r Normalization: Manual, Plot}
+if (lipidDataAttr$data_info$norm_info$is_normalized) {
+  
+  if (is.null(lipidDataAttr$group_DF) == FALSE) {
+    
+    plot(lipidData, order_by = pmart_inputs$gcol1, color_by = pmart_inputs$gcol1, bw_theme = TRUE)
+    
+  } else {plot(lipidData, bw_theme = TRUE)}  
+  
+}
+```
+
+```{r Normalization: Manual, Data Table}
+if (is.null(lipidDataAttr$data_info$norm_info$norm_type) == FALSE 
+    && lipidDataAttr$data_info$norm_info$norm_type == "global") {
+  
+  SubsetParameters <- ifelse(is.null(lipidDataAttr$data_info$norm_info$subset_params), "",
+    paste(lapply(names(lipidDataAttr$data_info$norm_info$subset_params), function(name) {
+      paste0(name, ": ", lipidDataAttr$data_info$norm_info$subset_params[[name]])}), collapse = " & "))
+  
+  data.table("Attribute" = c("Subset Function", "Subset Parameters", "Normalization Function"),
+             "Value" = c(lipidDataAttr$data_info$norm_info$subset_fn, 
+                         SubsetParameters, 
+                         lipidDataAttr$data_info$norm_info$norm_fn)) %>% kable()
+}
+```
+
+`r if (pmart_inputs$ReportCode && lipidDataAttr$data_info$norm_info$is_normalized) {"### *Example Code*"}`
+
+```{r eval = FALSE, echo = pmart_inputs$ReportCode, include = lipidDataAttr$data_info$norm_info$is_normalized}
+# This is example code of how to conduct the normalization step. 
+
+# Note: There are many normalization parameters to consider. Use ?normalize_global to see them
+normallipidData <- normalize_global(omicsData = mylipidData, subset_fn = "all", norm_fn = "mean")
+```
+
+`r if (is.null(lipidStats) == FALSE) {"## Statistical Analysis\n The statistical analysis step **was** run."}`
+
+```{r Analysis: Comparison Text}
+ComparisonsText <- ""
+
+if (is.null(lipidStats) == FALSE) {
+  ComparisonsText <- paste("The following groups were compared:", paste0(paste(lipidStatsAttr$comparisons, sep = ","), 
+    "."), "Reported below are the parameters used in the statistical analysis,",
+    "followed by the number of siginificant biomolecules for each comparison.")
+}
+```
+
+`r ComparisonsText`
+
+```{r Analysis: Input Parameters}
+if (is.null(lipidStats) == FALSE) {
+  data.table("Attribute" = c("Test Method", "Multiple Comparison Adjustment", 
+      "Significance Threshold"), "Value" = c(lipidStatsAttr$statistical_test, lipidStatsAttr$adjustment_method,
+      lipidStatsAttr$pval_thresh)) %>% kable()
+}
+
+if (is.null(lipidStats) == FALSE) {
+  lipidStatsAttr$number_significant[1:4] %>% kable("latex") 
+}
+
+if (is.null(lipidStats) == FALSE) {
+  plot(lipidStats, bw_theme = TRUE)
+}
+```
+
+`r if (pmart_inputs$ReportCode && is.null(lipidStats) == FALSE) {"### *Example Code*"}`
+
+```{r eval = FALSE, echo = pmart_inputs$ReportCode, include = is.null(lipidStats) == FALSE}
+# This is example code of how to conduct the imdanova step
+
+# Note: You should consider whether you want to conduct an anova (default), gtest (missingness), or both. 
+# See ?imd_anova for more information
+lipidStats <- imd_anova(normallipidData, test_method = "anova")
+```
+
+
+
+
+
