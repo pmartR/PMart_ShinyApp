@@ -16,10 +16,8 @@ Depends:
   dplyr,
   ggplot2,
   gridExtra,
-  mapDataAccess,
   markdown,
   plotly,
-  pmartR,
   purrr,
   readr,
   renv,
@@ -33,5 +31,8 @@ Depends:
   shinycssloaders,
   shinyjs,
   stringr
+Remotes:
+  mapDataAccess,
+  pmartR
 
 

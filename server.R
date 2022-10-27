@@ -175,6 +175,8 @@ shinyServer(function(session, input, output) {
     contentType = "application/zip"
   )
   
+  cfg_path = if(isTruthy(Sys.getenv("MAP_CONFIG"))) Sys.getenv("MAP_CONFIG") else "./cfg/minio_config.yml"
+  
   if (MAP_ACTIVE) {
     
     # Connect to map data access library
@@ -183,8 +185,6 @@ shinyServer(function(session, input, output) {
     # Soure MAP-specific functionality (reading from header, etc)
     source("./MAP_Functions.R", local = TRUE)
     
-    cfg_path = if(isTruthy(Sys.getenv("MAP_CONFIG"))) Sys.getenv("MAP_CONFIG") else "./cfg/minio_config.yml"
-    
     # Create a reactive value to hold MAP-specific objects
     MapConnect <- reactiveValues(MapConnect = map_data_connection(cfg_path),
                                  Project = NULL, Midpoint = NULL)
@@ -192,7 +192,7 @@ shinyServer(function(session, input, output) {
   } else {
     hide(id = "loading-gray-overlay")
     
-    cfg <- yaml::read_yaml("./cfg/kaleido_config.yml")
+    cfg <- yaml::read_yaml(cfg_path)
     python_venv <- get_config_variable(cfg, "python_venv")
     
     conda_envs <- tryCatch(
