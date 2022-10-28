@@ -6,4 +6,5 @@
 pmart_standalone.Rproj
 mapDataAccess/
 venv/
+cfg/local_install.yml
 www/preview.png

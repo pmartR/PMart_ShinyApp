@@ -91,7 +91,7 @@ observeEvent(input$makezipfile, {
         if(inherits(plots$allplots[[i]], "plotly")){
           save_options <- plots$plot_save_options[[i]]
           switch(
-            save_options[[1]],
+            save_options$type,
             
             "HTML Widget" = {
               fname <- paste0(gsub(":", " ", plot_name), ".html") #create a plot name
@@ -101,17 +101,17 @@ observeEvent(input$makezipfile, {
             
             "PNG" = {
               fname <- paste0(gsub(":", " ", plot_name), ".png")
-              scope$transform(plots$allplots[[i]], file = gsub("\\\\", "/", file.path(tempdir(), fname)), width = save_options[[2]], height = save_options[[3]], scale = save_options[[4]])
+              scope$transform(plots$allplots[[i]], file = gsub("\\\\", "/", file.path(tempdir(), fname)), width = save_options$width, height = save_options$height, scale = save_options$scale)
             },
             
             "JPG" = {
               fname <- paste0(gsub(":", " ", plot_name), ".jpg")
-              scope$transform(plots$allplots[[i]], file = gsub("\\\\", "/", file.path(tempdir(), fname)), width = save_options[[2]], height = save_options[[3]], scale = save_options[[4]])
+              scope$transform(plots$allplots[[i]], file = gsub("\\\\", "/", file.path(tempdir(), fname)), width = save_options$width, height = save_options$height, scale = save_options$scale)
             },
             
             "SVG" = {
               fname <- paste0(gsub(":", " ", plot_name), ".svg")
-              scope$transform(plots$allplots[[i]], file = gsub("\\\\", "/", file.path(tempdir(), fname)), width = save_options[[2]], height = save_options[[3]], scale = save_options[[4]])
+              scope$transform(plots$allplots[[i]], file = gsub("\\\\", "/", file.path(tempdir(), fname)), width = save_options$width, height = save_options$height, scale = save_options$scale)
             }
           )
           
@@ -181,7 +181,7 @@ observeEvent(input$download_apply_save_options, {
   } 
   
   plot_name <- plots$plot_table[input$download_plot_table_rows_selected, 1]
-  plots$plot_save_options[[plot_name]] <- list(input$download_file_type, input$download_plot_width, input$download_plot_height, input$download_plot_scale)
+  plots$plot_save_options[[plot_name]] <- list(type = input$download_file_type, width = input$download_plot_width, height = input$download_plot_height, scale = input$download_plot_scale)
 
   output$download_image_preview <- renderUI(NULL)  
 })

@@ -63,10 +63,10 @@ list(
     } 
     
     plot_name <- plots$plot_table[input$download_plot_table_rows_selected, 1]
-    plot_file_type <- plots$plot_save_options[[plot_name]][[1]]
-    plot_save_width <- plots$plot_save_options[[plot_name]][[2]]
-    plot_save_height <- plots$plot_save_options[[plot_name]][[3]]
-    plot_save_scale <- plots$plot_save_options[[plot_name]][[4]]
+    plot_file_type <- plots$plot_save_options[[plot_name]]$type
+    plot_save_width <- plots$plot_save_options[[plot_name]]$width
+    plot_save_height <- plots$plot_save_options[[plot_name]]$height
+    plot_save_scale <- plots$plot_save_options[[plot_name]]$scale
     
     return (div(
       bsCollapsePanel("Axes Options",
