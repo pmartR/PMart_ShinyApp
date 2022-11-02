@@ -166,7 +166,7 @@ shinyServer(function(session, input, output) {
       orig_wd <- getwd()
       on.exit(setwd(orig_wd))
       setwd(tempdir())
-
+      
       zip(zipfile = fname, files = revals$fs, flags = "-r")
       if (file.exists(paste0(fname, ".zip"))) {
         file.rename(paste0(fname, ".zip"), fname)
