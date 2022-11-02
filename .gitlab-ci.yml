@@ -6,7 +6,7 @@ tests:
   image: code-registry.emsl.pnl.gov/multiomics-analyses/pmart_standalone/base:latest
   tags:
     - map
-    - codebuilds
+    - shiny
   before_script:
     - |
       apt-get update
