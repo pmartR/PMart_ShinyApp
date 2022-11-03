@@ -27,7 +27,9 @@ To install package with `renv`, first `install.packages("renv")`.  Then call `re
 
 Some in-development packages are not being tracked in renv.lock (to reduce Docker image build times).  These can be seen in the `install commonly updated packages` section of Dockerfile-base.  You will have to install these separately from the files that will be installed by calling `renv::restore()`.
 
-You will also need a Python virtual environment. You can create one automatically by running `source("local_install.R")` or by manually create a virtual environment, installing the packages from requirements.txt, and setting the `python_venv` variable in cfg/kaleido_config.yml.
+You will also need a [Phython virtual environment](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#creating-a-virtual-environment) with the packages from requirements.txt installed. 
+Then, add a .yml file with `python_venv: <path-to-your-venv>` in it. Finally, set the MAP_CONFIG environment variable to point to that yml file. 
+You can optionally put the following command in your .RProfile to automatically set the environment variable when the project is loaded: `Sys.setenv("MAP_CONFIG" = "<path-to-yml-file>")`.
 
 Once all dependencies are installed, make sure calling `.libPaths()` displays the renv environment, then call `shiny::runApp()`.
 
