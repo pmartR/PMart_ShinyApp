@@ -9,7 +9,7 @@ test:
     - map
     - rzr
   script:
-    - R -e 'options(testthat.use_colours = TRUE);testthat::test_dir("tests/testthat", reporter = testthat::MultiReporter$new(reporters = list(testthat::StopReporter$new(), testthat::JunitReporter$new(file = "junit_result.xml"))))'
+    - R -e 'shiny::runTests()'
   artifacts:
     when: always
     reports:
