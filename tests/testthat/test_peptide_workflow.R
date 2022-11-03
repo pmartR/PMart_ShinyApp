@@ -110,110 +110,110 @@ test_that("App completes a basic workflow on peptide-level data", {
   app$set_inputs(spans_which_norm_fn = c("mean", "zscore", "mad"))
   app$set_inputs(spans_which_norm_fn = c("mean", "mad"))
   
-  app$wait_for_value(input = "execute_spans")
-  app$click("execute_spans")
-  
-  Sys.sleep(1)
-  
-  # params panel opened by default
-  app$wait_for_value(output = "spans_table")
-  app$set_inputs(
-    spans_table_rows_selected = 1,
-    spans_table_row_last_clicked = 1,
-    allow_no_input_binding_ = TRUE
-  )
-  
-  app$click("use_selected_spans")
-  app$click("apply_normalization")
-  
-  app$wait_for_value(input = "normalization_dismiss")
-  app$click("normalization_dismiss")
-  
-  omicsData_norm = app$get_value(export = "omicsData_norm")
-  norm_info <- attributes(omicsData_norm)$data_info$norm_info
-  
-  expect_true(norm_info$is_normalized)
-  expect_equal(norm_info$norm_type, "global")
-  expect_equal(norm_info$subset_fn, "los")
-  expect_equal(norm_info$subset_params$los, 0.2)
-  expect_equal(norm_info$norm_fn, "mean")
-  expect_equal(norm_info$n_features_calc, 637)
-  
-  expect_equal(
-    unname(norm_info$params$norm_location), 
-    c(
-      23.6913243579832,
-      23.5876540826849,
-      23.4985959037066,
-      23.6045605299241,
-      23.4263876220424,
-      23.6362881425376,
-      23.4956245648087,
-      23.7881275415636,
-      23.6988180128446,
-      23.7755521745674,
-      23.502880708832,
-      23.6618744044926,
-      23.3067293384951,
-      23.6220384305414,
-      23.6906529147068,
-      23.6815242130187
-    )
-  )
-  
-  app$set_inputs(top_page = "peptide_statistics_tab")
-  
-  # Peptide Statistics
-  app$set_inputs(peptide_stats_select_method = "imdanova")
-  app$set_inputs(peptide_imdanova_comparison_method = "All pairwise comparisons")
-  app$wait_for_value(input = "imd_comparison_button_1")
-  app$click("imd_comparison_button_1")
-  app$wait_for_value(input = "imd_comparison_button_2")
-  app$click("imd_comparison_button_2")
-  app$wait_for_value(input = "imd_comparison_button_3")
-  app$click("imd_comparison_button_3")
-  app$set_inputs(peptide_imdanova_test_method = "combined")
-  app$click("peptide_apply_imdanova")
-
-  app$wait_for_value(input = "pepstats_dismiss")
-  app$click("pepstats_dismiss")
-  
-  app$set_inputs(peptide_imdanova_plot_type = "volcano")
-  app$set_inputs(peptide_imdanova_plot_type = "gheatmap")
-  
-  app$set_inputs(top_page = "protein_rollup_tab")
-  app$run_js(open_collapse("rollup_sidebar", "isoform_identification"))
-
-  app$set_inputs(bpquant_comps = "B vs A")
-  app$set_inputs(bpquant_comps = c("B vs A", "C vs A"))
-  app$set_inputs(bpquant_comps = c("B vs A", "C vs A", "B vs C"))
-  app$set_inputs(bpquant_max_prot = 4)
-  app$set_inputs(bpquant_lock = TRUE)
-  app$click("bpquant")
-
-  app$set_inputs(bpquant_apply = "No")
-  app$set_inputs(which_combine_fn = "mean")
-  
-  app$click("apply_rollup")
-  app$wait_for_value(input = "rollup_goto_stats")
-  app$click("rollup_goto_stats")
-  
-  # Statistics
-  app$set_inputs(stats_select_method = "imdanova")
-  app$set_inputs(imdanova_comparison_method = "All pairwise comparisons")
-  app$wait_for_value(output = "pairwise_comp_display")
-  app$click("imd_comparison_button_1")
-  app$wait_for_value(input = "imd_comparison_button_2")
-  app$click("imd_comparison_button_2")
-  app$wait_for_value(input = "imd_comparison_button_3")
-  app$click("imd_comparison_button_3")
-  app$set_inputs(imdanova_test_method = "combined")
-  app$click("apply_imdanova")
-  
-  app$wait_for_value(input = "stats_dismiss")
-  app$click("stats_dismiss")
-  
-  app$set_inputs(top_page = "download_tab")
-  app$click("makezipfile")
+  # app$wait_for_value(input = "execute_spans")
+  # app$click("execute_spans")
+  # 
+  # Sys.sleep(1)
+  # 
+  # # params panel opened by default
+  # app$wait_for_value(output = "spans_table")
+  # app$set_inputs(
+  #   spans_table_rows_selected = 1,
+  #   spans_table_row_last_clicked = 1,
+  #   allow_no_input_binding_ = TRUE
+  # )
+  # 
+  # app$click("use_selected_spans")
+  # app$click("apply_normalization")
+  # 
+  # app$wait_for_value(input = "normalization_dismiss")
+  # app$click("normalization_dismiss")
+  # 
+  # omicsData_norm = app$get_value(export = "omicsData_norm")
+  # norm_info <- attributes(omicsData_norm)$data_info$norm_info
+  # 
+  # expect_true(norm_info$is_normalized)
+  # expect_equal(norm_info$norm_type, "global")
+  # expect_equal(norm_info$subset_fn, "los")
+  # expect_equal(norm_info$subset_params$los, 0.2)
+  # expect_equal(norm_info$norm_fn, "mean")
+  # expect_equal(norm_info$n_features_calc, 637)
+  # 
+  # expect_equal(
+  #   unname(norm_info$params$norm_location), 
+  #   c(
+  #     23.6913243579832,
+  #     23.5876540826849,
+  #     23.4985959037066,
+  #     23.6045605299241,
+  #     23.4263876220424,
+  #     23.6362881425376,
+  #     23.4956245648087,
+  #     23.7881275415636,
+  #     23.6988180128446,
+  #     23.7755521745674,
+  #     23.502880708832,
+  #     23.6618744044926,
+  #     23.3067293384951,
+  #     23.6220384305414,
+  #     23.6906529147068,
+  #     23.6815242130187
+  #   )
+  # )
+  # 
+  # app$set_inputs(top_page = "peptide_statistics_tab")
+  # 
+  # # Peptide Statistics
+  # app$set_inputs(peptide_stats_select_method = "imdanova")
+  # app$set_inputs(peptide_imdanova_comparison_method = "All pairwise comparisons")
+  # app$wait_for_value(input = "imd_comparison_button_1")
+  # app$click("imd_comparison_button_1")
+  # app$wait_for_value(input = "imd_comparison_button_2")
+  # app$click("imd_comparison_button_2")
+  # app$wait_for_value(input = "imd_comparison_button_3")
+  # app$click("imd_comparison_button_3")
+  # app$set_inputs(peptide_imdanova_test_method = "combined")
+  # app$click("peptide_apply_imdanova")
+  # 
+  # app$wait_for_value(input = "pepstats_dismiss")
+  # app$click("pepstats_dismiss")
+  # 
+  # app$set_inputs(peptide_imdanova_plot_type = "volcano")
+  # app$set_inputs(peptide_imdanova_plot_type = "gheatmap")
+  # 
+  # app$set_inputs(top_page = "protein_rollup_tab")
+  # app$run_js(open_collapse("rollup_sidebar", "isoform_identification"))
+  # 
+  # app$set_inputs(bpquant_comps = "B vs A")
+  # app$set_inputs(bpquant_comps = c("B vs A", "C vs A"))
+  # app$set_inputs(bpquant_comps = c("B vs A", "C vs A", "B vs C"))
+  # app$set_inputs(bpquant_max_prot = 4)
+  # app$set_inputs(bpquant_lock = TRUE)
+  # app$click("bpquant")
+  # 
+  # app$set_inputs(bpquant_apply = "No")
+  # app$set_inputs(which_combine_fn = "mean")
+  # 
+  # app$click("apply_rollup")
+  # app$wait_for_value(input = "rollup_goto_stats")
+  # app$click("rollup_goto_stats")
+  # 
+  # # Statistics
+  # app$set_inputs(stats_select_method = "imdanova")
+  # app$set_inputs(imdanova_comparison_method = "All pairwise comparisons")
+  # app$wait_for_value(output = "pairwise_comp_display")
+  # app$click("imd_comparison_button_1")
+  # app$wait_for_value(input = "imd_comparison_button_2")
+  # app$click("imd_comparison_button_2")
+  # app$wait_for_value(input = "imd_comparison_button_3")
+  # app$click("imd_comparison_button_3")
+  # app$set_inputs(imdanova_test_method = "combined")
+  # app$click("apply_imdanova")
+  # 
+  # app$wait_for_value(input = "stats_dismiss")
+  # app$click("stats_dismiss")
+  # 
+  # app$set_inputs(top_page = "download_tab")
+  # app$click("makezipfile")
   
 })
