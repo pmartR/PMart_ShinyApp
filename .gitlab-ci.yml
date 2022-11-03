@@ -1,19 +1,13 @@
 stages:
-  - tests
+  - test
   
-tests:
-  stage: tests
-  image: code-registry.emsl.pnl.gov/multiomics-analyses/pmart_standalone/base:latest
+test:
+  stage: test
+  image: code-registry.emsl.pnl.gov/multiomics-analyses/pmart_standalone/base-dev:1.4.1
   tags:
+    - k8s
     - map
-    - shiny
-  before_script:
-    - |
-      apt-get update
-      wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-      apt install -y ./google-chrome-stable_current_amd64.deb
-    - R -e "options(repos = c(CRAN = 'https://cloud.r-project.org'));install.packages('testthat');install.packages('shinytest2');install.packages('xml2')"
-    - R -e "chromote:::find_chrome()"
+    - rzr
   script:
     - R -e 'testthat::test_dir("tests/testthat", reporter = testthat::JunitReporter$new(file = "../../junit_result.xml"))'
   artifacts:
