@@ -250,4 +250,6 @@ observe({
   
 })
 
+observe({toggle("download_plot_options_UI", condition = length(input$download_plot_table_rows_selected) > 0)})
+
 ###

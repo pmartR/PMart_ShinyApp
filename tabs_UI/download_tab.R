@@ -13,7 +13,25 @@ download_UI <- function() {
         column(4, withSpinner(DTOutput("download_plot_table"))),
         column(8, 
                uiOutput("download_plot_UI"),
-               uiOutput("download_plot_options_UI")
+               hidden(div(id = "download_plot_options_UI",
+                 bsCollapsePanel("Axes Options",
+                                 value = "axes_options",
+                                 style_UI("download"),
+                                 apply_style_UI("download", FALSE, FALSE)
+                 ),
+                 bsCollapsePanel("Save Options",
+                                 value = "save_options",
+                                 div(
+                                   uiOutput("plot_selected_save_options"),
+                                   div(class = "inline-wrapper-1",
+                                       div(id = "download_apply_save_options_tooltip", class = "tooltip-wrapper", actionButton("download_apply_save_options", "Apply")),
+                                       conditionalPanel("input.download_file_type!='HTML Widget'", actionButton("download_preview_image", "Preview"))
+                                   ),
+                                   br(),
+                                   br(),
+                                   div(style="overflow:auto", uiOutput("download_image_preview"))
+                                 ))
+                ))
                )
       ),
       div(
