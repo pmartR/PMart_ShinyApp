@@ -55,16 +55,29 @@ list(
     escape = FALSE
   ),
   
-  output$download_plot_options_UI <- renderUI({
-    if(length(input$download_plot_table_rows_selected) < 1){
-      return(NULL)
-    } 
-    
+  #'@details Plot type and dimension options for a plot selected in the downloads table
+  output$plot_selected_save_options <- renderUI({
     plot_name <- plots$plot_table[input$download_plot_table_rows_selected, 1]
     plot_file_type <- plots$plot_save_options[[plot_name]]$type
     plot_save_width <- plots$plot_save_options[[plot_name]]$width
     plot_save_height <- plots$plot_save_options[[plot_name]]$height
     plot_save_scale <- plots$plot_save_options[[plot_name]]$scale
+    
+    fluidRow(
+      column(3, selectInput("download_file_type", "File Type", c("HTML Widget", "PNG", "JPG", "SVG"), c(plot_file_type))),
+      conditionalPanel(
+        "input.download_file_type!='HTML Widget'",
+        column(3, numericInput("download_plot_width", "Width", plot_save_width)),
+        column(3, numericInput("download_plot_height", "Height", plot_save_height)),
+        column(3, numericInput("download_plot_scale", "Scale", plot_save_scale, min = 0, step = 0.25))
+      )
+    )
+  }),
+  
+  output$download_plot_options_UI <- renderUI({
+    if(length(input$download_plot_table_rows_selected) < 1){
+      return(NULL)
+    } 
     
     return (div(
       bsCollapsePanel("Axes Options",
@@ -75,19 +88,13 @@ list(
       bsCollapsePanel("Save Options",
                       value = "save_options",
                       div(
-                        fluidRow(
-                          column(3, selectInput("download_file_type", "File Type", c("HTML Widget", "PNG", "JPG", "SVG"), c(plot_file_type))),
-                          conditionalPanel(
-                            "input.download_file_type!='HTML Widget'",
-                            column(3, numericInput("download_plot_width", "Width", plot_save_width)),
-                            column(3, numericInput("download_plot_height", "Height", plot_save_height)),
-                            column(3, numericInput("download_plot_scale", "Scale", plot_save_scale, min = 0, step = 0.25))
-                          )
+                        uiOutput("plot_selected_save_options"),
+                        div(class = "inline-wrapper-1",
+                          div(id = "download_apply_save_options_tooltip", class = "tooltip-wrapper", actionButton("download_apply_save_options", "Apply")),
+                          conditionalPanel("input.download_file_type!='HTML Widget'", actionButton("download_preview_image", "Preview"))
                         ),
-                        fluidRow(
-                          column(1, actionButton("download_apply_save_options", "Apply")),
-                          column(1, conditionalPanel("input.download_file_type!='HTML Widget'", actionButton("download_preview_image", "Preview")))
-                        ),
+                        br(),
+                        br(),
                         div(style="overflow:auto", uiOutput("download_image_preview"))
                       ))
     ))

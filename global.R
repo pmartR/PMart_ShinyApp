@@ -34,6 +34,7 @@ ttext_ <- list(
   ABUNDANCE_NAS_TO_ZEROS = "NAs will be automatically transformed to zeros in transcript count data.",
   COVARIATE_TYPE_INFO = "Suppose your covariate has values [1,1,2,2,3,3].  By default, it is treated as a factor variable, but you may want to specify it is numeric.",
   CV_FILTER_INFO = "Remove biomolecules based on minimum value of coefficient of variation, calculated per-group as the standard deviation divided by the mean, and then pooled across groups per Ahmed (1995).",
+  DOWNLOAD_OPTS_DISABLED = "Currently selected parameters are the same as the ones currently stored for this plot",
   IMD_INTERACTIVE_MANY_POINTS = "If your data has many biomolecules, creating an interactive plot may take a while.",
   MAIN_EFFECTS_INFO = "Main effects are the variables of interest, those values across which you want to make comparisons.  Covariates are those values that are not of experimental interest, but must be controlled for in the statistics.",
   MISSING_DATA_REPLACE = "The value specified here will be replaced by NA in the data file.  If missing values are already NA in your data or the missing values are zeros in your abundance data, then you do not have to specify this field.",

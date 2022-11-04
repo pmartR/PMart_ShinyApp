@@ -227,4 +227,27 @@ observeEvent(input$download_preview_image, {
   shinyjs::enable("download_preview_image")
 })
 
+#'@details Disable and add a tooltip to the button that updates the download
+#'parameters for each plot if the currently selected parameters are the same
+#'as the saved ones.
+observe({
+  req(input$download_plot_table_rows_selected)
+  plot_name <- plots$plot_table[input$download_plot_table_rows_selected, 1]
+  plot_file_type <- plots$plot_save_options[[plot_name]]$type
+  plot_save_width <- plots$plot_save_options[[plot_name]]$width
+  plot_save_height <- plots$plot_save_options[[plot_name]]$height
+  plot_save_scale <- plots$plot_save_options[[plot_name]]$scale
+  
+  .cond1 <- isTRUE(plot_file_type == input$download_file_type)
+  .cond2 <- isTRUE(plot_save_width == input$download_plot_width)
+  .cond3 <- isTRUE(plot_save_height == input$download_plot_height)
+  .cond4 <- isTRUE(plot_save_scale == input$download_plot_scale)
+  
+  params_unchanged <- all(.cond1, .cond2, .cond3, .cond4)
+  
+  togglestate_add_tooltip(session, "download_apply_save_options_tooltip", condition = !params_unchanged, tooltip_text = ttext_[["DOWNLOAD_OPTS_DISABLED"]])
+  toggleCssClass(id = "download_apply_save_options", condition = !params_unchanged, class = "blueoutline")
+  
+})
+
 ###
