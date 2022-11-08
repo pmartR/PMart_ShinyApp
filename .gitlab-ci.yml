@@ -23,5 +23,8 @@ test:
     - R -e 'chromote::get_chrome_args();testthat::test_path();file.path(testthat::test_path(), "../../example_data/test_edata_pep.csv");shiny::runTests()'
   artifacts:
     when: always
+    paths:
+      - debug_screenshot.png
+    expire_in: 1 week
     reports:
       junit: junit_result.xml
