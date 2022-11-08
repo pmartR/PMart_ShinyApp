@@ -17,10 +17,19 @@ test_that("App completes a basic workflow on peptide-level data", {
   app$set_inputs(datatype = "pep")
   app$upload_file(file_edata = file.path(testthat::test_path(), "../../example_data/test_edata_pep.csv"))
   
-  app$get_screenshot(file.path(testthat::test_path(), "../../debug_screenshot.png"))
-  
+  Sys.sleep(10)
+
   expect_equal(1,1)
-  # app$run_js(open_collapse("upload_collapse_left", "columnids"))
+  
+  app$get_screenshot(file.path(testthat::test_path(), "../../debug_screenshot1.png"))
+  
+  app$run_js(open_collapse("upload_collapse_left", "columnids"))
+
+  Sys.sleep(10)
+
+  app$get_screenshot(file.path(testthat::test_path(), "../../debug_screenshot2.png"))
+
+  print(app$get_value(input = "transform"))
   # app$wait_for_value(input = "transform")
   # app$set_inputs(transform = "log2")
   # 

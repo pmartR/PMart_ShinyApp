@@ -24,7 +24,8 @@ test:
   artifacts:
     when: always
     paths:
-      - debug_screenshot.png
-    expire_in: 1 week
+      - debug_screenshot1.png
+      - debug_screenshot2.png
+    expire_in: 1 day
     reports:
       junit: junit_result.xml
