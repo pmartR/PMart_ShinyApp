@@ -1,3 +1,0 @@
-# Local run only (cloud uses minio_config.yml)
-
-python_venv: ./venv

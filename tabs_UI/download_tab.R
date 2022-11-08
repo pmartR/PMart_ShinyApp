@@ -16,7 +16,7 @@ download_UI <- function() {
                hidden(div(id = "download_plot_options_UI",
                  bsCollapsePanel("Axes Options",
                                  value = "axes_options",
-                                 style_UI("download"),
+                                 uiOutput("download_apply_style_UI"),
                                  apply_style_UI("download", FALSE, FALSE)
                  ),
                  bsCollapsePanel("Save Options",

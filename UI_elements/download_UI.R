@@ -73,5 +73,11 @@ list(
         column(3, numericInput("download_plot_scale", "Scale", plot_save_scale, min = 0, step = 0.25))
       )
     )
-  })
+  }),
+  
+  #' Redraw style UI when another plot is selected.
+  output$download_apply_style_UI <- renderUI({
+    req(input$download_plot_table_rows_selected)
+    return(style_UI("download"))
+  }) 
 )

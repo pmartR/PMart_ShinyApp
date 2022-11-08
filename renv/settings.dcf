@@ -3,7 +3,7 @@ external.libraries:
 ignored.packages: pmartR
 package.dependency.fields: Depends
 r.version:
-snapshot.type: explicit
+snapshot.type: implicit
 use.cache: TRUE
 vcs.ignore.cellar: TRUE
 vcs.ignore.library: TRUE
