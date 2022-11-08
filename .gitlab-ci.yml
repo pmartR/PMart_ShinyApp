@@ -1,6 +1,16 @@
 stages:
   - test
-  
+
+variables:
+  KUBERNETES_CPU_REQUEST: "2"
+  KUBERNETES_CPU_LIMIT: "2"
+  KUBERNETES_MEMORY_REQUEST: "4Gi"
+  KUBERNETES_MEMORY_LIMIT: "8Gi"
+  KUBERNETES_SERVICE_CPU_REQUEST: "4"
+  KUBERNETES_SERVICE_CPU_LIMIT: "4"
+  KUBERNETES_SERVICE_MEMORY_REQUEST: "4Gi"
+  KUBERNETES_SERVICE_MEMORY_LIMIT: "10Gi"
+
 test:
   stage: test
   image: code-registry.emsl.pnl.gov/multiomics-analyses/pmart_standalone/base-dev:1.4.1
