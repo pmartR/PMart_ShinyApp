@@ -1,5 +1,17 @@
 options(shiny.maxRequestSize = 250 * 1024^2, ch.dir = TRUE, DT.TOJSON_ARGS = list(na = "string"))
 
+# internal function: throws error message if variable is not found and can_be_empty==FALSE
+get_config_variable <- function(cfg, varname, can_be_empty=FALSE) {
+  if (!(varname %in% names(cfg))) {
+    if (!can_be_empty)
+      stop(sprintf("Cannot find '%s' in config file", varname))
+    else
+      return('')
+  }
+  value <- cfg[[varname]]
+  return(value)
+}
+
 shinyServer(function(session, input, output) {
   # Named list whose values are either references to objects or filepaths for certain resources
   # needs to exist here because session doesnt exist in global.R
@@ -35,7 +47,7 @@ shinyServer(function(session, input, output) {
   )
 
   # store last plot and all plots for download
-  plots <- reactiveValues(allplots = list(), plot_table = data.frame("Select a plot" = character(0), "Download?" = character(0), check.names = F, stringsAsFactors = F))
+  plots <- reactiveValues(allplots = list(), plot_save_options = list(), plot_table = data.frame("Select a plot" = character(0), "Download?" = character(0), check.names = F, stringsAsFactors = F))
 
   # tables of results and other things (intentionally have plot_table in plots$... reactive list)
   # +1000 points for variable called tables_table, which is accessed by calling tables$tables_table
@@ -163,6 +175,8 @@ shinyServer(function(session, input, output) {
     contentType = "application/zip"
   )
   
+  cfg_path = if(isTruthy(Sys.getenv("MAP_CONFIG"))) Sys.getenv("MAP_CONFIG") else "./cfg/minio_config.yml"
+  
   if (MAP_ACTIVE) {
     
     # Connect to map data access library
@@ -171,14 +185,34 @@ shinyServer(function(session, input, output) {
     # Soure MAP-specific functionality (reading from header, etc)
     source("./MAP_Functions.R", local = TRUE)
     
-    cfg_path = if(isTruthy(Sys.getenv("MAP_CONFIG"))) Sys.getenv("MAP_CONFIG") else "./cfg/minio_config.yml"
-    
     # Create a reactive value to hold MAP-specific objects
     MapConnect <- reactiveValues(MapConnect = map_data_connection(cfg_path),
                                  Project = NULL, Midpoint = NULL)
     
   } else {
     hide(id = "loading-gray-overlay")
+    
+    cfg <- yaml::read_yaml(cfg_path)
+    python_venv <- get_config_variable(cfg, "python_venv")
+    
+    conda_envs <- tryCatch(
+      {
+        reticulate::conda_list()$python
+      },
+      error = function(e) {
+        NULL
+      }
+    )
+    
+    is_conda <- any(sapply(conda_envs, function(envpath) {
+      grepl(sprintf("^%s", normalizePath(python_venv)), envpath)
+    }))
+    
+    if (is_conda) {
+      reticulate::use_condaenv(python_venv, required = TRUE)
+    } else {
+      reticulate::use_virtualenv(python_venv, required = TRUE)
+    }
   }
   
 })
