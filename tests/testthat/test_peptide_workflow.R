@@ -23,7 +23,7 @@ test_that("App completes a basic workflow on peptide-level data", {
   
   app$get_screenshot(file.path(testthat::test_path(), "../../debug_screenshot1.png"))
   
-  app$run_js(open_collapse("upload_collapse_left", "columnids"))
+  # app$run_js(open_collapse("upload_collapse_left", "columnids"))
 
   Sys.sleep(10)
 
