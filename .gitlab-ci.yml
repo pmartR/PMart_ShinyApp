@@ -20,7 +20,7 @@ test:
     - map
     - rzr
   script:
-    - R -e 'chromote::get_chrome_args();testthat::test_path();file.path(testthat::test_path(), "../../example_data/test_edata_pep.csv");shiny::runTests()'
+    - R -e 'options("shiny.testmode");options("shiny.testmode"=TRUE);chromote::get_chrome_args();testthat::test_path();file.path(testthat::test_path(), "../../example_data/test_edata_pep.csv");shiny::runTests()'
   artifacts:
     when: always
     paths:
