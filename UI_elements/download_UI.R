@@ -2,13 +2,12 @@ list(
   
   output$download_plot_UI <- renderUI({
 
-    if(length(input$download_plot_table_rows_selected) < 1){
-      return(NULL)
-    } 
+    validate(need(input$download_plot_table_rows_selected >= 1, "Select a plot to preview/edit"))
     
     plot_name <- plots$plot_table[input$download_plot_table_rows_selected, 1]
     p <- plots$allplots[[plot_name]]
     
+    output$download_image_preview <- renderUI(NULL)
     
     if(inherits(p, c("ggplot", "gtable"))){
       return(withSpinner(plotOutput("download_plot")))
@@ -19,7 +18,7 @@ list(
   
   # render a plot depending on which row in the plot table is selected
   output$download_plot <- renderPlot({
-    # req(length(input$download_plot_table_rows_selected) > 0, cancelOutput = TRUE)
+    req(input$download_plot_table_rows_selected)
     plot_name <- plots$plot_table[input$download_plot_table_rows_selected, 1]
     p <- plots$allplots[[plot_name]]
 
@@ -32,7 +31,7 @@ list(
   }),
   
   output$download_plotly <- renderPlotly({
-    # req(length(input$download_plot_table_rows_selected) > 0, cancelOutput = TRUE)
+    req(input$download_plot_table_rows_selected)
     plot_name <- plots$plot_table[input$download_plot_table_rows_selected, 1]
     p <- plots$allplots[[plot_name]]
     
@@ -54,5 +53,31 @@ list(
     },
     selection = list(selection = "single", selected = 1),
     escape = FALSE
-  )
+  ),
+  
+  #'@details Plot type and dimension options for a plot selected in the downloads table
+  output$plot_selected_save_options <- renderUI({
+    req(input$download_plot_table_rows_selected)
+    plot_name <- plots$plot_table[input$download_plot_table_rows_selected, 1]
+    plot_file_type <- plots$plot_save_options[[plot_name]]$type
+    plot_save_width <- plots$plot_save_options[[plot_name]]$width
+    plot_save_height <- plots$plot_save_options[[plot_name]]$height
+    plot_save_scale <- plots$plot_save_options[[plot_name]]$scale
+    
+    fluidRow(
+      column(3, selectInput("download_file_type", "File Type", c("HTML Widget", "PNG", "JPG", "SVG"), c(plot_file_type))),
+      conditionalPanel(
+        "input.download_file_type!='HTML Widget'",
+        column(3, numericInput("download_plot_width", "Width", plot_save_width)),
+        column(3, numericInput("download_plot_height", "Height", plot_save_height)),
+        column(3, numericInput("download_plot_scale", "Scale", plot_save_scale, min = 0, step = 0.25))
+      )
+    )
+  }),
+  
+  #' Redraw style UI when another plot is selected.
+  output$download_apply_style_UI <- renderUI({
+    req(input$download_plot_table_rows_selected)
+    return(style_UI("download"))
+  }) 
 )
