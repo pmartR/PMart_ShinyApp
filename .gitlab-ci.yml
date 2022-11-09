@@ -20,7 +20,7 @@ test:
     - map
     - rzr
   script:
-    - R -e 'options("shiny.testmode");options("shiny.testmode"=TRUE);chromote::get_chrome_args();testthat::test_path();file.path(testthat::test_path(), "../../example_data/test_edata_pep.csv");shiny::runTests()'
+    - R -e 'chromote::set_chrome_args(c(chromote::default_chrome_args(),"--no-sandbox", "--no-proxy-server",sprintf("--remote-debugging-port=%s", chromote::default_chromote_object()$get_browser()$get_port())));options("shiny.testmode");options("shiny.testmode"=TRUE);chromote::get_chrome_args();testthat::test_path();file.path(testthat::test_path(), "../../example_data/test_edata_pep.csv");shiny::runTests()'
   artifacts:
     when: always
     paths:
