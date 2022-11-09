@@ -28,7 +28,7 @@ test_that("App completes a basic workflow on peptide-level data", {
   Sys.sleep(10)
 
   # print(app$get_value(input = "transform"))
-  # app$wait_for_value(input = "transform")
+  app$wait_for_value(input = "transform")
   Sys.sleep(2)
   app$set_inputs(transform = "log2")
   # 
