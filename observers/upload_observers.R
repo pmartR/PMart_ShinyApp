@@ -68,7 +68,7 @@ makeobject <- function(use_iso = T){
           e_data = edata2, e_meta = emeta2, f_data = fdata2,
           edata_cname = edata_cname, emeta_cname = emeta_cname2,
           fdata_cname = "SampleId",
-          data_scale = data_scale, is_normalized = norm_info
+          data_scale = data_scale, is_normalized = is_normalized
         ) %>%
           edata_replace(na_replace, NA)
       },

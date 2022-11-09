@@ -439,7 +439,7 @@ observeEvent(input$add_tcfilt, {
 observeEvent(input$add_rmdfilt, {
   rmdfilt_exists <- !is.null(objects$filters$rmdfilt) & 
     (!is.null(objects$filters$rmdfilt_2) | is.null(objects$uploaded_omicsData_2))
-  browser()
+  
   if (!rmdfilt_exists) {
     
     objects$filters$rmdfilt <- tryCatch(
