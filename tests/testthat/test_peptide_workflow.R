@@ -27,31 +27,42 @@ test_that("App completes a basic workflow on peptide-level data", {
 
   Sys.sleep(10)
 
-  app$get_screenshot(file.path(testthat::test_path(), "../../debug_screenshot2.png"))
-
-  print(app$get_value(input = "transform"))
+  # print(app$get_value(input = "transform"))
   # app$wait_for_value(input = "transform")
-  # app$set_inputs(transform = "log2")
+  Sys.sleep(2)
+  app$set_inputs(transform = "log2")
   # 
   # app$wait_for_value(input = "done_idcols")
-  # app$click("done_idcols")
+  Sys.sleep(2)
+  app$click("done_idcols")
   # app$wait_for_value(input = "emeta_yn")
-  # app$upload_file(file_emeta = file.path(testthat::test_path(), "../../example_data/test_emeta_pep.csv"))
-  # app$set_inputs(protein_column = "Protein")
+
+  Sys.sleep(2)
+
+  app$get_screenshot(file.path(testthat::test_path(), "../../debug_screenshot2.png"))
+
+  app$upload_file(file_emeta = file.path(testthat::test_path(), "../../example_data/test_emeta_pep.csv"))
+  app$set_inputs(protein_column = "Protein")
   # 
-  # app$click("makeobject")
+  app$click("makeobject")
+  Sys.sleep(2)
   # 
   # app$wait_for_value(input = "goto_groups")
-  # app$click("goto_groups")
+  app$click("goto_groups")
   # 
   # # Groups tab
   # app$wait_for_value(input = "usevizsampnames")
-  # app$upload_file(file_fdata = file.path(testthat::test_path(), "../../example_data/test_fdata_pep.csv"))
+  Sys.sleep(2)
+  app$upload_file(file_fdata = file.path(testthat::test_path(), "../../example_data/test_fdata_pep.csv"))
   # app$set_inputs(groups_collapse_left = "fdata_columns")
   # app$set_inputs(groups_collapse_right = "fdata_preview")
   # 
   # app$wait_for_value(input = "gcol1")
-  # app$set_inputs(gcol1 = "Condition1")
+
+  Sys.sleep(2)
+  app$set_inputs(gcol1 = "Condition1")
+
+  app$get_screenshot(file.path(testthat::test_path(), "../../debug_screenshot3.png"))
   # 
   # app$click("group_designation")
   # app$wait_for_value(input = "goto_qc")

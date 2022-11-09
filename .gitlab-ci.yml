@@ -26,6 +26,7 @@ test:
     paths:
       - debug_screenshot1.png
       - debug_screenshot2.png
+      - debug_screenshot3.png
     expire_in: 1 day
     reports:
       junit: junit_result.xml
