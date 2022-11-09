@@ -139,7 +139,7 @@ list(
   }),
 
   # do they have an emeta file to upload?
-  output$emeta_yn <- renderUI({
+  output$emeta_yn_UI <- renderUI({
     req(input$datatype, input$datatype != "none")
     radioGroupButtons("emeta_yn",
       "Do you have a file containing extra biomolecule information?",
