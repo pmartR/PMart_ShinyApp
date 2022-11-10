@@ -2,23 +2,22 @@ stages:
   - build
   - test
 
-variables:
-  KUBERNETES_CPU_REQUEST: "2"
-  KUBERNETES_CPU_LIMIT: "2"
-  KUBERNETES_MEMORY_REQUEST: "8Gi"
-  KUBERNETES_MEMORY_LIMIT: "8Gi"
-  KUBERNETES_SERVICE_CPU_REQUEST: "4"
-  KUBERNETES_SERVICE_CPU_LIMIT: "4"
-  KUBERNETES_SERVICE_MEMORY_REQUEST: "10Gi"
-  KUBERNETES_SERVICE_MEMORY_LIMIT: "10Gi"
+# variables:
+#   KUBERNETES_CPU_REQUEST: "2"
+#   KUBERNETES_CPU_LIMIT: "2"
+#   KUBERNETES_MEMORY_REQUEST: "8Gi"
+#   KUBERNETES_MEMORY_LIMIT: "8Gi"
+#   KUBERNETES_SERVICE_CPU_REQUEST: "4"
+#   KUBERNETES_SERVICE_CPU_LIMIT: "4"
+#   KUBERNETES_SERVICE_MEMORY_REQUEST: "10Gi"
+#   KUBERNETES_SERVICE_MEMORY_LIMIT: "10Gi"
 
 test:
   stage: test
   image: code-registry.emsl.pnl.gov/multiomics-analyses/pmart_standalone/base-dev:1.4.1
   tags:
-    - k8s
     - map
-    - rzr
+    - shiny
   script:
     - R -e 'chromote::set_chrome_args(c(chromote::default_chrome_args(),"--no-sandbox", "--no-proxy-server",sprintf("--remote-debugging-port=%s", chromote::default_chromote_object()$get_browser()$get_port())));options("shiny.testmode");options("shiny.testmode"=TRUE);chromote::get_chrome_args();testthat::test_path();file.path(testthat::test_path(), "../../example_data/test_edata_pep.csv");shiny::runTests()'
   artifacts:
