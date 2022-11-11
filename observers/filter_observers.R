@@ -160,6 +160,29 @@ apply_filt <- function(){
         )
       }
       
+      # align samples for both datasets - TODO:  Check that samples are the same
+      if (two_lipids()) {
+        samps_remaining_1 <- objects$omicsData$f_data[,get_fdata_cname(objects$omicsData)]
+        samps_remaining_2 <- objects$omicsData_2$f_data[,get_fdata_cname(objects$omicsData_2)]
+        
+        remaining_samps <- intersect(samps_remaining_1, samps_remaining_2)
+        
+        if (!dplyr::setequal(remaining_samps, samps_remaining_1)) {
+          tmp <- applyFilt(
+            custom_filter(tmp, f_data_keep = remaining_samps),
+            tmp
+          )  
+        }
+        
+        if(!dplyr::setequal(remaining_samps, samps_remaining_2)) {
+          tmp2 <- applyFilt(
+            custom_filter(tmp2, f_data_keep = remaining_samps),
+            tmp2
+          )  
+        }
+        
+      }
+      
       # store saved objects and remove temp objects, tmp2 will be null if there is only one dataset
       objects$omicsData <- tmp
       objects$omicsData_2 <- tmp2

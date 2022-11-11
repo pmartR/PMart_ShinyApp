@@ -42,7 +42,16 @@ list(
     #' TODO: collect all samples and perform differences at the end?
     rmd_removed_samps <- if (any(grepl("rmdfilt", names(objects$filters)))) {
       tmp_idx = which(grepl("rmdfilt", names(objects$filters)))
-      attr(objects$filters[[tmp_idx]], "sample_names")[which(objects$filters[[tmp_idx]]$pvalue < input$pvalue_threshold)]
+      
+      collect_samps_rmv <- NULL
+      
+      # loop for two lipids case
+      for (idx in tmp_idx) {
+        collect_samps_rmv <- c(collect_samps_rmv, attr(objects$filters[[idx]], "sample_names")[which(objects$filters[[idx]]$pvalue < input$pvalue_threshold)])
+      }
+      
+      unique(collect_samps_rmv)
+      
     } else NULL
     
     rnafilt_libsize_removed_samps <- if(any(grepl("rnafilt_libsize", names(objects$filters)))) {
@@ -216,6 +225,8 @@ list(
     # Display two summary sections if there are two omicsData objects
     if (length(obj2_inds) > 0) {
       tagList(
+        h3(tags$b("Samples removed in one object will be removed in the other as well.", style = "color:deepskyblue")),
+        hr(),
         h3(tags$b("Filters to be applied to Object 1:  ")),
         hr(),
         divs[obj1_inds],
