@@ -12,8 +12,8 @@ apply_filt <- function(){
   tryCatch(
     {
       # make temp objects and clear summaries
-      tmp <- objects$uploaded_omicsData
-      tmp2 <- objects$uploaded_omicsData_2
+      tmp <- objects$omicsData
+      tmp2 <- objects$omicsData_2
       revals$filter_summary <- revals$filter_summary_2 <- NULL
       # molecule filter
       if (!is.null(objects$filters$molfilt)) {
@@ -210,7 +210,7 @@ observeEvent(input$reset_filters, {
 observe({
   # check if molfilt was created
   input$reset_filters
-  molfilt_exists <- !is.null(objects$filters$molfilt) & (!is.null(objects$filters$molfilt_2) | is.null(objects$uploaded_omicsData_2))
+  molfilt_exists <- !is.null(objects$filters$molfilt) & (!is.null(objects$filters$molfilt_2) | is.null(objects$omicsData_2))
   
   # toggle('remove_molfilt', condition = !is.null(objects$filters$molfilt), anim = TRUE)
   toggle("molfilt_exists", condition = molfilt_exists, anim = TRUE)
@@ -218,9 +218,9 @@ observe({
   toggleCssClass("mol_min_num", "grey_text", condition = molfilt_exists)
   
   ## CV Filter
-  cvfilt_exists <- !is.null(objects$filters$cvfilt) & (!is.null(objects$filters$cvfilt_2) | is.null(objects$uploaded_omicsData_2))
+  cvfilt_exists <- !is.null(objects$filters$cvfilt) & (!is.null(objects$filters$cvfilt_2) | is.null(objects$omicsData_2))
 
-  toggle("cvfilt_exists", condition = !is.null(objects$filters$cvfilt) & (!is.null(objects$filters$cvfilt_2) | is.null(objects$uploaded_omicsData_2)), anim = TRUE)
+  toggle("cvfilt_exists", condition = !is.null(objects$filters$cvfilt) & (!is.null(objects$filters$cvfilt_2) | is.null(objects$omicsData_2)), anim = TRUE)
   toggleState("cv_threshold", condition = !cvfilt_exists)
   toggleCssClass("cv_threshold", "grey_text", condition = cvfilt_exists)
   
@@ -234,7 +234,7 @@ observe({
   
   ## imd-ANOVA Filter
   imdanovafilt_exists <- !is.null(objects$filters$imdanovafilt) & 
-    (!is.null(objects$filters$imdanovafilt_2) | is.null(objects$uploaded_omicsData_2))
+    (!is.null(objects$filters$imdanovafilt_2) | is.null(objects$omicsData_2))
 
   toggle("imdanovafilt_exists", condition = imdanovafilt_exists, anim = TRUE)
   toggleState("min_nonmiss_anova", condition = !imdanovafilt_exists)
@@ -259,7 +259,7 @@ observe({
   toggleState("rnafilt_min_nonzero", condition = !rnafilt_min_nonzero_exists)
   
   ## rMd-Filter
-  rmdfilt_exists <- !is.null(objects$filters$rmdfilt) & (!is.null(objects$filters$rmdfilt_2) | is.null(objects$uploaded_omicsData_2))
+  rmdfilt_exists <- !is.null(objects$filters$rmdfilt) & (!is.null(objects$filters$rmdfilt_2) | is.null(objects$omicsData_2))
   
   toggle("rmdfilt_exists", condition = rmdfilt_exists, anim = TRUE)
   toggleState("pvalue_threshold", condition = !rmdfilt_exists)
@@ -294,13 +294,13 @@ observe({
 
 # create molfilt objects
 observeEvent(input$add_molfilt, {
-  molfilt_exists <- !is.null(objects$filters$molfilt) & (!is.null(objects$filters$molfilt_2) | is.null(objects$uploaded_omicsData_2))
+  molfilt_exists <- !is.null(objects$filters$molfilt) & (!is.null(objects$filters$molfilt_2) | is.null(objects$omicsData_2))
 
   if (!molfilt_exists) {
     objects$filters$molfilt <- tryCatch(
       {
         revals$warnings_filter$molecule_filter_1 <<- NULL
-        molecule_filter(objects$uploaded_omicsData)
+        molecule_filter(objects$omicsData)
       },
       error = function(e) {
         msg <- paste0("Something went wrong updating your molecule filter object \n System error:  ", e)
@@ -308,11 +308,11 @@ observeEvent(input$add_molfilt, {
         NULL
       }
     )
-    if (!is.null(objects$uploaded_omicsData_2)) {
+    if (!is.null(objects$omicsData_2)) {
       objects$filters$molfilt_2 <- tryCatch(
         {
           revals$warnings_filter$molecule_filter2 <<- NULL
-          molecule_filter(objects$uploaded_omicsData_2)
+          molecule_filter(objects$omicsData_2)
         },
         error = function(e) {
           msg <- paste0("Something went wrong updating your second molecule filter object \n System error:  ", e)
@@ -329,13 +329,13 @@ observeEvent(input$add_molfilt, {
 
 # create cvfilt objects
 observeEvent(input$add_cvfilt, {
-  cvfilt_exists <- !is.null(objects$filters$cvfilt) & (!is.null(objects$filters$cvfilt_2) | is.null(objects$uploaded_omicsData_2))
+  cvfilt_exists <- !is.null(objects$filters$cvfilt) & (!is.null(objects$filters$cvfilt_2) | is.null(objects$omicsData_2))
 
   if (!cvfilt_exists) {
     objects$filters$cvfilt <- tryCatch(
       {
         revals$warnings_filter$cv_filter1 <<- NULL
-        tmp_cvfilt <- cv_filter(objects$uploaded_omicsData)
+        tmp_cvfilt <- cv_filter(objects$omicsData)
         test_filt_conditions <- summary(
           tmp_cvfilt,
           cv_threshold = input$cv_threshold
@@ -348,16 +348,16 @@ observeEvent(input$add_cvfilt, {
         NULL
       }
     )
-    if (!is.null(objects$uploaded_omicsData_2)) {
+    if (!is.null(objects$omicsData_2)) {
       objects$filters$cvfilt_2 <- tryCatch(
         {
           revals$warnings_filter$cv_filter2 <<- NULL
-          tmp_cvfilt <- cv_filter(objects$uploaded_omicsData_2)
+          tmp_cvfilt <- cv_filter(objects$omicsData_2)
           test_filt_conditions <- summary(
             tmp_cvfilt,
             cv_threshold = input$cv_threshold
           )
-          cv_filter(objects$uploaded_omicsData_2)
+          cv_filter(objects$omicsData_2)
         },
         error = function(e) {
           msg <- paste0("Something went wrong updating your second CV filter object \n System error:  ", e)
@@ -379,7 +379,7 @@ observeEvent(input$add_profilt, {
     objects$filters$profilt <- tryCatch(
       {
         revals$warnings_filter$profilt <<- NULL
-        proteomics_filter(objects$uploaded_omicsData)
+        proteomics_filter(objects$omicsData)
       },
       error = function(e) {
         msg <- paste0("Something went wrong updating your proteomics filter object \n System error:  ", e)
@@ -402,28 +402,28 @@ observeEvent(input$add_profilt, {
 
 #'@details hide/show filters based on if we are processing the correct data type
 #'for example, the proteomics filt is only for peptide level data.
-observeEvent(objects$uploaded_omicsData, {
-  toggle("profilt_ftab_UI", condition = inherits(objects$uploaded_omicsData, "pepData"))
+observeEvent(objects$omicsData, {
+  toggle("profilt_ftab_UI", condition = inherits(objects$omicsData, "pepData"))
   
   # seqData has very specific types of filters that can/cannot be applied
   toggle("tcfilt_ftab_UI", condition = inherits(objects$uploaded_omicsData, "seqData"))
   toggle("rnafilt_libsize_ftab_UI", condition = inherits(objects$uploaded_omicsData, "seqData"))
   toggle("rnafilt_min_nonzero_ftab_UI", condition = inherits(objects$uploaded_omicsData, "seqData"))
   
-  toggle("cvfilt_ftab_UI", condition = !inherits(objects$uploaded_omicsData, "seqData"))
-  toggle("imdanovafilt_ftab_UI", condition = !inherits(objects$uploaded_omicsData, "seqData"))
-  toggle("rmdfilt_ftab_UI", condition = !inherits(objects$uploaded_omicsData, "seqData"))
+  toggle("cvfilt_ftab_UI", condition = !inherits(objects$omicsData, "seqData"))
+  toggle("imdanovafilt_ftab_UI", condition = !inherits(objects$omicsData, "seqData"))
+  toggle("rmdfilt_ftab_UI", condition = !inherits(objects$omicsData, "seqData"))
 })
 
 # create imdanovafilt object
 observeEvent(input$add_imdanovafilt, {
-  imdanovafilt_exists <- !is.null(objects$filters$imdanovafilt) & (!is.null(objects$filters$imdanovafilt_2) | is.null(objects$uploaded_omicsData_2))
+  imdanovafilt_exists <- !is.null(objects$filters$imdanovafilt) & (!is.null(objects$filters$imdanovafilt_2) | is.null(objects$omicsData_2))
 
   if (!imdanovafilt_exists) {
     objects$filters$imdanovafilt <- tryCatch(
       {
         revals$warnings_filter$imdanovafilt1 <<- NULL
-        imdanova_filter(objects$uploaded_omicsData)
+        imdanova_filter(objects$omicsData)
       },
       error = function(e) {
         msg <- paste0("Something went wrong updating your imd-ANOVA filter object \n System error:  ", e)
@@ -432,11 +432,11 @@ observeEvent(input$add_imdanovafilt, {
       }
     )
 
-    if (!is.null(objects$uploaded_omicsData_2)) {
+    if (!is.null(objects$omicsData_2)) {
       objects$filters$imdanovafilt_2 <- tryCatch(
         {
           revals$warnings_filter$imdanovafilt2 <<- NULL
-          imdanova_filter(objects$uploaded_omicsData_2)
+          imdanova_filter(objects$omicsData_2)
         },
         error = function(e) {
           msg <- paste0("Something went wrong updating your second imd-ANOVA filter object \n System error:  ", e)
@@ -451,7 +451,7 @@ observeEvent(input$add_imdanovafilt, {
   }
 
   imdanovafilt_exists <- !is.null(objects$filters$imdanovafilt) & 
-    (!is.null(objects$filters$imdanovafilt_2) | is.null(objects$uploaded_omicsData_2))
+    (!is.null(objects$filters$imdanovafilt_2) | is.null(objects$omicsData_2))
 })
 
 #'@details Create total count filter
@@ -462,7 +462,7 @@ observeEvent(input$add_tcfilt, {
     objects$filters$tcfilt <- tryCatch(
       {
         revals$warnings_filter$tcfilt <<- NULL
-        total_count_filter(objects$uploaded_omicsData)
+        total_count_filter(objects$omicsData)
       },
       error = function(e) {
         msg <- paste0("Something went wrong updating your total count filter object \n System error:  ", e)
@@ -479,14 +479,14 @@ observeEvent(input$add_tcfilt, {
 # create rmdfilt object
 observeEvent(input$add_rmdfilt, {
   rmdfilt_exists <- !is.null(objects$filters$rmdfilt) & 
-    (!is.null(objects$filters$rmdfilt_2) | is.null(objects$uploaded_omicsData_2))
+    (!is.null(objects$filters$rmdfilt_2) | is.null(objects$omicsData_2))
   
   if (!rmdfilt_exists) {
     
     objects$filters$rmdfilt <- tryCatch(
       {
         revals$warnings_filter$rmdfilt1 <<- NULL
-        rmd_filter(objects$uploaded_omicsData, metrics = input$rmd_metrics)
+        rmd_filter(objects$omicsData, metrics = input$rmd_metrics)
       },
       error = function(e) {
         msg <- paste0("Something went wrong updating your rMd filter object \n System error:  ", e)
@@ -494,11 +494,11 @@ observeEvent(input$add_rmdfilt, {
         NULL
       }
     )
-    if (!is.null(objects$uploaded_omicsData_2)) {
+    if (!is.null(objects$omicsData_2)) {
       objects$filters$rmdfilt_2 <- tryCatch(
         {
           revals$warnings_filter$rmdfilt2 <<- NULL
-          rmd_filter(objects$uploaded_omicsData_2, metrics = input$rmd_metrics)
+          rmd_filter(objects$omicsData_2, metrics = input$rmd_metrics)
         },
         error = function(e) {
           msg <- paste0("Something went wrong updating your second rMd filter object \n System error:  ", e)
@@ -523,7 +523,7 @@ observeEvent(input$add_rnafilt_libsize, {
     objects$filters$rnafilt_libsize <- tryCatch(
       {
         revals$warnings_filter$rnafilt_libsize <<- NULL
-        RNA_filter(objects$uploaded_omicsData)
+        RNA_filter(objects$omicsData)
       },
       error = function(e) {
         msg <- paste0("Something went wrong updating your RNA filter object \n System error:  ", e)
@@ -545,7 +545,7 @@ observeEvent(input$add_rnafilt_min_nonzero, {
     objects$filters$rnafilt_min_nonzero <- tryCatch(
       {
         revals$warnings_filter$rnafilt_min_nonzero <<- NULL
-        RNA_filter(objects$uploaded_omicsData)
+        RNA_filter(objects$omicsData)
       },
       error = function(e) {
         msg <- paste0("Something went wrong updating your RNA filter object \n System error:  ", e)
@@ -579,7 +579,7 @@ observeEvent(input$add_customfilt, {
           length(e_meta_remove_rv()) > 0
         )) {
           custom_filter(
-            objects$uploaded_omicsData, 
+            objects$omicsData, 
             f_data_remove = samples_rmv,
             e_data_remove = input$edata_customfilt_remove_mols_1,
             e_meta_remove = e_meta_remove_rv()
@@ -592,7 +592,7 @@ observeEvent(input$add_customfilt, {
         NULL
       }
     )
-    if (!is.null(objects$uploaded_omicsData_2)) {
+    if (!is.null(objects$omicsData_2)) {
       objects$filters$customfilt_2 <- tryCatch(
         {
           samples_rmv <- if (input$remove_or_keep == "Remove"){
@@ -605,7 +605,7 @@ observeEvent(input$add_customfilt, {
             length(e_meta_remove_rv_2()) > 0
           )) {
             custom_filter(
-              objects$uploaded_omicsData_2, 
+              objects$omicsData_2, 
               f_data_remove = samples_rmv,
               e_data_remove = input$edata_customfilt_remove_mols_2,
               e_meta_remove = e_meta_remove_rv_2()
@@ -650,7 +650,7 @@ observeEvent(input$plot_tcfilt, {
       revals$warnings_filter$tcfilt_plot <<- NULL
       
       p <- plot(
-        filter_obj = total_count_filter(objects$uploaded_omicsData),
+        filter_obj = total_count_filter(objects$omicsData),
         min_count = min_num_trans,
         interactive = T
       )
@@ -677,7 +677,7 @@ observeEvent(input$plot_rnafilt_libsize, {
       revals$warnings_filter$rnafilt_plot <<- NULL
       
       p <- plot(
-        filter_obj = RNA_filter(objects$uploaded_omicsData),
+        filter_obj = RNA_filter(objects$omicsData),
         plot_type = "library",
         size_library = size_library,
         interactive = T
@@ -705,7 +705,7 @@ observeEvent(input$plot_rnafilt_min_nonzero, {
       revals$warnings_filter$rnafilt_plot <<- NULL
       
       p <- plot(
-        filter_obj = RNA_filter(objects$uploaded_omicsData),
+        filter_obj = RNA_filter(objects$omicsData),
         plot_type = "biomolecule",
         min_nonzero = min_nonzero,
         interactive = T
@@ -734,7 +734,7 @@ observeEvent(c(input$plot_rmdfilt, input$rmd_metrics, input$pvalue_threshold, in
     # store plot object in reactive variable
     plots$filter_mainplot <- tryCatch(
       {
-        p <- plot(rmd_filter(objects$uploaded_omicsData, 
+        p <- plot(rmd_filter(objects$omicsData, 
                              metrics = input$rmd_metrics),
                   pvalue_threshold = input$pvalue_threshold, 
                   sampleID = sampleID1, bw_theme = TRUE, interactive = T
@@ -749,12 +749,12 @@ observeEvent(c(input$plot_rmdfilt, input$rmd_metrics, input$pvalue_threshold, in
       }
     )
 
-    if (!is.null(objects$uploaded_omicsData_2)) {
+    if (!is.null(objects$omicsData_2)) {
       sampleID2 <- if (length(input$rmd_sample_2) > 0 & (input$rmdfilt_plot_type %in% c("subset", "outliers"))) input$rmd_sample_2 else NULL
 
       plots$filter_mainplot_2 <- tryCatch(
         {
-          p <- plot(rmd_filter(objects$uploaded_omicsData_2, metrics = input$rmd_metrics),
+          p <- plot(rmd_filter(objects$omicsData_2, metrics = input$rmd_metrics),
             pvalue_threshold = input$pvalue_threshold, sampleID = sampleID2, 
             bw_theme = TRUE, interactive = T
           )
@@ -780,7 +780,7 @@ observeEvent(c(input$plot_profilt, input$min_num_peps, input$degen_peps),
 
     plots$filter_mainplot <- tryCatch(
       {
-        plot(proteomics_filter(objects$uploaded_omicsData), 
+        plot(proteomics_filter(objects$omicsData), 
              min_num_peps = as.numeric(input$min_num_peps), 
              bw_theme = TRUE, interactive = T
              )
@@ -803,7 +803,7 @@ observeEvent(c(input$plot_molfilt, input$mol_min_num),
 
     plots$filter_mainplot <- tryCatch(
       {
-        plot(molecule_filter(objects$uploaded_omicsData), 
+        plot(molecule_filter(objects$omicsData), 
              min_num = input$mol_min_num, bw_theme = TRUE, interactive = T
              )
       },
@@ -814,10 +814,10 @@ observeEvent(c(input$plot_molfilt, input$mol_min_num),
       }
     )
 
-    if (!is.null(objects$uploaded_omicsData_2)) {
+    if (!is.null(objects$omicsData_2)) {
       plots$filter_mainplot_2 <- tryCatch(
         {
-          plot(molecule_filter(objects$uploaded_omicsData_2), 
+          plot(molecule_filter(objects$omicsData_2), 
                min_num = input$mol_min_num, 
                bw_theme = TRUE, interactive = T
                )
@@ -841,7 +841,7 @@ observeEvent(c(input$plot_cvfilt, input$cv_threshold),
     
     plots$filter_mainplot <- tryCatch(
       {
-        p <- plot(cv_filter(objects$uploaded_omicsData),
+        p <- plot(cv_filter(objects$omicsData),
              cv_threshold = input$cv_threshold,
              bw_theme = TRUE)
         title_info <- paste(str_extract_all(as.character(p$labels$title)[3], "[0-9]+")[[1]], collapse = ".")
@@ -856,10 +856,10 @@ observeEvent(c(input$plot_cvfilt, input$cv_threshold),
       }
     )
 
-    if (!is.null(objects$uploaded_omicsData_2)) {
+    if (!is.null(objects$omicsData_2)) {
       plots$filter_mainplot_2 <- tryCatch(
         {
-          p <- plot(cv_filter(objects$uploaded_omicsData_2),
+          p <- plot(cv_filter(objects$omicsData_2),
                     cv_threshold = input$cv_threshold,
                     bw_theme = TRUE)
           title_info <- paste(str_extract_all(as.character(p$labels$title)[3], "[0-9]+")[[1]], collapse = ".")
@@ -886,7 +886,7 @@ observeEvent(c(input$plot_imdanovafilt, input$min_nonmiss_anova, input$min_nonmi
 
     plots$filter_mainplot <- tryCatch(
       {
-        plot(imdanova_filter(objects$uploaded_omicsData), 
+        plot(imdanova_filter(objects$omicsData), 
              min_nonmiss_anova = input$min_nonmiss_anova, 
              min_nonmiss_gtest = input$min_nonmiss_gtest, 
              bw_theme = TRUE, interactive = T
@@ -899,10 +899,10 @@ observeEvent(c(input$plot_imdanovafilt, input$min_nonmiss_anova, input$min_nonmi
       }
     )
 
-    if (!is.null(objects$uploaded_omicsData_2)) {
+    if (!is.null(objects$omicsData_2)) {
       plots$filter_mainplot_2 <- tryCatch(
         {
-          plot(imdanova_filter(objects$uploaded_omicsData_2), 
+          plot(imdanova_filter(objects$omicsData_2), 
                min_nonmiss_anova = input$min_nonmiss_anova, 
                min_nonmiss_gtest = input$min_nonmiss_gtest, 
                bw_theme = TRUE, interactive = T
@@ -975,12 +975,12 @@ observeEvent(input$review_filters, {
 # Apply Filters #
 #################
 observeEvent(input$apply_filters, {
-  req(!is.null(objects$uploaded_omicsData))
+  req(!is.null(objects$omicsData))
   res <- apply_filt()
 
   # two logicals that are TRUE is something went wrong, used to determine if success modal appears
   error_msg <- is.character(res)
-  if (!is.null(objects$uploaded_omicsData_2)) {
+  if (!is.null(objects$omicsData_2)) {
     empty_object <- nrow(objects$omicsData$e_data) == 0 | nrow(objects$omicsData_2$e_data) == 0
   }
   else {

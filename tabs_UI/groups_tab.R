@@ -24,7 +24,7 @@ groups_UI <- function() {
             radioGroupButtons("customsampnames_opts", "Trim By:",
               choices = c("First x characters" = "first_n", "Range of characters" = "range", "Split by a character" = "split")
             ),
-            uiOutput("customsampnames_split")
+            uiOutput("customsampnames")
           )
           ),
           # ID column collapse sub-div
@@ -47,14 +47,6 @@ groups_UI <- function() {
                 uiOutput("cv_col1"),
                 uiOutput("cv_col2"),
                 uiOutput("pairing_col_1")
-              ),
-              column(
-                6,
-                uiOutput("group_col1_2"),
-                uiOutput("group_col2_2"),
-                uiOutput("cv_col1_2"),
-                uiOutput("cv_col2_2"),
-                uiOutput("pairing_col_2")
               )
             ),
             uiOutput("covariates_type_picker_UI_wrapper")
@@ -75,12 +67,6 @@ groups_UI <- function() {
                 uiOutput("pairing_id_col"),
                 uiOutput("pairing_group_col"),
                 uiOutput("pairing_denom_col")
-              ),
-              column(
-                6,
-                uiOutput("pairing_id_col_2"),
-                uiOutput("pairing_group_col_2"),
-                uiOutput("pairing_denom_col_2")
               )
             )
           )
@@ -98,11 +84,6 @@ groups_UI <- function() {
           id = "groups_collapse_right",
           bsCollapsePanel("Grouping File Preview",
             value = "fdata_preview",
-            hidden(div(
-              id = "toggle_fdata",
-              div(style = "float:left;margin-top:10px;margin-right:10px;font-weight:bold", "Display dataset:"),
-              radioGroupButtons("which_fdata", choices = c("1" = 1, "2" = 2))
-            )),
             DTOutput("fdata_table")
           ),
           bsCollapsePanel("Group Plots",

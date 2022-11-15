@@ -366,12 +366,6 @@ observe({
   toggleElement("toggle_table", condition = two_lipids() & cond_file2exists)
 })
 
-observe({
-  cond_fdata2exists <- !is.null(f_data_2()) && nrow(f_data_2()) > 0
-
-  toggleElement("toggle_fdata", condition = two_lipids() & cond_fdata2exists)
-})
-
 #'@details store emeta info in an intermediate container that can be NULLED
 observeEvent(input$file_emeta, {
   revals$e_meta_info <- input$file_emeta
