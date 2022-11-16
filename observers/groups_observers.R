@@ -35,7 +35,7 @@ makegroup <- function(){
       {
         tmp <- objects$omicsData_2
         tmp$f_data <- f_data()
-        attr(tmp, "cnames")$fdata_cname <- input$fdata_id_col
+        attr(tmp, "cnames")$fdata_cname <- input$fdata_id_col_2
         
         tmp <- group_designation(tmp,
                                  main_effects = main_effects(),

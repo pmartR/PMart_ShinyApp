@@ -35,7 +35,7 @@ list(
   }),
 
   # id column(s) for new fdata if they choose to do grouping
-  output$fdata_id_col <- renderUI({
+  output$fdata_id_col_UI <- renderUI({
     
     matching_col_n <- map_int(1:ncol(f_data()), function(col) {
       sum(f_data()[[col]] %in% colnames(objects$omicsData$e_data))
@@ -43,9 +43,47 @@ list(
     
     matching_col <- colnames(f_data())[which(matching_col_n == max(matching_col_n))[1]]
     
-    pickerInput("fdata_id_col", "Which column in your grouping file indicates sample names?",
-      choices = colnames(f_data()),
-      selected = matching_col
+    if (two_lipids()) {
+      matching_col_n2 <- map_int(1:ncol(f_data()), function(col) {
+        sum(f_data()[[col]] %in% colnames(objects$omicsData_2$e_data))
+      })
+      
+      matching_col2 <- colnames(f_data())[which(matching_col_n2 == max(matching_col_n2))[1]]
+      
+      return(tagList(
+        splitLayout(cellArgs = list(style = "text-align:center"), "Dataset 1", "Dataset 2"),
+        br(style = "padding:2px"),
+        HTML(
+          "<p style = 'font-weight:bold'>Which columns in these files specify the respective sample names?</p>"
+        ),
+        fluidRow(column(
+          6,
+          pickerInput(
+            "fdata_id_col",
+            NULL,
+            choices = colnames(f_data()),
+            selected = matching_col
+          )
+        ),
+        column(
+          6,
+          pickerInput(
+            "fdata_id_col_2",
+            NULL,
+            choices = colnames(f_data()),
+            selected = matching_col2
+          )
+        ))
+      ))
+    }
+    
+    return(
+      pickerInput(
+        "fdata_id_col",
+        "Which column in your grouping file indicates sample names?",
+        choices = colnames(f_data()),
+        selected = matching_col
+      )
     )
   }),
 

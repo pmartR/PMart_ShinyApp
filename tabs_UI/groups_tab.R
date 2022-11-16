@@ -38,17 +38,12 @@ groups_UI <- function() {
               hidden(div(id = "ok_fdata_idcols", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
             ),
             value = "fdata_columns",
-            hidden(div(id = "js_fdata_id_col", uiOutput("fdata_id_col"))),
-            fluidRow(
-              column(
-                6,
-                uiOutput("group_col1"),
-                uiOutput("group_col2"),
-                uiOutput("cv_col1"),
-                uiOutput("cv_col2"),
-                uiOutput("pairing_col_1")
-              )
-            ),
+            hidden(div(id = "js_fdata_id_col", uiOutput("fdata_id_col_UI"))),
+            uiOutput("group_col1"),
+            uiOutput("group_col2"),
+            uiOutput("cv_col1"),
+            uiOutput("cv_col2"),
+            uiOutput("pairing_col_1"),
             uiOutput("covariates_type_picker_UI_wrapper")
           ),
           bsCollapsePanel(

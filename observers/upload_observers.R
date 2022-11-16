@@ -279,8 +279,8 @@ observe({
 #'TODO:  Make this a reactive
 observe({
   isolate({
-    revals$boolean$upload$lipids_sampnames_setequal <- NULL
-    revals$warnings_upload$samps_not_equal <- NULL
+    #revals$boolean$upload$lipids_sampnames_setequal <- NULL
+    #revals$warnings_upload$samps_not_equal <- NULL
     
     revals$boolean$upload$lipids_ids_unique <- NULL
     revals$warnings_upload$edata_not_unique <- NULL
@@ -289,14 +289,14 @@ observe({
   req(two_lipids())
   req(!is.null(input$id_col) & !is.null(input$id_col_2))
   
-  if(!lipids_samps_eq()) {
-    isolate({
-      revals$warnings_upload$samps_not_equal <- "<p style = 'color:red'>Your data files for both lipids must have the same column names.</p>"
-    })
-  }
-  isolate({
-    revals$boolean$upload$lipids_sampnames_setequal <- lipids_samps_eq()
-  })
+  # if(!lipids_samps_eq()) {
+  #   isolate({
+  #     revals$warnings_upload$samps_not_equal <- "<p style = 'color:red'>Your data files for both lipids must have the same column names.</p>"
+  #   })
+  # }
+  # isolate({
+  #   revals$boolean$upload$lipids_sampnames_setequal <- lipids_samps_eq()
+  # })
   
   if(!lipids_edata_unq()) {
     isolate({
