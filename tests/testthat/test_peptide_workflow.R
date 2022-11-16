@@ -113,7 +113,7 @@ test_that("App completes a basic workflow on peptide-level data", {
   app$wait_for_value(input = "execute_spans")
   app$click("execute_spans")
   
-  Sys.sleep(1)
+  Sys.sleep(2)
   
   # params panel opened by default
   app$wait_for_value(output = "spans_table")
