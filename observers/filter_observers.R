@@ -367,7 +367,8 @@ observeEvent(objects$uploaded_omicsData, {
   
   # seqData has very specific types of filters that can/cannot be applied
   toggle("tcfilt_ftab_UI", condition = inherits(objects$uploaded_omicsData, "seqData"))
-  toggle("rnafilt_ftab_UI", condition = inherits(objects$uploaded_omicsData, "seqData"))
+  toggle("rnafilt_libsize_ftab_UI", condition = inherits(objects$uploaded_omicsData, "seqData"))
+  toggle("rnafilt_min_nonzero_ftab_UI", condition = inherits(objects$uploaded_omicsData, "seqData"))
   
   toggle("cvfilt_ftab_UI", condition = !inherits(objects$uploaded_omicsData, "seqData"))
   toggle("imdanovafilt_ftab_UI", condition = !inherits(objects$uploaded_omicsData, "seqData"))
