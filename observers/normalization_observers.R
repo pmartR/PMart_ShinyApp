@@ -245,7 +245,7 @@ observeEvent(c(input$apply_normalization, input$apply_normalization_modal), {
       }
       
       # __SHINYTEST__
-      if(options("shiny.testmode") == TRUE) {
+      if(isTRUE(getOption("shiny.testmode"))) {
         .omicsData_prenorm <- objects$omicsData
         exportTestValues(
           omicsData_prenorm = .omicsData_prenorm 
