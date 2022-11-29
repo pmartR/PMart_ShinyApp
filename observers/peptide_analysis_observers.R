@@ -1,11 +1,11 @@
 #'@details depending on the type of comparison the user wants to do, edit the 
 #' table that presents the group comparisons
 observe({
-  req(input$peptide_imdanova_comparison_method, objects$omicsData)
+  req(input$peptide_comparison_method, objects$omicsData)
   req(!is.null(attr(objects$omicsData,"group_DF")))
 
-  if (input$peptide_imdanova_comparison_method == "Control to test condition comparisons") {
-    control <- input$peptide_imdanova_control_group
+  if (input$peptide_comparison_method == "Control to test condition comparisons") {
+    control <- input$peptide_control_group
     noncontrol <- input$peptide_imdanova_non_control_groups
     
     req(!is.null(control) && !is.null(noncontrol))
@@ -14,8 +14,8 @@ observe({
     if (nrow(combos) > 1) {
       combos <- as.matrix(combos[combos[, 1] == control, ], ncol = 2)
     }
-  } else if (input$peptide_imdanova_comparison_method == "Custom comparisons") {
-    combos <- input$peptide_imdanova_custom_comps
+  } else if (input$peptide_comparison_method == "Custom comparisons") {
+    combos <- input$peptide_custom_comps
     
     req(!is.null(combos))
     
