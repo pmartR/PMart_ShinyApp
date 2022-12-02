@@ -147,6 +147,9 @@ observeEvent(input$makezipfile, {
     print(fs)
     revals$fs <- fs
   })
+  
+  # __SHINYTEST__
+  exportTestValues(files_to_export = revals$fs)
 })
 
 # check that the files have been written to the location that zip() will try to read from

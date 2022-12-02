@@ -3,4 +3,4 @@ numpy
 gunicorn
 minio==7.0.2
 plotly
-kaleido==0.1.0post1
+kaleido==0.1.0

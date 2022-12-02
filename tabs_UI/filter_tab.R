@@ -34,7 +34,7 @@ filter_UI <- function() {
           # imd-anova filter options
           add_filter_UI(
             filter_name = "imdanovafilt",
-            title = "Coefficient of Variation Filter",
+            title = "IMD-ANOVA Filter",
             tooltip_text = ttext_[["IMDANOVA_FILTER_INFO"]],
             numericInput("min_nonmiss_anova", "Minimum number observed to perform ANOVA", 2, step = 1),
             numericInput("min_nonmiss_gtest", "Minimum number observed to perform G-test", 3, step = 1)
@@ -89,7 +89,7 @@ filter_UI <- function() {
               uiOutput("rmd_propmis_warn_icon")
             ),
             pickerInput("rmdfilt_plot_type", "Plot everything or inspect certain samples?", choices = c("Plot all samples" = "all", "Select from all samples" = "subset", "Select from outliers" = "outliers")),
-            uiOutput("rmdfilt_plot_type")
+            uiOutput("rmdfilt_plot_type_UI")
           ),
           
           ## RNA_filt - Library Size
@@ -116,6 +116,7 @@ filter_UI <- function() {
             "Custom Filter",
             hidden(div(id = "ok_custom_filter", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
           ),
+          value = "customfilt",
           div(class = "inline-wrapper-1",
             uiOutput("fdata_customfilt"),
             radioGroupButtons("remove_or_keep", label = "Remove or keep these choices?", choices = c("Remove", "Keep"), selected = "Remove")

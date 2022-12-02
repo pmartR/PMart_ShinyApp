@@ -102,3 +102,29 @@ two_lipids <- reactive({
   !is.null(input$datatype) && input$datatype == "lip" && 
     !is.null(input$twolipids_yn) && isTRUE(input$twolipids_yn == "TRUE")
 })
+
+# are the sample names of the two lipid objects the same?
+lipids_samps_eq <- reactive({
+  req(two_lipids())
+  req(!is.null(input$id_col) & !is.null(input$id_col_2))
+  
+  sampnames_1 <- colnames(e_data())[-which(colnames(e_data()) %in% input$id_col)]
+  sampnames_2 <- colnames(e_data_2())[-which(colnames(e_data_2()) %in% input$id_col_2)]
+  
+  samps_setequal <- dplyr::setequal(sampnames_1, sampnames_2)
+  
+  return(samps_setequal)
+})
+
+# are the edata_id columns of the two lipid objects unique?
+lipids_edata_unq <- reactive({
+  req(two_lipids())
+  req(!is.null(input$id_col) & !is.null(input$id_col_2))
+  
+  ids_1 <- e_data()[,which(colnames(e_data()) %in% input$id_col)]
+  ids_2 <- e_data_2()[,which(colnames(e_data_2()) %in% input$id_col_2)]
+  
+  ids_unique <- length(intersect(ids_1, ids_2)) == 0
+  
+  return(ids_unique)
+})

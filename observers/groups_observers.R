@@ -3,37 +3,43 @@ makegroup <- function(){
   
   req(!is.null(objects$omicsData) && !is.null(f_data()))
   
-  ## Check two lipids requirements and process first
-  if (two_lipids()) {
-    req(!is.null(objects$omicsData_2) && !is.null(f_data_2()))
-    
-    if (input$usevizsampnames == "Yes") {
-      if (input$customsampnames_opts == "first_n") {
-        args_2 <- list(firstn = input$first_n_2)
-      }
-      else if (input$customsampnames_opts == "range") {
-        args_2 <- list(from = input$range_low_2, to = input$range_high_2)
-      }
-      else if (input$customsampnames_opts == "split") {
-        args_2 <- list(delim = input$delimiter_2, components = as.numeric(input$split_el_2))
-      }
+  ## arguments for custom_sampnames
+  if (input$usevizsampnames == "Yes") {
+    if (input$customsampnames_opts == "first_n") {
+      sampname_args <- list(firstn = input$first_n)
     }
+    else if (input$customsampnames_opts == "range") {
+      sampname_args <- list(from = input$range_low, to = input$range_high)
+    }
+    else if (input$customsampnames_opts == "split") {
+      sampname_args <- list(delim = input$delimiter, components = as.numeric(input$split_el))
+    }
+  }
+  
+  revals$warnings_groups$obj_2 <- revals$warnings_groups$obj_1 <- NULL
+  
+  cov_type = c(input$cv_type_1, input$cv_type_2)
+  
+  pair_id = if(isTRUE(input$pair_id_col_2 == "None") | !isTruthy(input$pair_id_col)) NULL else input$pair_id_col
+  pair_group = if(isTRUE(input$pair_group_col_2 == "None") | !isTruthy(input$pair_group_col)) NULL else input$pair_group_col
+  pair_denom = if(isTRUE(input$pair_denom_col_2 == "None") | !isTruthy(input$pair_denom_col)) NULL else input$pair_denom_col
+  
+  ## To process the data, we will replace fdata and fdata cname,
+  ## call group_designation, and apply custom sampnames if specified.
+  
+  ## Check two lipids requirements and process second object first ...
+  if (two_lipids()) {
+    req(!is.null(objects$omicsData_2))
     
-    objects$omicsData_2 <- objects$uploaded_omicsData_2 <- tryCatch(
+    .tmp_obj_2 <- tryCatch(
       {
         tmp <- objects$omicsData_2
-        tmp$f_data <- f_data_2()
+        tmp$f_data <- f_data()
         attr(tmp, "cnames")$fdata_cname <- input$fdata_id_col_2
         
-        cov_type = c(input$cv_type_1_2, input$cv_type_2_2)
-        
-        pair_id = if(isTRUE(input$pair_id_col_2 == "None") | !isTruthy(input$pair_id_col_2)) NULL else input$pair_id_col_2
-        pair_group = if(isTRUE(input$pair_group_col_2 == "None") | !isTruthy(input$pair_group_col_2)) NULL else input$pair_group_col_2
-        pair_denom = if(isTRUE(input$pair_denom_col_2 == "None") | !isTruthy(input$pair_denom_col_2)) NULL else input$pair_denom_col_2
-        
         tmp <- group_designation(tmp,
-                                 main_effects = main_effects_2(),
-                                 covariates = covariates_2(),
+                                 main_effects = main_effects(),
+                                 covariates = covariates(),
                                  cov_type = cov_type,
                                  pair_id = pair_id,
                                  pair_group = pair_group,
@@ -41,7 +47,7 @@ makegroup <- function(){
         )
 
         if (input$usevizsampnames == "Yes") {
-          tmp <- do.call(custom_sampnames, args = c(omicsData = list(tmp), args_2))
+          tmp <- do.call(custom_sampnames, args = c(omicsData = list(tmp), sampname_args))
         }
 
         tmp
@@ -50,30 +56,16 @@ makegroup <- function(){
         msg <- paste0("Something went wrong grouping your second omicsData object \n System error:  ", e)
         message(msg)
         revals$warnings_groups$obj_2 <<- sprintf("<p style = 'color:red'>%s</p>", msg)
-        tmp <- objects$omicsData_2
-        attr(tmp, "group_DF") <- NULL
-        tmp
+        NULL
       }
     )
+    
+    req(!is.null(.tmp_obj_2))
   }
   
-  ## Process omicsData normally
-  if (input$usevizsampnames == "Yes") {
-    if (input$customsampnames_opts == "first_n") {
-      args <- list(firstn = input$first_n)
-    }
-    else if (input$customsampnames_opts == "range") {
-      args <- list(from = input$range_low, to = input$range_high)
-    }
-    else if (input$customsampnames_opts == "split") {
-      args <- list(delim = input$delimiter, components = as.numeric(input$split_el))
-    }
-  }
-  
-  # replace fdata and fdata cname, then check data integrity
-  objects$omicsData <- objects$uploaded_omicsData <- tryCatch(
+  # ... then process the first object
+  .tmp_obj <- tryCatch(
     {
-      
       tmp <- objects$omicsData
       ## as it turns out, having an f_data with samples not in e_data is problematic
       ref_catch <- f_data()[[input$fdata_id_col]] %in% colnames(objects$omicsData$e_data)
@@ -81,10 +73,6 @@ makegroup <- function(){
       attr(tmp, "cnames")$fdata_cname <- input$fdata_id_col
       
       cov_type = c(input$cv_type_1, input$cv_type_2)
-      
-      pair_id = if(isTRUE(input$pair_id_col == "None") | !isTruthy(input$pair_id_col)) NULL else input$pair_id_col
-      pair_group = if(isTRUE(input$pair_group_col == "None") | !isTruthy(input$pair_group_col)) NULL else input$pair_group_col
-      pair_denom = if(isTRUE(input$pair_denom_col == "None") | !isTruthy(input$pair_denom_col)) NULL else input$pair_denom_col
       
       tmp <- group_designation(tmp,
                                main_effects = main_effects(),
@@ -96,7 +84,7 @@ makegroup <- function(){
       )
       
       if (input$usevizsampnames == "Yes") {
-        tmp <- do.call(custom_sampnames, args = c(omicsData = list(tmp), args))
+        tmp <- do.call(custom_sampnames, args = c(omicsData = list(tmp), sampname_args))
       }
       
       tmp
@@ -105,11 +93,17 @@ makegroup <- function(){
       msg <- paste0("Something went wrong grouping your omicsData object \n System error:  ", e)
       message(msg)
       revals$warnings_groups$obj_1 <<- sprintf("<p style = 'color:red'>%s</p>", msg)
-      tmp <- objects$omicsData
-      attr(tmp, "group_DF") <- NULL
-      tmp
+      NULL
     }
   )
+  
+  req(!is.null(.tmp_obj))
+  
+  objects$omicsData <- .tmp_obj
+  
+  if(two_lipids()){
+    objects$omicsData_2 <- .tmp_obj_2 
+  }
 }
 
 # toggle fdata id col select if f_data() exists
@@ -118,11 +112,10 @@ observe({
   toggleElement("js_fdata_id_col", condition = !is.null(f_data()))
 })
 
-observeEvent(c(input$file_fdata, input$file_fdata_2), {
+observeEvent(input$file_fdata, {
   Sys.sleep(0.7)
   
-  cond <- !is.null(input$file_fdata) && 
-    (!two_lipids() || !is.null(input$file_fdata_2))
+  cond <- !is.null(input$file_fdata)
 
   if (cond) {
     updateCollapse(session, "groups_collapse_left", open = c("fdata_columns"))
@@ -173,7 +166,6 @@ observeEvent(input$group_designation, {
             hr(),
             actionButton("groups_dismiss", "Review results", width = "75%"),
             usebutton
-            # actionButton("goto_qc", "Continue to Data Summary Tab", style = "margin:5px;width:75%")
           )
         ),
         footer = NULL
@@ -223,12 +215,9 @@ observeEvent(sample_names(), {
 
 #'@details Toggle the 'complete' checkmark for pairing structure collapsepanel.
 observeEvent(c(
-  input$pair_id_col, 
-  input$pair_id_col_2,
+  input$pair_id_col,
   input$pair_group_col,
-  input$pair_group_col_2,
-  input$pair_denom_col,
-  input$pair_denom_col_2
+  input$pair_denom_col
   ), {
 
   toggle("ok_fdata_pair_cols", condition = pairs_complete()[['valid']])
@@ -236,44 +225,25 @@ observeEvent(c(
 
 # error checking for groups tab
 observe({
-  # 2 file lipid conditions:
-  # two fdata files uploaded with correct id col
-  # there is at 1 main effect, and all specified main effects and covariates exist in both datasets
-  fdata_idcol1 <- if (length(input$fdata_id_col) == 0) "__NULLSELECT__" else input$fdata_id_col
-  fdata_idcol2 <- if (length(input$fdata_id_col_2) == 0) "__NULLSELECT__" else input$fdata_id_col_2
+  fdata_idcol <- if (length(input$fdata_id_col) == 0) "__NULLSELECT__" else input$fdata_id_col
 
   req(!is.null(f_data()))
   
-  if (two_lipids()) {
-    cond_files <- !is.null(input$file_fdata) & !is.null(input$file_fdata_2)
-    cond_idcol_fdata <- all(isTRUE(input$fdata_id_col %in% colnames(f_data())), isTRUE(input$fdata_id_col_2 %in% colnames(f_data_2())))
-    cond_sample_names <- all(f_data()[[fdata_idcol1]] %in% sample_names(), f_data_2()[[fdata_idcol2]] %in% sample_names_2())
-    cond_main_effects <- all(c(length(main_effects()), length(main_effects_2())) != 0, main_effects() %in% colnames(f_data()), main_effects_2() %in% colnames(f_data_2()))
-    cond_main_effects <- cond_main_effects | pairs_complete()[["valid"]] # main effect can be left blank if pairing present
-    
-    cond_covariates <- if (all(c(length(covariates()), length(covariates_2())) == 0)) TRUE else all(covariates() %in% colnames(f_data()), covariates_2() %in% colnames(f_data_2()))
-    cond_NA_groups <- any(is.na(f_data()[main_effects()])) || any(is.na(f_data_2()[main_effects()]))
-    
-    cond <- all(cond_files, cond_idcol_fdata, cond_main_effects, cond_covariates, cond_sample_names, pairs_complete()[['pass']])
-  }
-  # otherwise check:
   # input column exists in fdata
   # there is at 1 main effect, and all specified main effects and covariates exist in f_data
-  else {
-    cond_files <- !is.null(input$file_fdata)
-    cond_idcol_fdata <- isTRUE(input$fdata_id_col %in% colnames(f_data()))
-    cond_sample_names <- all(f_data()[[fdata_idcol1]] %in% sample_names())
-    
-    cond_main_effects <- (length(main_effects()) != 0) & all(main_effects() %in% colnames(f_data()))
-    cond_main_effects <- cond_main_effects | pairs_complete()[["valid"]] # main effect can be left blank if pairing present
-    
-    cond_covariates <- if (length(covariates() == 0)) TRUE else all(covariates() %in% colnames(f_data()))
-    cond_NA_groups <- any(is.na(f_data()[main_effects()]))
-    cond_iso_nrm <- inherits(objects$omicsData, "pepData") && 
-                        input$labeled_yn == "iso"
-    
-    cond <- all(cond_files, cond_idcol_fdata, cond_main_effects, cond_covariates, cond_sample_names, pairs_complete()[['pass']])
-  }
+  cond_files <- !is.null(input$file_fdata)
+  cond_idcol_fdata <- isTRUE(input$fdata_id_col %in% colnames(f_data()))
+  cond_sample_names <- all(f_data()[[fdata_idcol]] %in% sample_names())
+  
+  cond_main_effects <- (length(main_effects()) != 0) & all(main_effects() %in% colnames(f_data()))
+  cond_main_effects <- cond_main_effects | pairs_complete()[["valid"]] # main effect can be left blank if pairing present
+  
+  cond_covariates <- if (length(covariates() == 0)) TRUE else all(covariates() %in% colnames(f_data()))
+  cond_NA_groups <- any(is.na(f_data()[main_effects()]))
+  cond_iso_nrm <- inherits(objects$omicsData, "pepData") && 
+                      input$labeled_yn == "iso"
+  
+  cond <- all(cond_files, cond_idcol_fdata, cond_main_effects, cond_covariates, cond_sample_names, pairs_complete()[['pass']])
 
   revals$warnings_groups$files <- if (!cond_files) "<p style = 'color:grey'>No f_data uploaded or one file missing.</p>" else NULL
   revals$warnings_groups$sample_names <- if (!cond_sample_names) "<p style = 'color:grey'>The chosen sample ID columns do not contain the sample names for one or more files</p>" else NULL

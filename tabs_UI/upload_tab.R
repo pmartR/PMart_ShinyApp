@@ -74,7 +74,7 @@ upload_UI <- function() {
             hidden(div(
               id = "js_datascale",
               uiOutput("datascale_UI"),
-              uiOutput("transform")
+              uiOutput("transform_UI")
             )),
             
             conditionalPanel(
@@ -104,7 +104,7 @@ upload_UI <- function() {
               hidden(div(id = "ok_metadata", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
             ),
             value = "meta_collapse",
-            uiOutput("emeta_yn"),
+            uiOutput("emeta_yn_UI"),
             hidden(div(
               id = "js_emeta_UI",
               uiOutput("emeta_UI")

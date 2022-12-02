@@ -186,8 +186,6 @@ observe({
 #'@details Check that everything in the biomolecule information section is ok.
 #' If it is, then collapse the sidebar, show a checkmark, and activate the create
 #' omicsData button.
-#' TODO:  store conditions in a named list in revals$boolean$upload$emeta_ok,
-#' or break this up a bit into multiple conditions.
 observe({
   # 2 file lipid conditions:
   # two emeta files uploaded
@@ -196,12 +194,10 @@ observe({
   if (two_lipids()) {
     req(!is.null(input$id_col) & !is.null(input$id_col_2))
     cond_files <- (!is.null(input$file_emeta) & !is.null(input$file_emeta_2))
-    cond_idcol_edata <- all(sapply(
-      list(e_data(), e_data_2()),
-      function(df) {
-        isTRUE(input$id_col %in% colnames(df))
-      }
-    ))
+    cond_idcol_edata <- all(
+      input$id_col %in% colnames(e_data()),
+      input$id_col_2 %in% colnames(e_data_2())
+    )
     cond_idcol_emeta <- all(sapply(
       list(revals$e_meta, revals$e_meta_2),
       function(df) {
@@ -264,7 +260,6 @@ observe({
   toggle("ok_metadata", condition = cond)
   
   revals$boolean$upload$emeta_ok <- cond
-  # toggleState("makeobject", condition = cond)
 })
 
 #'@details Collect all values that indicate all required inputs are correct and
@@ -277,6 +272,40 @@ observe({
   toggleState("makeobject",
               condition = all(unlist(revals$boolean$upload)) & 
                 length(unlist(revals$boolean$upload)) > 0)
+})
+
+#'@details Disable create object if the sample names of the two edatas are not 
+#'the same for two lipids 
+#'TODO:  Make this a reactive
+observe({
+  isolate({
+    #revals$boolean$upload$lipids_sampnames_setequal <- NULL
+    #revals$warnings_upload$samps_not_equal <- NULL
+    
+    revals$boolean$upload$lipids_ids_unique <- NULL
+    revals$warnings_upload$edata_not_unique <- NULL
+  })
+  
+  req(two_lipids())
+  req(!is.null(input$id_col) & !is.null(input$id_col_2))
+  
+  # if(!lipids_samps_eq()) {
+  #   isolate({
+  #     revals$warnings_upload$samps_not_equal <- "<p style = 'color:red'>Your data files for both lipids must have the same column names.</p>"
+  #   })
+  # }
+  # isolate({
+  #   revals$boolean$upload$lipids_sampnames_setequal <- lipids_samps_eq()
+  # })
+  
+  if(!lipids_edata_unq()) {
+    isolate({
+      revals$warnings_upload$edata_not_unique <- "<p style = 'color:red'>There were duplicate entries in the identifier columns of your lipid datasets.</p>"
+    })
+  }
+  isolate({
+    revals$boolean$upload$lipids_ids_unique <- lipids_edata_unq()
+  })
 })
 
 # make data and display success message on successful objects$omicsData object creation
@@ -335,12 +364,6 @@ observe({
   cond_file2exists <- !is.null(e_data_2()) | !is.null(revals$e_meta_2)
 
   toggleElement("toggle_table", condition = two_lipids() & cond_file2exists)
-})
-
-observe({
-  cond_fdata2exists <- !is.null(f_data_2()) && nrow(f_data_2()) > 0
-
-  toggleElement("toggle_fdata", condition = two_lipids() & cond_fdata2exists)
 })
 
 #'@details store emeta info in an intermediate container that can be NULLED

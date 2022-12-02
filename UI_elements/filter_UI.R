@@ -42,7 +42,16 @@ list(
     #' TODO: collect all samples and perform differences at the end?
     rmd_removed_samps <- if (any(grepl("rmdfilt", names(objects$filters)))) {
       tmp_idx = which(grepl("rmdfilt", names(objects$filters)))
-      attr(objects$filters[[tmp_idx]], "sample_names")[which(objects$filters[[tmp_idx]]$pvalue < input$pvalue_threshold)]
+      
+      collect_samps_rmv <- NULL
+      
+      # loop for two lipids case
+      for (idx in tmp_idx) {
+        collect_samps_rmv <- c(collect_samps_rmv, attr(objects$filters[[idx]], "sample_names")[which(objects$filters[[idx]]$pvalue < input$pvalue_threshold)])
+      }
+      
+      unique(collect_samps_rmv)
+      
     } else NULL
     
     rnafilt_libsize_removed_samps <- if(any(grepl("rnafilt_libsize", names(objects$filters)))) {
@@ -212,10 +221,17 @@ list(
         )
       }
     }
-
+    
+    filtered_disclaimer <- if(length(attr(objects$omicsData, "filters")) > 0) {
+      h3(tags$b("Filters have already been applied, these filters will be applied in addition to the existing filters.", style = "color:deepskyblue"))
+    } else NULL
+    
     # Display two summary sections if there are two omicsData objects
     if (length(obj2_inds) > 0) {
       tagList(
+        h3(tags$b("Samples removed in one object will be removed in the other as well.", style = "color:deepskyblue")),
+        filtered_disclaimer,
+        hr(),
         h3(tags$b("Filters to be applied to Object 1:  ")),
         hr(),
         divs[obj1_inds],
@@ -226,6 +242,7 @@ list(
     }
     else {
       tagList(
+        filtered_disclaimer,
         h3(tags$b("Filters to be applied:  ")),
         divs
       )
@@ -407,7 +424,7 @@ list(
   }),
   
   # Conditional UI for rmd filter, depends on the sample names in the file(s)
-  output$rmdfilt_plot_type <- renderUI({
+  output$rmdfilt_plot_type_UI <- renderUI({
     req(!is.null(objects$omicsData))
     if (input$rmdfilt_plot_type == "all") {
       NULL
@@ -457,12 +474,12 @@ list(
   #'@details Picker inputs for selecting which molecules to remove using e_data
   #'custom filter.
   output$edata_customfilt_pickers<- renderUI({
-    req(!is.null(objects$uploaded_omicsData))
-    mols1 = objects$uploaded_omicsData$e_data[,get_edata_cname(objects$uploaded_omicsData)]
+    req(!is.null(objects$omicsData))
+    mols1 = objects$omicsData$e_data[,get_edata_cname(objects$omicsData)]
     
     if(two_lipids()){
-      validate(need(!is.null(objects$uploaded_omicsData_2), "No second object"))
-      mols2 = objects$uploaded_omicsData_2$e_data[,get_edata_cname(objects$uploaded_omicsData_2)]
+      validate(need(!is.null(objects$omicsData_2), "No second object"))
+      mols2 = objects$omicsData_2$e_data[,get_edata_cname(objects$omicsData_2)]
       
       tagList(
         h5("Filter by data file identifiers:"),
@@ -499,13 +516,13 @@ list(
   
   #'@details Pickers for which e-meta columns to use when filtering by e-meta
   output$emeta_customfilt_which_col <- renderUI({
-    req(objects$uploaded_omicsData$e_meta)
+    req(objects$omicsData$e_meta)
     
-    choices1 = colnames(objects$uploaded_omicsData$e_meta)
+    choices1 = colnames(objects$omicsData$e_meta)
     
     if(two_lipids()) {
-      validate(need(!is.null(objects$uploaded_omicsData_2), "No second object"))
-      choices2 = colnames(objects$uploaded_omicsData_2)
+      validate(need(!is.null(objects$omicsData_2), "No second object"))
+      choices2 = colnames(objects$omicsData_2)
       
       tagList(
         tags$p("Filter by which columns:"),
@@ -535,19 +552,19 @@ list(
   #'custom filter.
   output$emeta_customfilt_pickers<- renderUI({
     validate(
-      need(objects$uploaded_omicsData$e_meta, "No biomolecule information found."),
+      need(objects$omicsData$e_meta, "No biomolecule information found."),
       need(input$emeta_customfilt_which_col_1, "Select which column to use.")
     )
     
-    choices1 <- objects$uploaded_omicsData$e_meta %>% 
+    choices1 <- objects$omicsData$e_meta %>% 
       purrr::pluck(input$emeta_customfilt_which_col_1) %>% unique() %>% sort()
     
     if(two_lipids()){
       validate(
-        need(!is.null(objects$uploaded_omicsData_2$e_meta), "No biomolecule information for second data object."),
+        need(!is.null(objects$omicsData_2$e_meta), "No biomolecule information for second data object."),
         need(input$emeta_customfilt_which_col_2, "Select second identifier.")
       )
-      choices2 <- objects$uploaded_omicsData_2$e_meta %>% 
+      choices2 <- objects$omicsData_2$e_meta %>% 
         purrr::pluck(input$emeta_customfilt_which_col_2) %>% unique() %>% sort()
       
       tagList(

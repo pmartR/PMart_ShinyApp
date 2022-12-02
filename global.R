@@ -87,6 +87,7 @@ global_input_choices = list(
 #'@details input id's that need to be mutually exclusive in the groups tab ...
 GROUPS_ME_IDS <- c(
   "fdata_id_col",
+  "fdata_id_col_2",
   "gcol1",
   "gcol2", 
   "cvcol1", 
@@ -94,18 +95,6 @@ GROUPS_ME_IDS <- c(
   "pair_id_col",
   "pair_group_col",
   "pair_denom_col"
-)
-
-#'@details ... and for the optional second dataset as well
-GROUPS_ME_IDS_2 <- c(
-  "fdata_id_col_2",
-  "gcol1_2",
-  "gcol2_2", 
-  "cvcol1_2", 
-  "cvcol2_2",
-  "pair_id_col_2",
-  "pair_group_col_2",
-  "pair_denom_col_2"
 )
 
 NULLSELECT_ = "__nullselect__"
