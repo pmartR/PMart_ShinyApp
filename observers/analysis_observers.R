@@ -578,3 +578,8 @@ observeEvent(input$statistics_apply_style_plot_2, {
     )
   }
 })
+
+#'@details Clear plots when stats method is changed
+observeEvent(input$stats_select_method, {
+  plots$statistics_mainplot <- plots$statistics_diagplot <- NULL
+})
