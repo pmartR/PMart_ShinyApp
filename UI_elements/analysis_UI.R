@@ -13,7 +13,7 @@ output$statistics_mainplot <- renderUI({
   }
 })
 
-# diagnotic plot display which takes in the diagnotic plot object for seqData
+# diagnostic plot display which takes in the diagnostic plot object for seqData
 output$statistics_diagplot <- renderUI({
   req(!is.null(plots$statistics_diagplot))
   
@@ -325,7 +325,7 @@ output$statistics_tab_sidepanel <- renderUI({
           uiOutput("seqdata_test_method_UI"),
           uiOutput("seqdata_pval_adjust_UI"),
           numericInput("pval_thresh", "Significance threshold", value = 0.05, step = 0.01),
-          bsButton("apply_diagnotic", "Run Trend-fitting Diagnotics", style = "primary"),
+          bsButton("apply_diagnostic", "Run Trend-fitting Diagnostics", style = "primary"),
           disabled(bsButton("apply_seqstats", "Perform Differential Expression", style = "primary")),
           br(), br(),
           hidden(
@@ -607,11 +607,11 @@ output$statistics_plot_options <- renderUI({
     div(
       class = "inline-wrapper-1",
       conditionalPanel(
-        "['volcano'].includes(input.imdanova_plot_type)",
+        "['volcano'].includes(input.imdanova_plot_type) || ['volcano'].includes(input.seqdata_plot_type)",
         numericInput("imd_plot_fc_thresh", "Fold-change Threshold", value = NULL) 
       ),
       conditionalPanel(
-        "['volcano', 'gheatmap'].includes(input.imdanova_plot_type)",
+        "['volcano', 'gheatmap'].includes(input.imdanova_plot_type) || ['volcano', 'gheatmap'].includes(input.seqdata_plot_type)",
         radioGroupButtons(
           "stats_interactive_yn",
           choices = c("Interactive" = T, "Static" = F),
@@ -620,12 +620,12 @@ output$statistics_plot_options <- renderUI({
       )
     ),
     conditionalPanel(
-      "['volcano', 'bar'].includes(input.imdanova_plot_type)",
+      "['volcano', 'bar'].includes(input.imdanova_plot_type) || ['volcano', 'bar'].includes(input.seqdata_plot_type)",
       tags$b(h5("Statistical significance/fold change colors")),
       inline_cpickers(cpicker_args), # UI helper
     ),
     conditionalPanel(
-      "['gheatmap'].includes(input.imdanova_plot_type)",
+      "['gheatmap'].includes(input.imdanova_plot_type) || ['gheatmap'].includes(input.seqdata_plot_type)",
       tags$b(h5("Low/High count colors")),
       inline_cpickers(high_low_args), # UI helper
     ),
@@ -647,7 +647,19 @@ output$statistics_plot_options <- renderUI({
 })
 
 output$statistics_apply_style <- renderUI({
-  apply_style_UI("statistics", FALSE, inherits(plots$statistics_mainplot, "list"))
+  second_apply_button <- if(inherits(objects$omicsData, "seqData")) {
+    bsButton("statistics_apply_style_diag", "Update Diagnostic Plot Style") 
+  } else NULL
+  
+  div(class = "inline-wrapper-1",
+      apply_style_UI(
+        "statistics",
+         FALSE,
+         inherits(plots$statistics_mainplot, "list"),
+         one_plot_title="Update Analysis Plot style"
+      ), 
+    second_apply_button
+  )
 })
 
 output$warnings_analysis <- renderUI({
