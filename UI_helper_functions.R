@@ -194,7 +194,17 @@ inline_cpickers <- function(cpicker_args, ...) {
 #'@param two_plots Boolean indicating if there are two plots for some other
 #'reason than that there are two datasets.
 #'@param flip_button Whether to include a checkboxgroupbutton to flip the axes
-apply_style_UI <- function(pagename, two_lipids, two_plots, flip_button = FALSE) {
+#'@param ... Extra UI element to be appended in the resulting div
+apply_style_UI <-
+  function(pagename,
+           two_lipids,
+           two_plots,
+           flip_button = FALSE,
+           two_lipids_title = "Update plots style for the:",
+           one_plot_title = "Update plot style",
+           two_plot_title = "Update plots style for the:",
+           ...) {
+    
   if (flip_button) {
     fbtn <- div(checkboxGroupButtons(paste0(pagename, "_flip_axes"), "",
       choices = list("Flip Axes" = TRUE),
@@ -209,22 +219,24 @@ apply_style_UI <- function(pagename, two_lipids, two_plots, flip_button = FALSE)
 
   if (two_lipids) {
     tagList(
-      tags$b("Update style to the plots for the:"),
+      tags$b(two_lipids_title),
       div(
         bsButton(paste0(pagename, "_apply_style_plot_1"), "first dataset"),
         bsButton(paste0(pagename, "_apply_style_plot_2"), "second dataset"),
-        fbtn
+        fbtn,
+        ...
       )
     )
   } else if (!two_plots) {
-    div(bsButton(paste0(pagename, "_apply_style_plot_1"), "Update plot style"), fbtn)
+    div(bsButton(paste0(pagename, "_apply_style_plot_1"), one_plot_title), fbtn)
   } else if (two_plots) {
     tagList(
-      tags$b("Update style to the plots for the:"),
+      tags$b(two_plot_title),
       div(
         bsButton(paste0(pagename, "_apply_style_plot_1"), "top/left plot"),
         bsButton(paste0(pagename, "_apply_style_plot_2"), "bottom/right plot"),
-        fbtn
+        fbtn,
+        ...
       )
     )
   }

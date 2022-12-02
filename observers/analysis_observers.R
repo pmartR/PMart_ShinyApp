@@ -149,7 +149,7 @@ observeEvent(input$apply_imdanova, {
 
 
 # make statres object
-observeEvent(input$apply_diagnotic, {
+observeEvent(input$apply_diagnostic, {
   req(!is.null(objects$omicsData) && 
         input$top_page == "statistics_tab")
   
@@ -506,13 +506,36 @@ observeEvent(
 
 # apply plot styling to...
 
+# diagnostic plot ...
+observeEvent(input$statistics_apply_style_diag, {
+  if (inherits(plots$statistics_diagplot, "list")) {
+    plots$statistics_diagplot[[1]] <- add_plot_styling(
+      input,
+      "statistics", 
+      plots$statistics_diagplot[[1]],
+      subplot = subplot
+    )
+  } else if (!is.null(plots$statistics_diagplot)) {
+    plots$statistics_diagplot <- add_plot_styling(
+      input,
+      "statistics", 
+      plots$statistics_diagplot,
+      subplot = subplot
+    )  
+  }
+})
+
 # ...first plot...
 observeEvent(input$statistics_apply_style_plot_1, {
   
   if(!is.null(objects$imdanova_res)){
     comps <- get_comparisons(objects$imdanova_res)
-  } else {
+    subplot <- nrow(comps) > 1
+  } else if(!is.null(objects$seqstats_res)) {
     comps <- get_comparisons(objects$seqstats_res)
+    subplot <- nrow(comps) > 1
+  } else {
+    subplot <-  F
   }
   
   if (inherits(plots$statistics_mainplot, "list")) {
@@ -520,15 +543,15 @@ observeEvent(input$statistics_apply_style_plot_1, {
       input,
       "statistics", 
       plots$statistics_mainplot[[1]],
-      subplot = nrow(comps) > 1
+      subplot = subplot
     )
  }
-  else {
+  else if(!is.null(plots$statistics_mainplot)){
     plots$statistics_mainplot <- add_plot_styling(
       input,
       "statistics", 
       plots$statistics_mainplot,
-      subplot = nrow(comps) > 1
+      subplot = subplot
     )
  }
 })
@@ -554,4 +577,9 @@ observeEvent(input$statistics_apply_style_plot_2, {
       subplot = nrow(comps) > 1
     )
   }
+})
+
+#'@details Clear plots when stats method is changed
+observeEvent(input$stats_select_method, {
+  plots$statistics_mainplot <- plots$statistics_diagplot <- NULL
 })
