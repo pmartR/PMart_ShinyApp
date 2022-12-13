@@ -48,6 +48,7 @@ ttext_ <- list(
   RNA_FILT_LIB_INFO = "Filter samples based on a minimum specified library size, defined as the sum of gene counts in a sample.",
   RNA_FILT_MIN_NONZERO_INFO = "Filter samples based on a specified minimum number of nonzero gene counts",
   ROLLUP_DISABLE_INFO = "Your data has already been rolled up to the protein level, if you would like to revert to the peptide level, go back to the filter page and re-apply your filters (you may need to re-do other steps that happened after the filter tab.)",
+  SEQDATA_PVAL_ADJUST = "Adjust p-values to control for multiple tests resulting from many biomolecules (as oppose to multiple comparisons within a single biomolecule).",
   TABDISABLE_NOT_PEP = "Tab disabled because either you are not analyzing peptide data or your object does not exist.",
   TABDISABLE_NOT_PEP_NO_EMETA = "Tab disabled because either you are not analyzing peptide data, you did not include a biomolecule information file, or your object does not exist",
   TABDISABLE_NOT_REF = "Tab disabled because reference normalization is only available for NMR data or labeled peptide data",

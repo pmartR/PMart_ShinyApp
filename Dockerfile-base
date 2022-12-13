@@ -24,7 +24,7 @@ USER root
 WORKDIR /srv/shiny-server/
 
 # pre-install renv
-ENV RENV_VERSION 0.15.5
+ENV RENV_VERSION 0.16.0
 RUN R -e "install.packages('remotes', repos = c(CRAN = 'https://cloud.r-project.org'))"
 RUN R -e "remotes::install_github('rstudio/renv@${RENV_VERSION}')"
 
@@ -43,7 +43,7 @@ RUN --mount=type=secret,id=gitlab_pat export GITLAB_PAT="$(cat /run/secrets/gitl
 # install commonly updated packages
 RUN --mount=type=secret,id=gitlab_pat export GITLAB_PAT="$(cat /run/secrets/gitlab_pat)" \
 && R -e "renv::install('gitlab@code.emsl.pnl.gov::multiomics-analyses/mapdataaccess-lib@72e880781d8f4cea7e9045c088020d04fce66d0d')" \
-&& R -e "options(repos=list('CRAN'='https://cran.rstudio.com', 'BioCsoft'='https://bioconductor.org/packages/3.13/bioc'));renv::install('pmartR/pmartR@2d922a3ef3709f5164660210591d15e69ee81f6c')"
+&& R -e "options(repos=list('CRAN'='https://cran.rstudio.com', 'BioCsoft'='https://bioconductor.org/packages/3.13/bioc'));renv::install('pmartR/pmartR@ae1188423735c32f19d1cdbacc0643da1a857530')"
 
 # Install python dependencies
 COPY requirements.txt .

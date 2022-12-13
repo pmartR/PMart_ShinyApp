@@ -164,8 +164,9 @@ test_that("App completes a basic workflow on peptide-level data", {
   app$set_inputs(top_page = "peptide_statistics_tab")
   
   # Peptide Statistics
+  app$wait_for_js("$('#peptide_stats_select_method')[0]")
   app$set_inputs(peptide_stats_select_method = "imdanova")
-  app$set_inputs(peptide_imdanova_comparison_method = "All pairwise comparisons")
+  app$set_inputs(peptide_comparison_method = "All pairwise comparisons")
   app$wait_for_value(input = "imd_comparison_button_1")
   app$click("imd_comparison_button_1")
   app$wait_for_value(input = "imd_comparison_button_2")
@@ -197,10 +198,11 @@ test_that("App completes a basic workflow on peptide-level data", {
   app$click("apply_rollup")
   app$wait_for_value(input = "rollup_goto_stats")
   app$click("rollup_goto_stats")
-  
+
   # Statistics
+  app$wait_for_js("$('#stats_select_method')[0]")
   app$set_inputs(stats_select_method = "imdanova")
-  app$set_inputs(imdanova_comparison_method = "All pairwise comparisons")
+  app$set_inputs(comparison_method = "All pairwise comparisons")
   app$wait_for_value(output = "pairwise_comp_display")
   app$click("imd_comparison_button_1")
   app$wait_for_value(input = "imd_comparison_button_2")

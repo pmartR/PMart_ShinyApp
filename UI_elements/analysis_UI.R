@@ -77,7 +77,7 @@ output$stats_select_method_UI <- renderUI({
         "EdgeR" = "edgeR"
       ),
       choicesOpt = list(
-        disabled = !seq_disables
+        disabled = c(F, F, T, T, T)
       ),
       multiple = TRUE,
       options = pickerOptions(maxOptions = 1)
@@ -180,7 +180,7 @@ output$seqdata_pval_adjust_UI <- renderUI({
 
   
   # to make things look nice
-  prepend <- "Multiple comparisons adjustment "
+  prepend <- "Multiple test adjustment "
   
   analysis <- switch(
     input$stats_select_method,
@@ -192,16 +192,22 @@ output$seqdata_pval_adjust_UI <- renderUI({
     "seqdata_pval_adjust",
     paste0(prepend, analysis),
     choices = c(
+      "Bonferroni-Holm" = "BH",
       "Holm" = "holm",
-      "Bonferroni" = "bonferroni",
       "Tukey" = "tukey",
       "Dunnet" = "dunnett",
       "None" = "none"
     ),
-    selected = character(0)
+    selected = "BH"
   )
   
-  return(seqdata_picker)
+  out_div = div(
+    class = "inline-wrapper-1",
+    seqdata_picker,
+    shinyBS::tipify(blueq, title = ttext_[["SEQDATA_PVAL_ADJUST"]])
+  )
+  
+  return(out_div)
 })
 
 

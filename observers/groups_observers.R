@@ -20,9 +20,9 @@ makegroup <- function(){
   
   cov_type = c(input$cv_type_1, input$cv_type_2)
   
-  pair_id = if(isTRUE(input$pair_id_col_2 == "None") | !isTruthy(input$pair_id_col)) NULL else input$pair_id_col
-  pair_group = if(isTRUE(input$pair_group_col_2 == "None") | !isTruthy(input$pair_group_col)) NULL else input$pair_group_col
-  pair_denom = if(isTRUE(input$pair_denom_col_2 == "None") | !isTruthy(input$pair_denom_col)) NULL else input$pair_denom_col
+  pair_id = if(isTRUE(input$pair_id_col == "None") | !isTruthy(input$pair_id_col)) NULL else input$pair_id_col
+  pair_group = if(isTRUE(input$pair_group_col == "None") | !isTruthy(input$pair_group_col)) NULL else input$pair_group_col
+  pair_denom = if(isTRUE(input$pair_denom_col == "None") | !isTruthy(input$pair_denom_col)) NULL else input$pair_denom_col
   
   ## To process the data, we will replace fdata and fdata cname,
   ## call group_designation, and apply custom sampnames if specified.
