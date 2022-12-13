@@ -48,7 +48,7 @@ output$stats_select_method_UI <- renderUI({
   
   seq_disables <- c(F, T, F, F, F)
   
-  if(input$datatype == "seq"){
+  if(inherits(objects$omicsData, "seqData")){
     pickerInput(
       "stats_select_method",
       "Select statistics method:",

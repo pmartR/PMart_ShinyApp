@@ -190,7 +190,7 @@ list(
     
     if (MAP_ACTIVE) {
       fname_tmp = MapConnect$Project$Data$e_meta_filename
-      fname_tmp = if(is.null(fname_tmp)) {
+      fname_tmp = if(!isTruthy(fname_tmp)) {
         "No e_meta file found - indicate no e_meta."
       } else {
         fname_tmp %>% 
