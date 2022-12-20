@@ -145,7 +145,7 @@ apply_filt <- function(){
       }
 
       # __SHINYTEST__
-      if(options("shiny.testmode") == TRUE) {
+      if(isTRUE(getOption("shiny.testmode"))) {
         .tmp = tmp
         .tmp2 = tmp2
         .omicsData.prefilt = objects$omicsData

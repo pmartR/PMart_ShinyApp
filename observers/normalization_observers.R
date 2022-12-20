@@ -245,7 +245,7 @@ observeEvent(c(input$apply_normalization, input$apply_normalization_modal), {
       }
       
       # __SHINYTEST__
-      if(options("shiny.testmode") == TRUE) {
+      if(isTRUE(getOption("shiny.testmode"))) {
         .omicsData_prenorm <- objects$omicsData
         exportTestValues(
           omicsData_prenorm = .omicsData_prenorm 
@@ -446,6 +446,10 @@ observeEvent(input$inspect_norm, {
       proceed_msg <- NULL
     }
 
+    combine_msg <- if (two_lipids()) {
+      tags$b(tags$h4("Data will be combined into a single object for subsequent tabs", style="color:deepskyblue"))
+    } else NULL
+
     # display the modal which will warns of low p-values and gives option to apply normalization
     showModal(
       modalDialog(
@@ -459,6 +463,7 @@ observeEvent(input$inspect_norm, {
           choices = c("Before and after normalization" = "ba", "Boxplots of normalization factors by group" = "fac")
         ),
         uiOutput("norm_modal_mainplot"),
+        combine_msg,
         footer = tagList(
           div(
             style = "float:left",

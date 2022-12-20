@@ -117,7 +117,7 @@ shinyServer(function(session, input, output) {
   # set options("shiny.testmode" = T) to get a developer button
   output$developer_buttons <- renderUI({
 
-   if (isTRUE(getOption("shiny.testmode"))) {
+   if (Sys.getenv("SHINY_DEBUG") == 1) {
       div(
         style = "position:absolute;z-index:9999;bottom:10px;left:10px;",
         actionButton("Browser", "whats wrong!?!?", style = "background:deepskyblue")

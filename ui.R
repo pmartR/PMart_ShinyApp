@@ -84,7 +84,7 @@ ui <- function(request) {
         )),
         # Add UI if MAP is enabled
         if (MAP_ACTIVE) {
-          div(id = "js_midpoint", style = "vertical-align:top",
+          div(id = "js_midpoint", style = "vertical-align:top", class="tooltip-wrapper",
               bsButton("exportMid", "Save and Export Progress", style = "success")
           )
         } else NULL

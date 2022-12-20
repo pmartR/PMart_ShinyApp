@@ -242,7 +242,7 @@ observe({
     cond_idcol_edata <- isTRUE(input$id_col %in% colnames(e_data()))
     cond_idcol_emeta <- isTRUE(input$id_col %in% colnames(revals$e_meta)) | is.null(revals$e_meta)
     cond_nasymbol <- !is.null(input$na_symbol)
-    cond_shared_ids <- all(e_data()[[input$id_col]] %in% revals$e_meta[[input$id_col]]) 
+    cond_shared_ids <- all(e_data()[[input$id_col]] %in% revals$e_meta[[input$id_col]]) | (MAP_ACTIVE & is.null(revals$e_meta))
     cond_emeta <- all(cond_files, cond_shared_ids, cond_idcol_emeta) | isTruthy(!as.logical(input$emeta_yn))
     
     cond <- all(cond_idcol_edata, cond_nasymbol, cond_emeta)
