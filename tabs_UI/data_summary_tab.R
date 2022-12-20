@@ -5,8 +5,14 @@ data_summary_UI <- function() {
     fluidRow(
       column(
         4,
-        radioGroupButtons("which_qc_plot", "Choose a Plot Type:",
-          choices = c("Boxplots" = "boxplots", "Missing Values Barplots" = "bar", "Missing Values Scatterplots" = "scatter")
+        div(
+          id = "which_qc_plot_wrapper",
+          class = "tooltip-wrapper",
+          radioGroupButtons("which_qc_plot", "Choose a Plot Type:",
+            choices = c("Boxplots" = "boxplots", 
+                        "Missing Values Barplots" = "bar", 
+                        "Missing Values Scatterplots" = "scatter")
+          )
         ),
         bsCollapse(
           id = "qc_collapse", multiple = TRUE, open = c("qc_plot_params"),
@@ -15,16 +21,16 @@ data_summary_UI <- function() {
             tagList(
               div("Order Samples By:", style = "font-weight:bold"),
               fluidRow(
-                column(6, uiOutput("qc_order_by")),
-                column(6, uiOutput("qc_order_by_2"))
+                column(6, uiOutput("qc_order_by_UI")),
+                column(6, uiOutput("qc_order_by_2_UI"))
               )
             ),
             # color selection
             tagList(
               div("Color Samples By:", style = "font-weight:bold"),
               fluidRow(
-                column(6, uiOutput("qc_color_by")),
-                column(6, uiOutput("qc_color_by_2"))
+                column(6, uiOutput("qc_color_by_UI")),
+                column(6, uiOutput("qc_color_by_2_UI"))
               )
             ),
             div(

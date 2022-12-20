@@ -42,20 +42,74 @@ list(
     #' TODO: collect all samples and perform differences at the end?
     rmd_removed_samps <- if (any(grepl("rmdfilt", names(objects$filters)))) {
       tmp_idx = which(grepl("rmdfilt", names(objects$filters)))
-      attr(objects$filters[[tmp_idx]], "sample_names")[which(objects$filters[[tmp_idx]]$pvalue < input$pvalue_threshold)]
+      
+      collect_samps_rmv <- NULL
+      
+      # loop for two lipids case
+      for (idx in tmp_idx) {
+        collect_samps_rmv <- c(collect_samps_rmv, attr(objects$filters[[idx]], "sample_names")[which(objects$filters[[idx]]$pvalue < input$pvalue_threshold)])
+      }
+      
+      unique(collect_samps_rmv)
+      
+    } else NULL
+    
+    rnafilt_libsize_removed_samps <- if(any(grepl("rnafilt_libsize", names(objects$filters)))) {
+      size_library <- if(isTruthy(input$rnafilt_min_lib_size)) input$rnafilt_min_lib_size else NULL
+      tmp_idx = which(grepl("rnafilt_libsize", names(objects$filters))) 
+      tmp_summ <- summary(objects$filters[[tmp_idx]], size_library=size_library)$samples_filtered 
+    } else NULL
+    
+    rnafilt_min_nonzero_removed_samps <- if(any(grepl("rnafilt_min_nonzero", names(objects$filters)))) {
+      min_nonzero <- if(isTruthy(input$rnafilt_min_nonzero)) input$rnafilt_min_nonzero else NULL
+      tmp_idx = which(grepl("rnafilt_min_nonzero", names(objects$filters))) 
+      tmp_summ <- summary(objects$filters[[tmp_idx]], min_nonzero=min_nonzero)$samples_filtered 
     } else NULL
     
     # text for first filter object
     for (i in 1:length(objects$filters)) {
-      # rmd filter
-      if (grepl("rmdfilt", names(objects$filters)[i])) {
+      # total count filter
+      if (grepl("^tcfilt$", names(objects$filters)[i])) {
+        tcfilt_summ <- summary(objects$filters[[i]], min_count = input$min_num_trans)
         divs[[i]] <- tagList(
-          tags$b("rMd Filter:"),
-          tags$p(sprintf("p-value threshold: %s", input$pvalue_threshold)),
-          tags$p(sprintf("Removed Samples: %s", ifelse(length(rmd_removed_samps > 0), paste(rmd_removed_samps, collapse = "&nbsp|&nbsp"), "None"))),
+          tags$b("Total Count Filter:"),
+          tags$p(
+            sprintf("Minimum Count: %s", input$min_num_trans),
+            sprintf("Transcripts Removed: %s", tcfilt_summ$filtered_biomolecules)
+          ),
           hr()
         )
       }
+      # rna filter (library size) 
+      else if (grepl("rnafilt_libsize", names(objects$filters)[i])) {
+        divs[[i]] <- tagList(
+          tags$b("RNA Filter:"),
+          tags$p(sprintf("Library Size Threshold: %s", input$rnafilt_min_libsize)),
+          tags$p(sprintf("Removed Samples: %s", ifelse(length(rnafilt_libsize_removed_samps > 0), paste(rnafilt_libsize_removed_samps, collapse = " | "), "None"))),
+          hr()
+        )
+      }
+      
+      # rna filter (min nonzero) 
+      else if (grepl("rnafilt_min_nonzero", names(objects$filters)[i])) {
+        divs[[i]] <- tagList(
+          tags$b("RNA Filter:"),
+          tags$p(sprintf("Minimum Nonzero Count Threshold: %s", input$rnafilt_min_nonzero)),
+          tags$p(sprintf("Removed Samples: %s", ifelse(length(rnafilt_min_nonzero_removed_samps > 0), paste(rnafilt_min_nonzero_removed_samps, collapse = " | "), "None"))),
+          hr()
+        )
+      }
+      
+      # rmd filter
+      else if (grepl("rmdfilt", names(objects$filters)[i])) {
+        divs[[i]] <- tagList(
+          tags$b("rMd Filter:"),
+          tags$p(sprintf("p-value threshold: %s", input$pvalue_threshold)),
+          tags$p(sprintf("Removed Samples: %s", ifelse(length(rmd_removed_samps > 0), paste(rmd_removed_samps, collapse = " | "), "None"))),
+          hr()
+        )
+      }
+      
       # custom filter
       else if (grepl("customfilt", names(objects$filters)[i])) {
         # get samples and check whether we are removing or keeping
@@ -113,6 +167,7 @@ list(
           e_meta_remove_div,
           hr()
         )
+        
       # cv filter
       } else if (grepl("cvfilt", names(objects$filters)[i])) {
         n_removed <- sum(objects$filters[[i]]$CV > input$cv_threshold, na.rm=T)
@@ -121,6 +176,7 @@ list(
           tags$p("CV threshold: ", input$cv_threshold, "| Biomolecules removed: ", n_removed),
           hr()
         )
+        
       # imd filter
       } else if (grepl("imdanovafilt", names(objects$filters)[i])) {
         
@@ -140,6 +196,7 @@ list(
           hr()
         )
       }
+      
       # molecule filter
       else if (grepl("molfilt", names(objects$filters)[i])) {
         foo <- summary(objects$filters[[i]], min_num = input$mol_min_num)
@@ -152,6 +209,7 @@ list(
           hr()
         )
       }
+      
       # proteomics filter
       else if (grepl("profilt", names(objects$filters)[i])) {
         foo <- summary(objects$filters[[i]], min_num_peps = input$min_num_peps, degen_peps = input$degen_peps)
@@ -163,10 +221,17 @@ list(
         )
       }
     }
-
+    
+    filtered_disclaimer <- if(length(attr(objects$omicsData, "filters")) > 0) {
+      h3(tags$b("Filters have already been applied, these filters will be applied in addition to the existing filters.", style = "color:deepskyblue"))
+    } else NULL
+    
     # Display two summary sections if there are two omicsData objects
     if (length(obj2_inds) > 0) {
       tagList(
+        h3(tags$b("Samples removed in one object will be removed in the other as well.", style = "color:deepskyblue")),
+        filtered_disclaimer,
+        hr(),
         h3(tags$b("Filters to be applied to Object 1:  ")),
         hr(),
         divs[obj1_inds],
@@ -177,6 +242,7 @@ list(
     }
     else {
       tagList(
+        filtered_disclaimer,
         h3(tags$b("Filters to be applied:  ")),
         divs
       )
@@ -358,7 +424,7 @@ list(
   }),
   
   # Conditional UI for rmd filter, depends on the sample names in the file(s)
-  output$rmdfilt_plot_type <- renderUI({
+  output$rmdfilt_plot_type_UI <- renderUI({
     req(!is.null(objects$omicsData))
     if (input$rmdfilt_plot_type == "all") {
       NULL
@@ -408,12 +474,12 @@ list(
   #'@details Picker inputs for selecting which molecules to remove using e_data
   #'custom filter.
   output$edata_customfilt_pickers<- renderUI({
-    req(!is.null(objects$uploaded_omicsData))
-    mols1 = objects$uploaded_omicsData$e_data[,get_edata_cname(objects$uploaded_omicsData)]
+    req(!is.null(objects$omicsData))
+    mols1 = objects$omicsData$e_data[,get_edata_cname(objects$omicsData)]
     
     if(two_lipids()){
-      validate(need(!is.null(objects$uploaded_omicsData_2), "No second object"))
-      mols2 = objects$uploaded_omicsData_2$e_data[,get_edata_cname(objects$uploaded_omicsData_2)]
+      validate(need(!is.null(objects$omicsData_2), "No second object"))
+      mols2 = objects$omicsData_2$e_data[,get_edata_cname(objects$omicsData_2)]
       
       tagList(
         h5("Filter by data file identifiers:"),
@@ -450,13 +516,13 @@ list(
   
   #'@details Pickers for which e-meta columns to use when filtering by e-meta
   output$emeta_customfilt_which_col <- renderUI({
-    req(objects$uploaded_omicsData$e_meta)
+    req(objects$omicsData$e_meta)
     
-    choices1 = colnames(objects$uploaded_omicsData$e_meta)
+    choices1 = colnames(objects$omicsData$e_meta)
     
     if(two_lipids()) {
-      validate(need(!is.null(objects$uploaded_omicsData_2), "No second object"))
-      choices2 = colnames(objects$uploaded_omicsData_2)
+      validate(need(!is.null(objects$omicsData_2), "No second object"))
+      choices2 = colnames(objects$omicsData_2)
       
       tagList(
         tags$p("Filter by which columns:"),
@@ -486,19 +552,19 @@ list(
   #'custom filter.
   output$emeta_customfilt_pickers<- renderUI({
     validate(
-      need(objects$uploaded_omicsData$e_meta, "No biomolecule information found."),
+      need(objects$omicsData$e_meta, "No biomolecule information found."),
       need(input$emeta_customfilt_which_col_1, "Select which column to use.")
     )
     
-    choices1 <- objects$uploaded_omicsData$e_meta %>% 
+    choices1 <- objects$omicsData$e_meta %>% 
       purrr::pluck(input$emeta_customfilt_which_col_1) %>% unique() %>% sort()
     
     if(two_lipids()){
       validate(
-        need(!is.null(objects$uploaded_omicsData_2$e_meta), "No biomolecule information for second data object."),
+        need(!is.null(objects$omicsData_2$e_meta), "No biomolecule information for second data object."),
         need(input$emeta_customfilt_which_col_2, "Select second identifier.")
       )
-      choices2 <- objects$uploaded_omicsData_2$e_meta %>% 
+      choices2 <- objects$omicsData_2$e_meta %>% 
         purrr::pluck(input$emeta_customfilt_which_col_2) %>% unique() %>% sort()
       
       tagList(
@@ -533,36 +599,42 @@ list(
   }),
   
   # Conditional UI for proteomics filter, invisible if the object is not pepData with protein column
-  output$profilt_UI <- renderUI({
-    if (class(objects$omicsData) == "pepData") {
-      tagList(
-        fluidRow(
-          column(
-            6,
-            actionButton("add_profilt",
-              label = div("add/remove proteomics filter", hidden(div(id = "profilt_exists", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))),
-              width = "100%"
-            ),
-            actionButton("plot_profilt", "Plot this filter", width = "100%"),
-            actionButton("remove_profilt", "Remove proteomics filter", width = "100%")
-          ),
-          column(
-            6,
-            numericInput("min_num_peps", "Minimum number of peptides mapped to each protein:", 2, step = 1),
-            checkboxInput("degen_peps", "Remove Degenerate Peptides?", TRUE)
-          )
-        ),
-        hr()
-      )
-    }
-    else {
-      NULL
-    }
-  }),
+  # output$profilt_UI <- renderUI({
+  #   if (class(objects$omicsData) == "pepData") {
+  #     tagList(
+  #       fluidRow(
+  #         column(
+  #           6,
+  #           actionButton("add_profilt",
+  #             label = div("add/remove proteomics filter", hidden(div(id = "profilt_exists", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))),
+  #             width = "100%"
+  #           ),
+  #           actionButton("plot_profilt", "Plot this filter", width = "100%"),
+  #           actionButton("remove_profilt", "Remove proteomics filter", width = "100%")
+  #         ),
+  #         column(
+  #           6,
+  #           numericInput("min_num_peps", "Minimum number of peptides mapped to each protein:", 2, step = 1),
+  #           checkboxInput("degen_peps", "Remove Degenerate Peptides?", TRUE)
+  #         )
+  #       ),
+  #       hr()
+  #     )
+  #   }
+  #   else {
+  #     NULL
+  #   }
+  # }),
 
   # inputs for axes labels and sizes
   output$filter_plot_options <- renderUI({
-    style_UI("filter")
+    # Placeholder for conditional plot options based on filter type
+    if(FALSE) {
+      extra_UI <- NULL
+    } else {
+      extra_UI <- NULL
+    }
+    style_UI("filter", extra_UI)
   }),
 
   # apply filter plot style options

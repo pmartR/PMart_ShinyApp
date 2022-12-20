@@ -23,13 +23,16 @@ makeobject <- function(use_iso = T){
   fdata <- f_data_upload()
   data_scale <- input$data_scale
   transform <- input$transform
-  norm_info <- as.logical(as.integer(input$normalized_yn))
+  is_normalized <- as.logical(as.integer(input$normalized_yn))
+  if(!isTruthy(is_normalized)) is_normalized <- FALSE
+  
   na_replace <- input$na_symbol
   
   # store appropriate function call for data type
   fn_list <- list("lip" = "as.lipidData", "pep" = "as.pepData", 
                   "iso" = "as.isobaricpepData", "pro" = "as.proData", 
-                  "metab" = "as.metabData", "nmr" = "as.nmrData")
+                  "metab" = "as.metabData", "nmr" = "as.nmrData",
+                  "seq" = "as.seqData")
   
   if(selection == "metab") selection <- metab_type
   if(selection == "pep" && use_iso) selection <- pep_type
@@ -40,13 +43,15 @@ makeobject <- function(use_iso = T){
   # create first object
   objects$uploaded_omicsData <- objects$omicsData <- tryCatch(
     {
-      object_fn(
+      res <- object_fn(
         e_data = edata, e_meta = emeta, f_data = fdata,
         edata_cname = edata_cname, emeta_cname = emeta_cname, fdata_cname = "SampleId",
-        data_scale = data_scale, is_normalized = norm_info,
+        data_scale = data_scale, is_normalized = is_normalized,
         check.names = F
-      ) %>%
-        edata_replace(na_replace, NA)
+      )
+      
+      if(selection != "seq") res <- res %>% edata_replace(na_replace, NA)
+      res
     },
     error = function(e) {
       msg <- paste0("Something went wrong processing your omicsData object \n System error:  ", e)
@@ -63,7 +68,7 @@ makeobject <- function(use_iso = T){
           e_data = edata2, e_meta = emeta2, f_data = fdata2,
           edata_cname = edata_cname, emeta_cname = emeta_cname2,
           fdata_cname = "SampleId",
-          data_scale = data_scale, is_normalized = norm_info
+          data_scale = data_scale, is_normalized = is_normalized
         ) %>%
           edata_replace(na_replace, NA)
       },
@@ -79,7 +84,9 @@ makeobject <- function(use_iso = T){
   }
   
   # transform data objects
-  if (!is.null(objects$uploaded_omicsData) & transform != "Select one") {
+  if (!is.null(objects$uploaded_omicsData) && 
+      length(transform) > 0 &&
+      transform != "Select one") {
     if (attr(objects$uploaded_omicsData, "data_info")$data_scale != transform) {
       objects$omicsData <- objects$uploaded_omicsData <- tryCatch(
         {
@@ -94,7 +101,9 @@ makeobject <- function(use_iso = T){
     }
   }
   
-  if (!is.null(objects$uploaded_omicsData_2) & transform != "Select one") {
+  if (!is.null(objects$uploaded_omicsData_2) &&
+      length(transform) > 0 && 
+      transform != "Select one") {
     if (attr(objects$uploaded_omicsData_2, "data_info")$data_scale != transform) {
       objects$omicsData_2 <- objects$uploaded_omicsData_2 <- tryCatch(
         {
@@ -177,8 +186,6 @@ observe({
 #'@details Check that everything in the biomolecule information section is ok.
 #' If it is, then collapse the sidebar, show a checkmark, and activate the create
 #' omicsData button.
-#' TODO:  store conditions in a named list in revals$boolean$upload$emeta_ok,
-#' or break this up a bit into multiple conditions.
 observe({
   # 2 file lipid conditions:
   # two emeta files uploaded
@@ -187,12 +194,10 @@ observe({
   if (two_lipids()) {
     req(!is.null(input$id_col) & !is.null(input$id_col_2))
     cond_files <- (!is.null(input$file_emeta) & !is.null(input$file_emeta_2))
-    cond_idcol_edata <- all(sapply(
-      list(e_data(), e_data_2()),
-      function(df) {
-        isTRUE(input$id_col %in% colnames(df))
-      }
-    ))
+    cond_idcol_edata <- all(
+      input$id_col %in% colnames(e_data()),
+      input$id_col_2 %in% colnames(e_data_2())
+    )
     cond_idcol_emeta <- all(sapply(
       list(revals$e_meta, revals$e_meta_2),
       function(df) {
@@ -237,7 +242,7 @@ observe({
     cond_idcol_edata <- isTRUE(input$id_col %in% colnames(e_data()))
     cond_idcol_emeta <- isTRUE(input$id_col %in% colnames(revals$e_meta)) | is.null(revals$e_meta)
     cond_nasymbol <- !is.null(input$na_symbol)
-    cond_shared_ids <- all(e_data()[[input$id_col]] %in% revals$e_meta[[input$id_col]]) 
+    cond_shared_ids <- all(e_data()[[input$id_col]] %in% revals$e_meta[[input$id_col]]) | (MAP_ACTIVE & is.null(revals$e_meta))
     cond_emeta <- all(cond_files, cond_shared_ids, cond_idcol_emeta) | isTruthy(!as.logical(input$emeta_yn))
     
     cond <- all(cond_idcol_edata, cond_nasymbol, cond_emeta)
@@ -255,7 +260,6 @@ observe({
   toggle("ok_metadata", condition = cond)
   
   revals$boolean$upload$emeta_ok <- cond
-  # toggleState("makeobject", condition = cond)
 })
 
 #'@details Collect all values that indicate all required inputs are correct and
@@ -270,8 +274,43 @@ observe({
                 length(unlist(revals$boolean$upload)) > 0)
 })
 
+#'@details Disable create object if the sample names of the two edatas are not 
+#'the same for two lipids 
+#'TODO:  Make this a reactive
+observe({
+  isolate({
+    #revals$boolean$upload$lipids_sampnames_setequal <- NULL
+    #revals$warnings_upload$samps_not_equal <- NULL
+    
+    revals$boolean$upload$lipids_ids_unique <- NULL
+    revals$warnings_upload$edata_not_unique <- NULL
+  })
+  
+  req(two_lipids())
+  req(!is.null(input$id_col) & !is.null(input$id_col_2))
+  
+  # if(!lipids_samps_eq()) {
+  #   isolate({
+  #     revals$warnings_upload$samps_not_equal <- "<p style = 'color:red'>Your data files for both lipids must have the same column names.</p>"
+  #   })
+  # }
+  # isolate({
+  #   revals$boolean$upload$lipids_sampnames_setequal <- lipids_samps_eq()
+  # })
+  
+  if(!lipids_edata_unq()) {
+    isolate({
+      revals$warnings_upload$edata_not_unique <- "<p style = 'color:red'>There were duplicate entries in the identifier columns of your lipid datasets.</p>"
+    })
+  }
+  isolate({
+    revals$boolean$upload$lipids_ids_unique <- lipids_edata_unq()
+  })
+})
+
 # make data and display success message on successful objects$omicsData object creation
 observeEvent(input$makeobject, {
+
   makeobject(use_iso = F)
 
   # store warning message if data did not successfully create
@@ -325,12 +364,6 @@ observe({
   cond_file2exists <- !is.null(e_data_2()) | !is.null(revals$e_meta_2)
 
   toggleElement("toggle_table", condition = two_lipids() & cond_file2exists)
-})
-
-observe({
-  cond_fdata2exists <- !is.null(f_data_2()) && nrow(f_data_2()) > 0
-
-  toggleElement("toggle_fdata", condition = two_lipids() & cond_fdata2exists)
 })
 
 #'@details store emeta info in an intermediate container that can be NULLED

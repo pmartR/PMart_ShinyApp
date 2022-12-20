@@ -24,16 +24,8 @@ f_data <- reactive({
 
 })
 
-f_data_2 <- reactive({
-  # Error handling: Need file_emeta to be valid
-  req(input$file_fdata_2$datapath)
-  # Load file
-  filename <- input$file_fdata_2$datapath
-  read.csv(filename, stringsAsFactors = FALSE, check.names = F)
-})
-
 main_effects <- reactive({
-  main_effects <- c(input$gcol1, input$gcol2)[which(c(input$gcol1, input$gcol2) != "None")]
+  main_effects <- input$gcol1[which(input$gcol1 != "None")]
   if (length(main_effects) == 0) {
     return(NULL)
   } else {
@@ -42,29 +34,11 @@ main_effects <- reactive({
 })
 
 covariates <- reactive({
-  covariates <- c(input$cvcol1, input$cvcol2)[which(c(input$cvcol1, input$cvcol2) != "None")]
+  covariates <- input$cvcol1[which(input$cvcol1 != "None")]
   if (length(covariates) == 0) {
     return(NULL)
   } else {
     return(covariates)
-  }
-})
-
-main_effects_2 <- reactive({
-  main_effects_2 <- c(input$gcol1_2, input$gcol2_2)[which(c(input$gcol1_2, input$gcol2_2) != "None")]
-  if (length(main_effects_2) == 0) {
-    return(NULL)
-  } else {
-    return(main_effects_2)
-  }
-})
-
-covariates_2 <- reactive({
-  covariates_2 <- c(input$cvcol1_2, input$cvcol2_2)[which(c(input$cvcol1_2, input$cvcol2_2) != "None")]
-  if (length(covariates_2) == 0) {
-    return(NULL)
-  } else {
-    return(covariates_2)
   }
 })
 
@@ -78,39 +52,16 @@ covariates_2 <- reactive({
 pairs_complete <- reactive({
   indicators <- list()
   
-  if (two_lipids()) {
-    cond_selected1 <- all(
-        isTRUE(input$pair_id_col %in% colnames(f_data())), 
-        isTruthy(input$pair_id_col != "None") 
-    )
-    cond_selected2 <- all(
-        isTRUE(input$pair_id_col_2 %in% colnames(f_data_2())),
-        isTruthy(input$pair_id_col_2 != "None") 
-    )
-    
-    cond_selected = any(cond_selected1, cond_selected2)
-    
-    cond_pairs <- all(
-      cond_selected1,
-      cond_selected2,
-      isTruthy(input$pair_group_col != "None"),
-      isTruthy(input$pair_denom_col != "None"),
-      isTruthy(input$pair_group_col_2 != "None"),
-      isTruthy(input$pair_denom_col_2 != "None")
-    )
-  }
-  else {
-    cond_selected <- all(
-      isTRUE(input$pair_id_col %in% colnames(f_data())),
-      isTruthy(input$pair_id_col != "None")
-    )
-    
-    cond_pairs <- all(
-      cond_selected,
-      isTruthy(input$pair_group_col != "None"), 
-      isTruthy(input$pair_denom_col != "None")
-    )
-  }
+  cond_selected <- all(
+    isTRUE(input$pair_id_col %in% colnames(f_data())),
+    isTruthy(input$pair_id_col != "None")
+  )
+  
+  cond_pairs <- all(
+    cond_selected,
+    isTruthy(input$pair_group_col != "None"), 
+    isTruthy(input$pair_denom_col != "None")
+  )
   
   indicators[["selected"]] = cond_selected
   indicators[["valid"]] = cond_pairs

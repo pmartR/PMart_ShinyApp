@@ -12,6 +12,8 @@ observe({
   
   cond_ref <- (is_pepdata && input$labeled_yn == "iso") || inherits(objects$omicsData, "nmrData")
   
+  cond_seq <- inherits(objects$omicsData, "seqData") || is.null(objects$omicsData)
+  
   toggleTooltip(
     session, 
     tooltip_text = ttext_[['TABDISABLE_NOT_PEP']], 
@@ -33,9 +35,17 @@ observe({
     selector = ".nav li a[data-value=reference_tab]"
   )
   
+  toggleTooltip(
+    session, 
+    tooltip_text = ttext_[['TABDISABLE_SEQDATA']], 
+    condition = cond_seq,
+    selector = ".nav li a[data-value=normalization_tab]"
+  )
+  
   toggleTab("peptide_statistics_tab", condition = is_pepdata)
   toggleTab("protein_rollup_tab", condition = !cond)
   toggleTab("reference_tab", condition = cond_ref)
+  toggleTab("normalization_tab", condition = !cond_seq)
   
 
   #' Disable regular statistics if there is not e_meta, since we expect this tab

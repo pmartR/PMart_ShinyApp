@@ -26,7 +26,8 @@ upload_UI <- function() {
                   "Peptides" = "pep",
                   "Proteins" = "pro",
                   "Metabolites" = "metab",
-                  "Lipids" = "lip"
+                  "Lipids" = "lip",
+                  "Transcripts" = "seq"
                 )
               ),
 
@@ -73,17 +74,20 @@ upload_UI <- function() {
             hidden(div(
               id = "js_datascale",
               uiOutput("datascale_UI"),
-              uiOutput("transform")
+              uiOutput("transform_UI")
             )),
-            hidden(div(
-              class = "inline-wrapper-1",
-              id = "js_na_symbol",
-              textInput("na_symbol", "What value denotes missing data?", value = NA),
-              tipify(
-                div(style="color:deepskyblue", icon("question-sign", lib = "glyphicon")),
-                title = ttext_[["MISSING_DATA_REPLACE"]]
-              )
-            )),
+            
+            conditionalPanel(
+              "input.datatype != 'seq'",
+              hidden(div(
+                class = "inline-wrapper-1",
+                id = "js_na_symbol",
+                textInput("na_symbol", "What value denotes missing data?", value = NA),
+                tipify(
+                  div(style="color:deepskyblue", icon("question-sign", lib = "glyphicon")),
+                  title = ttext_[["MISSING_DATA_REPLACE"]]
+                )
+              ))),
           
             # conditionalPanel(
             #   "input.labeled_yn == 'pep'",
@@ -100,7 +104,7 @@ upload_UI <- function() {
               hidden(div(id = "ok_metadata", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
             ),
             value = "meta_collapse",
-            uiOutput("emeta_yn"),
+            uiOutput("emeta_yn_UI"),
             hidden(div(
               id = "js_emeta_UI",
               uiOutput("emeta_UI")
