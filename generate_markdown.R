@@ -1,6 +1,8 @@
 # This script contains the server portion of the "generate report" tab. 
 
 list(
+  
+  
 
   # Download the markdown
   output$ReportDownload <- downloadHandler(
@@ -34,22 +36,24 @@ list(
         if (class(objects$omicsData) != "proData") {
           
           # Create a temporary directory and copy the report there
-          report <- file.path(tempdir(), "Peptide_Template.Rmd")
-          file.copy(file.path("markdowns", "Peptide_Template.Rmd"), report, overwrite = TRUE)
+          report <- file.path(tempdir(), "Abundance_Template.Rmd")
+          file.copy(file.path("www", "markdowns", "Abundance_Template.Rmd"), report, overwrite = TRUE)
           
           # Set up specific parameters needed by the peptide data markdown
           params <- list(titleName = input$ReportName,
-                         pepData = objects$omicsData,
-                         pepStats = objects$imdanova_res,
-                         pmart_inputs = reactiveValuesToList(input),
-                         spans_results = objects$spans_res)
+                         omicData = objects$omicsData,
+                         omicStats = objects$imdanova_res,
+                         omicDataRoll = NULL,
+                         omicStatsRoll = NULL,
+                         spans_results = objects$spans_res,
+                         pmart_inputs = reactiveValuesToList(input))
           
         } else {
       
           message("Using the roll-up template")
           
           report <- file.path(tempdir(), "Rollup_Template.Rmd")
-          file.copy(file.path("markdowns", "Rollup_Template.Rmd"), report, overwrite = TRUE)
+          file.copy(file.path("www", "markdowns", "Rollup_Template.Rmd"), report, overwrite = TRUE)
           
           # Set up specific parameters need by the rollup data markdown
           params <- list(titleName = input$ReportName,
@@ -67,7 +71,7 @@ list(
         
         # Create a temporary directory and copy the report there
         report <- file.path(tempdir(), "Protein_Template.Rmd")
-        file.copy(file.path("markdowns", "Protein_Template.Rmd"), report, overwrite = TRUE)
+        file.copy(file.path("www", "markdowns", "Protein_Template.Rmd"), report, overwrite = TRUE)
         
         # Set up specific parameters needed by the protein data markdown
         params <- list(titleName = input$ReportName,
@@ -83,7 +87,7 @@ list(
         
         # Create a temporary directory and copy the report there 
         report <- file.path(tempdir(), "Metabolite_Template.Rmd")
-        file.copy(file.path("markdowns", "Metabolite_Template.Rmd"), report, overwrite = TRUE)
+        file.copy(file.path("www", "markdowns", "Metabolite_Template.Rmd"), report, overwrite = TRUE)
         
         # Set up specific parameters needed by the metabolite data markdown
         params <- list(titleName = input$ReportName,
@@ -98,7 +102,7 @@ list(
         
         # Create a temporary directory and copy the report there 
         report <- file.path(tempdir(), "Lipid_Template.Rmd")
-        file.copy(file.path("markdowns", "Lipid_Template.Rmd"), report, overwrite = TRUE)
+        file.copy(file.path("www", "markdowns", "Lipid_Template.Rmd"), report, overwrite = TRUE)
         
         # Set up specific parameters needed by the metabolite data markdown
         params <- list(titleName = input$ReportName,
