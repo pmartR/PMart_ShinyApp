@@ -224,8 +224,7 @@ observeEvent(c(input$apply_normalization, input$apply_normalization_modal), {
   removeModal()
 
   show("ok_normalization")
-  updateCollapse(session, "normalization_sidebar", close = "normalize_global_sidebar")
-
+  
   tryCatch(
     {
       # construct parameters
@@ -244,25 +243,62 @@ observeEvent(c(input$apply_normalization, input$apply_normalization_modal), {
       else if (input$subset_fn == "ppp_rip") {
         params <- list(ppp_rip = list(ppp = input$ppp, rip = input$rip))
       }
-
-      objects$omicsData <- normalize_global(objects$omicsData,
+      
+      # __SHINYTEST__
+      if(isTRUE(getOption("shiny.testmode"))) {
+        .omicsData_prenorm <- objects$omicsData
+        exportTestValues(
+          omicsData_prenorm = .omicsData_prenorm 
+        ) 
+      }
+      
+      .tmp_obj <- normalize_global(objects$omicsData,
         subset_fn = input$subset_fn,
         norm_fn = input$norm_fn,
         backtransform = as.logical(input$backtransform),
         params = params,
         apply_norm = TRUE
       )
-
+      
       if (!is.null(objects$omicsData_2)) {
-        objects$omicsData_2 <- normalize_global(objects$omicsData_2,
+        .tmp_obj_2 <- normalize_global(objects$omicsData_2,
           subset_fn = input$subset_fn,
           norm_fn = input$norm_fn,
           backtransform = as.logical(input$backtransform),
           params = params,
           apply_norm = TRUE
         )
+        
+        # set the fdata_cnames to be the same to allow combination
+        sample_idx = match(colnames(dplyr::select(.tmp_obj_2$e_data, -one_of(get_edata_cname(.tmp_obj_2)))), .tmp_obj_2$f_data[,get_fdata_cname(.tmp_obj_2)])
+        colnames(.tmp_obj_2$e_data)[-which(colnames(.tmp_obj_2$e_data) == get_edata_cname(.tmp_obj_2))] <- .tmp_obj_2$f_data[sample_idx, get_fdata_cname(.tmp_obj)]
+        
+        group_sample_idx = match(
+          attr(.tmp_obj_2, "group_DF")[,get_fdata_cname(.tmp_obj_2)], 
+          .tmp_obj_2$f_data[,get_fdata_cname(.tmp_obj_2)]
+        )
+        attr(.tmp_obj_2, "group_DF")[,get_fdata_cname(.tmp_obj_2)] <- .tmp_obj_2$f_data[group_sample_idx, get_fdata_cname(.tmp_obj)]
+        attr(.tmp_obj_2, "cnames")$fdata_cname <- colnames(attr(.tmp_obj_2, "group_DF"))[1] <- get_fdata_cname(.tmp_obj)
+        
+        .tmp_obj <- pmartR::combine_lipidData(
+          .tmp_obj,
+          .tmp_obj_2,
+          retain_groups = TRUE,
+          retain_filters = TRUE
+        )
+        
+        objects$omicsData_2 <- .tmp_obj_2
       }
-
+      
+      # __SHINYTEST__
+      exportTestValues(
+        omicsData_norm = .tmp_obj
+      )
+      
+      objects$omicsData <- .tmp_obj
+      
+      updateCollapse(session, "normalization_sidebar", close = "normalize_global_sidebar")
+      
       # success modal if all is well
       showModal(
         modalDialog(
@@ -410,6 +446,10 @@ observeEvent(input$inspect_norm, {
       proceed_msg <- NULL
     }
 
+    combine_msg <- if (two_lipids()) {
+      tags$b(tags$h4("Data will be combined into a single object for subsequent tabs", style="color:deepskyblue"))
+    } else NULL
+
     # display the modal which will warns of low p-values and gives option to apply normalization
     showModal(
       modalDialog(
@@ -423,6 +463,7 @@ observeEvent(input$inspect_norm, {
           choices = c("Before and after normalization" = "ba", "Boxplots of normalization factors by group" = "fac")
         ),
         uiOutput("norm_modal_mainplot"),
+        combine_msg,
         footer = tagList(
           div(
             style = "float:left",

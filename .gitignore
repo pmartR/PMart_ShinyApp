@@ -5,3 +5,8 @@
 .DS_Store
 pmart_standalone.Rproj
 mapDataAccess/
+venv/
+cfg/*
+!cfg/minio_config.yml
+!cfg/redis_config.yml
+www/preview.png

@@ -12,7 +12,6 @@ ui <- function(request) {
         "toggleTabInputs" # Toggles state of inputs on a page
       )
     ),
-    shinyalert::useShinyalert(),
     list(tags$head(HTML('<link rel="icon", href="pmartlogo.png", 
                                  type="image/png" />'))),
     div(
@@ -85,7 +84,7 @@ ui <- function(request) {
         )),
         # Add UI if MAP is enabled
         if (MAP_ACTIVE) {
-          div(id = "js_midpoint", style = "vertical-align:top",
+          div(id = "js_midpoint", style = "vertical-align:top", class="tooltip-wrapper",
               bsButton("exportMid", "Save and Export Progress", style = "success")
           )
         } else NULL

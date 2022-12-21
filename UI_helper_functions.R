@@ -1,3 +1,43 @@
+#' @details helper function to add filter UI for a new filter
+add_filter_UI <- function(filter_name, title, tooltip_text, ..., add_btn_title = "Add/Remove", trailing_hr = T, colsize_l = 6, colsize_r = 6) {
+  div(
+    id = sprintf("%s_ftab_UI", filter_name),
+    tagList(
+      fluidRow(
+        column(
+          colsize_l,
+          div(
+            class = "flex-inline",
+            tags$b(title), 
+            tipify(
+              icon("question-sign", lib = "glyphicon", class = "info-right"),
+              title = tooltip_text
+            )
+          ),
+          div(
+            id = sprintf("add_%s_ttip_control", filter_name),
+            actionButton(
+              sprintf("add_%s", filter_name),
+              label = div(class="flex-inline",
+                          add_btn_title,
+                          hidden(div(id = sprintf("%s_exists", filter_name), style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
+              ),
+              width = "100%"
+            ),
+            bsButton(inputId = sprintf("plot_%s", filter_name), "Plot Preview", width = "100%") 
+          )
+        ),
+        column(
+          colsize_r,
+          ...
+        )
+      )
+    ),
+    
+    if(trailing_hr) hr() else NULL
+  )
+}
+
 #'@details UI panel for ggplot axes options with optional prepended elements.
 #'@param pagename The name of the page or the string to prepend to each input name
 #'@param ... Extra shiny elements to prepend to the axes options UI.
@@ -154,7 +194,17 @@ inline_cpickers <- function(cpicker_args, ...) {
 #'@param two_plots Boolean indicating if there are two plots for some other
 #'reason than that there are two datasets.
 #'@param flip_button Whether to include a checkboxgroupbutton to flip the axes
-apply_style_UI <- function(pagename, two_lipids, two_plots, flip_button = FALSE) {
+#'@param ... Extra UI element to be appended in the resulting div
+apply_style_UI <-
+  function(pagename,
+           two_lipids,
+           two_plots,
+           flip_button = FALSE,
+           two_lipids_title = "Update plots style for the:",
+           one_plot_title = "Update plot style",
+           two_plot_title = "Update plots style for the:",
+           ...) {
+    
   if (flip_button) {
     fbtn <- div(checkboxGroupButtons(paste0(pagename, "_flip_axes"), "",
       choices = list("Flip Axes" = TRUE),
@@ -169,22 +219,24 @@ apply_style_UI <- function(pagename, two_lipids, two_plots, flip_button = FALSE)
 
   if (two_lipids) {
     tagList(
-      tags$b("Update style to the plots for the:"),
+      tags$b(two_lipids_title),
       div(
         bsButton(paste0(pagename, "_apply_style_plot_1"), "first dataset"),
         bsButton(paste0(pagename, "_apply_style_plot_2"), "second dataset"),
-        fbtn
+        fbtn,
+        ...
       )
     )
   } else if (!two_plots) {
-    div(bsButton(paste0(pagename, "_apply_style_plot_1"), "Update plot style"), fbtn)
+    div(bsButton(paste0(pagename, "_apply_style_plot_1"), one_plot_title), fbtn)
   } else if (two_plots) {
     tagList(
-      tags$b("Update style to the plots for the:"),
+      tags$b(two_plot_title),
       div(
         bsButton(paste0(pagename, "_apply_style_plot_1"), "top/left plot"),
         bsButton(paste0(pagename, "_apply_style_plot_2"), "bottom/right plot"),
-        fbtn
+        fbtn,
+        ...
       )
     )
   }
@@ -219,6 +271,15 @@ toggleTooltip <- function(session, id = NULL, condition = T, tooltip_text = "", 
       sprintf("$('%s').attr('data-original-title', null)", jquery)
     )
   }
+}
+
+#'@details disable/enable sub-elements of a div and display a tooltip based on condition.
+### NOTE:  THIS CANNOT ADD A TOOLTIP TO THE SAME ELEMENT IT DISABLES
+### DISABLED ELEMENTS DO NOT LIKE HAVING TOOLTIPS ADDED TO THEM FOR SOME REASON.
+togglestate_add_tooltip <- function(session, id, condition, tooltip_text, 
+                                    selector=NULL, position="bottom") {
+  toggleState(id = id, condition = condition, selector = selector)
+  toggleTooltip(session, id, !condition, tooltip_text, selector = selector, position= position)
 }
 
 #'@description Convenience function to assign a class to a tab in a shiny 
