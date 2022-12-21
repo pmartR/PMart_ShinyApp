@@ -82,29 +82,56 @@ list(
 
   # select data scale
   output$datascale_UI <- renderUI({
+    
+    ## If seqData, only allow counts
+    
+    ch <- list("Raw intensity" = "abundance", "Log base 2" = "log2", 
+               "Log base 10" = "log10", "Natural log" = "log", 
+               "Counts" = "counts")
+    
+    if(input$datatype == "seq"){
+      selected <- "counts"
+      disabled <- !(ch %in% "counts")
+      cond <- "input.data_scale == 'counts'"
+      text <- ttext_[["ABUNDANCE_NAS_TO_ZEROS"]]
+    } else {
+      selected <- "abundance"
+      disabled <- ch %in% "counts"
+      cond <- "input.data_scale == 'abundance'"
+      text <- ttext_[["ABUNDANCE_ZEROS_TO_NA"]]
+    }
+    
     div(class = "inline-wrapper-1",
       pickerInput("data_scale", "On what scale is your data?",
-        choices = list("Raw intensity" = "abundance", "Log base 2" = "log2", "Log base 10" = "log10", "Natural log" = "log"),
-        selected = "abundance"
+        choices = ch,
+        selected = selected,
+        choicesOpt = list(disabled = disabled)
       ),
       conditionalPanel(
-        "input.data_scale == 'abundance'",
+        cond,
         tipify(
           blueexcl,
-          title = gsub("\n", " ", ttext_[["ABUNDANCE_ZEROS_TO_NA"]])
+          title = gsub("\n", " ", text)
         )
       )
     )
   }),
 
   # transform to what scale?
-  output$transform <- renderUI({
-    choices <- list("Raw intensity" = "abundance", "Log base 2" = "log2", "Log base 10" = "log10", "Natural log" = "log")
+  output$transform_UI <- renderUI({
+    
+    req(input$datatype != "seq")
+    
+    ## Disable for seqdata
+    choices <- list("Raw intensity" = "abundance", "Log base 2" = "log2", 
+                    "Log base 10" = "log10", "Natural log" = "log")
     pickerInput("transform", "Transform data to:", choices = c("Select one", choices))
   }),
 
   # normalized or not?
   output$normalized_UI <- renderUI({
+    
+    req(input$datatype != "seq")
     radioGroupButtons("normalized_yn", "Has your data been normalized?",
       choices = c("Yes" = 1, "No" = 0),
       selected = 0
@@ -112,7 +139,7 @@ list(
   }),
 
   # do they have an emeta file to upload?
-  output$emeta_yn <- renderUI({
+  output$emeta_yn_UI <- renderUI({
     req(input$datatype, input$datatype != "none")
     radioGroupButtons("emeta_yn",
       "Do you have a file containing extra biomolecule information?",
@@ -163,7 +190,7 @@ list(
     
     if (MAP_ACTIVE) {
       fname_tmp = MapConnect$Project$Data$e_meta_filename
-      fname_tmp = if(is.null(fname_tmp)) {
+      fname_tmp = if(!isTruthy(fname_tmp)) {
         "No e_meta file found - indicate no e_meta."
       } else {
         fname_tmp %>% 
@@ -236,7 +263,17 @@ list(
   output$omicsData_upload_boxplot <- renderPlotly({
     req(!is.null(objects$uploaded_omicsData))
     
-    p <- plot(objects$omicsData, bw_theme = TRUE, interactive = T) #+ theme(axis.text.x = element_blank())
+    plot_args = list(
+      objects$omicsData,
+      "interactive" = TRUE
+    )
+    
+    ## If Data type is seq, add transformation
+    if(input$datatype == "seq") {
+      plot_args[["transformation"]] = "lcpm"
+    }
+    
+    p <- do.call(plot, plot_args) 
     plots$last_plot <- p
     return(p)
   }),

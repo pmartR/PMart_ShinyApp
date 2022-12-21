@@ -2,3 +2,5 @@ celery[redis]
 numpy
 gunicorn
 minio==7.0.2
+plotly
+kaleido==0.1.0

@@ -5,3 +5,5 @@ rmdFilt,RMD Filter
 moleculeFilt,Molecule Filter
 proteomicsFilt,Proteomics Filter
 customFilt, Custom Filter
+RNAFilt, RNA-seq Filter
+totalCountFilt, Total Count Filter

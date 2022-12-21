@@ -12,18 +12,19 @@ License: BSD + file LICENSE
 Encoding: UTF-8
 Depends:
   colourpicker,
+  DESeq2,
   DT,
   dplyr,
+  edgeR,
   ggplot2,
   gridExtra,
-  mapDataAccess,
   markdown,
   plotly,
-  pmartR,
   purrr,
   readr,
   renv,
   reshape2,
+  reticulate,
   rlang,
   shiny,
   shinyBS,
@@ -31,6 +32,10 @@ Depends:
   shinyalert,
   shinycssloaders,
   shinyjs,
-  stringr
+  stringr,
+  yaml
+Remotes:
+  mapDataAccess,
+  pmartR
 
 

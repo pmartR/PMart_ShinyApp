@@ -6,7 +6,7 @@ success_modal <-
         column(10,
                align = "center", offset = 1,
                HTML('<h4 style= "color:#1A5276">Your data has been successfully reference normalized. 
-                      Future processing will be performaed on the reference normalized data.</h4>'),
+                      Future processing will be performed on the reference normalized data.</h4>'),
                hr(),
                actionButton("upload_dismiss", "Review results", width = "75%"),
                actionButton("goto_filter", "Continue to Filters", style = "margin:5px;width:75%")

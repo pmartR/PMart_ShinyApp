@@ -108,7 +108,7 @@ output$peptide_statistics_tab_sidepanel <- renderUI({
         ),
         value = "peptide_imdanova-specify-comparisons",
         pickerInput(
-          "peptide_imdanova_comparison_method",
+          "peptide_comparison_method",
           "Select comparisons to use (singleton groups excluded):",
           c(
             "All pairwise comparisons",
@@ -163,21 +163,21 @@ output$peptide_statistics_tab_sidepanel <- renderUI({
 #'@details Give options for comparisons depending on what user selected as the
 #' method to perform comparisons (All comparisons, control vs treatment, custom)
 output$peptide_pairwise_comp_selector <- renderUI({
-  req(input$peptide_imdanova_comparison_method)
+  req(input$peptide_comparison_method)
   
-  if (input$peptide_imdanova_comparison_method == "All pairwise comparisons") {
+  if (input$peptide_comparison_method == "All pairwise comparisons") {
     return()
-  } else if (input$peptide_imdanova_comparison_method == "Control to test condition comparisons") {
+  } else if (input$peptide_comparison_method == "Control to test condition comparisons") {
     groups <- objects$omicsData %>%
       pmartR:::get_group_table()
     groups <- groups[groups > 1] %>% names()
     
     return(
       div(
-        pickerInput("peptide_imdanova_control_group",
+        pickerInput("peptide_control_group",
                     "Select control group:",
                     groups,
-                    selected = input$peptide_imdanova_control_group,
+                    selected = input$peptide_control_group,
                     options = pickerOptions(maxOptions = 1),
                     multiple = TRUE
         ),
@@ -191,10 +191,10 @@ output$peptide_pairwise_comp_selector <- renderUI({
     combos <- apply(combn(groups, 2), 2, toString)
     
     return(
-      pickerInput("peptide_imdanova_custom_comps",
+      pickerInput("peptide_custom_comps",
                   "Select group comparisons of interest:",
                   combos,
-                  selected = isolate(input$peptide_imdanova_custom_comps),
+                  selected = isolate(input$peptide_custom_comps),
                   multiple = TRUE
       )
     )
@@ -204,7 +204,7 @@ output$peptide_pairwise_comp_selector <- renderUI({
 #'@details Select the 'treatment' groups to compare to the selected control.
 #'The control selection will be disabled.
 output$peptide_non_control_groups <- renderUI({
-  req(input$peptide_imdanova_control_group)
+  req(input$peptide_control_group)
   groups <- objects$omicsData %>%
     pmartR:::get_group_table()
   groups <- groups[groups > 1] %>% names()
@@ -214,7 +214,7 @@ output$peptide_non_control_groups <- renderUI({
               groups,
               selected = isolate(input$peptide_imdanova_non_control_groups),
               choicesOpt = list(
-                disabled = groups %in% input$peptide_imdanova_control_group
+                disabled = groups %in% input$peptide_control_group
               ),
               multiple = TRUE
   )
@@ -376,8 +376,7 @@ output$peptide_statistics_plot_options <- renderUI({
         ),
         uiOutput("peptide_statistics_apply_style")
       )
-    )
-  )
+  ))
 })
 
 output$peptide_statistics_apply_style <- renderUI({
