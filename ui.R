@@ -50,7 +50,7 @@ ui <- function(request) {
 
       #### FILTER TAB ####
 
-      filter_UI(),
+      #filter_UI(),
 
       #### NORMALIZATION TAB ####
 
