@@ -6,7 +6,7 @@ filter_UI <- function() {
     class = "collapse_page",
     column(
       4,
-      shinyBS::bsCollapse(
+      bsCollapse(
         id = "filter_collapse", multiple = FALSE, open = c("data_filters"),
         # biomolecule filters
         bsCollapsePanel(
