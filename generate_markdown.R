@@ -1,8 +1,6 @@
 # This script contains the server portion of the "generate report" tab. 
 
 list(
-  
-  
 
   # Download the markdown
   output$ReportDownload <- downloadHandler(
@@ -34,6 +32,8 @@ list(
         
         # Check for peptide roll-up into protein data
         if (class(objects$omicsData) != "proData") {
+          
+          #browser()
           
           # Create a temporary directory and copy the report there
           report <- file.path(tempdir(), "Abundance_Template.Rmd")

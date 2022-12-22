@@ -94,10 +94,23 @@ if (is.null(omicDataAttr$group_DF) == FALSE) {
 
 To generate a **`r biomolecule` object** in pmartR for this dataset, use: 
   
-  ```{r, echo = FALSE}
-theUploadString <- paste0('omicObj <- as.pepData(e_data = read.csv("', pmart_inputs$file_edata$name, '"), e_data_cname = "', omicDataAttr$cnames$edata_cname, '")')
+```{r, echo = FALSE}
+if (is.null(omicDataAttr$cnames$fdata_cname)) {
+  theUploadString <- "No code can be run, as all omicData objects require an e_data and f_data file."
+} else {
+  theUploadString <- paste0('omicObj <- as.pepData(e_data = read.csv("', pmart_inputs$file_edata$name, '"), e_data_cname = "', omicDataAttr$cnames$edata_cname, '", f_data = read.csv("', pmart_inputs$file_fdata$name, '"), f_data_cname = "', omicDataAttr$cnames$fdata_cname, '")')
+}
+
+if (!is.null(omicDataAttr$cnames$emeta_cname) & !is.null(omicDataAttr$cnames$fdata_cname)) {
+  theUploadString <- theUploadString %>% 
+    substr(1, nchar(theUploadString) - 1) %>%
+    paste0(', e_meta = read.csv("', pmart_inputs$file_emeta$name, '"), e_meta_cname = "',
+           omicDataAttr$cnames$emeta_cname, '")')
+}
 ```
 
 ``r theUploadString``
+
+
 
 
