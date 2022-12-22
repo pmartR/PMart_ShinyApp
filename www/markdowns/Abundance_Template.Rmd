@@ -65,7 +65,7 @@ All missing data is denoted with **`r pmart_inputs$na_symbol`** and the expressi
 
 Here is the expression data matrix: 
   
-```{r}
+```{r Expression Matrix}
 datatable(omicData$e_data, options = list(scrollX = TRUE))
 ```
 
@@ -102,7 +102,7 @@ if ((!is.null(pmart_inputs$pair_id_col))) {
 
 To generate a **`r biomolecule` object** in pmartR for this dataset, use: 
   
-```{r, echo = FALSE}
+```{r Formulate Upload Code, echo = FALSE}
 theUploadString <- "No code can be run, as all omicData objects require an e_data and f_data file."
 
 if (!is.null(pmart_inputs$file_fdata$name)) {
@@ -119,13 +119,33 @@ if (!is.null(omicDataAttr$cnames$emeta_cname) & !is.null(pmart_inputs$file_fdata
 
 ``r theUploadString``
 
-`r if(!is.null(pmart_inputs$file_fdata$name)) {"Next, to set group designations, use:"}`
+Next, to log transform the data (if necessary), use: 
 
-```{r, echo = FALSE}
-theGroupString <- "Group designation was not completed in the app, so no code can be generated here."
-
-
-
+```{r Formulate Transformation Code}
+theTransformString <- paste0('omicObj <- edata_transform(omicObj, data_scale = "', omicDataAttr$data_info$data_scale, '")')
 ```
 
+``r theTransformString``
+
+`r if(!is.null(pmart_inputs$file_fdata$name)) {"Next, to set group designations, use:"}`
+
+```{r Formulate Group Designation Code, echo = FALSE}
+theGroupString <- "No group designation was conducted."
+
+if (!is.null(pmart_inputs$file_fdata$name)) {
+  
+  # Pull groups 
+  gcols <- capture.output({c(pmart_inputs$gcol1, pmart_inputs$gcol2) %>% .[.!= "None"] %>% dput()})
+  if (gcols == 'character(0)') {gcols <- "NULL"}
+  
+  # Pull covariates
+  cvcols <- capture.output({c(pmart_inputs$cvcol1, pmart_inputs$cvcol2) %>% .[.!= "None"] %>% dput()})
+  if (cvcols == 'character(0)') {cvcols <- "NULL"}
+  
+  theGroupString <- paste0('omicObj <- group_designation(omicObj, main_effects = ', gcols, ', covariates = ', cvcols, ')')
+  
+}
+```
+
+``r theGroupString``
 
