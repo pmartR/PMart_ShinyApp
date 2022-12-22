@@ -71,7 +71,7 @@ datatable(omicData$e_data, options = list(scrollX = TRUE))
 
 `r if (is.null(omicDataAttr$cnames$emeta_cname) == FALSE) {paste0("### *Biomolecule Information*\nAn associated biomolecule information file was also uploaded called **", pmart_inputs$file_emeta$name, "** and the molecule identifier column was designated as **", omicDataAttr$cnames$emeta_cname, "**. The file contains ", length(omicData$e_meta) - 1, " columns of biomolecule information.")}`
 
-```{r}
+```{r Biomolecule Information}
 if (is.null(omicDataAttr$cnames$emeta_cname) == FALSE) {
   datatable(omicData$e_meta, options = list(scrollX = TRUE))
 }
@@ -90,18 +90,26 @@ if (is.null(omicDataAttr$group_DF) == FALSE) {
 
 `r if (is.null(omicDataAttr$group_DF) == FALSE) {paste0("This table summarizes to which group or covariate each column in the expression data belongs.")}`
 
+`r if (!is.null(pmart_inputs$pair_id_col)) {paste0("### *Paired Data*\nPaired data was specified. The column with the pair IDs was designated as **", pmart_inputs$pair_id_col, "**, the group identifier column was designated as **", pmart_inputs$pair_group_col, "**, and the value within the group that contains the denominator was determined to be **", pmart_inputs$pair_denom_col, "**. The file contains ", length(unique(omicData$f_data[[pmart_inputs$pair_id_col]])), " unique pairs.")}`
+
+```{r Paired Information}
+if ((!is.null(pmart_inputs$pair_id_col))) {
+  omicData$f_data %>% datatable()
+}
+```
+
 ### *Code*
 
 To generate a **`r biomolecule` object** in pmartR for this dataset, use: 
   
 ```{r, echo = FALSE}
-if (is.null(omicDataAttr$cnames$fdata_cname)) {
-  theUploadString <- "No code can be run, as all omicData objects require an e_data and f_data file."
-} else {
+theUploadString <- "No code can be run, as all omicData objects require an e_data and f_data file."
+
+if (!is.null(pmart_inputs$file_fdata$name)) {
   theUploadString <- paste0('omicObj <- as.pepData(e_data = read.csv("', pmart_inputs$file_edata$name, '"), e_data_cname = "', omicDataAttr$cnames$edata_cname, '", f_data = read.csv("', pmart_inputs$file_fdata$name, '"), f_data_cname = "', omicDataAttr$cnames$fdata_cname, '")')
 }
 
-if (!is.null(omicDataAttr$cnames$emeta_cname) & !is.null(omicDataAttr$cnames$fdata_cname)) {
+if (!is.null(omicDataAttr$cnames$emeta_cname) & !is.null(pmart_inputs$file_fdata$name)) {
   theUploadString <- theUploadString %>% 
     substr(1, nchar(theUploadString) - 1) %>%
     paste0(', e_meta = read.csv("', pmart_inputs$file_emeta$name, '"), e_meta_cname = "',
@@ -111,6 +119,13 @@ if (!is.null(omicDataAttr$cnames$emeta_cname) & !is.null(omicDataAttr$cnames$fda
 
 ``r theUploadString``
 
+`r if(!is.null(pmart_inputs$file_fdata$name)) {"Next, to set group designations, use:"}`
 
+```{r, echo = FALSE}
+theGroupString <- "Group designation was not completed in the app, so no code can be generated here."
+
+
+
+```
 
 
