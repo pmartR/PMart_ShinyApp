@@ -1,3 +1,4 @@
+# Reverting
 ui <- function(request) {
   tagList(
     useShinyjs(),
@@ -50,7 +51,7 @@ ui <- function(request) {
 
       #### FILTER TAB ####
 
-      #filter_UI(),
+      filter_UI(),
 
       #### NORMALIZATION TAB ####
 
