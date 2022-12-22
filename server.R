@@ -155,7 +155,9 @@ shinyServer(function(session, input, output) {
     contentType = "text/csv"
   )
 
-
+  # Add markdown capabilities 
+  source("./generate_markdown.R", local = TRUE)
+  
   output$download_processed_data <- downloadHandler(
     filename = paste("pmartR_output_", proc.time()[1], ".zip", sep = ""),
     content = function(fname) {
@@ -193,26 +195,26 @@ shinyServer(function(session, input, output) {
     hide(id = "loading-gray-overlay")
     
     cfg <- yaml::read_yaml(cfg_path)
-    python_venv <- get_config_variable(cfg, "python_venv")
-    
-    conda_envs <- tryCatch(
-      {
-        reticulate::conda_list()$python
-      },
-      error = function(e) {
-        NULL
-      }
-    )
-    
-    is_conda <- any(sapply(conda_envs, function(envpath) {
-      grepl(sprintf("^%s", normalizePath(python_venv)), envpath)
-    }))
-    
-    if (is_conda) {
-      reticulate::use_condaenv(python_venv, required = TRUE)
-    } else {
-      reticulate::use_virtualenv(python_venv, required = TRUE)
-    }
+    #python_venv <- get_config_variable(cfg, "python_venv")
+    #
+    #conda_envs <- tryCatch(
+    #  {
+    #    reticulate::conda_list()$python
+    #  },
+    #  error = function(e) {
+    #    NULL
+    #  }
+    #)
+    #
+    #is_conda <- any(sapply(conda_envs, function(envpath) {
+    #  grepl(sprintf("^%s", normalizePath(python_venv)), envpath)
+    #}))
+    #
+    #if (is_conda) {
+    #  reticulate::use_condaenv(python_venv, required = TRUE)
+    #} else {
+    #  reticulate::use_virtualenv(python_venv, required = TRUE)
+    #}
   }
   
 })
