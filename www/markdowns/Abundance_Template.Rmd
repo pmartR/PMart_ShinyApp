@@ -164,6 +164,9 @@ FilterTable <- NULL
 
 if (length(omicDataAttr$filters) != 0) {
   
+  # List filter types
+  FilterTypes <- lapply(omicDataAttr$filters, function(filter) {filter$type}) %>% unlist()
+  
   # Iterate through all the filters for the table, apply different logic for each filter type
   FilterTable <- do.call(rbind, lapply(omicDataAttr$filters, function(filter) {
     
@@ -251,19 +254,81 @@ if (length(omicDataAttr$filters) != 0) {
 
 `r if ("Molecule Filter" %in% FilterTable$Filter) {paste0("### *Molecule Filter*\nA molecule filter was applied to the data, which removes biomolecule(s), **", omicDataAttr$cnames$edata_cname, "(s)**, not having at least the minimum number of samples (Min Number Molecules).")}`
 
+```{r Molecule Filter, echo = FALSE}
+if ("Molecule Filter" %in% FilterTable$Filter) {
+  
+  # Pull filter information
+  filterInfo <- omicDataAttr$filters[[which(FilterTypes == "moleculeFilt")[1]]]
+  
+  # Plot the filter 
+  plot(molecule_filter(omicData, use_groups = filterInfo$method$use_groups, use_batch = filterInfo$method$use_batch),
+       min_num = as.numeric(filterInfo$threshold))
+
+}
+```
+
 `r if ("Proteomics Filter" %in% FilterTable$Filter) {paste0("### *Proteomics Filter*\nA degenerate peptide filter (Degenerate Peptides Removed) was applied to the data, which identifies peptides, **", omicDataAttr$cnames$edata_cname, "(s)**, not belonging to a single protein. Additionally, a protein filter can be applied to the data which identifies proteins not having at least a minimum number of peptides (Min Number of Peptides) mapping to them.")}`
+
+```{r Proteomics Filter, echo = FALSE}
+if ("Proteomics Filter" %in% FilterTable$Filter) {
+  
+  # Pull filter information
+  filterInfo <- omicDataAttr$filters[[which(FilterTypes == "proteomicsFilt")[1]]]
+  
+  # Plot the filter 
+  plot(proteomics_filter(omicData), min_num_peps = as.numeric(filterInfo$threshold$min_num_peps))
+
+}
+```
 
 `r if ("CV Filter" %in% FilterTable$Filter) {paste0("### *CV Filter*\nA coefficient of variation (CV) filter was applied to the data which removes biomolecule(s), **", omicDataAttr$cnames$edata_cname, "(s)**, with a CV greater than the threshold (Max CV).")} `
 
+```{r CV Filter, echo = FALSE}
+if ("CV Filter" %in% FilterTable$Filter) {
+  
+  # Pull filter information
+  filterInfo <- omicDataAttr$filters[[which(FilterTypes == "cvFilt")[1]]]
+  
+  # Plot the filter
+  plot(cv_filter(omicData, use_groups = filterInfo$method$use_groups), cv_threshold = as.numeric(filterInfo$threshold))
+  
+}
+```
+
 `r if ("imd-ANOVA Filter" %in% FilterTable$Filter) {paste0("### *imd-ANOVA Filter*\nAn ANOVA filter can be applied to the data which removes biomolecule(s), **", omicDataAttr$cnames$edata_cname, "(s)**, of non-missing values per group (Min ANOVA). Additionaly, an IMD (independence of missing data) filter can be applied to the data, removing biomolecules not having at least a minimum number of non-missing values (Min G-Test) in at least one of the groups.")}`
 
+```{r imd-ANOVA Filter, echo = FALSE}
+if ("imd-ANOVA Filter" %in% FilterTable$Filter) {
+  
+  # Pull filter information
+  filterInfo <- omicDataAttr$filters[[which(FilterTypes == "imdanovaFilt")[1]]]
+  
+  # Plot the filter
+  plot(imdanova_filter(omicData), min_nonmiss_anova = as.numeric(filterInfo$threshold$min_nonmiss_anova),
+       min_nonmiss_gtest = as.numeric(filterInfo$threshold$min_nonmiss_gtest))
+  
+}
+```
+
 `r if ("rMD Filter" %in% FilterTable$Filter) {paste0("### *rMD Filter*\nA robust Mahalanobis distance (rMD) filter was applied to the data, removing sample(s), **", omicDataAttr$cnames$fdata_cname, "(s)**, with an associated rMD p-value of less than the threshold (P-Value Threshold). Metrics used to calculate the p-values are also included (Metrics Used).")}`
+
+```{r rMD Filter, echo = FALSE}
+if ("rMD Filter" %in% FilterTable$Filter) {
+  
+  # Pull filter information
+  filterInfo <- omicDataAttr$filters[[which(FilterTypes == "rmdFilt")[1]]]
+  
+  # Plot the filter
+  plot(rmd_filter(omicData), pvalue_threshold = as.numeric(filterInfo$threshold))
+  
+}
+```
 
 `r if ("Custom Filter" %in% FilterTable$Filter) {paste0("### *Custom Filter*\n Custom filters can be used to remove samples, biomolecules or proteins.")}`
 
 `r if (length(omicDataAttr$filters) != 0) {paste0("### *Code*\n Use applyFilt to apply any filter to a dataset. For example, omicObj <- applyFilt(filter_object, omicObj, parameters). All filter functions have summary and plot options.")}`
 
-`r if (omicDataAttr$data_info$norm_info$is_normalized) {paste0("## Normalization\n", biomolecule, " data **was** normalized.\n\n### *Manual*")}`
+`r if (omicDataAttr$data_info$norm_info$is_normalized) {paste0("## Normalization\n The ", biomolecule, " data **was** normalized with pMART.\n\n### *Manual*")}`
 
 ```{r Normalization: Manual, Plot}
 if (omicDataAttr$data_info$norm_info$is_normalized) {
@@ -276,8 +341,6 @@ if (omicDataAttr$data_info$norm_info$is_normalized) {
 
 }
 ```
-
-`r if (omicDataAttr$data_info$norm_info$is_normalized) {paste0("A Kruskal-Wallis test can be used to ensure that the normalization approach does not introduce bias. A p-value greater than 0.05 is preferable. The p-value for this normalization is:")}`
 
 ```{r Normalization: Manual, Data Table}
 if (is.null(omicDataAttr$data_info$norm_info$norm_type) == FALSE 
@@ -293,6 +356,9 @@ if (is.null(omicDataAttr$data_info$norm_info$norm_type) == FALSE
                          omicDataAttr$data_info$norm_info$norm_fn)) %>% kable()
 }
 ```
+
+`r if (omicDataAttr$data_info$norm_info$is_normalized) {paste0("### *Code*")}`
+
 
 `r if (is.null(spans_results) == FALSE) {"### *SPANS*\n\nSPANS **was** run to determine optimum normalization parameters."}`
 
