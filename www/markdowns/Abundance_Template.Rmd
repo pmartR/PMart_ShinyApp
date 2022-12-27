@@ -380,17 +380,25 @@ if (is.null(omicDataAttr$data_info$norm_info$norm_type) == FALSE
     paste(lapply(names(omicDataAttr$data_info$norm_info$subset_params), function(name) {
       paste0(name, ": ", omicDataAttr$data_info$norm_info$subset_params[[name]])}), collapse = " & "))
   
+  # Start the normalization code
+  norm_code_start <- paste0('omicObj <- normalize_global(omicObj, subset_fn = "', omicDataAttr$data_info$norm_info$subset_fn, 
+    '", norm_fn = "', omicDataAttr$data_info$norm_info$norm_fn, '", apply_norm = TRUE, backtransform = TRUE')
+  
+  
   if (is.null(omicDataAttr$data_info$norm_info$subset_params)) {
-    norm_code <- paste0('omicObj <- normalize_global(omicObj, subset_fn = "', omicDataAttr$data_info$norm_info$subset_fn, 
-                    '", norm_fn = "', omicDataAttr$data_info$norm_info$norm_fn, '", apply_norm = TRUE, backtransform = TRUE)')
- 
+    norm_code <- paste0(norm_code_start, ')')
   } else {
     
+    # Collapse the normalization parameters
+    the_norm_params <- omicDataAttr$data_info$norm_info$subset_params
+    the_collapsed_params <- lapply(1:length(the_norm_params), function(el) {
+      paste0('"', names(the_norm_params)[el], '" = ', the_norm_params[el])
+    }) %>% unlist() 
+    the_param_string <- paste0('list(', paste0(the_collapsed_params, collapse = ", "), ')')
     
+    norm_code <- paste0(norm_code_start, ', params = ', the_param_string, ')')
     
   }
-  
-
   
   data.table("Attribute" = c("Subset Function", "Subset Parameters", "Normalization Function"),
              "Value" = c(omicDataAttr$data_info$norm_info$subset_fn, 
@@ -399,14 +407,13 @@ if (is.null(omicDataAttr$data_info$norm_info$norm_type) == FALSE
 }
 ```
 
-`r if (omicDataAttr$data_info$norm_info$is_normalized) {paste0("**Code**:", norm_code)}`
-
+`r if (omicDataAttr$data_info$norm_info$is_normalized) {paste0("**Code**: ", norm_code)}`
 
 `r if (is.null(spans_results) == FALSE) {"### *SPANS*\n\nSPANS **was** run to determine optimum normalization parameters."}`
 
 ```{r, SPANS}
 if (is.null(spans_results) == FALSE) {
-  plot(spans_results)
+  plot(spans_results) # ToFIX - where are SPANS results being saved now? Thanks 
 }
 ``` 
 
