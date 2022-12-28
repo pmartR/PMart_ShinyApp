@@ -360,7 +360,7 @@ if ("rMD Filter" %in% FilterTable$Filter) {
 
 `r if (omicDataAttr$data_info$norm_info$is_normalized) {paste0("## Normalization\n The ", biomolecule, " data **was** normalized with pMART.\n\n### *Manual*")}`
 
-```{r Normalization: Manual, Plot}
+```{r Normalization: Manual Plot, echo = FALSE}
 if (omicDataAttr$data_info$norm_info$is_normalized) {
   
   if (is.null(omicDataAttr$group_DF) == FALSE) {
@@ -372,7 +372,7 @@ if (omicDataAttr$data_info$norm_info$is_normalized) {
 }
 ```
 
-```{r Normalization: Manual, Data Table}
+```{r Normalization: Manual Data Table, echo = FALSE}
 if (is.null(omicDataAttr$data_info$norm_info$norm_type) == FALSE 
     && omicDataAttr$data_info$norm_info$norm_type == "global") {
   
@@ -411,7 +411,7 @@ if (is.null(omicDataAttr$data_info$norm_info$norm_type) == FALSE
 
 `r if (is.null(spans_results) == FALSE) {"### *SPANS*\n\nSPANS **was** run to determine optimum normalization parameters."}`
 
-```{r, SPANS}
+```{r, SPANS, echo = FALSE}
 if (is.null(spans_results) == FALSE) {
   plot(spans_results) # ToFIX - where are SPANS results being saved now? Thanks 
 }
@@ -419,7 +419,7 @@ if (is.null(spans_results) == FALSE) {
 
 `r if (!is.null(omicStatsRoll)) {"## Peptide Statistics \n\n"}`
 
-```{r Peptide Statistics, Text}
+```{r Peptide Statistics: Text, echo = FALSE}
 if (is.null(omicStatsRoll) == FALSE) {
   ComparisonsText <- paste("The following groups were compared on the peptide level:", paste0(paste(omicStatsRollAttr$comparisons, sep = ","), 
     "."), "Reported below are the parameters used in the statistical analysis,",
@@ -427,9 +427,9 @@ if (is.null(omicStatsRoll) == FALSE) {
 }
 ```
 
-`r if (!is.null(omicStatsRoll)) {ComparisonsText}`
+`r if (is.null(omicStatsRoll) == FALSE) {paste(ComparisonsText)}`
 
-```{r Peptide Statistics, Table}
+```{r Peptide Statistics: Table and Plot, echo = FALSE}
 if (is.null(omicStatsRoll) == FALSE) {
   
   # Write the code 
@@ -456,6 +456,44 @@ if (is.null(omicStatsRoll) == FALSE) {
 
 `r if (!is.null(omicStatsRoll)) {paste0('**Code**: ', pepStat_code)}`
 
+`r if (!is.null(omicDataRoll)) {paste0("## Peptide Rollup \n\nPeptides **were** rolled up into proteins. Protein quantification was conducted with the **", pmart_inputs$which_rollup, "** method and was centered with the **", pmart_inputs$which_combine_fn, "** function. The quantile cutoff was restricted to **",  pmart_inputs$qrollup_thresh, "**.")}`
+
+`r if (!is.null(omicStats)) {"## Statistics \n\n"}`
+
+```{r Statistics: Text, echo = FALSE}
+if (is.null(omicStats) == FALSE) {
+  ComparisonsText <- paste("The following groups were compared on the peptide level:", paste0(paste(omicStatsAttr$comparisons, sep = ","), 
+    "."), "Reported below are the parameters used in the statistical analysis,",
+    "followed by the number of siginificant biomolecules for each comparison.")
+}
+```
+
+`r if (is.null(omicStats) == FALSE) {paste(ComparisonsText)}`
+
+```{r Peptide Statistics: Table and Plot, echo = FALSE}
+if (is.null(omicStats) == FALSE) {
+  
+  # Write the code 
+  pepStat_code <- paste0('imd_anova(omicObj, test_method = "', omicStatsAttr$statistical_test,
+                         '", pval_adjust_a = "', omicStatsAttr$adjustment_method_a,
+                         '", pval_adjust_g = "', omicStatsAttr$adjustment_method_g,
+                         '", pval_thresh = ', omicStatsAttr$pval_thresh, ')')
+  
+  # Generate a data table of parameters set 
+  data.table("Attribute" = c("Test Method", 
+                             "ANOVA Multiple Comparison Adjustment", 
+                             "G-Test Multiple Comparison Adjustment",
+                             "Significance Threshold"), 
+             "Value" = c(omicStatsAttr$statistical_test, 
+                         omicStatsAttr$adjustment_method_a,
+                         omicStatsAttr$adjustment_method_g,
+                         omicStatsAttr$pval_thresh)) %>% kable()
+  
+  # Generate the plot
+  plot(omicStats, bw_theme = TRUE)
+
+}
+```
 
 
 

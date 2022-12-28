@@ -195,6 +195,8 @@ shinyServer(function(session, input, output) {
     hide(id = "loading-gray-overlay")
     
     cfg <- yaml::read_yaml(cfg_path)
+    
+    js$enableTab("statistics_tab")
     #python_venv <- get_config_variable(cfg, "python_venv")
     #
     #conda_envs <- tryCatch(
