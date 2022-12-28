@@ -417,6 +417,44 @@ if (is.null(spans_results) == FALSE) {
 }
 ``` 
 
+`r if (!is.null(omicStatsRoll)) {"## Peptide Statistics \n\n"}`
+
+```{r Peptide Statistics, Text}
+if (is.null(omicStatsRoll) == FALSE) {
+  ComparisonsText <- paste("The following groups were compared on the peptide level:", paste0(paste(omicStatsRollAttr$comparisons, sep = ","), 
+    "."), "Reported below are the parameters used in the statistical analysis,",
+    "followed by the number of siginificant biomolecules for each comparison.")
+}
+```
+
+`r if (!is.null(omicStatsRoll)) {ComparisonsText}`
+
+```{r Peptide Statistics, Table}
+if (is.null(omicStatsRoll) == FALSE) {
+  
+  # Write the code 
+  pepStat_code <- paste0('imd_anova(omicObj, test_method = "', omicStatsRollAttr$statistical_test,
+                         '", pval_adjust_a = "', omicStatsRollAttr$adjustment_method_a,
+                         '", pval_adjust_g = "', omicStatsRollAttr$adjustment_method_g,
+                         '", pval_thresh = ', omicStatsRollAttr$pval_thresh, ')')
+  
+  # Generate a data table of parameters set 
+  data.table("Attribute" = c("Test Method", 
+                             "ANOVA Multiple Comparison Adjustment", 
+                             "G-Test Multiple Comparison Adjustment",
+                             "Significance Threshold"), 
+             "Value" = c(omicStatsRollAttr$statistical_test, 
+                         omicStatsRollAttr$adjustment_method_a,
+                         omicStatsRollAttr$adjustment_method_g,
+                         omicStatsRollAttr$pval_thresh)) %>% kable()
+  
+  # Generate the plot
+  plot(omicStatsRoll, bw_theme = TRUE)
+
+}
+```
+
+`r if (!is.null(omicStatsRoll)) {paste0('**Code**: ', pepStat_code)}`
 
 
 

@@ -35,7 +35,7 @@ list(
                      omicData = objects$omicsData,
                      omicStats = objects$imdanova_res,
                      omicDataRoll = NULL,
-                     omicStatsRoll = NULL,
+                     omicStatsRoll = objects$peptide_imdanova_res,
                      spans_results = objects$spans_res,
                      pmart_inputs = reactiveValuesToList(input))
           
