@@ -429,7 +429,7 @@ if (is.null(omicStatsRoll) == FALSE) {
 
 `r if (is.null(omicStatsRoll) == FALSE) {paste(ComparisonsText)}`
 
-```{r Peptide Statistics: Table and Plot, echo = FALSE}
+```{r Peptide Statistics: Table, echo = FALSE}
 if (is.null(omicStatsRoll) == FALSE) {
   
   # Write the code 
@@ -447,6 +447,12 @@ if (is.null(omicStatsRoll) == FALSE) {
                          omicStatsRollAttr$adjustment_method_a,
                          omicStatsRollAttr$adjustment_method_g,
                          omicStatsRollAttr$pval_thresh)) %>% kable()
+}
+```
+
+
+```{r Peptide Statistics: Plot, echo = FALSE}
+if (is.null(omicStatsRoll) == FALSE) {
   
   # Generate the plot
   plot(omicStatsRoll, bw_theme = TRUE)
@@ -457,6 +463,16 @@ if (is.null(omicStatsRoll) == FALSE) {
 `r if (!is.null(omicStatsRoll)) {paste0('**Code**: ', pepStat_code)}`
 
 `r if (!is.null(omicDataRoll)) {paste0("## Peptide Rollup \n\nPeptides **were** rolled up into proteins. Protein quantification was conducted with the **", pmart_inputs$which_rollup, "** method and was centered with the **", pmart_inputs$which_combine_fn, "** function. The quantile cutoff was restricted to **",  pmart_inputs$qrollup_thresh, "**.")}`
+
+```{r Rollup, echo = FALSE}
+if (!is.null(omicDataRoll)) {
+  rollup_code <- paste0('omicObj <- protein_quant(omicObj, method = "', pmart_inputs$which_rollup, '", combine_fn = "', 
+                        pmart_inputs$which_combine_fn, '", qrollup_thresh = ', pmart_inputs$qrollup_thresh, ')')
+}
+
+```
+
+`r if (!is.null(omicStatsRoll)) {paste0('**Code**: ', rollup_code)}`
 
 `r if (!is.null(omicStats)) {"## Statistics \n\n"}`
 
@@ -470,11 +486,11 @@ if (is.null(omicStats) == FALSE) {
 
 `r if (is.null(omicStats) == FALSE) {paste(ComparisonsText)}`
 
-```{r Peptide Statistics: Table and Plot, echo = FALSE}
+```{r Statistics: Table, echo = FALSE}
 if (is.null(omicStats) == FALSE) {
   
   # Write the code 
-  pepStat_code <- paste0('imd_anova(omicObj, test_method = "', omicStatsAttr$statistical_test,
+  stat_code <- paste0('imd_anova(omicObj, test_method = "', omicStatsAttr$statistical_test,
                          '", pval_adjust_a = "', omicStatsAttr$adjustment_method_a,
                          '", pval_adjust_g = "', omicStatsAttr$adjustment_method_g,
                          '", pval_thresh = ', omicStatsAttr$pval_thresh, ')')
@@ -488,6 +504,12 @@ if (is.null(omicStats) == FALSE) {
                          omicStatsAttr$adjustment_method_a,
                          omicStatsAttr$adjustment_method_g,
                          omicStatsAttr$pval_thresh)) %>% kable()
+}
+```
+
+
+```{r Statistics: Plot, echo = FALSE}  
+if (is.null(omicStats) == FALSE) {
   
   # Generate the plot
   plot(omicStats, bw_theme = TRUE)
@@ -495,6 +517,6 @@ if (is.null(omicStats) == FALSE) {
 }
 ```
 
-
+`r if (!is.null(omicStats)) {paste0('**Code**: ', stat_code)}`
 
 
