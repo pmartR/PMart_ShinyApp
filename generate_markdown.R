@@ -24,7 +24,7 @@ list(
         return(NULL)
       }
           
-      browser()
+      #browser()
           
       # Create a temporary directory and copy the report there
       report <- file.path(tempdir(), "Abundance_Template.Rmd")
