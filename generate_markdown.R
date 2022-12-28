@@ -30,12 +30,25 @@ list(
       report <- file.path(tempdir(), "Abundance_Template.Rmd")
       file.copy(file.path("www", "markdowns", "Abundance_Template.Rmd"), report, overwrite = TRUE)
       
+      # Rearrange names if rollup has happened 
+      if (!is.null(objects$omicsData_pre_rollup)) {
+        omicData <- objects$omicsData_pre_rollup
+        omicStats <- objects$imdanova_res
+        omicDataRoll <- objects$omicsData
+        omicStatsRoll <- objects$peptide_imdanova_res
+      } else {
+        omicData <- objects$omicsData
+        omicStats <- objects$imdanova_res
+        omicDataRoll <- NULL
+        omicStatsRoll <- NULL
+      }
+      
       # Set up specific parameters needed by the peptide data markdown
       params <- list(titleName = input$ReportName,
-                     omicData = objects$omicsData,
-                     omicStats = objects$imdanova_res,
-                     omicDataRoll = NULL,
-                     omicStatsRoll = objects$peptide_imdanova_res,
+                     omicData = omicData,
+                     omicStats = omicStats,
+                     omicDataRoll = omicDataRoll,
+                     omicStatsRoll = omicStatsRoll,
                      spans_results = objects$spans_res,
                      pmart_inputs = reactiveValuesToList(input))
           
