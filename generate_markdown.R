@@ -24,8 +24,6 @@ list(
         return(NULL)
       }
           
-      browser()
-          
       # Create a temporary directory and copy the report there
       report <- file.path(tempdir(), "Abundance_Template.Rmd")
       file.copy(file.path("www", "markdowns", "Abundance_Template.Rmd"), report, overwrite = TRUE)
@@ -43,8 +41,16 @@ list(
         omicStatsRoll <- NULL
       }
       
+      # Pull the original edata, emeta, and fdata 
+      if (is.null(input$file_edata$datapath)) {edata <- NULL} else {edata <- read.csv(input$file_edata$datapath)}
+      if (is.null(input$file_emeta$datapath)) {edata <- NULL} else {emeta <- read.csv(input$file_emeta$datapath)}
+      if (is.null(input$file_fdata$datapath)) {edata <- NULL} else {fdata <- read.csv(input$file_fdata$datapath)}
+      
       # Set up specific parameters needed by the peptide data markdown
       params <- list(titleName = input$ReportName,
+                     edata = edata,
+                     emeta = emeta,
+                     fdata = fdata,
                      omicData = omicData,
                      omicStats = omicStats,
                      omicDataRoll = omicDataRoll,
