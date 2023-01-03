@@ -42,9 +42,9 @@ pmart_inputs$ReportCode <- TRUE
 # Get the file type 
 biomolecule <- switch(
   class(omicData),
-  "pepData" = "unlabelled peptide",
+  "pepData" = "unlabeled peptide",
   "isobaricpepData" = "isobaric peptide",
-  "proData" = "unlabelled protein",
+  "proData" = "unlabeled protein",
   "metabData" = "GC-LC/MS metabolite",
   "nmrData" = "NMR metabolite",
   "lipidData" = "lipid"
@@ -354,6 +354,24 @@ if ("rMD Filter" %in% FilterTable$Filter) {
 }
 ```
 
+`r if ("rMD Filter" %in% FilterTable$Filter) {"Below are the summary statistics of each sample that was removed. If this section is blank, no samples were removed."}`
+
+```{r rMD Filter Samples, echo = FALSE}
+if ("rMD Filter" %in% FilterTable$Filter) {
+  
+  # Pull filter information
+  filterInfo <- omicDataAttr$filters[[which(FilterTypes == "rmdFilt")[1]]]
+  
+  # Plot all samples removed
+  lapply(filterInfo$filtered, function(samp) {
+    #plot(rmd_filter(omicData), sampleID = samp) # Enable this once the error is fixed 
+    paste("The sample", samp, "was removed.")
+  })
+  
+}
+
+```
+
 `r if ("rMD Filter" %in% FilterTable$Filter) paste0("**Code:**\n", rmdFilt_code)`
 
 `r if ("Custom Filter" %in% FilterTable$Filter) {paste0("### *Custom Filter*\n Custom filters can be used to remove samples, biomolecules or proteins. See ?custom_filter to learn how to make and apply custom filters.")}`
@@ -413,7 +431,7 @@ if (is.null(omicDataAttr$data_info$norm_info$norm_type) == FALSE
 
 ```{r, SPANS, echo = FALSE}
 if (is.null(spans_results) == FALSE) {
-  plot(spans_results) # ToFIX - where are SPANS results being saved now? Thanks 
+  plot(spans_results) # ToFIX - where are SPANS results being saved now?
 }
 ``` 
 
@@ -462,7 +480,7 @@ if (is.null(omicStatsRoll) == FALSE) {
 
 `r if (!is.null(omicStatsRoll)) {paste0('**Code**: ', pepStat_code)}`
 
-`r if (!is.null(omicDataRoll)) {paste0("## Peptide Rollup \n\nPeptides **were** rolled up into proteins. Protein quantification was conducted with the **", pmart_inputs$which_rollup, "** method and was centered with the **", pmart_inputs$which_combine_fn, "** function. The quantile cutoff was restricted to **",  pmart_inputs$qrollup_thresh, "**.")}`
+`r if (!is.null(omicDataRoll)) {paste0("## Peptide Rollup \n\nPeptides **were** rolled up into proteins. Protein quantification was conducted with the **", pmart_inputs$which_rollup, "** method and was centered with the **", pmart_inputs$which_combine_fn, "** function. The quantile cutoff was restricted to **",  pmart_inputs$qrollup_thresh, "**. The number of quantified proteins was ", omicDataRoll$e_data[[omicDataRollAttr$cnames$edata_cname]] %>% unique() %>% length(), ".")}`
 
 ```{r Rollup, echo = FALSE}
 if (!is.null(omicDataRoll)) {
