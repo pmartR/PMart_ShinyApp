@@ -1,6 +1,9 @@
 ---
 params:
   titleName: ""
+  edata: ""
+  emeta: ""
+  fdata: ""
   omicData: ""
   omicStats: ""
   omicDataRoll: ""
@@ -19,6 +22,11 @@ library(data.table); library(patchwork); library(purrr)
 
 ```{r Read in Results}
 # This data will be passed to the markdown through shiny
+
+# Original edata, emeta, and fdata files 
+edata <- params$edata
+emeta <- params$emeta
+fdata <- params$fdata
 
 # omicData and stats objects 
 omicData <- params$omicData # The omic data (e.g. pepData, proData, lipiData, etc.)
@@ -41,7 +49,7 @@ pmart_inputs$ReportCode <- TRUE
 
 # Get the file type 
 biomolecule <- switch(
-  class(omicData),
+  class(omicData)[1],
   "pepData" = "unlabeled peptide",
   "isobaricpepData" = "isobaric peptide",
   "proData" = "unlabeled protein",
@@ -66,14 +74,14 @@ All missing data is denoted with **`r pmart_inputs$na_symbol`** and the expressi
 Here is the expression data matrix: 
   
 ```{r Expression Matrix}
-datatable(omicData$e_data, options = list(scrollX = TRUE))
+datatable(edata, options = list(scrollX = TRUE))
 ```
 
 `r if (is.null(omicDataAttr$cnames$emeta_cname) == FALSE) {paste0("### *Biomolecule Information*\nAn associated biomolecule information file was also uploaded called **", pmart_inputs$file_emeta$name, "** and the molecule identifier column was designated as **", omicDataAttr$cnames$emeta_cname, "**. The file contains ", length(omicData$e_meta) - 1, " columns of biomolecule information.")}`
 
 ```{r Biomolecule Information}
 if (is.null(omicDataAttr$cnames$emeta_cname) == FALSE) {
-  datatable(omicData$e_meta, options = list(scrollX = TRUE))
+  datatable(emeta, options = list(scrollX = TRUE))
 }
 ```
 
@@ -84,19 +92,11 @@ if (is.null(omicDataAttr$cnames$emeta_cname) == FALSE) {
 
 ```{r Grouping Information: Main Effects and Covariates}
 if (is.null(omicDataAttr$group_DF) == FALSE) {
-  omicDataAttr$group_DF %>% datatable()
+  datatable(fdata, options = list(scrollX = TRUE))
 }
 ```
-
-`r if (is.null(omicDataAttr$group_DF) == FALSE) {paste0("This table summarizes to which group or covariate each column in the expression data belongs.")}`
 
 `r if (!is.null(pmart_inputs$pair_id_col)) {paste0("### *Paired Data*\nPaired data was specified. The column with the pair IDs was designated as **", pmart_inputs$pair_id_col, "**, the group identifier column was designated as **", pmart_inputs$pair_group_col, "**, and the value within the group that contains the denominator was determined to be **", pmart_inputs$pair_denom_col, "**. The file contains ", length(unique(omicData$f_data[[pmart_inputs$pair_id_col]])), " unique pairs.")}`
-
-```{r Paired Information}
-if ((!is.null(pmart_inputs$pair_id_col))) {
-  omicData$f_data %>% datatable()
-}
-```
 
 ### *Code*
 
@@ -106,13 +106,13 @@ To generate a **`r biomolecule` object** in pmartR for this dataset, use:
 theUploadString <- "No code can be run, as all omicData objects require an e_data and f_data file."
 
 if (!is.null(pmart_inputs$file_fdata$name)) {
-  theUploadString <- paste0('omicObj <- as.pepData(e_data = read.csv("', pmart_inputs$file_edata$name, '"), e_data_cname = "', omicDataAttr$cnames$edata_cname, '", f_data = read.csv("', pmart_inputs$file_fdata$name, '"), f_data_cname = "', omicDataAttr$cnames$fdata_cname, '")')
+  theUploadString <- paste0('omicObj <- as.', class(omicData), '(e_data = read.csv("', pmart_inputs$file_edata$name, '"), edata_cname = "', omicDataAttr$cnames$edata_cname, '", f_data = read.csv("', pmart_inputs$file_fdata$name, '"), fdata_cname = "', omicDataAttr$cnames$fdata_cname, '")')
 }
 
 if (!is.null(omicDataAttr$cnames$emeta_cname) & !is.null(pmart_inputs$file_fdata$name)) {
   theUploadString <- theUploadString %>% 
     substr(1, nchar(theUploadString) - 1) %>%
-    paste0(', e_meta = read.csv("', pmart_inputs$file_emeta$name, '"), e_meta_cname = "',
+    paste0(', e_meta = read.csv("', pmart_inputs$file_emeta$name, '"), emeta_cname = "',
            omicDataAttr$cnames$emeta_cname, '")')
 }
 ```
@@ -156,6 +156,37 @@ if (!is.null(pmart_inputs$file_fdata$name)) {
 
 ``r theGroupString``
 
+`r if (!is.null(omicDataAttr$isobaric_info) && omicDataAttr$isobaric_info$norm_info$is_normalized) {paste0("## Isobaric Reference Normalization\n\nIsobaric peptide data was reference normalized. The reference group column was designated as **", omicDataAttr$isobaric_info$exp_cname, "**, the reference column was designated as **",  omicDataAttr$isobaric_info$refpool_cname, "**, and the reference sample notation was **", omicDataAttr$isobaric_info$refpool_notation, "**.\n\n")}`
+
+`r if (!is.null(omicDataAttr$isobaric_info) && omicDataAttr$isobaric_info$norm_info$is_normalized) {"### *Code*\n\n To conduct isobaric reference normalization, use:"}`
+
+```{r Isobaric Norm Code, echo = FALSE}
+if (!is.null(omicDataAttr$isobaric_info) && omicDataAttr$isobaric_info$norm_info$is_normalized) {
+  ref_isonorm_string <- paste0('omicObj <- normalize_isobaric(omicObj, exp_cname = "', omicDataAttr$isobaric_info$exp_cname,
+                               '", apply_norm = TRUE, refpool_channel = "', omicDataAttr$isobaric_info$refpool_cname,
+                               '", refpool_cname = "', omicDataAttr$isobaric_info$refpool_notation, 
+                               '")')
+}
+```
+
+`r if (!is.null(omicDataAttr$isobaric_info) && omicDataAttr$isobaric_info$norm_info$is_normalized) {ref_isonorm_string}`
+
+`r if (!is.null(omicDataAttr$nmr_info) && omicDataAttr$nmr_info$norm_info$is_normalized) {paste0("## NMR Reference Normalization\n\nThe ", omicDataAttr$nmr_info$norm_info$norm_method, ".")}`
+
+```{r NMR Ref Norm Code, echo = FALSE}
+if (!is.null(omicDataAttr$nmr_info) && omicDataAttr$nmr_info$norm_info$is_normalized) {
+  if (is.null(omicDataAttr$nmr_info$sample_property_cname)) {
+      ref_isonorm_string <- paste0('**Code:** omicObj <- normalize_nmr(omicObj, apply_norm = TRUE, backtransform = TRUE,
+                               metabolite_name = "', omicDataAttr$nmr_info$metabolite_name, '")')
+  } else {
+      ref_isonorm_string <- paste0('**Code:** omicObj <- normalize_nmr(omicObj, apply_norm = TRUE, backtransform = TRUE,
+                           sample_property_cname = "', omicDataAttr$nmr_info$sample_property_cname, '")')
+  }
+}
+```
+
+`r if (!is.null(omicDataAttr$nmr_info) && omicDataAttr$nmr_info$norm_info$is_normalized) {ref_isonorm_string}`
+
 `r if (length(omicDataAttr$filters) > 0) {"## Filter Data"}`
 
 ```{r Filter: Table Summarizing Applied Filters}
@@ -177,10 +208,32 @@ if (length(omicDataAttr$filters) != 0) {
                "Type" = "Biomolecule", 
                "Parameters" = paste0("Min Number Molecules: ", filter$threshold), 
                "Summary" = paste0(filter$filtered %>% length(), " biomolecule(s) were filtered."),
-               "First 5 Filtered" = paste0(filter$filtered[1:5][!is.na(filter$filtered[1:5])], collapse = " & ")
-             ))
+               "First 5 Filtered" = paste0(filter$filtered[1:5][!is.na(filter$filtered[1:5])], collapse = " & ")))
     } else
     
+    # CV Filter
+    if (filter$type == "cvFilt") {
+      return(c("Filter" = "CV Filter", 
+               "pmartR Function" = "cv_filter",
+               "Type" = "Biomolecule", 
+               "Parameters" = paste0("Max CV: ", filter$threshold),
+               "Summary" = paste0(filter$filtered %>% length(), " biomolecule(s) were filtered."),
+               "First 5 Filtered" = paste0(filter$filtered[1:5][!is.na(filter$filtered[1:5])], collapse = " & ")))  
+      
+    } else
+      
+    # imd-ANOVA filter
+    if (filter$type == "imdanovaFilt") {
+      return(c("Filter" = "imd-ANOVA Filter", 
+               "pmartR Function" = "imdanova_filter",
+               "Type" = "Biomolecule", 
+               "Parameters" = paste0("Min ANOVA: ", filter$threshold$min_nonmiss_anova,
+                                     " & Min G-Test: ", filter$threshold$min_nonmiss_gtest),
+               "Summary" = paste0(filter$filtered %>% length(), " biomolecule(s) were filtered."),
+               "First 5 Filtered" = paste0(filter$filtered[1:5][!is.na(filter$filtered[1:5])], collapse = " & ")))  
+      
+    } else
+      
     # Proteomics Filter
     if (filter$type == "proteomicsFilt") {
       return(c("Filter" = "Proteomics Filter", 
@@ -194,29 +247,8 @@ if (length(omicDataAttr$filters) != 0) {
                                            filter$filtered$e_meta_remove[1:5][!is.na(filter$filtered$e_meta_remove[1:5])],
                                            collapse = " & ")
               ))
-    } else
       
-    # CV Filter
-    if (filter$type == "cvFilt") {
-      return(c("Filter" = "CV Filter", 
-               "pmartR Function" = "cv_filter",
-               "Type" = "Biomolecule", 
-               "Parameters" = paste0("Max CV: ", filter$threshold),
-               "Summary" = paste0(filter$filtered %>% length(), " biomolecule(s) were filtered."),
-               "First 5 Filtered" = paste0(filter$filtered[1:5][!is.na(filter$filtered[1:5])], collapse = " & ")
-             ))
     } else
-      
-    # imd-ANOVA filter
-    if (filter$type == "imdanovaFilt") {
-      return(c("Filter" = "imd-ANOVA Filter", 
-               "pmartR Function" = "imdanova_filter",
-               "Type" = "Biomolecule", 
-               "Parameters" = paste0("Min ANOVA: ", filter$threshold$min_nonmiss_anova,
-                                     " & Min G-Test: ", filter$threshold$min_nonmiss_gtest),
-               "Summary" = paste0(filter$filtered %>% length(), " biomolecule(s) were filtered."),
-               "First 5 Filtered" = paste0(filter$filtered[1:5][!is.na(filter$filtered[1:5])], collapse = " & ")))
-    } else 
       
     # rmd Filter
     if (filter$type == "rmdFilt") {
@@ -263,35 +295,11 @@ if ("Molecule Filter" %in% FilterTable$Filter) {
   # Generate code chunk 
   molFilt_code <- paste0('omicObj <- applyFilt(molecule_filter(omicObj, use_groups = ', filterInfo$method$use_groups, ', use_batch = ', 
                          filterInfo$method$use_batch, '), omicsData = omicObj, min_num = ', filterInfo$threshold, ')')
-  
-  # Plot the filter 
-  plot(molecule_filter(omicData, use_groups = filterInfo$method$use_groups, use_batch = filterInfo$method$use_batch),
-       min_num = as.numeric(filterInfo$threshold))
 
 }
 ```
 
 `r if ("Molecule Filter" %in% FilterTable$Filter) paste0("**Code:**\n", molFilt_code)`
-
-`r if ("Proteomics Filter" %in% FilterTable$Filter) {paste0("### *Proteomics Filter*\nA degenerate peptide filter (Degenerate Peptides Removed) was applied to the data, which identifies peptides, **", omicDataAttr$cnames$edata_cname, "(s)**, not belonging to a single protein. Additionally, a protein filter can be applied to the data which identifies proteins not having at least a minimum number of peptides (Min Number of Peptides) mapping to them.")}`
-
-```{r Proteomics Filter, echo = FALSE}
-if ("Proteomics Filter" %in% FilterTable$Filter) {
-  
-  # Pull filter information
-  filterInfo <- omicDataAttr$filters[[which(FilterTypes == "proteomicsFilt")[1]]]
-  
-  # Generate code chunk
-  proFilt_code <- paste0('omicObj <- applyFilt(proteomics_filter(omicObj), omicsData = omicObj, min_num_peps = ',
-                         filterInfo$threshold$min_num_peps, ')')
-  
-  # Plot the filter 
-  plot(proteomics_filter(omicData), min_num_peps = as.numeric(filterInfo$threshold$min_num_peps))
-
-}
-```
-
-`r if ("Proteomics Filter" %in% FilterTable$Filter) paste0("**Code:**\n", proFilt_code)`
 
 `r if ("CV Filter" %in% FilterTable$Filter) {paste0("### *CV Filter*\nA coefficient of variation (CV) filter was applied to the data which removes biomolecule(s), **", omicDataAttr$cnames$edata_cname, "(s)**, with a CV greater than the threshold (Max CV).")} `
 
@@ -305,9 +313,6 @@ if ("CV Filter" %in% FilterTable$Filter) {
   cvFilt_code <- paste0('omicObj <- applyFilt(cv_filter(omicObj, use_groups = ', 
                         filterInfo$method$use_groups, '), omicsData = omicObj, cv_threshold = ',
                         filterInfo$threshold, ')')
-  
-  # Plot the filter
-  plot(cv_filter(omicData, use_groups = filterInfo$method$use_groups), cv_threshold = as.numeric(filterInfo$threshold))
   
 }
 ```
@@ -325,16 +330,29 @@ if ("imd-ANOVA Filter" %in% FilterTable$Filter) {
   # Generate code chunk
   imdFilt_code <- paste0('omicObj <- applyFilt(imdanova_filter(omicObj), omicsData = omicObj, min_nonmiss_anova = ', 
                          filterInfo$threshold$min_nonmiss_anova, 
-                         'min_nonmiss_gtest = ', filterInfo$threshold$min_nonmiss_gtest, ')')
-  
-  # Plot the filter
-  plot(imdanova_filter(omicData), min_nonmiss_anova = as.numeric(filterInfo$threshold$min_nonmiss_anova),
-       min_nonmiss_gtest = as.numeric(filterInfo$threshold$min_nonmiss_gtest))
+                         ', min_nonmiss_gtest = ', filterInfo$threshold$min_nonmiss_gtest, ')')
   
 }
 ```
 
 `r if ("imd-ANOVA Filter" %in% FilterTable$Filter) paste0("**Code:**\n", imdFilt_code)`
+
+`r if ("Proteomics Filter" %in% FilterTable$Filter) {paste0("### *Proteomics Filter*\nA degenerate peptide filter (Degenerate Peptides Removed) was applied to the data, which identifies peptides, **", omicDataAttr$cnames$edata_cname, "(s)**, not belonging to a single protein. Additionally, a protein filter can be applied to the data which identifies proteins not having at least a minimum number of peptides (Min Number of Peptides) mapping to them.")}`
+
+```{r Proteomics Filter, echo = FALSE}
+if ("Proteomics Filter" %in% FilterTable$Filter) {
+  
+  # Pull filter information
+  filterInfo <- omicDataAttr$filters[[which(FilterTypes == "proteomicsFilt")[1]]]
+  
+  # Generate code chunk
+  proFilt_code <- paste0('omicObj <- applyFilt(proteomics_filter(omicObj), omicsData = omicObj, min_num_peps = ',
+                         filterInfo$threshold$min_num_peps, ')')
+
+}
+```
+
+`r if ("Proteomics Filter" %in% FilterTable$Filter) paste0("**Code:**\n", proFilt_code)`
 
 `r if ("rMD Filter" %in% FilterTable$Filter) {paste0("### *rMD Filter*\nA robust Mahalanobis distance (rMD) filter was applied to the data, removing sample(s), **", omicDataAttr$cnames$fdata_cname, "(s)**, with an associated rMD p-value of less than the threshold (P-Value Threshold). Metrics used to calculate the p-values are also included (Metrics Used).")}`
 
@@ -348,28 +366,7 @@ if ("rMD Filter" %in% FilterTable$Filter) {
   rmdFilt_code <- paste0('omicObj <- applyFilt(rmd_filter(omicData), omicsData = omicObj, pvalue_threshold = ', 
                          filterInfo$threshold, ')')
   
-  # Plot the filter
-  plot(rmd_filter(omicData), pvalue_threshold = as.numeric(filterInfo$threshold))
-  
 }
-```
-
-`r if ("rMD Filter" %in% FilterTable$Filter) {"Below are the summary statistics of each sample that was removed. If this section is blank, no samples were removed."}`
-
-```{r rMD Filter Samples, echo = FALSE}
-if ("rMD Filter" %in% FilterTable$Filter) {
-  
-  # Pull filter information
-  filterInfo <- omicDataAttr$filters[[which(FilterTypes == "rmdFilt")[1]]]
-  
-  # Plot all samples removed
-  lapply(filterInfo$filtered, function(samp) {
-    #plot(rmd_filter(omicData), sampleID = samp) # Enable this once the error is fixed 
-    paste("The sample", samp, "was removed.")
-  })
-  
-}
-
 ```
 
 `r if ("rMD Filter" %in% FilterTable$Filter) paste0("**Code:**\n", rmdFilt_code)`
