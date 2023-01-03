@@ -46,8 +46,6 @@ list(
       if (is.null(input$file_emeta$datapath)) {edata <- NULL} else {emeta <- read.csv(input$file_emeta$datapath)}
       if (is.null(input$file_fdata$datapath)) {edata <- NULL} else {fdata <- read.csv(input$file_fdata$datapath)}
       
-      browser()
-      
       # Set up specific parameters needed by the peptide data markdown
       params <- list(titleName = input$ReportName,
                      edata = edata,
