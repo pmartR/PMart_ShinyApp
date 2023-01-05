@@ -1,0 +1,359 @@
+---
+params:
+  titleName: ""
+  edata: ""
+  emeta: ""
+  fdata: ""
+  omicData: ""
+  omicStats: ""
+  omicDiag: ""
+  pmart_inputs: ""
+title: "`r params$titleName`"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+---
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, error = FALSE)
+library(dplyr); library(pmartR); library(knitr); library(DT); library(ggplot2);
+library(data.table); library(patchwork); library(purrr)
+```
+
+```{r Read in Results}
+# This data will be passed to the markdown through shiny
+
+# Original edata, emeta, and fdata files 
+edata <- params$edata
+emeta <- params$emeta
+fdata <- params$fdata
+
+# omicData and stats objects 
+omicData <- params$omicData # The omic data (e.g. pepData, proData, lipiData, etc.)
+omicDataAttr <- attributes(omicData) # The omic data attributes 
+omicDiag <- params$omicData # The omic diagnotics for stats
+omicDiagAttr <- attributes(omicDiag) # The omic diagnotics attributes 
+omicStats <- params$omicStats # The omic stats 
+omicStatsAttr <- attributes(omicStats) # The omic stats attributes
+
+# All inputs from tool 
+pmart_inputs <- params$pmart_input
+pmart_inputs$ReportCode <- TRUE
+
+# Get the file type 
+biomolecule <- "RNA-seq"
+```
+
+## Upload, Transform, and Format Data 
+
+### *Expression Data*
+
+An `r biomolecule` expression data file called **`r pmart_inputs$file_edata$name`** 
+  was uploaded to the PMART application. This file contains `r length(omicData$e_data) - 1`
+samples and `r length(unique(omicData$e_data[[omicDataAttr$cnames$edata_cname]]))` 
+transcripts designated by the **`r omicDataAttr$cnames$edata_cname`** column. The original scale of the data was counts and remained unchanged. Missing data is not applicable for RNA-seq counts.
+
+Here is the expression data matrix: 
+  
+```{r Expression Matrix}
+datatable(edata, options = list(scrollX = TRUE))
+```
+
+`r if (!is.null(omicDataAttr$cnames$emeta_cname)) {paste0("### *Biomolecule Information*\nAn associated biomolecule information file was also uploaded called **", pmart_inputs$file_emeta$name, "** and the molecule identifier column was designated as **", omicDataAttr$cnames$emeta_cname, "**. The file contains ", length(omicData$e_meta) - 1, " columns of biomolecule information.")}`
+
+```{r Biomolecule Information}
+if (!is.null(omicDataAttr$cnames$emeta_cname)) {
+  datatable(emeta, options = list(scrollX = TRUE))
+}
+```
+
+
+`r if (!("Var1" %in% colnames(omicData$f_data))) {paste0("### *Sample Information*\nAn associated sample information file was also uploaded called **", pmart_inputs$file_fdata$name, "**. Trimmed samples names **", ifelse(pmart_inputs$usevizsampnames == "No", "were not", "were"), "** used. The column in the sample information file which indicates sample names was designated as **", omicDataAttr$cnames$fdata_cname, "**.")}`
+
+`r if (!is.null(omicDataAttr$group_DF)) {paste0("*Grouping Information*")}`
+
+```{r Grouping Information: Main Effects and Covariates}
+if (!is.null(omicDataAttr$group_DF)) {
+  datatable(fdata, options = list(scrollX = TRUE))
+}
+```
+
+`r if (!is.null(pmart_inputs$pair_id_col)) {paste0("### *Paired Data*\nPaired data was specified. The column with the pair IDs was designated as **", pmart_inputs$pair_id_col, "**, the group identifier column was designated as **", pmart_inputs$pair_group_col, "**, and the value within the group that contains the denominator was determined to be **", pmart_inputs$pair_denom_col, "**. The file contains ", length(unique(omicData$f_data[[pmart_inputs$pair_id_col]])), " unique pairs.")}`
+
+### *Code*
+
+To generate a **`r biomolecule` object** in pmartR for this dataset, use: 
+  
+```{r Formulate Upload Code, echo = FALSE}
+theUploadString <- "No code can be run, as all omicData objects require an e_data and f_data file."
+
+if (!is.null(pmart_inputs$file_fdata$name)) {
+  theUploadString <- paste0('omicObj <- as.', class(omicData), '(e_data = read.csv("', pmart_inputs$file_edata$name, '"), edata_cname = "', omicDataAttr$cnames$edata_cname, '", f_data = read.csv("', pmart_inputs$file_fdata$name, '"), fdata_cname = "', omicDataAttr$cnames$fdata_cname, '")')
+}
+
+if (!is.null(omicDataAttr$cnames$emeta_cname) & !is.null(pmart_inputs$file_fdata$name)) {
+  theUploadString <- theUploadString %>% 
+    substr(1, nchar(theUploadString) - 1) %>%
+    paste0(', e_meta = read.csv("', pmart_inputs$file_emeta$name, '"), emeta_cname = "',
+           omicDataAttr$cnames$emeta_cname, '")')
+}
+```
+
+``r theUploadString``
+
+`r if(!is.null(pmart_inputs$file_fdata$name)) {"Next, to set group designations, use:"}`
+
+```{r Formulate Group Designation Code, echo = FALSE}
+theGroupString <- "No group designation was conducted."
+
+if (!is.null(pmart_inputs$file_fdata$name)) {
+  
+  # Pull groups 
+  gcols <- capture.output({c(pmart_inputs$gcol1, pmart_inputs$gcol2) %>% .[.!= "None"] %>% dput()})
+  if (gcols == 'character(0)') {gcols <- "NULL"}
+  
+  # Pull covariates
+  cvcols <- capture.output({c(pmart_inputs$cvcol1, pmart_inputs$cvcol2) %>% .[.!= "None"] %>% dput()})
+  if (cvcols == 'character(0)') {cvcols <- "NULL"}
+  
+  theGroupString <- paste0('omicObj <- group_designation(omicObj, main_effects = ', gcols, ', covariates = ', cvcols, ')')
+  
+  # Add paired data information 
+  if (!is.null(pmart_inputs$pair_id_col)) {
+    theGroupString <- theGroupString %>%
+      substr(1, nchar(theGroupString) - 1) %>% 
+      paste0(', pair_id = "', pmart_inputs$pair_id_col, '", pair_group = "', pmart_inputs$pair_group_col, '", pair_denom = "', pmart_inputs$pair_denom_col, '")')
+  }
+  
+}
+```
+
+``r theGroupString``
+
+`r if (length(omicDataAttr$filters) > 0) {"## Filter Data"}`
+
+```{r Filter: Table Summarizing Applied Filters}
+#  Put applied filters in a table
+    FilterTable <- NULL
+    
+    if (length(omicDataAttr$filters) > 0) {
+      
+      # List filter types
+      FilterTypes <- lapply(omicDataAttr$filters, function(filter) {filter$type}) %>% unlist()
+      
+      # Iterate through all the filters for the table, apply different logic for each filter type
+      FilterTable <- do.call(rbind, lapply(omicDataAttr$filters, function(filter) {
+        
+        # Molecule Filter
+        if (filter$type == "moleculeFilt") {
+          return(c("Filter" = "Molecule Filter", 
+                   "pmartR Function" = "molecule_filter",
+                   "Type" = "Biomolecule", 
+                   "Parameters" = paste0("Min Number Molecules: ", 
+                                         filter$threshold), 
+                   "Summary" = paste0(filter$filtered %>% length(), 
+                                      " biomolecule(s) were filtered."),
+                   "First 5 Filtered" = paste0(
+                     filter$filtered[1:5][!is.na(filter$filtered[1:5])], 
+                     collapse = " & ")))
+        } else
+          
+          # Total Count Filter
+          if (filter$type == "totalCountFilt") {
+            return(c("Filter" = "Total Count Filter", 
+                     "pmartR Function" = "total_count_filter",
+                     "Type" = "Biomolecule", 
+                     "Parameters" = paste0("Min biomolecule counts: ", 
+                                           filter$threshold),
+                     "Summary" = paste0(filter$filtered %>% length(), 
+                                        " biomolecules(s) were filtered."),
+                     "First 5 Filtered" = paste0(
+                       filter$filtered[1:5][!is.na(filter$filtered[1:5])], 
+                       collapse = " & ")))
+          } else 
+            
+            # RNA Filter
+            if (filter$type == "RNAFilt") {
+              if(is.null(filter$threshold$size_library)){
+                text <- "Non-zero Filter"
+                param_text <- "Minimum Non-zero Counts: "
+                thresh <- filter$threshold$min_nonzero
+              } else {
+                text <- "Library Size Filter"
+                param_text <- "Minimum Library Size: "
+                thresh <- filter$threshold$size_library
+              }
+              
+              return(c("Filter" = text, 
+                       "pmartR Function" = "RNA_filter",
+                       "Type" = "Sample", 
+                       "Parameters" = paste0(param_text, thresh),
+                       "Summary" = paste0(filter$filtered %>% length(), 
+                                          " sample(s) were filtered."),
+                       "First 5 Filtered" = paste0(
+                         filter$filtered[1:5][!is.na(filter$filtered[1:5])], 
+                         collapse = " & ")))
+            } else 
+              
+              # Custom filter
+              if (filter$type == "customFilt") {
+                return(c("Filter" = "Custom Filter", 
+                         "pmartR Function" = "custom_filter",
+                         "Type" = "Sample or Biomolecule", 
+                         "Parameters" = "",
+                         "Summary" = paste0(
+                           filter$filtered$f_data_remove %>% length(), 
+                           " sample(s) were filtered. ",
+                           filter$filtered$e_data_remove %>% length(), 
+                           " biomolecule(s) were filtered. ", 
+                           filter$filtered$e_meta_remove %>% length(),
+                           " ",
+                           get_emeta_cname(omicData),
+                           "(s) were filtered."),
+                         "First 5 Filtered" = paste0(
+                           filter$filtered$f_data_remove[1:5][
+                             !is.na(filter$filtered$f_data_remove[1:5])],
+                           filter$filtered$e_data_remove[1:5][
+                               !is.na(filter$filtered$e_data_remove[1:5])],
+                           filter$filtered$e_meta_remove[1:5][
+                             !is.na(filter$filtered$e_meta_remove[1:5])],
+                           collapse = " & ")))
+                
+              } else {
+                stop(paste0(filter$type, " is not a recognized filter type."))
+                }
+        })) %>% data.table()
+      
+      cbind("Order" = 1:nrow(FilterTable), FilterTable) %>% kable()
+    }
+      
+```
+
+`r if ("Molecule Filter" %in% FilterTable$Filter) {paste0("### *Molecule Filter*\nA molecule filter was applied to the data, which removes biomolecule(s), **", omicDataAttr$cnames$edata_cname, "(s)**, not having at least the minimum number of samples (Min Number Molecules) with non-zero counts.")}`
+
+```{r Molecule Filter, echo = FALSE}
+if ("Molecule Filter" %in% FilterTable$Filter) {
+  
+  # Pull filter information
+  filterInfo <- omicDataAttr$filters[[which(FilterTypes == "moleculeFilt")[1]]]
+  
+  # Generate code chunk 
+  molFilt_code <- paste0('omicObj <- applyFilt(molecule_filter(omicObj, use_groups = ', filterInfo$method$use_groups, ', use_batch = ', 
+                         filterInfo$method$use_batch, '), omicsData = omicObj, min_num = ', filterInfo$threshold, ')')
+
+}
+```
+
+`r if ("Molecule Filter" %in% FilterTable$Filter) paste0("**Code:**\n", molFilt_code)`
+
+`r if ("Total Count Filter" %in% FilterTable$Filter) {paste0("### *Total Count Filter*\nA total count filter was applied to the data, which identifies biomolecules, **", omicDataAttr$cnames$edata_cname, "(s)**, with less than the specified number of counts (Min biomolecule counts) across all samples.")}`
+
+```{r Total Count Filter, echo = FALSE}
+if ("Total Count Filter" %in% FilterTable$Filter) {
+  
+  # Pull filter information
+  filterInfo <- omicDataAttr$filters[[which(FilterTypes == "totalCountFilt")[1]]]
+  
+  # Generate code chunk
+  tc_code <- paste0('omicObj <- applyFilt(total_count_filter(omicObj), omicsData = omicObj, min_count = ', filterInfo$threshold, ')')
+
+}
+```
+
+`r if ("Total Count Filter" %in% FilterTable$Filter) paste0("**Code:**\n", tc_code)`
+
+`r if ("Non-zero Filter" %in% FilterTable$Filter) {paste0("### *Non-zero Filter*\nA non-zero filter was applied to the data, removing sample(s), **", omicDataAttr$cnames$fdata_cname, "(s)**, with library non-zero counts less than the specified threshold (Minimum Non-zero Counts).")}`
+
+```{r RNAFilt nonzero, echo = FALSE}
+if ("Non-zero Filter" %in% FilterTable$Filter) {
+  
+  # Pull filter information
+  filterInfo <- omicDataAttr$filters[[which(FilterTypes == "RNAFilt")]]
+  if(length(filterInfo) > 1){
+    if(is.null(filterInfo[[1]]$threshold$min_nonzero)){
+      filterInfo <- filterInfo[[2]]
+    } else filterInfo <- filterInfo[[1]]
+  }
+  
+  # Generate code chunk
+  nonzero_code <- paste0(
+    'omicObj <- applyFilt(RNA_filter(omicData), omicsData = omicObj, min_nonzero = ', 
+    filterInfo$threshold$min_nonzero, 
+    ')')
+  
+}
+```
+
+`r if ("Non-zero Filter" %in% FilterTable$Filter) paste0("**Code:**\n", nonzero_code)`
+
+`r if ("Library Size Filter" %in% FilterTable$Filter) {paste0("### *Library Size Filter*\nA library size filter was applied to the data, removing sample(s), **", omicDataAttr$cnames$fdata_cname, "(s)**, with total library size less than the specified threshold (Minimum Library Size).")}`
+
+```{r RNAFilt libsize, echo = FALSE}
+if ("Library Size Filter" %in% FilterTable$Filter) {
+  
+  # Pull filter information
+  filterInfo <- omicDataAttr$filters[[which(FilterTypes == "RNAFilt")]]
+  if(length(filterInfo) > 1){
+    if(is.null(filterInfo[[1]]$threshold$size_library)){
+      filterInfo <- filterInfo[[2]]
+    } else filterInfo <- filterInfo[[1]]
+  }
+  
+  # Generate code chunk
+  libsize_code <- paste0(
+    'omicObj <- applyFilt(RNA_filter(omicData), omicsData = omicObj, size_library = ', 
+    filterInfo$threshold$size_library, ')')
+  
+}
+```
+
+`r if ("Library Size Filter" %in% FilterTable$Filter) paste0("**Code:**\n", libsize_code)`
+
+`r if ("Custom Filter" %in% FilterTable$Filter) {paste0("### *Custom Filter*\n Custom filters can be used to remove samples, biomolecules or  ", get_emeta_cname(omicData)", s. See ?custom_filter to learn how to make and apply custom filters.")}`
+
+
+`r if (!is.null(omicStats)) {"## Statistics \n\n"}`
+
+
+```{r Statistics: Text, echo = FALSE}
+if (!is.null(omicStats)) {
+  ComparisonsText <- paste("The following groups were compared:", paste0(paste(omicStatsAttr$comparisons, sep = ","), 
+    "."), "Reported below are the parameters used in the statistical analysis,",
+    "followed by the number of siginificant biomolecules for each comparison.")
+}
+```
+
+`r if (!is.null(omicStats)) {paste(ComparisonsText)}`
+
+```{r Statistics: Table, echo = FALSE}
+    if (!is.null(omicStats)) {
+      
+      # Write the code 
+      stat_code <- paste0(
+        'diffexp_seq(omicObj, method = "',
+        tolower(str_extract(omicStatsAttr$statistical_test, "[A-Za-z]+")),
+        '", p_adjust = "', omicStatsAttr$adjustment_method,
+        '", p_cutoff = ', omicStatsAttr$pval_thresh, ')')
+      
+      # Generate a data table of parameters set 
+      data.table("Attribute" = c("Test Method", 
+                                 "False Discovery Rate Control",
+                                 "Significance Threshold"), 
+                 "Value" = c(
+                   tolower(str_extract(omicStatsAttr$statistical_test, "[A-Za-z]+")), 
+                   omicStatsAttr$adjustment_method,
+                   omicStatsAttr$pval_thresh)) %>% kable()
+    }
+```
+
+
+```{r Statistics: Plot, echo = FALSE}  
+if (!is.null(omicStats)) {
+  
+  # Generate the plot
+  plot(omicStats, bw_theme = TRUE)
+
+}
+```
+
+`r if (!is.null(omicStats)) {paste0('**Code**: ', stat_code)}`
+
+
