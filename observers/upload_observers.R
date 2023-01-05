@@ -321,22 +321,23 @@ observeEvent(input$makeobject, {
   cond_one_obj <- !two_lipids() & !is.null(objects$omicsData)
   cond_two_obj <- two_lipids() & !is.null(objects$omicsData_2)
   
-  if (cond_one_obj | cond_two_obj) {
-    
-    # if(inherits(objects$omicsData, "nmrData") || 
-    #    (inherits(objects$omicsData, "pepData") && 
-    #     input$labeled_yn == "iso")){
-    #   usebutton <- actionButton("goto_reference", "Continue to Reference Tab", style = "margin:5px;width:75%")
-    # } else {
-    #   usebutton <- actionButton("goto_qc", "Continue to Groups Tab", style = "margin:5px;width:75%")
-    # }
-    
+  if (cond_one_obj | cond_two_obj) { 
+
+    is_logtrf  <- isTRUE(
+      grepl("^log", attributes(objects$omicsData)$data_info$data_scale)
+    )
+
+    nolog_warn  <- if(!is_logtrf & !inherits(objects$omicsData, "seqData")) {
+      div(class = "warning-msg", infotext_[["DATA_NOT_LOG"]])
+    } else NULL
+
     showModal(
       modalDialog(
         title = "Upload Success",
         fluidRow(
           column(10,
             align = "center", offset = 1,
+            nolog_warn,
             HTML('<h4 style= "color:#1A5276">Your data has been successfully uploaded! 
                       Future processing will be performed on the uploaded data.</h4>'),
             hr(),

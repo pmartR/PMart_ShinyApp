@@ -119,6 +119,11 @@
   text-align:center;
 }
 
+.warning-msg {
+  color: #9F6000;
+  background-color: #FEEFB3;
+}
+
 .error .btn, .error .form-control, .error-upload .input-group{
   animation: error 0.2s linear;
   animation-fill-mode: forwards;

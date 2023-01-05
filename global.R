@@ -67,6 +67,7 @@ infotext_ <- list(
   which would cause some values to be transformed to -infinity.  Either specify
   that zeros indicate missing values or replace them with NA's or the missing value
   indicator.",
+  "DATA_NOT_LOG" = "Your data is not on the log scale and was not transformed to the log scale, some downstream methods may be disabled, consider recreating your data with a log-transform specified or that your data is already on the log scale.",
   "RESET_FILTERS_WARNING" = "Re-applying filters will delete any statistics you 
   have computed.  If your data was normalized in the normalize tab, you will 
   have to re-normalize it.  Rolled-up protein data will revert to the peptide
