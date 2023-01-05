@@ -38,7 +38,7 @@ Once all dependencies are installed, make sure calling `.libPaths()` displays th
 Either build the container as described in the development section, or pull it from gitlab:
 `docker pull code-registry.emsl.pnl.gov/multiomics-analyses/pmart_standalone:<tag>`
 
-Then run the docker container:  `docker run -p 8300:8300 code-registry.emsl.pnl.gov/multiomics-analyses/pmart_standalone:<tag>`  
+Then run the docker container:  `docker run -v /absolute/path/to/cfg/minio_config.yml:/srv/shiny-server/cfg/minio_config.yml -p 8300:8300 code-registry.emsl.pnl.gov/multiomics-analyses/pmart_standalone:<tag>`  
 ... and navigate to https://127.0.0.1:8300
 
 ***
@@ -71,9 +71,9 @@ If all is well, push new containers to the registry:  `docker push <container_na
 
 #### **3. Dependencies**
 
-We use [renv](https://rstudio.github.io/renv/articles/renv.html) to track dependencies.  The renv.lock file contains a list of dependencies and various details about them.  We use renv to manage the details about dependencies, but try keep track of them manually in DESCRIPTION as well.  This gives us the option of explicity telling renv to include a package when calling `renv::snapshot()`.  When updating the lockfile, we will do the following:
+We use [renv](https://rstudio.github.io/renv/articles/renv.html) to track dependencies.  The renv.lock file contains a list of dependencies and various details about them.  (NOTE:  Currently two dependencies (pmartR and mapDataAccess-lib) that are under active development alongside the app are not tracked in the lockfile, but in `Dockerfile-base`, you will have to install these manually).  We use renv to manage the details about dependencies, but try keep track of them manually in DESCRIPTION as well.  This gives us the option of explicity telling renv to include a package when calling `renv::snapshot()`.  When updating the lockfile, we will do the following:
 
-1.  Set renv to only install sub-dependencies in the "Depends" field of installed packages. `renv::settings$package.dependency.fields("Depends")`.  This should get recorded in ./renv/settings.dcf so you only have to do it once.
+1.  Set renv to only install sub-dependencies in the "Depends" and "Imports" field of installed packages. `renv::settings$package.dependency.fields("Depends", "Imports")`.  This should get recorded in ./renv/settings.dcf so you only have to do it once.
 2.  Snapshot only packages mentioned in the project (including in the DESCRIPTION file), as well as any packages mentioned in their "Depends" field by calling `renv::snapshot(type="implicit")`
 
 #### **4. Misc**
