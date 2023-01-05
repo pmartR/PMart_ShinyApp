@@ -114,7 +114,7 @@ shinyServer(function(session, input, output) {
     x
   })
 
-  # set options("shiny.testmode" = T) to get a developer button
+  # Sys.setenv("SHINY_DEBUG" = 1) to get a developer button
   output$developer_buttons <- renderUI({
 
    if (Sys.getenv("SHINY_DEBUG") == 1) {

@@ -11,10 +11,7 @@ params:
   uploaded_omicData: NULL
   uploaded_omicData_2: NULL
   omicStats: NULL
-  omicDataRoll: NULL
-  omicStatsRoll: NULL
   pmart_inputs: NULL
-  spans_results: NULL
 title: "`r params$titleName`"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 ---
@@ -53,15 +50,6 @@ uploaded_omicData <- params$uploaded_omicData
 uploaded_omicData_2 <- params$uploaded_omicData_2
 uploaded_omicDataAttr <- attributes(uploaded_omicData)
 uploaded_omicDataAttr_2 <- attributes(uploaded_omicData_2)
-
-# specific omicData and stats objects following roll up
-omicDataRoll <- params$omicDataRoll # The rolled up omic data 
-omicDataRollAttr <- attributes(omicDataRoll) # The rolled up omic data attributes
-omicStatsRoll <- params$omicStatsRoll # The omic stats following roll up
-omicStatsRollAttr <- attributes(omicStatsRoll) # The omic stats attributes following roll up
-
-# Spans results
-spans_results <- params$spans_results
 
 # All inputs from tool 
 pmart_inputs <- params$pmart_input

@@ -83,7 +83,7 @@ list(
       # rna filter (library size) 
       else if (grepl("rnafilt_libsize", names(objects$filters)[i])) {
         divs[[i]] <- tagList(
-          tags$b("RNA Filter:"),
+          tags$b("Library Size Filter:"),
           tags$p(sprintf("Library Size Threshold: %s", input$rnafilt_min_libsize)),
           tags$p(sprintf("Removed Samples: %s", ifelse(length(rnafilt_libsize_removed_samps > 0), paste(rnafilt_libsize_removed_samps, collapse = " | "), "None"))),
           hr()
@@ -93,7 +93,7 @@ list(
       # rna filter (min nonzero) 
       else if (grepl("rnafilt_min_nonzero", names(objects$filters)[i])) {
         divs[[i]] <- tagList(
-          tags$b("RNA Filter:"),
+          tags$b("Non-Zero Filter:"),
           tags$p(sprintf("Minimum Nonzero Count Threshold: %s", input$rnafilt_min_nonzero)),
           tags$p(sprintf("Removed Samples: %s", ifelse(length(rnafilt_min_nonzero_removed_samps > 0), paste(rnafilt_min_nonzero_removed_samps, collapse = " | "), "None"))),
           hr()

@@ -180,7 +180,7 @@ output$seqdata_pval_adjust_UI <- renderUI({
 
   
   # to make things look nice
-  prepend <- "Multiple test adjustment "
+  prepend <- "False discovery rate control "
   
   analysis <- switch(
     input$stats_select_method,
@@ -192,10 +192,8 @@ output$seqdata_pval_adjust_UI <- renderUI({
     "seqdata_pval_adjust",
     paste0(prepend, analysis),
     choices = c(
-      "Bonferroni-Holm" = "BH",
-      "Holm" = "holm",
-      "Tukey" = "tukey",
-      "Dunnet" = "dunnett",
+      "Benjamini & Hochberg (FDR)" = "BH",
+      "Benjamini & Yekutieli" = "BY",
       "None" = "none"
     ),
     selected = "BH"

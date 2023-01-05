@@ -56,7 +56,8 @@ filter_UI <- function() {
             add_btn_title = "Add/Remove",
             trailing_hr = FALSE,
             tooltip_text = ttext_[["TOTAL_COUNT_FILT_INFO"]],
-            numericInput("min_num_trans", "Minimum number of transcript counts:", 10, step = 1, min = 0)
+            numericInput("min_num_trans", "Minimum number of transcript counts:", 
+                         10, step = 1, min = 0)
           )
         ), # end biomolecule filter collapse
 
@@ -97,7 +98,8 @@ filter_UI <- function() {
             filter_name = "rnafilt_libsize",
             title = "RNA-seq filter (Library Size)",
             tooltip_text = ttext_[["RNA_FILT_LIB_INFO"]],
-            numericInput("rnafilt_min_lib_size", "Minimum library size in sample:", value = NULL, step = 1, min = 0)
+            numericInput("rnafilt_min_lib_size", "Minimum library size in sample:", 
+                         value = 0, step = 1, min = 0)
           ),
           
           ## RNA_filt - Minimum Nonzero
@@ -106,7 +108,9 @@ filter_UI <- function() {
             title = "RNA-seq filter (Minimum Nonzero)",
             trailing_hr = FALSE,
             tooltip_text = ttext_[["RNA_FILT_MIN_NONZERO_INFO"]],
-            numericInput("rnafilt_min_nonzero", "Minimum number of nonzero observations:", value = NULL, step = 1, min = 0)
+            numericInput("rnafilt_min_nonzero", 
+                         "Minimum number of nonzero observations:", 
+                         value = 0, step = 1, min = 0)
           )
         ),
         

@@ -80,5 +80,5 @@ We use [renv](https://rstudio.github.io/renv/articles/renv.html) to track depend
 
 **Long text**:  Long tooltips or info text should go in the `ttext_` or `infotext_` global variables in `global.R` and then referenced in the app to keep code tidy.
 
-**Developer buttons**:  It is often useful to get access to the console when debugging changes.  To activate developer buttons, set options("shiny.testmode" = TRUE) before running the app.  It helps to put this command in your local .Rprofile.  At least one button should appear floating in the corner of the screen, which when clicked, will give access to the R console for debugging while the app is running.
+**Developer buttons**:  It is often useful to get access to the console when debugging changes.  To activate developer buttons, set `Sys.setenv("SHINY_DEBUG" = 1)` before running the app.  It helps to put this command in your local .Rprofile.  At least one button should appear floating in the corner of the screen, which when clicked, will give access to the R console for debugging while the app is running.
 
