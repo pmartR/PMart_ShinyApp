@@ -4,12 +4,7 @@ params:
   edata: NULL
   emeta: NULL
   fdata: NULL
-  edata_2: NULL
-  emeta_2: NULL
   omicData: NULL
-  omicData_2: NULL
-  uploaded_omicData: NULL
-  uploaded_omicData_2: NULL
   omicStats: NULL
   omicDataRoll: NULL
   omicStatsRoll: NULL

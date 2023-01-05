@@ -113,9 +113,8 @@ test_that("App completes a basic workflow on peptide-level data", {
   app$wait_for_value(input = "execute_spans")
   app$click("execute_spans")
   
-  Sys.sleep(2)
-  
   # params panel opened by default
+  app$wait_for_idle(timeout = 50000)
   app$wait_for_value(output = "spans_table")
   app$set_inputs(
     spans_table_rows_selected = 1,

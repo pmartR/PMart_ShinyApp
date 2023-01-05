@@ -2,7 +2,7 @@ library(shinytest2)
 
 test_that("{shinytest2} recording: pmart_standalone", {
     # app <- AppDriver$new("http://127.0.0.1:3858", name = "pmart_standalone", height = 1187, width = 1263) 
-    app <- AppDriver$new(name = "pmart_standalone", variant = platform_variant(), height = 1187, width = 1263, timeout = 10000, clean_logs=FALSE)
+    app <- AppDriver$new(name = "pmart_standalone", variant = platform_variant(), height = 1187, width = 1263, timeout = 10000)
     app$set_inputs(datatype = "lip")
     app$set_inputs(upload_collapse_left = "datselect")
     app$upload_file(file_edata = file.path(testthat::test_path(), "../../example_data/lipid_edata_pos.csv"))
