@@ -54,7 +54,7 @@ protein_rollup_UI <- function() {
             "Center By:",
             c("Median" = "median", "Mean" = "mean")
           ),
-          numericInput("qrollup_thresh", "Quantile cutoff", value = 0),
+          hidden(numericInput("qrollup_thresh", "Quantile cutoff", value = 0)),
           uiOutput("bpquant_apply_icon_UI"),
           hr(),
           div(

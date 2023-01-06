@@ -20,6 +20,10 @@ observeEvent(c(objects$omicsData, input$top_page), {
   
 })
 
+# disable quantile cutoff input if quantile not selected
+observeEvent(input$which_rollup, {
+  toggle("qrollup_thresh", condition = (input$which_rollup == "qrollup"))
+})
 
 ## BPQUANT
 
