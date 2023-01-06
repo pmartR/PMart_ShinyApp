@@ -29,7 +29,7 @@ fdata <- params$fdata
 # omicData and stats objects 
 omicData <- params$omicData # The omic data (e.g. pepData, proData, lipiData, etc.)
 omicDataAttr <- attributes(omicData) # The omic data attributes 
-omicDiag <- params$omicData # The omic diagnotics for stats
+omicDiag <- params$omicDiag # The omic diagnotics for stats
 omicDiagAttr <- attributes(omicDiag) # The omic diagnotics attributes 
 omicStats <- params$omicStats # The omic stats 
 omicStatsAttr <- attributes(omicStats) # The omic stats attributes
@@ -47,8 +47,8 @@ biomolecule <- "RNA-seq"
 ### *Expression Data*
 
 An `r biomolecule` expression data file called **`r pmart_inputs$file_edata$name`** 
-  was uploaded to the PMART application. This file contains `r length(omicData$e_data) - 1`
-samples and `r length(unique(omicData$e_data[[omicDataAttr$cnames$edata_cname]]))` 
+  was uploaded to the PMART application. This file contains `r length(edata) - 1`
+samples and `r length(unique(edata[[omicDataAttr$cnames$edata_cname]]))` 
 transcripts designated by the **`r omicDataAttr$cnames$edata_cname`** column. The original scale of the data was counts and remained unchanged. Missing data is not applicable for RNA-seq counts.
 
 Here is the expression data matrix: 
@@ -57,7 +57,7 @@ Here is the expression data matrix:
 datatable(edata, options = list(scrollX = TRUE))
 ```
 
-`r if (!is.null(omicDataAttr$cnames$emeta_cname)) {paste0("### *Biomolecule Information*\nAn associated biomolecule information file was also uploaded called **", pmart_inputs$file_emeta$name, "** and the molecule identifier column was designated as **", omicDataAttr$cnames$emeta_cname, "**. The file contains ", length(omicData$e_meta) - 1, " columns of biomolecule information.")}`
+`r if (!is.null(omicDataAttr$cnames$emeta_cname)) {paste0("### *Biomolecule Information*\nAn associated biomolecule information file was also uploaded called **", pmart_inputs$file_emeta$name, "** and the molecule identifier column was designated as **", omicDataAttr$cnames$emeta_cname, "**. The file contains ", length(omicData$e_meta) - 1, " column(s) of biomolecule information.")}`
 
 ```{r Biomolecule Information}
 if (!is.null(omicDataAttr$cnames$emeta_cname)) {
@@ -80,7 +80,7 @@ if (!is.null(omicDataAttr$group_DF)) {
 
 ### *Code*
 
-To generate a **`r biomolecule` object** in pmartR for this dataset, use: 
+To generate an **`r biomolecule` object** in pmartR for this dataset, use: 
   
 ```{r Formulate Upload Code, echo = FALSE}
 theUploadString <- "No code can be run, as all omicData objects require an e_data and f_data file."
@@ -227,7 +227,7 @@ if (!is.null(pmart_inputs$file_fdata$name)) {
       
 ```
 
-`r if ("Molecule Filter" %in% FilterTable$Filter) {paste0("### *Molecule Filter*\nA molecule filter was applied to the data, which removes biomolecule(s), **", omicDataAttr$cnames$edata_cname, "(s)**, not having at least the minimum number of samples (Min Number Molecules) with non-zero counts.")}`
+`r if ("Molecule Filter" %in% FilterTable$Filter) {paste0("#### *Molecule Filter*\nA molecule filter was applied to the data, which removes biomolecule(s), **", omicDataAttr$cnames$edata_cname, "(s)**, not having at least the minimum number of samples (Min Number Molecules) with non-zero counts.")}`
 
 ```{r Molecule Filter, echo = FALSE}
 if ("Molecule Filter" %in% FilterTable$Filter) {
@@ -236,15 +236,15 @@ if ("Molecule Filter" %in% FilterTable$Filter) {
   filterInfo <- omicDataAttr$filters[[which(FilterTypes == "moleculeFilt")[1]]]
   
   # Generate code chunk 
-  molFilt_code <- paste0('omicObj <- applyFilt(molecule_filter(omicObj, use_groups = ', filterInfo$method$use_groups, ', use_batch = ', 
-                         filterInfo$method$use_batch, '), omicsData = omicObj, min_num = ', filterInfo$threshold, ')')
+  molFilt_code <- HTML(paste0('`omicObj <- applyFilt(molecule_filter(omicObj, use_groups = ', filterInfo$method$use_groups, ', use_batch = ', 
+                         filterInfo$method$use_batch, '), omicsData = omicObj, min_num = ', filterInfo$threshold, ')`'))
 
 }
 ```
 
 `r if ("Molecule Filter" %in% FilterTable$Filter) paste0("**Code:**\n", molFilt_code)`
 
-`r if ("Total Count Filter" %in% FilterTable$Filter) {paste0("### *Total Count Filter*\nA total count filter was applied to the data, which identifies biomolecules, **", omicDataAttr$cnames$edata_cname, "(s)**, with less than the specified number of counts (Min biomolecule counts) across all samples.")}`
+`r if ("Total Count Filter" %in% FilterTable$Filter) {paste0("#### *Total Count Filter*\nA total count filter was applied to the data, which identifies biomolecules, **", omicDataAttr$cnames$edata_cname, "(s)**, with less than the specified number of counts (Min biomolecule counts) across all samples.")}`
 
 ```{r Total Count Filter, echo = FALSE}
 if ("Total Count Filter" %in% FilterTable$Filter) {
@@ -253,20 +253,20 @@ if ("Total Count Filter" %in% FilterTable$Filter) {
   filterInfo <- omicDataAttr$filters[[which(FilterTypes == "totalCountFilt")[1]]]
   
   # Generate code chunk
-  tc_code <- paste0('omicObj <- applyFilt(total_count_filter(omicObj), omicsData = omicObj, min_count = ', filterInfo$threshold, ')')
+  tc_code <- HTML(paste0('`omicObj <- applyFilt(total_count_filter(omicObj), omicsData = omicObj, min_count = ', filterInfo$threshold, ')`'))
 
 }
 ```
 
 `r if ("Total Count Filter" %in% FilterTable$Filter) paste0("**Code:**\n", tc_code)`
 
-`r if ("Non-zero Filter" %in% FilterTable$Filter) {paste0("### *Non-zero Filter*\nA non-zero filter was applied to the data, removing sample(s), **", omicDataAttr$cnames$fdata_cname, "(s)**, with library non-zero counts less than the specified threshold (Minimum Non-zero Counts).")}`
+`r if ("Non-zero Filter" %in% FilterTable$Filter) {paste0("#### *Non-zero Filter*\nA non-zero filter was applied to the data, removing sample(s), **", omicDataAttr$cnames$fdata_cname, "(s)**, with library non-zero counts less than the specified threshold (Minimum Non-zero Counts).")}`
 
 ```{r RNAFilt nonzero, echo = FALSE}
 if ("Non-zero Filter" %in% FilterTable$Filter) {
   
   # Pull filter information
-  filterInfo <- omicDataAttr$filters[[which(FilterTypes == "RNAFilt")]]
+  filterInfo <- omicDataAttr$filters[which(FilterTypes == "RNAFilt")]
   if(length(filterInfo) > 1){
     if(is.null(filterInfo[[1]]$threshold$min_nonzero)){
       filterInfo <- filterInfo[[2]]
@@ -274,23 +274,23 @@ if ("Non-zero Filter" %in% FilterTable$Filter) {
   }
   
   # Generate code chunk
-  nonzero_code <- paste0(
-    'omicObj <- applyFilt(RNA_filter(omicData), omicsData = omicObj, min_nonzero = ', 
+  nonzero_code <- HTML(paste0(
+    '`omicObj <- applyFilt(RNA_filter(omicData), omicsData = omicObj, min_nonzero = ', 
     filterInfo$threshold$min_nonzero, 
-    ')')
+    ')`'))
   
 }
 ```
 
 `r if ("Non-zero Filter" %in% FilterTable$Filter) paste0("**Code:**\n", nonzero_code)`
 
-`r if ("Library Size Filter" %in% FilterTable$Filter) {paste0("### *Library Size Filter*\nA library size filter was applied to the data, removing sample(s), **", omicDataAttr$cnames$fdata_cname, "(s)**, with total library size less than the specified threshold (Minimum Library Size).")}`
+`r if ("Library Size Filter" %in% FilterTable$Filter) {paste0("#### *Library Size Filter*\nA library size filter was applied to the data, removing sample(s), **", omicDataAttr$cnames$fdata_cname, "(s)**, with total library size less than the specified threshold (Minimum Library Size).")}`
 
 ```{r RNAFilt libsize, echo = FALSE}
 if ("Library Size Filter" %in% FilterTable$Filter) {
   
   # Pull filter information
-  filterInfo <- omicDataAttr$filters[[which(FilterTypes == "RNAFilt")]]
+  filterInfo <- omicDataAttr$filters[which(FilterTypes == "RNAFilt")]
   if(length(filterInfo) > 1){
     if(is.null(filterInfo[[1]]$threshold$size_library)){
       filterInfo <- filterInfo[[2]]
@@ -298,52 +298,123 @@ if ("Library Size Filter" %in% FilterTable$Filter) {
   }
   
   # Generate code chunk
-  libsize_code <- paste0(
-    'omicObj <- applyFilt(RNA_filter(omicData), omicsData = omicObj, size_library = ', 
-    filterInfo$threshold$size_library, ')')
+  libsize_code <- HTML(paste0(
+    '`omicObj <- applyFilt(RNA_filter(omicData), omicsData = omicObj, size_library = ', 
+    filterInfo$threshold$size_library, ')`'))
   
 }
 ```
 
 `r if ("Library Size Filter" %in% FilterTable$Filter) paste0("**Code:**\n", libsize_code)`
 
-`r if ("Custom Filter" %in% FilterTable$Filter) {paste0("### *Custom Filter*\n Custom filters can be used to remove samples, biomolecules or  ", get_emeta_cname(omicData)", s. See ?custom_filter to learn how to make and apply custom filters.")}`
+`r if ("Custom Filter" %in% FilterTable$Filter) {paste0("### *Custom Filter*\n Custom filters can be used to remove samples, biomolecules or  ", get_emeta_cname(omicData), "s. See ?custom_filter to learn how to make and apply custom filters.")}`
 
+
+
+```{r postfilt text, echo = FALSE}
+if (length(omicDataAttr$filters) > 0) {
+  
+  # Generate code chunk
+  postfilt_text <- HTML(paste0(
+    "Post-filtering, the remaining data contained a total of ", 
+    length(omicData$e_data) -1,
+    " samples and ", 
+    length(unique(omicData$e_data[[omicDataAttr$cnames$edata_cname]])),
+    " transcripts."
+    ))
+  
+}
+```
+
+
+`r if (length(omicDataAttr$filters) > 0) {"### *Post-processing Totals*\n"}`
+`r if (length(omicDataAttr$filters) > 0) {postfilt_text}`
 
 `r if (!is.null(omicStats)) {"## Statistics \n\n"}`
 
 
 ```{r Statistics: Text, echo = FALSE}
 if (!is.null(omicStats)) {
-  ComparisonsText <- paste("The following groups were compared:", paste0(paste(omicStatsAttr$comparisons, sep = ","), 
-    "."), "Reported below are the parameters used in the statistical analysis,",
-    "followed by the number of siginificant biomolecules for each comparison.")
+  ComparisonsText <- paste0(
+    "The following groups were compared: ", 
+    toString(omicStatsAttr$comparisons), 
+    ". Reported below are the parameters used in the statistical analysis, ",
+    "followed by a trend diagnotic plot, then the number of siginificant",
+    " biomolecules for each comparison.")
 }
 ```
 
+
 `r if (!is.null(omicStats)) {paste(ComparisonsText)}`
+
+`r if (!is.null(omicStats)) {"#### User Specifications \n\n"}`
+
 
 ```{r Statistics: Table, echo = FALSE}
     if (!is.null(omicStats)) {
       
-      # Write the code 
-      stat_code <- paste0(
-        'diffexp_seq(omicObj, method = "',
+      method <- switch(
         tolower(str_extract(omicStatsAttr$statistical_test, "[A-Za-z]+")),
+        voom = "voom",
+        deseq2 = "DESeq2",
+        edger = "edgeR"
+        )
+      
+      # Write the code 
+      stat_code <- HTML(paste0(
+        '`diffexp_seq(omicObj, method = "',
+        method,
         '", p_adjust = "', omicStatsAttr$adjustment_method,
-        '", p_cutoff = ', omicStatsAttr$pval_thresh, ')')
+        '", p_cutoff = ', omicStatsAttr$pval_thresh, ')`'))
       
       # Generate a data table of parameters set 
       data.table("Attribute" = c("Test Method", 
                                  "False Discovery Rate Control",
                                  "Significance Threshold"), 
                  "Value" = c(
-                   tolower(str_extract(omicStatsAttr$statistical_test, "[A-Za-z]+")), 
+                   method, 
                    omicStatsAttr$adjustment_method,
                    omicStatsAttr$pval_thresh)) %>% kable()
     }
 ```
 
+`r if (!is.null(omicStats)) {"#### Diagnotic Plot \n\n"}`
+
+
+```{r Statistics: Diag, echo = FALSE}
+if (!is.null(omicStats)) {
+  
+    method <- switch(
+        tolower(str_extract(omicStatsAttr$statistical_test, "[A-Za-z]+")),
+        voom = "voom",
+        deseq2 = "DESeq2",
+        edger = "edgeR"
+        )
+        
+  DiagText <- paste0("Diagnostic plotting of dispersion estimates can help", 
+  "determine if the selected differential expression method is appropriate for",
+  " the provided RNA-seq dataset. If the trend line used to fit the data",
+  " appears to majorly diverge from the data, additional filtering or a",
+  " different method should be considered.")
+  
+  Diagcode <- HTML(paste0('`dispersion_est(omicObj, method = "', method, '")`'))
+}
+```
+
+
+```{r Statistics: diag plot, echo = FALSE}
+if (!is.null(omicStats)) {
+  omicDiag
+}
+```
+
+`r if (!is.null(omicStats)) {DiagText}`
+
+
+`r if (!is.null(omicStats)) {paste0('**Code**: ', Diagcode)}`
+
+
+`r if (!is.null(omicStats)) {"#### Results \n\n"}`
 
 ```{r Statistics: Plot, echo = FALSE}  
 if (!is.null(omicStats)) {

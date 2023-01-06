@@ -40,7 +40,7 @@ output$ReportDownload <- downloadHandler(
     
     ## seqdata ##
     if(inherits(objects$omicsData, "seqData")){
-      template <- "Count_Template.Rmd"
+      template <- "Counts_Template.Rmd"
       
       add_params <- list(
         omicData = objects$omicsData,
