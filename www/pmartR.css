@@ -58,6 +58,14 @@
   display:inline-block;
 }
 
+.inline-btn-margin {
+  margin-top:-5px;
+}
+
+.inline-btn-margin .btn {
+  margin-top: 5px;
+}
+
 /* Mask */
 .loading-mask {
    width: 100%;
