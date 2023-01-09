@@ -3,7 +3,7 @@ download_UI <- function() {
     value = "download_tab",
     class = "collapse_page",
     bsCollapse(
-      id = "download_collapse", multiple = FALSE, open = c("download_plots", "download_tables"),
+      id = "download_collapse", multiple = TRUE, open = c("download_plots", "download_tables"),
       bsCollapsePanel(div(
         "Choose plots to download",
         hidden(div(id = "ok_download_display", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
