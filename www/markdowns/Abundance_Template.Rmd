@@ -64,7 +64,7 @@ biomolecule <- switch(
 ### *Expression Data*
 
 A `r biomolecule` expression data file called **`r pmart_inputs$file_edata$name`** 
-  was uploaded to the PMART application. This file contains `r length(omicData$e_data) - 1`
+  was uploaded to the PMart application. This file contains `r length(omicData$e_data) - 1`
 samples and `r length(unique(omicData$e_data[[omicDataAttr$cnames$edata_cname]]))` 
 biomolecules designated by the **`r omicDataAttr$cnames$edata_cname`** column.
 `r if (omicDataAttr$data_info$data_scale_orig == omicDataAttr$data_info$data_scale) {"The original scale of the data was **omicDataAttr$data_info$data_scale_orig** and remained unchanged."} else {paste0("The original scale of the data was **", omicDataAttr$data_info$data_scale_orig, "** and was transformed to **", omicDataAttr$data_info$data_scale, "**.")}` 
@@ -373,7 +373,7 @@ if ("rMD Filter" %in% FilterTable$Filter) {
 
 `r if ("Custom Filter" %in% FilterTable$Filter) {paste0("### *Custom Filter*\n Custom filters can be used to remove samples, biomolecules or proteins. See ?custom_filter to learn how to make and apply custom filters.")}`
 
-`r if (omicDataAttr$data_info$norm_info$is_normalized) {paste0("## Normalization\n The ", biomolecule, " data **was** normalized with pMART.\n\n### *Manual*")}`
+`r if (omicDataAttr$data_info$norm_info$is_normalized) {paste0("## Normalization\n The ", biomolecule, " data **was** normalized with PMart.\n\n### *Manual*")}`
 
 ```{r Normalization: Manual Plot, echo = FALSE}
 if (omicDataAttr$data_info$norm_info$is_normalized) {
