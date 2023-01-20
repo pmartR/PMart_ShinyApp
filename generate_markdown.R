@@ -23,6 +23,8 @@ list(
           "Reports can only be built if the 'Upload Data' tab has been completed.", "error")
         return(NULL)
       }
+      
+      browser()
           
       # Create a temporary directory and copy the report there
       report <- file.path(tempdir(), "Abundance_Template.Rmd")

@@ -92,9 +92,17 @@ if (is.null(omicDataAttr$cnames$emeta_cname) == FALSE) {
 
 ```{r Grouping Information: Main Effects and Covariates}
 if (is.null(omicDataAttr$group_DF) == FALSE) {
+  
+  main_effects <- c(pmart_inputs$gcol1, pmart_inputs$gcol2) %>% .[.!="None"] %>% paste0(collapse = ", ")
+  covariates <- c(pmart_inputs$cvcol1, pmart_inputs$cvcol2) %>% .[.!="None"] %>% paste0(collapse = ", ")
+  if (main_effects == "") {main_effects <- "not specified"}
+  if (covariates == "") {covariates <- "not specified"}
+  
   datatable(fdata, options = list(scrollX = TRUE))
 }
 ```
+
+`r if (is.null(omicDataAttr$group_DF) == FALSE) {paste0("The main effects were designated as **", main_effects, "** and the covariates were designated as **", covariates, ".**")}`
 
 `r if (!is.null(pmart_inputs$pair_id_col)) {paste0("### *Paired Data*\nPaired data was specified. The column with the pair IDs was designated as **", pmart_inputs$pair_id_col, "**, the group identifier column was designated as **", pmart_inputs$pair_group_col, "**, and the value within the group that contains the denominator was determined to be **", pmart_inputs$pair_denom_col, "**. The file contains ", length(unique(omicData$f_data[[pmart_inputs$pair_id_col]])), " unique pairs.")}`
 
@@ -527,7 +535,7 @@ if (is.null(omicStats) == FALSE) {
 if (is.null(omicStats) == FALSE) {
   
   # Generate the plot
-  plot(omicStats, bw_theme = TRUE)
+  plot(omicStats, bw_theme = TRUE, stacked = T)
 
 }
 ```
