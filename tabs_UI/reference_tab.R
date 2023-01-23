@@ -47,6 +47,7 @@ upload_reference <- function(tabname) {
             uiOutput("Isobaric_ref_group_UI"),
             uiOutput("Isobaric_ref_col_UI"),
             uiOutput("Isobaric_ref_notation_UI"),
+            bsButton(inputId = "refnorm_see_example", label = "See an example", style = "info"),
             br(),
             div(style = "float:right", actionButton("ref_done", div("I'm done specifying values", icon("ok-sign", lib = "glyphicon"))))
           )

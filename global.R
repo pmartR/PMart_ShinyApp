@@ -65,16 +65,18 @@ ttext_ <- list(
 
 #'@details info text NOT displayed in tooltips.  Usually in warnings UI elements
 infotext_ <- list(
-  "LOG_TRANSFORM_ZEROS" = "You have selected to log transform abundance values, 
+  LOG_TRANSFORM_ZEROS = "You have selected to log transform abundance values, 
   and %s to indicate missing values.  However there are zeros in your data
   which would cause some values to be transformed to -infinity.  Either specify
   that zeros indicate missing values or replace them with NA's or the missing value
   indicator.",
-  "DATA_NOT_LOG" = "Your data is not on the log scale and was not transformed to the log scale, some downstream methods may be disabled, consider recreating your data with a log-transform specified or that your data is already on the log scale.",
+  DATA_NOT_LOG = "Your data is not on the log scale and was not transformed to the log scale, some downstream methods may be disabled, consider recreating your data with a log-transform specified or that your data is already on the log scale.",
   "RESET_FILTERS_WARNING" = "Re-applying filters will delete any statistics you 
   have computed.  If your data was normalized in the normalize tab, you will 
   have to re-normalize it.  Rolled-up protein data will revert to the peptide
-  level."
+  level.",
+  REFNORM_COLUMN_INFO_1 = "In the first image below, you would select 'TMT_Plex_Number' as the reference group column (1st dropdown), 'Treatment_Group' as the column containing the indicator for reference samples (2nd dropdown), and 'ReferencePool' as the value indicating reference samples (last dropdown).  ",
+  REFNORM_COLUMN_INFO_2 = "In the second example, you would select 'TMT_Plex_Number' as the reference group column (1st dropdown), 'Is_Reference_Pool' as the column containing the indicator for reference samples (2nd dropdown), and 'Yes' as the value indicating reference samples (last dropdown).  "
 ) 
 
 global_input_choices = list(
