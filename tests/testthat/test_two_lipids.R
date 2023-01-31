@@ -71,5 +71,23 @@ test_that("{shinytest2} recording: pmart_standalone", {
     expect_true(
       all(ftypes_prenorm %in% ftypes_postnorm)
     )
-    expect_equal(1,1)
+    
+    app$wait_for_idle()
+    app$click("goto_statistics")
+    
+    app$wait_for_idle()
+    app$set_inputs(stats_select_method = "imdanova")
+    app$set_inputs(comparison_method = "All pairwise comparisons")
+    app$wait_for_idle()
+    app$set_inputs(imdanova_test_method = "combined")
+    app$wait_for_idle()
+    app$click("apply_imdanova")
+    app$wait_for_idle()
+    app$click("goto_downloads")
+    
+    app$run_js(open_collapse("download_collapse", "Generate Report"))
+    report_name = app$get_value(input = "ReportName")
+    fs <- app$get_download("ReportDownload")
+    
+    expect_true(basename(fs) == paste0(report_name, ".html"))
 })
