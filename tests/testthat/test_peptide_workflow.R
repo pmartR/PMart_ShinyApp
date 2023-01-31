@@ -215,7 +215,14 @@ test_that("App completes a basic workflow on peptide-level data", {
   app$wait_for_value(input = "stats_dismiss")
   app$click("stats_dismiss")
   
+  # Download
   app$set_inputs(top_page = "download_tab")
   app$click("makezipfile")
   
+  # report download
+  app$run_js(open_collapse("download_collapse", "Generate Report"))
+  report_name = app$get_value(input = "ReportName")
+  fs <- app$get_download("ReportDownload")
+  
+  expect_true(basename(fs) == paste0(report_name, ".html"))
 })
