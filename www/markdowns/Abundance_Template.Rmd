@@ -18,11 +18,12 @@ params:
 title: "`r params$titleName`"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 ---
-  
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, error = FALSE)
 library(dplyr); library(pmartR); library(knitr); library(DT); library(ggplot2);
 library(data.table); library(patchwork); library(purrr)
+options(htmlwidgets.TOJSON_ARGS = list(na = 'string'))
 ```
 
 ```{r Read in Results}
@@ -200,7 +201,7 @@ if (!is.null(omicDataAttr$nmr_info) && omicDataAttr$nmr_info$norm_info$is_normal
 
 `r if (!is.null(omicDataAttr$nmr_info) && omicDataAttr$nmr_info$norm_info$is_normalized) {ref_isonorm_string}`
 
-`r if (length(omicDataAttr$filters) > 0) {"## Filter Data"}`
+`r if (length(omicDataAttr$filters) > 0) {"## Filter Data\n The following filters were applied to your data.  Note that if a filter was selected but did not remove any data then it will not be included below."}`
 
 ```{r Filter: Table Summarizing Applied Filters}
 #  Put applied filters in a table
@@ -299,7 +300,7 @@ if (length(omicDataAttr$filters) != 0) {
 
 `r if ("Molecule Filter" %in% FilterTable$Filter) {paste0("### *Molecule Filter*\nA molecule filter was applied to the data, which removes biomolecule(s), **", omicDataAttr$cnames$edata_cname, "(s)**, not having at least the minimum number of samples (Min Number Molecules).")}`
 
-```{r Molecule Filter, echo = FALSE}
+```{r Molecule Filter, echo = FALSE, results = 'asis'}
 if ("Molecule Filter" %in% FilterTable$Filter) {
   
   # Pull filter information
@@ -308,15 +309,15 @@ if ("Molecule Filter" %in% FilterTable$Filter) {
   # Generate code chunk 
   molFilt_code <- paste0('omicObj <- applyFilt(molecule_filter(omicObj, use_groups = ', filterInfo$method$use_groups, ', use_batch = ', 
                          filterInfo$method$use_batch, '), omicsData = omicObj, min_num = ', filterInfo$threshold, ')')
+  
+  cat(sprintf("**Code**: `%s`", molFilt_code)) 
 
 }
 ```
 
-`r if ("Molecule Filter" %in% FilterTable$Filter) paste0("**Code:**\n", molFilt_code)`
-
 `r if ("CV Filter" %in% FilterTable$Filter) {paste0("### *CV Filter*\nA coefficient of variation (CV) filter was applied to the data which removes biomolecule(s), **", omicDataAttr$cnames$edata_cname, "(s)**, with a CV greater than the threshold (Max CV).")} `
 
-```{r CV Filter, echo = FALSE}
+```{r CV Filter, echo = FALSE, results = 'asis'}
 if ("CV Filter" %in% FilterTable$Filter) {
   
   # Pull filter information
@@ -327,14 +328,14 @@ if ("CV Filter" %in% FilterTable$Filter) {
                         filterInfo$method$use_groups, '), omicsData = omicObj, cv_threshold = ',
                         filterInfo$threshold, ')')
   
+  cat(sprintf("**Code**: `%s`", cvFilt_code)) 
+  
 }
 ```
 
-`r if ("CV Filter" %in% FilterTable$Filter) paste0("**Code:**\n", cvFilt_code)`
-
 `r if ("imd-ANOVA Filter" %in% FilterTable$Filter) {paste0("### *imd-ANOVA Filter*\nAn ANOVA filter can be applied to the data which removes biomolecule(s), **", omicDataAttr$cnames$edata_cname, "(s)**, of non-missing values per group (Min ANOVA). Additionaly, an IMD (independence of missing data) filter can be applied to the data, removing biomolecules not having at least a minimum number of non-missing values (Min G-Test) in at least one of the groups.")}`
 
-```{r imd-ANOVA Filter, echo = FALSE}
+```{r imd-ANOVA Filter, echo = FALSE, results = 'asis'}
 if ("imd-ANOVA Filter" %in% FilterTable$Filter) {
   
   # Pull filter information
@@ -345,14 +346,13 @@ if ("imd-ANOVA Filter" %in% FilterTable$Filter) {
                          filterInfo$threshold$min_nonmiss_anova, 
                          ', min_nonmiss_gtest = ', filterInfo$threshold$min_nonmiss_gtest, ')')
   
+  cat(sprintf("**Code**: `%s`", imdFilt_code)) 
 }
 ```
 
-`r if ("imd-ANOVA Filter" %in% FilterTable$Filter) paste0("**Code:**\n", imdFilt_code)`
-
 `r if ("Proteomics Filter" %in% FilterTable$Filter) {paste0("### *Proteomics Filter*\nA degenerate peptide filter (Degenerate Peptides Removed) was applied to the data, which identifies peptides, **", omicDataAttr$cnames$edata_cname, "(s)**, not belonging to a single protein. Additionally, a protein filter can be applied to the data which identifies proteins not having at least a minimum number of peptides (Min Number of Peptides) mapping to them.")}`
 
-```{r Proteomics Filter, echo = FALSE}
+```{r Proteomics Filter, echo = FALSE, results = 'asis'}
 if ("Proteomics Filter" %in% FilterTable$Filter) {
   
   # Pull filter information
@@ -361,15 +361,14 @@ if ("Proteomics Filter" %in% FilterTable$Filter) {
   # Generate code chunk
   proFilt_code <- paste0('omicObj <- applyFilt(proteomics_filter(omicObj), omicsData = omicObj, min_num_peps = ',
                          filterInfo$threshold$min_num_peps, ')')
-
+  
+  cat(sprintf("**Code**: `%s`", proFilt_code)) 
 }
 ```
 
-`r if ("Proteomics Filter" %in% FilterTable$Filter) paste0("**Code:**\n", proFilt_code)`
-
 `r if ("rMD Filter" %in% FilterTable$Filter) {paste0("### *rMD Filter*\nA robust Mahalanobis distance (rMD) filter was applied to the data, removing sample(s), **", omicDataAttr$cnames$fdata_cname, "(s)**, with an associated rMD p-value of less than the threshold (P-Value Threshold). Metrics used to calculate the p-values are also included (Metrics Used).")}`
 
-```{r rMD Filter, echo = FALSE}
+```{r rMD Filter, echo = FALSE, results = 'asis'}
 if ("rMD Filter" %in% FilterTable$Filter) {
   
   # Pull filter information
@@ -379,14 +378,13 @@ if ("rMD Filter" %in% FilterTable$Filter) {
   rmdFilt_code <- paste0('omicObj <- applyFilt(rmd_filter(omicData), omicsData = omicObj, pvalue_threshold = ', 
                          filterInfo$threshold, ')')
   
+  cat(sprintf("**Code**: `%s`", rmdFilt_code)) 
 }
 ```
 
-`r if ("rMD Filter" %in% FilterTable$Filter) paste0("**Code:**\n", rmdFilt_code)`
-
 `r if ("Custom Filter" %in% FilterTable$Filter) {paste0("### *Custom Filter*\n Custom filters can be used to remove samples, biomolecules or proteins. See ?custom_filter to learn how to make and apply custom filters.")}`
 
-`r if (omicDataAttr$data_info$norm_info$is_normalized) {paste0("## Normalization\n The ", biomolecule, " data **was** normalized with PMart.\n\n### *Manual*")}`
+`r if (omicDataAttr$data_info$norm_info$is_normalized) {paste0("## Normalization\n The ", biomolecule, " data **was** normalized with PMart.  \n\n### *Manual*")}`
 
 ```{r Normalization: Manual Plot, echo = FALSE}
 if (omicDataAttr$data_info$norm_info$is_normalized) {
@@ -435,7 +433,11 @@ if (is.null(omicDataAttr$data_info$norm_info$norm_type) == FALSE
 }
 ```
 
-`r if (omicDataAttr$data_info$norm_info$is_normalized) {paste0("**Code**: ", norm_code)}`
+```{r norm code, results = 'asis'}
+if (omicDataAttr$data_info$norm_info$is_normalized){
+  cat(sprintf("**Code**: `%s`", norm_code)) 
+}
+```
 
 `r if (is.null(spans_results) == FALSE) {"### *SPANS*\n\nSPANS **was** run to determine optimum normalization parameters."}`
 
@@ -449,9 +451,9 @@ if (is.null(spans_results) == FALSE) {
 
 ```{r Peptide Statistics: Text, echo = FALSE}
 if (is.null(omicStatsRoll) == FALSE) {
-  ComparisonsText <- paste("The following groups were compared on the peptide level:", paste0(paste(omicStatsRollAttr$comparisons, sep = ","), 
+  ComparisonsText <- paste("The following groups were compared on the peptide level:", paste0(paste(omicStatsRollAttr$comparisons, collapse = ", "), 
     "."), "Reported below are the parameters used in the statistical analysis,",
-    "followed by the number of siginificant biomolecules for each comparison.")
+    "followed by the number of siginificant peptides for each comparison, separated by fold change direction and test type, and finally a plot with the same information.")
 }
 ```
 
@@ -478,6 +480,15 @@ if (is.null(omicStatsRoll) == FALSE) {
 }
 ```
 
+***
+
+```{r Peptide Statistics: significance table}
+if (is.null(omicStatsRoll) == FALSE) {
+  sink("/dev/null"); sig_table <- summary(omicStatsRoll)$sig_table; sink()
+  
+  sig_table |> kable(caption = "Counts of significant (at 0.05) peptides grouped by fold change ('Positive'/'Negative'), and test type ('ANOVA'/'G-test') for each comparison.")
+}
+```
 
 ```{r Peptide Statistics: Plot, echo = FALSE}
 if (is.null(omicStatsRoll) == FALSE) {
@@ -488,27 +499,31 @@ if (is.null(omicStatsRoll) == FALSE) {
 }
 ```
 
-`r if (!is.null(omicStatsRoll)) {paste0('**Code**: ', pepStat_code)}`
+```{r pepstats code, results = 'asis'}
+if (is.null(omicStatsRoll) == FALSE){
+  cat(sprintf("**Code**: `%s`", pepStat_code)) 
+}
+```
 
 `r if (!is.null(omicDataRoll)) {paste0("## Peptide Rollup \n\nPeptides **were** rolled up into proteins. Protein quantification was conducted with the **", pmart_inputs$which_rollup, "** method and was centered with the **", pmart_inputs$which_combine_fn, "** function. The quantile cutoff was restricted to **",  pmart_inputs$qrollup_thresh, "**. The number of quantified proteins was ", omicDataRoll$e_data[[omicDataRollAttr$cnames$edata_cname]] %>% unique() %>% length(), ".")}`
 
-```{r Rollup, echo = FALSE}
+```{r Rollup, echo = FALSE, results='asis'}
 if (!is.null(omicDataRoll)) {
   rollup_code <- paste0('omicObj <- protein_quant(omicObj, method = "', pmart_inputs$which_rollup, '", combine_fn = "', 
                         pmart_inputs$which_combine_fn, '", qrollup_thresh = ', pmart_inputs$qrollup_thresh, ')')
+  
+  cat(sprintf("**Code**: `%s`", rollup_code)) 
 }
 
 ```
-
-`r if (!is.null(omicStatsRoll)) {paste0('**Code**: ', rollup_code)}`
 
 `r if (!is.null(omicStats)) {"## Statistics \n\n"}`
 
 ```{r Statistics: Text, echo = FALSE}
 if (is.null(omicStats) == FALSE) {
-  ComparisonsText <- paste("The following groups were compared on the peptide level:", paste0(paste(omicStatsAttr$comparisons, sep = ","), 
+  ComparisonsText <- paste("The following groups were compared on the peptide level:", paste0(paste(omicStatsAttr$comparisons, collapse = ", "), 
     "."), "Reported below are the parameters used in the statistical analysis,",
-    "followed by the number of siginificant biomolecules for each comparison.")
+    "followed by the number of siginificant biomolecules for each comparison, separated by fold change direction and test type, and finally a plot with the same information.")
 }
 ```
 
@@ -535,16 +550,27 @@ if (is.null(omicStats) == FALSE) {
 }
 ```
 
+***
+
+```{r Statistics: significance table}
+if (is.null(omicStats) == FALSE) {
+  sink("/dev/null"); sig_table <- summary(omicStats)$sig_table; sink()
+  
+  sig_table |> kable(caption = "Counts of significant (at 0.05) biomolecules grouped by fold change ('Positive'/'Negative'), and test type ('ANOVA'/'G-test') for each comparison.")
+}
+```
 
 ```{r Statistics: Plot, echo = FALSE}  
 if (is.null(omicStats) == FALSE) {
   
   # Generate the plot
   plot(omicStats, bw_theme = TRUE, stacked = F)
-
+  
 }
 ```
 
-`r if (!is.null(omicStats)) {paste0('**Code**: ', stat_code)}`
-
-
+```{r stats code, results = 'asis'}
+if (is.null(omicStats) == FALSE) {
+  cat(sprintf("**Code**: `%s`", stat_code)) 
+}
+```
