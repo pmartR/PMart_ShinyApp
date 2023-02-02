@@ -23,6 +23,7 @@ date: "`r format(Sys.time(), '%B %d, %Y')`"
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, error = FALSE)
 library(dplyr); library(pmartR); library(knitr); library(DT); library(ggplot2);
 library(data.table); library(patchwork); library(purrr)
+options(htmlwidgets.TOJSON_ARGS = list(na = 'string'))
 ```
 
 ```{r Read in Results}
@@ -118,12 +119,12 @@ if (is.null(uploaded_omicDataAttr$cnames$emeta_cname) == FALSE) {
 `r if (is.null(omicDataAttr$group_DF) == FALSE) {paste0("*Grouping Information*")}`
 
 ```{r Grouping Information: Main Effects and Covariates}
-if (is.null(uploaded_omicDataAttr$group_DF) == FALSE) {
+if (is.null(omicDataAttr$group_DF) == FALSE) {
   datatable(fdata, options = list(scrollX = TRUE))
 }
 ```
-
 `r if (!is.null(pmart_inputs$pair_id_col)) {paste0("### *Paired Data*\nPaired data was specified. The column with the pair IDs was designated as **", pmart_inputs$pair_id_col, "**, the group identifier column was designated as **", pmart_inputs$pair_group_col, "**, and the value within the group that contains the denominator was determined to be **", pmart_inputs$pair_denom_col, "**. The file contains ", length(unique(uploaded_omicData$f_data[[pmart_inputs$pair_id_col]])), " unique pairs.")}`
+
 
 ### *Code*
 
@@ -183,7 +184,7 @@ if (!is.null(pmart_inputs$file_fdata$name)) {
 
 ``r theGroupString``
 
-`r if (length(omicDataAttr$filters) > 0) {"## Filter Data"}`
+`r if (length(omicDataAttr$filters) > 0) {"## Filter Data\n The following filters were applied to your data.  Note that if a filter was selected but did not remove any data then it will not be included below."}`
 
 ```{r Filter: Table Summarizing Applied Filters}
 #  Put applied filters in a table
@@ -330,7 +331,7 @@ if ("imd-ANOVA Filter" %in% FilterTable$Filter) {
 }
 ```
 
-`r if ("rMD Filter" %in% FilterTable$Filter) {paste0("### *rMD Filter*\nA robust Mahalanobis distance (rMD) filter was applied to the data, removing sample(s) from columns, **", uploaded_omicDataAttr$cnames$fdata_cname, "** and **", uploaded_omicDataAttr_2$cnames$edata_fname, "**, with an associated rMD p-value of less than the threshold (P-Value Threshold). Metrics used to calculate the p-values are also included (Metrics Used).")}`
+`r if ("rMD Filter" %in% FilterTable$Filter) {paste0("### *rMD Filter*\nA robust Mahalanobis distance (rMD) filter was applied to the data, removing sample(s) from columns, **", uploaded_omicDataAttr$cnames$fdata_cname, "** and **", uploaded_omicDataAttr_2$cnames$fdata_cname, "**, with an associated rMD p-value of less than the threshold (P-Value Threshold). Metrics used to calculate the p-values are also included (Metrics Used).")}`
 
 ```{r rMD Filter, echo = FALSE, results = 'asis'}
 if ("rMD Filter" %in% FilterTable$Filter) {
@@ -348,7 +349,7 @@ if ("rMD Filter" %in% FilterTable$Filter) {
 
 `r if ("Custom Filter" %in% FilterTable$Filter) {paste0("### *Custom Filter*\n Custom filters can be used to remove samples, biomolecules or proteins. See ?custom_filter to learn how to make and apply custom filters.")}`
 
-`r if (omicDataAttr$data_info$norm_info$is_normalized) {paste0("## Normalization\n The ", biomolecule, " data **was** normalized with PMart.\n\n### *Manual*")}`
+`r if (omicDataAttr$data_info$norm_info$is_normalized) {paste0("## Normalization\n The ", biomolecule, " data **was** normalized with PMart.  Lipid objects are combined into a single object at this point and retain the sample names of the first object\n\n### *Manual*")}`
 
 ```{r Normalization: Manual Plot, echo = FALSE}
 if (omicDataAttr$data_info$norm_info$is_normalized) {
@@ -409,11 +410,13 @@ if (omicDataAttr$data_info$norm_info$is_normalized){
 
 ```{r Statistics: Text, echo = FALSE}
 if (is.null(omicStats) == FALSE) {
-  ComparisonsText <- paste("The following groups were compared on the peptide level:", paste0(paste(omicStatsAttr$comparisons, sep = ","), 
-    "."), "Reported below are the parameters used in the statistical analysis,",
-    "followed by the number of siginificant biomolecules for each comparison.")
+  ComparisonsText <- paste(
+    "The following groups were compared on the peptide level:",
+    paste0(paste(omicStatsAttr$comparisons, collapse = ", "), "."), 
+    "Reported below are the parameters used in the statistical analysis,",
+    "followed by the number of siginificant biomolecules for each comparison, separated by fold change direction and test type, and finally a plot with the same information.")
 }
-```
+```  
 
 `r if (is.null(omicStats) == FALSE) {paste(ComparisonsText)}`
 
@@ -425,7 +428,7 @@ if (is.null(omicStats) == FALSE) {
                          '", pval_adjust_a = "', omicStatsAttr$adjustment_method_a,
                          '", pval_adjust_g = "', omicStatsAttr$adjustment_method_g,
                          '", pval_thresh = ', omicStatsAttr$pval_thresh, ')')
-  
+
   # Generate a data table of parameters set 
   data.table("Attribute" = c("Test Method", 
                              "ANOVA Multiple Comparison Adjustment", 
@@ -435,6 +438,17 @@ if (is.null(omicStats) == FALSE) {
                          omicStatsAttr$adjustment_method_a,
                          omicStatsAttr$adjustment_method_g,
                          omicStatsAttr$pval_thresh)) %>% kable()
+  
+}
+```
+
+***
+
+```{r Statistics: build significance}
+if (is.null(omicStats) == FALSE) {
+  sink("/dev/null"); sig_table <- summary(omicStats)$sig_table; sink()
+  
+  sig_table |> kable(caption = "Counts of significant (at 0.05) biomolecules grouped by fold change ('Positive'/'Negative'), and test type ('ANOVA'/'G-test') for each comparison.")
 }
 ```
 
@@ -449,5 +463,7 @@ if (is.null(omicStats) == FALSE) {
 ```
 
 ```{r stats code, results = 'asis'}
+if (is.null(omicStats) == FALSE) {
   cat(sprintf("**Code**: `%s`", stat_code)) 
+}
 ```
