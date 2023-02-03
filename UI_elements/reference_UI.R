@@ -210,7 +210,7 @@ assign_ref_uploads <- function(tabname) {
       if(cond_disable_apply) apply_button <- disabled(apply_button)
       if(cond_disable_reset) reset_button <- disabled(reset_button)
       
-      return(div(apply_button, br(), reset_button))
+      return(div(class = "inline-wrapper-1 inline-btn-margin", apply_button, reset_button))
     })
   } else {
     ## Upload
@@ -242,46 +242,26 @@ assign_ref_uploads <- function(tabname) {
       
       
     })
-    output[["Isobaric_fdata_cname_UI"]] <- renderUI({
-
-      if (is.null(input$Isobaric_ref_samps) || input$Isobaric_ref_samps == "No") {
-        return(
-          disabled(pickerInput(paste0(tabname, "_fdata_cname"),
-                               label = "Select column designating sample identifiers",
-                               choices = c("Only applicable with reference normalization", "placeholder")
-          ))
-        )
-      }  else {
-        return(
-          pickerInput(paste0(tabname, "_fdata_cname"),
-                      label = "Select column designating sample identifiers",
-                      choices = colnames(f_data()),
-                      selected = input[[paste0(tabname, "_fdata_cname")]],
-                      multiple = TRUE,
-                      options = pickerOptions(maxOptions = 1),
-                      choicesOpt = list(
-                        disabled = colnames(f_data()) %in% c(
-                          input[[paste0(tabname, "_ref_group")]],
-                          input[[paste0(tabname, "_ref_col")]]
-                        )
-                      )
-          )
-        )
-      }
-    })
+    
     output[["Isobaric_ref_group_UI"]] <- renderUI({
+      
+      label_div <- div(
+        class="inline-wrapper-1", 
+        "Select reference group column",
+        tipify(blueq, title = ttext_[["REF_GROUP_INFO"]])
+      )
       
       if (is.null(is.null(input$Isobaric_ref_samps) || input$Isobaric_ref_samps == "No")) {
         return(
           disabled(pickerInput(paste0(tabname, "_ref_group"),
-                               label = "Select reference group column (one reference must be present for each group)",
+                               label = label_div,
                                choices = c("Only applicable with reference normalization", "placeholder")
           ))
         )
       } else {
         return(
           pickerInput(paste0(tabname, "_ref_group"),
-                      label = "Select reference group column (one reference must be present for each group)",
+                      label = label_div,
                       choices = colnames(f_data()),
                       multiple = TRUE,
                       selected = input[[paste0(tabname, "_ref_group")]],
@@ -297,18 +277,23 @@ assign_ref_uploads <- function(tabname) {
       }
     })
     output[["Isobaric_ref_col_UI"]] <- renderUI({
-
+      label_div <- div(
+        class="inline-wrapper-1", 
+        "Select column designating reference samples",
+        tipify(blueq, title = ttext_[["REF_SAMP_INDICATOR_COL_INFO"]])
+      )
+      
       if (is.null(input$Isobaric_ref_samps) || input$Isobaric_ref_samps == "No") {
         return(
           disabled(pickerInput(paste0(tabname, "_ref_col"),
-                               label = "Select column designating reference samples",
+                               label = label_div,
                                choices = c("Only applicable with reference normalization", "placeholder")
           ))
         )
       } else {
         return(
           pickerInput(paste0(tabname, "_ref_col"),
-                      label = "Select column designating reference samples",
+                      label = label_div,
                       choices = colnames(f_data()),
                       multiple = TRUE,
                       selected = input[[paste0(tabname, "_ref_col")]],
@@ -324,20 +309,25 @@ assign_ref_uploads <- function(tabname) {
       }
     })
     output[["Isobaric_ref_notation_UI"]] <- renderUI({
-
+      label_div <- div(
+        class="inline-wrapper-1", 
+        "Specify reference sample indicator",
+        tipify(blueq, title = ttext_[["REF_SAMP_INDICATOR_SYMBOL_INFO"]])
+      )
+      
       if (is.null(input$Isobaric_ref_samps) || input$Isobaric_ref_samps == "No" ||
                  is.null(input[[paste0(tabname, "_ref_col")]])
       ) {
         return(
           disabled(pickerInput(paste0(tabname, "_ref_notation"),
-                               label = "Select reference sample notation",
+                               label = label_div,
                                choices = c("Reference column required", "placeholder")
           ))
         )
       } else {
         return(
           pickerInput(paste0(tabname, "_ref_notation"),
-                      label = "Select reference sample notation",
+                      label = label_div,
                       choices = unique(
                         as.character(
                           f_data()[[input[[paste0(tabname, "_ref_col")]]]]
@@ -387,8 +377,7 @@ assign_ref_uploads <- function(tabname) {
       if(cond_disable_apply) apply_button <- disabled(apply_button)
       if(cond_disable_reset) reset_button <- disabled(reset_button)
       
-      return( div(class = "inline-wrapper-1", apply_button, reset_button))
-      # return(div( apply_button, br(), reset_button)) #### If the text is still too big after making the buttons smaller across pages
+      return(div(class = "inline-wrapper-1 inline-btn-margin", apply_button, reset_button))
       
     })
   }

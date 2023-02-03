@@ -43,7 +43,7 @@ RUN --mount=type=secret,id=gitlab_pat export GITLAB_PAT="$(cat /run/secrets/gitl
 # install commonly updated packages
 RUN --mount=type=secret,id=gitlab_pat export GITLAB_PAT="$(cat /run/secrets/gitlab_pat)" \
 && R -e "renv::install('gitlab@code.emsl.pnl.gov::multiomics-analyses/mapdataaccess-lib@72e880781d8f4cea7e9045c088020d04fce66d0d')" \
-&& R -e "options(repos=list('CRAN'='https://cran.rstudio.com', 'BioCsoft'='https://bioconductor.org/packages/3.13/bioc'));renv::install('pmartR/pmartR@ae1188423735c32f19d1cdbacc0643da1a857530')"
+&& R -e "options(repos=list('CRAN'='https://cran.rstudio.com', 'BioCsoft'='https://bioconductor.org/packages/3.13/bioc'));renv::install('pmartR/pmartR@cc2b0e5d7b3d4b01ea23e6b563a165a3b8a8ad0c')"
 
 # Install python dependencies
 COPY requirements.txt .

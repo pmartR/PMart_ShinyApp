@@ -81,7 +81,7 @@ filter_UI <- function() {
               )
             ),
             colsize_l = 5, colsize_r = 7,
-            numericInput("pvalue_threshold", "P-value threshold:", 0.001, step = 0.001),
+            numericInput("pvalue_threshold", "P-value threshold:", 0.0001, step = 0.001),
             div(
               id = "rmd_metrics_js", 
               class = "inline-wrapper-1",

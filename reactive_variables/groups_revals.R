@@ -25,7 +25,7 @@ f_data <- reactive({
 })
 
 main_effects <- reactive({
-  main_effects <- input$gcol1[which(input$gcol1 != "None")]
+  main_effects <- c(input$gcol1, input$gcol2)[which(c(input$gcol1, input$gcol2) != "None")]
   if (length(main_effects) == 0) {
     return(NULL)
   } else {
@@ -34,7 +34,7 @@ main_effects <- reactive({
 })
 
 covariates <- reactive({
-  covariates <- input$cvcol1[which(input$cvcol1 != "None")]
+  covariates <- c(input$cvcol1, input$cvcol2)[which(c(input$cvcol1, input$cvcol2) != "None")]
   if (length(covariates) == 0) {
     return(NULL)
   } else {

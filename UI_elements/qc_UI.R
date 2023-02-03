@@ -110,11 +110,17 @@ list(
     
     # ifelse chain for which type of plot
     if (input$which_qc_plot == "boxplots") {
-      p <- plot(objects$omicsData,
-        order_by = order_by, color_by = color_by,
-        use_VizSampNames = use_VizSampNames,
-        bw_theme = TRUE, transformation = transformation
+      pargs <- list(
+        "omicsData" = objects$omicsData,
+        "order_by" = order_by,
+        "color_by" = color_by,
+        "use_VizSampNames" = use_VizSampNames,
+        "bw_theme" = TRUE
       )
+      
+      if(!is.null(transformation)) pargs[['transformation']] <- transformation
+      
+      p <- do.call(plot, pargs)
     }
     else {
       p <- plot(missingval_result(objects$omicsData),

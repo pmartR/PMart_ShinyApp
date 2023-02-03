@@ -44,17 +44,12 @@ upload_reference <- function(tabname) {
               "color:orange;float:right",
               icon("ok", lib = "glyphicon")
             ),
-            # conditionalPanel("typeof input.Isobaric_ref_samps !== 'undefined' && input.Isobaric_ref_samps == 'Yes'", {
-            #   div(
-            # uiOutput('Isobaric_fdata_cname_UI'),
             uiOutput("Isobaric_ref_group_UI"),
             uiOutput("Isobaric_ref_col_UI"),
             uiOutput("Isobaric_ref_notation_UI"),
+            bsButton(inputId = "refnorm_see_example", label = "See an example", style = "info"),
             br(),
             div(style = "float:right", actionButton("ref_done", div("I'm done specifying values", icon("ok-sign", lib = "glyphicon"))))
-            
-              # )
-            # })
           )
       ), # parent collapse
       uiOutput("Isobaric_ref_done_idcols_UI")
@@ -122,14 +117,14 @@ upload_reference <- function(tabname) {
                    tabsetPanel(
                      id = paste0(tabname, "_ref_preview_tables"),
                      tabPanel(
+                       "Reference Groups File",
+                       br(),
+                       withSpinner(uiOutput(paste0(tabname, "_ref_head_fdata_UI")))
+                     ),
+                     tabPanel(
                        paste0("Uploaded ", tabname, " Data File"),
                        br(),
                        withSpinner(uiOutput(paste0(tabname, "_ref_head_edata_UI")))
-                     ),
-                     tabPanel(
-                       "Reference Data File",
-                       br(),
-                       withSpinner(uiOutput(paste0(tabname, "_ref_head_fdata_UI")))
                      ),
                      tabPanel(
                        paste0("Reference Normalized ", tabname, " Data File"),

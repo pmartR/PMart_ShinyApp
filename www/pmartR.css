@@ -58,6 +58,14 @@
   display:inline-block;
 }
 
+.inline-btn-margin {
+  margin-top:-5px;
+}
+
+.inline-btn-margin .btn {
+  margin-top: 5px;
+}
+
 /* Mask */
 .loading-mask {
    width: 100%;
@@ -117,6 +125,11 @@
 .collapse_page .panel-heading{
   font-weight:bold;
   text-align:center;
+}
+
+.warning-msg {
+  color: #9F6000;
+  background-color: #FEEFB3;
 }
 
 .error .btn, .error .form-control, .error-upload .input-group{

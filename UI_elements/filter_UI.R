@@ -226,11 +226,57 @@ list(
       h3(tags$b("Filters have already been applied, these filters will be applied in addition to the existing filters.", style = "color:deepskyblue"))
     } else NULL
     
+    # construct object size info divs
+    n_edata_1 <- attributes(objects$omicsData)$data_info$num_edata
+    n_fdata_1 <- attributes(objects$omicsData)$data_info$num_samps
+    
+    n_edata_2 <- attributes(objects$omicsData_2)$data_info$num_edata
+    n_fdata_2 <- attributes(objects$omicsData_2)$data_info$num_samps
+    
+    n_edata_1_div <-
+      h4(tags$b(
+        sprintf(
+          "Number of biomolecules in object 1 before filters:  %s",
+          formatC(n_edata_1, format = "d", big.mark = ",")
+        )
+      ))
+    n_fdata_1_div <-
+      h4(tags$b(
+        sprintf(
+          "Number of samples in object 1 before filters:  %s",
+          formatC(n_fdata_1, format = "d", big.mark = ",")
+        )
+      ))
+    
+    n_edata_2_div <- if (!is.null(n_edata_2))
+      h4(tags$b(
+        sprintf(
+          "Number of biomolecules in object 2 before filters:  %s",
+          formatC(n_edata_2, format = "d", big.mark = ",")
+        )
+      ))
+    else
+      NULL
+    n_fdata_2_div <- if (!is.null(n_fdata_2))
+      h4(tags$b(
+        sprintf(
+          "Number of samples in object 2 before filters:  %s",
+          formatC(n_fdata_2, format = "d", big.mark = ",")
+        )
+      ))
+    else
+      NULL
+    
     # Display two summary sections if there are two omicsData objects
     if (length(obj2_inds) > 0) {
       tagList(
         h3(tags$b("Samples removed in one object will be removed in the other as well.", style = "color:deepskyblue")),
         filtered_disclaimer,
+        hr(),
+        n_edata_1_div,
+        n_fdata_1_div,
+        n_edata_2_div,
+        n_fdata_2_div,
         hr(),
         h3(tags$b("Filters to be applied to Object 1:  ")),
         hr(),
@@ -243,6 +289,10 @@ list(
     else {
       tagList(
         filtered_disclaimer,
+        hr(),
+        n_edata_1_div,
+        n_fdata_1_div,
+        hr(),
         h3(tags$b("Filters to be applied:  ")),
         divs
       )

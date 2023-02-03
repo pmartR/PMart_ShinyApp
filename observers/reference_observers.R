@@ -32,6 +32,24 @@ success_modal_no_input <-
     footer = NULL
   )
 
+#'@details Help info modal for the pmartR::normalize_isobaric argument selectors
+observeEvent(input$refnorm_see_example, {
+  showModal({
+    modalDialog(
+      div(
+        infotext_[["REFNORM_INTRO"]],
+        br(),
+        infotext_[["REFNORM_COLUMN_INFO_1"]],
+        infotext_[["REFNORM_COLUMN_INFO_2"]]
+      ),
+      div(
+        tags$img(src = "refnorm_example_1.png"),
+        tags$img(src = "refnorm_example_2.png")
+      )
+    )
+  })
+})
+
 #'@details Applies reference normalization inplace to isobaric or NMR omicsData.
 refnorm <- function(){
   

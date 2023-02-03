@@ -42,6 +42,9 @@ ttext_ <- list(
   MOLECULE_FILTER_INFO = "Remove biomolecules that do not have at least some number of nonmissing values",
   PAIRING_INFO = "If your samples are paired, three pieces of information are needed:  The column specifying which pairs of samples go together, the column specifying which group or side of the pairing each sample is in, and which group is to be subtracted from the other.",
   PROTEOMICS_FILTER_INFO = "Remove proteins (and consequently peptides) that do not have a minimum number of peptides mapping to them.  Optionally, also remove peptides that map to more than one protein.",
+  REF_GROUP_INFO = "Reference normalization expects samples to belong to one of several several sets of samples (e.g. plexes or plates), each having a single &quot;reference&quot; sample (e.g. a sample on the plex that is a pool of the study samples on that same plex).  Indicate the columns in the groups file that specify these sets of samples.",
+  REF_SAMP_INDICATOR_COL_INFO = "Select which column in the groups file indicates whether or not a sample is the reference sample for its corresponding sample set. For example, this column might contain only 1s and 0s, with 1s indicating a reference sample, and would have only a single 1 for each sample set (e.g. plex or plate).",
+  REF_SAMP_INDICATOR_SYMBOL_INFO = "Select which value indicates a reference sample.  In the column you selected as indicating reference samples, what value in that column indicates a reference sample.  For example, you might specify that &quot;1&quot; represents a reference sample.",
   RMD_CUSTOM_FILTER_INFO = "If you want to filter out one or more samples based on inspection of the rMd metrics and not a p-value cutoff, note their names and use a custom sample filter from the sample filters section to remove them.",
   RMD_FILTER_INFO = "Identify and filter outlier samples based on their robust Mahalanobis distance, calculated based on up to 5 metrics described in Webb-Robertson et al. (2011)",
   RMD_PROP_MISSING_WARNING = "We advise against using proportion missing as a metric in lipidomics/metabolomics data, as they often have a very low proportion missing.",
@@ -62,15 +65,18 @@ ttext_ <- list(
 
 #'@details info text NOT displayed in tooltips.  Usually in warnings UI elements
 infotext_ <- list(
-  "LOG_TRANSFORM_ZEROS" = "You have selected to log transform abundance values, 
+  LOG_TRANSFORM_ZEROS = "You have selected to log transform abundance values, 
   and %s to indicate missing values.  However there are zeros in your data
   which would cause some values to be transformed to -infinity.  Either specify
   that zeros indicate missing values or replace them with NA's or the missing value
   indicator.",
+  DATA_NOT_LOG = "Your data is not on the log scale and was not transformed to the log scale, some downstream methods may be disabled, consider recreating your data with a log-transform specified or that your data is already on the log scale.",
   "RESET_FILTERS_WARNING" = "Re-applying filters will delete any statistics you 
   have computed.  If your data was normalized in the normalize tab, you will 
   have to re-normalize it.  Rolled-up protein data will revert to the peptide
-  level."
+  level.",
+  REFNORM_COLUMN_INFO_1 = "In the first image below, you would select 'TMT_Plex_Number' as the reference group column (1st dropdown), 'Treatment_Group' as the column containing the indicator for reference samples (2nd dropdown), and 'ReferencePool' as the value indicating reference samples (last dropdown).  ",
+  REFNORM_COLUMN_INFO_2 = "In the second example, you would select 'TMT_Plex_Number' as the reference group column (1st dropdown), 'Is_Reference_Pool' as the column containing the indicator for reference samples (2nd dropdown), and 'Yes' as the value indicating reference samples (last dropdown).  "
 ) 
 
 global_input_choices = list(

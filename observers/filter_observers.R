@@ -29,7 +29,7 @@ apply_filt <- function(){
       }
       
       # proteomics filter
-      if (class(tmp) == "pepData") {
+      if (inherits(tmp, "pepData")) {
         if (isTRUE(!is.null(objects$filters$profilt))) {
           tmp <- applyFilt(objects$filters$profilt, tmp, min_num_peps = input$min_num_peps, redundancy = input$degen_peps)
         }
