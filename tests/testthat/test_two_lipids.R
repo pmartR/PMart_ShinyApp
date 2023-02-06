@@ -2,11 +2,11 @@ library(shinytest2)
 
 test_that("{shinytest2} recording: pmart_standalone", {
     # app <- AppDriver$new("http://127.0.0.1:3858", name = "pmart_standalone", height = 1187, width = 1263) 
-    app <- AppDriver$new(name = "pmart_standalone", variant = platform_variant(), height = 1187, width = 1263, timeout = 10000)
+    app <- AppDriver$new(name = "pmart_standalone", variant = platform_variant(), height = 1187, width = 1263, timeout = 15000)
     app$set_inputs(datatype = "lip")
     app$set_inputs(upload_collapse_left = "datselect")
-    app$upload_file(file_edata = file.path(testthat::test_path(), "../../example_data/lipid_edata_pos.csv"))
-    app$upload_file(file_edata_2 = file.path(testthat::test_path(), "../../example_data/lipid_edata_neg.csv"))
+    app$upload_file(file_edata = file.path(testthat::test_path(), "../../example_data/test_lipid_pos_edata.csv"))
+    app$upload_file(file_edata_2 = file.path(testthat::test_path(), "../../example_data/test_lipid_neg_edata.csv"))
     
     app$wait_for_value(input = "transform")
     app$set_inputs(transform = "log2")
@@ -20,7 +20,7 @@ test_that("{shinytest2} recording: pmart_standalone", {
     app$click("goto_groups")
     
     app$wait_for_value(output = "fdata_UI")
-    app$upload_file(file_fdata = file.path(testthat::test_path(), "../../example_data/fdata_lipids.csv"))
+    app$upload_file(file_fdata = file.path(testthat::test_path(), "../../example_data/test_lipid_fdata.csv"))
     
     app$wait_for_value(input = "gcol1")
     app$set_inputs(gcol1 = "Condition1")
