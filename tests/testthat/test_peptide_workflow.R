@@ -12,7 +12,7 @@ test_that("App completes a basic workflow on peptide-level data", {
   app <- AppDriver$new(name = "pmart_standalone", height = 1199, width = 1299, variant = platform_variant(), timeout = 10000, seed = 551313)
   app$set_inputs(datatype = "pep")
   app$set_inputs(upload_collapse_left = "datselect")
-  app$upload_file(file_edata = file.path(testthat::test_path(), "../../example_data/test_edata_pep.csv"))
+  app$upload_file(file_edata = file.path(testthat::test_path(), "../../example_data/test_pep_edata.csv"))
   
   app$set_inputs(upload_collapse_left = "columnids")
   app$wait_for_value(input = "transform")
@@ -21,7 +21,7 @@ test_that("App completes a basic workflow on peptide-level data", {
   app$wait_for_value(input = "done_idcols")
   app$click("done_idcols")
   app$wait_for_value(input = "emeta_yn")
-  app$upload_file(file_emeta = file.path(testthat::test_path(), "../../example_data/test_emeta_pep.csv"))
+  app$upload_file(file_emeta = file.path(testthat::test_path(), "../../example_data/test_pep_emeta.csv"))
   app$set_inputs(protein_column = "Protein")
   
   app$click("makeobject")
@@ -31,7 +31,7 @@ test_that("App completes a basic workflow on peptide-level data", {
   
   # Groups tab
   app$wait_for_value(input = "usevizsampnames")
-  app$upload_file(file_fdata = file.path(testthat::test_path(), "../../example_data/test_fdata_pep.csv"))
+  app$upload_file(file_fdata = file.path(testthat::test_path(), "../../example_data/test_pep_fdata.csv"))
   app$set_inputs(groups_collapse_left = "fdata_columns")
   app$set_inputs(groups_collapse_right = "fdata_preview")
   

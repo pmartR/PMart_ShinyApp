@@ -29,8 +29,8 @@ fdata <- params$fdata
 # omicData and stats objects 
 omicData <- params$omicData # The omic data (e.g. pepData, proData, lipiData, etc.)
 omicDataAttr <- attributes(omicData) # The omic data attributes 
-omicDiag <- params$omicDiag # The omic diagnotics for stats
-omicDiagAttr <- attributes(omicDiag) # The omic diagnotics attributes 
+omicDiag <- params$omicDiag # The omic diagnostics for stats
+omicDiagAttr <- attributes(omicDiag) # The omic diagnostics attributes 
 omicStats <- params$omicStats # The omic stats 
 omicStatsAttr <- attributes(omicStats) # The omic stats attributes
 
@@ -339,11 +339,10 @@ if (!is.null(omicStats)) {
     "The following groups were compared: ", 
     toString(omicStatsAttr$comparisons), 
     ". Reported below are the parameters used in the statistical analysis, ",
-    "followed by a trend diagnotic plot, then the number of siginificant",
+    "followed by a trend diagnostic plot, then the number of significant",
     " biomolecules for each comparison.")
 }
 ```
-
 
 `r if (!is.null(omicStats)) {paste(ComparisonsText)}`
 
@@ -378,7 +377,7 @@ if (!is.null(omicStats)) {
     }
 ```
 
-`r if (!is.null(omicStats)) {"#### Diagnotic Plot \n\n"}`
+`r if (!is.null(omicStats)) {"#### Diagnostic Plot \n\n"}`
 
 
 ```{r Statistics: Diag, echo = FALSE}
@@ -416,11 +415,19 @@ if (!is.null(omicStats)) {
 
 `r if (!is.null(omicStats)) {"#### Results \n\n"}`
 
+```{r Statistics: significance table}
+if (is.null(omicStats) == FALSE) {
+  sink("/dev/null"); sig_table <- summary(omicStats)$sig_table; sink()
+  
+  sig_table |> kable(caption = "Counts of significant (at 0.05) biomolecules grouped by fold change ('Positive'/'Negative') for each comparison.")
+}
+```
+
 ```{r Statistics: Plot, echo = FALSE}  
 if (!is.null(omicStats)) {
   
   # Generate the plot
-  plot(omicStats, bw_theme = TRUE)
+  plot(omicStats, bw_theme = TRUE, stacked = FALSE)
 
 }
 ```
