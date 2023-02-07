@@ -74,7 +74,7 @@ If all is well, push new containers to the registry:  `docker push <container_na
 We use [renv](https://rstudio.github.io/renv/articles/renv.html) to track dependencies.  The renv.lock file contains a list of dependencies and various details about them.  (NOTE:  Currently two dependencies (pmartR and mapDataAccess-lib) that are under active development alongside the app are not tracked in the lockfile, but in `Dockerfile-base`, you will have to install these manually).  We use renv to manage the details about dependencies, but try keep track of them manually in DESCRIPTION as well.  This gives us the option of explicity telling renv to include a package when calling `renv::snapshot()`.  When updating the lockfile, we will do the following:
 
 1.  Set renv to only install sub-dependencies in the "Depends" and "Imports" field of installed packages. `renv::settings$package.dependency.fields("Depends", "Imports")`.  This should get recorded in ./renv/settings.dcf so you only have to do it once.
-2.  Snapshot only packages mentioned in the project (including in the DESCRIPTION file), as well as any packages mentioned in their "Depends" field by calling `renv::snapshot(type="implicit")`
+2.  Snapshot only packages mentioned in the project (including in the DESCRIPTION file), as well as any packages mentioned in their "Depends" and "Imports" field by calling `renv::snapshot(type="implicit")`
 
 #### **4. Misc**
 
