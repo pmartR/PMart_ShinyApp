@@ -12,12 +12,9 @@ License: BSD + file LICENSE
 Encoding: UTF-8
 Depends:
   colourpicker,
-  DESeq2,
   DT,
   dplyr,
-  edgeR,
   ggplot2,
-  gridExtra,
   markdown,
   plotly,
   purrr,

@@ -88,8 +88,8 @@ observeEvent(input$apply_imdanova, {
         objects$omicsData,
         comparisons = comps,
         test_method = input$imdanova_test_method,
-        pval_adjust_a = pval_adjust_a,
-        pval_adjust_g = pval_adjust_g,
+        pval_adjust_a_multcomp = pval_adjust_a,
+        pval_adjust_g_multcomp = pval_adjust_g,
         pval_thresh = input$pval_thresh
       )
       
