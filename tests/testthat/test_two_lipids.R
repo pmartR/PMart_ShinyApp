@@ -2,11 +2,11 @@ library(shinytest2)
 
 test_that("{shinytest2} recording: pmart_standalone", {
     # app <- AppDriver$new("http://127.0.0.1:3858", name = "pmart_standalone", height = 1187, width = 1263) 
-    app <- AppDriver$new(name = "pmart_standalone", variant = platform_variant(), height = 1187, width = 1263, timeout = 10000, clean_logs=FALSE)
+    app <- AppDriver$new(name = "pmart_standalone", variant = platform_variant(), height = 1187, width = 1263, timeout = 15000)
     app$set_inputs(datatype = "lip")
     app$set_inputs(upload_collapse_left = "datselect")
-    app$upload_file(file_edata = file.path(testthat::test_path(), "../../example_data/lipid_edata_pos.csv"))
-    app$upload_file(file_edata_2 = file.path(testthat::test_path(), "../../example_data/lipid_edata_neg.csv"))
+    app$upload_file(file_edata = file.path(testthat::test_path(), "../../example_data/test_lipid_pos_edata.csv"))
+    app$upload_file(file_edata_2 = file.path(testthat::test_path(), "../../example_data/test_lipid_neg_edata.csv"))
     
     app$wait_for_value(input = "transform")
     app$set_inputs(transform = "log2")
@@ -20,7 +20,7 @@ test_that("{shinytest2} recording: pmart_standalone", {
     app$click("goto_groups")
     
     app$wait_for_value(output = "fdata_UI")
-    app$upload_file(file_fdata = file.path(testthat::test_path(), "../../example_data/fdata_lipids.csv"))
+    app$upload_file(file_fdata = file.path(testthat::test_path(), "../../example_data/test_lipid_fdata.csv"))
     
     app$wait_for_value(input = "gcol1")
     app$set_inputs(gcol1 = "Condition1")
@@ -71,5 +71,23 @@ test_that("{shinytest2} recording: pmart_standalone", {
     expect_true(
       all(ftypes_prenorm %in% ftypes_postnorm)
     )
-    expect_equal(1,1)
+    
+    app$wait_for_idle()
+    app$click("goto_statistics")
+    
+    app$wait_for_idle()
+    app$set_inputs(stats_select_method = "imdanova")
+    app$set_inputs(comparison_method = "All pairwise comparisons")
+    app$wait_for_idle()
+    app$set_inputs(imdanova_test_method = "combined")
+    app$wait_for_idle()
+    app$click("apply_imdanova")
+    app$wait_for_idle()
+    app$click("goto_downloads")
+    
+    app$run_js(open_collapse("download_collapse", "Generate Report"))
+    report_name = app$get_value(input = "ReportName")
+    fs <- app$get_download("ReportDownload")
+    
+    expect_true(basename(fs) == paste0(report_name, ".html"))
 })

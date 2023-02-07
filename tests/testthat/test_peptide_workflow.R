@@ -12,7 +12,7 @@ test_that("App completes a basic workflow on peptide-level data", {
   app <- AppDriver$new(name = "pmart_standalone", height = 1199, width = 1299, variant = platform_variant(), timeout = 10000, seed = 551313)
   app$set_inputs(datatype = "pep")
   app$set_inputs(upload_collapse_left = "datselect")
-  app$upload_file(file_edata = file.path(testthat::test_path(), "../../example_data/test_edata_pep.csv"))
+  app$upload_file(file_edata = file.path(testthat::test_path(), "../../example_data/test_pep_edata.csv"))
   
   app$set_inputs(upload_collapse_left = "columnids")
   app$wait_for_value(input = "transform")
@@ -21,7 +21,7 @@ test_that("App completes a basic workflow on peptide-level data", {
   app$wait_for_value(input = "done_idcols")
   app$click("done_idcols")
   app$wait_for_value(input = "emeta_yn")
-  app$upload_file(file_emeta = file.path(testthat::test_path(), "../../example_data/test_emeta_pep.csv"))
+  app$upload_file(file_emeta = file.path(testthat::test_path(), "../../example_data/test_pep_emeta.csv"))
   app$set_inputs(protein_column = "Protein")
   
   app$click("makeobject")
@@ -31,7 +31,7 @@ test_that("App completes a basic workflow on peptide-level data", {
   
   # Groups tab
   app$wait_for_value(input = "usevizsampnames")
-  app$upload_file(file_fdata = file.path(testthat::test_path(), "../../example_data/test_fdata_pep.csv"))
+  app$upload_file(file_fdata = file.path(testthat::test_path(), "../../example_data/test_pep_fdata.csv"))
   app$set_inputs(groups_collapse_left = "fdata_columns")
   app$set_inputs(groups_collapse_right = "fdata_preview")
   
@@ -113,9 +113,8 @@ test_that("App completes a basic workflow on peptide-level data", {
   app$wait_for_value(input = "execute_spans")
   app$click("execute_spans")
   
-  Sys.sleep(2)
-  
   # params panel opened by default
+  app$wait_for_idle(timeout = 50000)
   app$wait_for_value(output = "spans_table")
   app$set_inputs(
     spans_table_rows_selected = 1,
@@ -215,7 +214,14 @@ test_that("App completes a basic workflow on peptide-level data", {
   app$wait_for_value(input = "stats_dismiss")
   app$click("stats_dismiss")
   
+  # Download
   app$set_inputs(top_page = "download_tab")
   app$click("makezipfile")
   
+  # report download
+  app$run_js(open_collapse("download_collapse", "Generate Report"))
+  report_name = app$get_value(input = "ReportName")
+  fs <- app$get_download("ReportDownload")
+  
+  expect_true(basename(fs) == paste0(report_name, ".html"))
 })

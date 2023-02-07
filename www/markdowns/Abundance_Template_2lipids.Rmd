@@ -1,0 +1,457 @@
+---
+params:
+  titleName: NULL
+  edata: NULL
+  emeta: NULL
+  fdata: NULL
+  edata_2: NULL
+  emeta_2: NULL
+  omicData: NULL
+  omicData_2: NULL
+  uploaded_omicData: NULL
+  uploaded_omicData_2: NULL
+  omicStats: NULL
+  pmart_inputs: NULL
+title: "`r params$titleName`"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+---
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, error = FALSE)
+library(dplyr); library(pmartR); library(knitr); library(DT); library(ggplot2);
+library(data.table); library(patchwork); library(purrr)
+options(htmlwidgets.TOJSON_ARGS = list(na = 'string'))
+```
+
+```{r Read in Results}
+# This data will be passed to the markdown through shiny
+
+# Original edata, emeta, and fdata files 
+edata <- params$edata
+emeta <- params$emeta
+fdata <- params$fdata
+
+edata_2 <- params$edata_2
+emeta_2 <- params$emeta_2
+fdata_2 <- params$fdata_2
+
+# omicData and stats objects 
+omicData <- params$omicData # The omic data (e.g. pepData, proData, lipiData, etc.)
+omicDataAttr <- attributes(omicData) # The omic data attributes 
+
+omicData_2 <- params$omicData_2 # The omic data (e.g. pepData, proData, lipiData, etc.)
+omicDataAttr_2 <- attributes(omicData_2) # The omic data attributes 
+
+# these are the same after normalization
+omicStats <- params$omicStats # The omic stats 
+omicStatsAttr <- attributes(omicStats) # The omic stats attributes
+
+uploaded_omicData <- params$uploaded_omicData
+uploaded_omicData_2 <- params$uploaded_omicData_2
+uploaded_omicDataAttr <- attributes(uploaded_omicData)
+uploaded_omicDataAttr_2 <- attributes(uploaded_omicData_2)
+
+# All inputs from tool 
+pmart_inputs <- params$pmart_input
+pmart_inputs$ReportCode <- TRUE
+
+# Get the file type 
+biomolecule <- switch(
+  class(omicData)[1],
+  "pepData" = "unlabeled peptide",
+  "isobaricpepData" = "isobaric peptide",
+  "proData" = "unlabeled protein",
+  "metabData" = "GC-LC/MS metabolite",
+  "nmrData" = "NMR metabolite",
+  "lipidData" = "lipid"
+)
+```
+
+## Upload, Transform, and Format Data 
+
+### *Expression Data*
+
+Two `r biomolecule` expression data files called **`r pmart_inputs$file_edata$name`** and **`r pmart_inputs$file_edata_2$name`** were uploaded to the PMart application. The files both contain `r length(uploaded_omicData$e_data) - 1` samples and each contains `r attributes(uploaded_omicData)$data_info$num_edata` and `r attributes(uploaded_omicData_2)$data_info$num_edata` biomolecules designated by the **`r get_edata_cname(uploaded_omicData)`** and **`r get_edata_cname(uploaded_omicData_2)`** columns.
+`r if (uploaded_omicDataAttr$data_info$data_scale_orig == omicDataAttr$data_info$data_scale) {"The original scale of the data was **uploaded_omicDataAttr$data_info$data_scale_orig** and remained unchanged."} else {paste0("The original scale of the data was **", uploaded_omicDataAttr$data_info$data_scale_orig, "** and was transformed to **", omicDataAttr$data_info$data_scale, "**.")}` 
+All missing data is denoted with **`r pmart_inputs$na_symbol`** and the expression data
+**`r ifelse(pmart_inputs$normalized_yn == "0", "was not already", "was already")`** normalized. 
+
+Here is the expression data matrix of the first file: 
+
+```{r Expression Matrix}
+datatable(edata, options = list(scrollX = TRUE))
+```
+
+And of the second file:
+
+```{r}
+datatable(edata_2, options = list(scrollX = TRUE))
+```
+
+`r if (is.null(uploaded_omicDataAttr$cnames$emeta_cname) == FALSE) {paste0("### *Biomolecule Information*\nAssociated biomolecule information files were also uploaded.  The first was called **", pmart_inputs$file_emeta$name, "** with molecule identifier column designated as **", uploaded_omicDataAttr$cnames$emeta_cname, "**. The file contains ", length(omicData$e_meta) - 1, " columns of biomolecule information.\n  The second was called **", pmart_inputs$file_emeta_2$name, "** with molecule identifier column designated as **", uploaded_omicDataAttr_2$cnames$emeta_cname, "**. The file contains ", length(uploaded_omicData$e_meta) - 1, " columns of biomolecule information.  The two tables are shown below.")}`
+
+```{r Biomolecule Information}
+if (is.null(uploaded_omicDataAttr$cnames$emeta_cname) == FALSE) {
+  datatable(emeta, options = list(scrollX = TRUE))
+}
+```
+
+```{r Biomolecule Information 2}
+if (is.null(uploaded_omicDataAttr$cnames$emeta_cname) == FALSE) {
+  datatable(emeta_2, options = list(scrollX = TRUE))
+}
+```
+
+`r if ("Var1" %in% colnames(omicData$f_data) == FALSE) {paste0("### *Sample Information*\nAn associated sample information file used for both datasets was also uploaded called **", pmart_inputs$file_fdata$name, "**. Trimmed samples names **", ifelse(pmart_inputs$usevizsampnames == "No", "were not", "were"), "** used. The columnns in the sample information file which indicated sample names in both files were designated as **", pmart_inputs$fdata_id_col, "** and **", pmart_inputs$fdata_id_col_2, "**.")}`
+
+`r if (is.null(omicDataAttr$group_DF) == FALSE) {paste0("*Grouping Information*")}`
+
+```{r Grouping Information: Main Effects and Covariates}
+if (is.null(omicDataAttr$group_DF) == FALSE) {
+  datatable(fdata, options = list(scrollX = TRUE))
+}
+```
+`r if (!is.null(pmart_inputs$pair_id_col)) {paste0("### *Paired Data*\nPaired data was specified. The column with the pair IDs was designated as **", pmart_inputs$pair_id_col, "**, the group identifier column was designated as **", pmart_inputs$pair_group_col, "**, and the value within the group that contains the denominator was determined to be **", pmart_inputs$pair_denom_col, "**. The file contains ", length(unique(uploaded_omicData$f_data[[pmart_inputs$pair_id_col]])), " unique pairs.")}`
+
+
+### *Code*
+
+To generate one of the **`r biomolecule` objects** in pmartR for this dataset, use: 
+  
+```{r Formulate Upload Code, echo = FALSE}
+theUploadString <- "No code can be run, as all omicData objects require an e_data and f_data file."
+
+if (!is.null(pmart_inputs$file_fdata$name)) {
+  theUploadString <- paste0('omicObj <- as.', class(omicData), '(e_data = read.csv("', pmart_inputs$file_edata$name, '"), edata_cname = "', omicDataAttr$cnames$edata_cname, '", f_data = read.csv("', pmart_inputs$file_fdata$name, '"), fdata_cname = "', omicDataAttr$cnames$fdata_cname, '")')
+}
+
+if (!is.null(omicDataAttr$cnames$emeta_cname) & !is.null(pmart_inputs$file_fdata$name)) {
+  theUploadString <- theUploadString %>% 
+    substr(1, nchar(theUploadString) - 1) %>%
+    paste0(', e_meta = read.csv("', pmart_inputs$file_emeta$name, '"), emeta_cname = "',
+           omicDataAttr$cnames$emeta_cname, '")')
+}
+```
+
+``r theUploadString``
+
+Next, to log transform the data (if necessary), use: 
+
+```{r Formulate Transformation Code}
+theTransformString <- paste0('omicObj <- edata_transform(omicObj, data_scale = "', omicDataAttr$data_info$data_scale, '")')
+```
+
+``r theTransformString``
+
+`r if(!is.null(pmart_inputs$file_fdata$name)) {"Next, to set group designations, use:"}`
+
+```{r Formulate Group Designation Code, echo = FALSE}
+theGroupString <- "No group designation was conducted."
+
+if (!is.null(pmart_inputs$file_fdata$name)) {
+  
+  # Pull groups 
+  gcols <- capture.output({c(pmart_inputs$gcol1, pmart_inputs$gcol2) %>% .[.!= "None"] %>% dput()})
+  if (gcols == 'character(0)') {gcols <- "NULL"}
+  
+  # Pull covariates
+  cvcols <- capture.output({c(pmart_inputs$cvcol1, pmart_inputs$cvcol2) %>% .[.!= "None"] %>% dput()})
+  if (cvcols == 'character(0)') {cvcols <- "NULL"}
+  
+  theGroupString <- paste0('omicObj <- group_designation(omicObj, main_effects = ', gcols, ', covariates = ', cvcols, ')')
+  
+  # Add paired data information 
+  if (!is.null(pmart_inputs$pair_id_col)) {
+    theGroupString <- theGroupString %>%
+      substr(1, nchar(theGroupString) - 1) %>% 
+      paste0(', pair_id = "', pmart_inputs$pair_id_col, '", pair_group = "', pmart_inputs$pair_group_col, '", pair_denom = "', pmart_inputs$pair_denom_col, '")')
+  }
+  
+}
+```
+
+``r theGroupString``
+
+`r if (length(omicDataAttr$filters) > 0) {"## Filter Data\n The following filters were applied to your data.  Note that if a filter was selected but did not remove any data then it will not be included below."}`
+
+```{r Filter: Table Summarizing Applied Filters}
+#  Put applied filters in a table
+FilterTable <- NULL
+
+if (length(omicDataAttr$filters) != 0) {
+  
+  # List filter types
+  FilterTypes <- lapply(omicDataAttr$filters, function(filter) {filter$type}) %>% unlist()
+  
+  # Iterate through all the filters for the table, apply different logic for each filter type
+  FilterTable <- do.call(rbind, lapply(omicDataAttr$filters, function(filter) {
+    
+    # Molecule Filter
+    if (filter$type == "moleculeFilt") {
+      return(c("Filter" = "Molecule Filter", 
+               "pmartR Function" = "molecule_filter",
+               "Type" = "Biomolecule", 
+               "Parameters" = paste0("Min Number Molecules: ", filter$threshold), 
+               "Summary" = paste0(filter$filtered %>% length(), " biomolecule(s) were filtered."),
+               "First 5 Filtered" = paste0(filter$filtered[1:5][!is.na(filter$filtered[1:5])], collapse = " & ")))
+    } else
+    
+    # CV Filter
+    if (filter$type == "cvFilt") {
+      return(c("Filter" = "CV Filter", 
+               "pmartR Function" = "cv_filter",
+               "Type" = "Biomolecule", 
+               "Parameters" = paste0("Max CV: ", filter$threshold),
+               "Summary" = paste0(filter$filtered %>% length(), " biomolecule(s) were filtered."),
+               "First 5 Filtered" = paste0(filter$filtered[1:5][!is.na(filter$filtered[1:5])], collapse = " & ")))  
+      
+    } else
+      
+    # imd-ANOVA filter
+    if (filter$type == "imdanovaFilt") {
+      return(c("Filter" = "imd-ANOVA Filter", 
+               "pmartR Function" = "imdanova_filter",
+               "Type" = "Biomolecule", 
+               "Parameters" = paste0("Min ANOVA: ", filter$threshold$min_nonmiss_anova,
+                                     " & Min G-Test: ", filter$threshold$min_nonmiss_gtest),
+               "Summary" = paste0(filter$filtered %>% length(), " biomolecule(s) were filtered."),
+               "First 5 Filtered" = paste0(filter$filtered[1:5][!is.na(filter$filtered[1:5])], collapse = " & ")))  
+      
+    } else
+      
+    # Proteomics Filter
+    if (filter$type == "proteomicsFilt") {
+      return(c("Filter" = "Proteomics Filter", 
+               "pmartR Function" = "proteomics_filter",
+               "Type" = "Biomolecule", 
+               "Parameters" = paste0("Min Number of Peptides: ", filter$threshold$min_num_peps,
+                      " & Degenerate Peptides Removed: ", ifelse(filter$threshold$degen_peps, "Yes", "No")),
+               "Summary" = paste0(filter$filtered$e_data_remove %>% length(), " biomolecule(s) were filtered and ",
+                                  filter$filtered$e_meta_remove %>% length(), " protein(s) were filtered."),
+               "First 5 Filtered" = paste0(filter$filtered$e_data_remove[1:5][!is.na(filter$filtered$e_data_remove[1:5])],
+                                           filter$filtered$e_meta_remove[1:5][!is.na(filter$filtered$e_meta_remove[1:5])],
+                                           collapse = " & ")
+              ))
+      
+    } else
+      
+    # rmd Filter
+    if (filter$type == "rmdFilt") {
+      return(c("Filter" = "rMD Filter", 
+               "pmartR Function" = "rmd_filter",
+               "Type" = "Sample", 
+               "Parameters" = paste0("P-Value Threshold: ", filter$threshold, 
+                                     " & Metrics Used: ", pmart_inputs$rmd_metrics %>% paste(collapse = ", ")),
+               "Summary" = paste0(filter$filtered %>% length(), " sample(s) were filtered."),
+               "First 5 Filtered" = paste0(filter$filtered[1:5][!is.na(filter$filtered[1:5])], collapse = " & ")))
+    } else 
+      
+    # Custom filter
+    if (filter$type == "customFilt") {
+      return(c("Filter" = "Custom Filter", 
+               "pmartR Function" = "custom_filter",
+               "Type" = "Sample or Biomolecule", 
+               "Parameters" = "",
+               "Summary" = paste0(filter$filtered$f_data_remove %>% length(), " sample(s) were filtered. ",
+                           filter$filtered$e_data_remove %>% length(), " biomolecule(s) were filtered. ", 
+                           filter$filtered$e_meta_remove %>% length(), " protein(s) were filtered."),
+               "First 5 Filtered" = paste0(filter$filtered$f_data_remove[1:5][!is.na(filter$filtered$f_data_remove[1:5])], 
+                                           filter$filtered$e_data_remove[1:5][!is.na(filter$filtered$e_data_remove[1:5])],
+                                           filter$filtered$e_meta_remove[1:5][!is.na(filter$filtered$e_meta_remove[1:5])],
+                                           collapse = " & ")))
+      
+    } else {stop(paste0(filter$type, " is not a recognized filter type."))}
+  
+  })) %>% data.table()
+  
+  cbind("Order" = 1:nrow(FilterTable), FilterTable) %>% kable()
+  
+}
+```
+
+`r if ("Molecule Filter" %in% FilterTable$Filter) {paste0("### *Molecule Filter*\nA molecule filter was applied to the data, which removes biomolecule(s) in columns, **", uploaded_omicDataAttr$cnames$edata_cname, "** and", uploaded_omicDataAttr_2$cnames$edata_cname, "not having at least the minimum number of samples (Min Number Molecules).")}`
+
+```{r Molecule Filter, echo = FALSE, results = 'asis'}
+if ("Molecule Filter" %in% FilterTable$Filter) {
+  
+  # Pull filter information
+  filterInfo <- omicDataAttr$filters[[which(FilterTypes == "moleculeFilt")[1]]]
+  
+  # Generate code chunk 
+  molFilt_code <- paste0('omicObj <- applyFilt(molecule_filter(omicObj, use_groups = ', filterInfo$method$use_groups, ', use_batch = ', 
+                         filterInfo$method$use_batch, '), omicsData = omicObj, min_num = ', filterInfo$threshold, ')')
+  
+  cat(sprintf("**Code**: `%s`", molFilt_code))
+  
+}
+```
+
+`r if ("CV Filter" %in% FilterTable$Filter) {paste0("### *CV Filter*\nA coefficient of variation (CV) filter was applied to the data which removes biomolecule(s), **", uploaded_omicDataAttr$cnames$edata_cname, "** and **", uploaded_omicDataAttr_2$cnames$edata_cname, "**, with a CV greater than the threshold (Max CV).")} `
+
+```{r CV Filter, echo = FALSE, results = 'asis'}
+if ("CV Filter" %in% FilterTable$Filter) {
+  
+  # Pull filter information
+  filterInfo <- omicDataAttr$filters[[which(FilterTypes == "cvFilt")[1]]]
+  
+  # Generate code chunk
+  cvFilt_code <- paste0('omicObj <- applyFilt(cv_filter(omicObj, use_groups = ', 
+                        filterInfo$method$use_groups, '), omicsData = omicObj, cv_threshold = ',
+                        filterInfo$threshold, ')')
+  cat(sprintf("**Code**: `%s`", cvFilt_code))
+}
+```
+
+`r if ("imd-ANOVA Filter" %in% FilterTable$Filter) {paste0("### *imd-ANOVA Filter*\nAn ANOVA filter can be applied to the data which removes biomolecule(s), **", uploaded_omicDataAttr$cnames$edata_cname, "** and **", uploaded_omicDataAttr_2$cnames$edata_cname, "**, of non-missing values per group (Min ANOVA). Additionaly, an IMD (independence of missing data) filter can be applied to the data, removing biomolecules not having at least a minimum number of non-missing values (Min G-Test) in at least one of the groups.")}`
+
+```{r imd-ANOVA Filter, echo = FALSE, results = 'asis'}
+if ("imd-ANOVA Filter" %in% FilterTable$Filter) {
+  
+  # Pull filter information
+  filterInfo <- omicDataAttr$filters[[which(FilterTypes == "imdanovaFilt")[1]]]
+  
+  # Generate code chunk
+  imdFilt_code <- paste0('omicObj <- applyFilt(imdanova_filter(omicObj), omicsData = omicObj, min_nonmiss_anova = ', 
+                         filterInfo$threshold$min_nonmiss_anova, 
+                         ', min_nonmiss_gtest = ', filterInfo$threshold$min_nonmiss_gtest, ')')
+  
+  cat(sprintf("**Code**: `%s`", molFilt_code)) 
+}
+```
+
+`r if ("rMD Filter" %in% FilterTable$Filter) {paste0("### *rMD Filter*\nA robust Mahalanobis distance (rMD) filter was applied to the data, removing sample(s) from columns, **", uploaded_omicDataAttr$cnames$fdata_cname, "** and **", uploaded_omicDataAttr_2$cnames$fdata_cname, "**, with an associated rMD p-value of less than the threshold (P-Value Threshold). Metrics used to calculate the p-values are also included (Metrics Used).")}`
+
+```{r rMD Filter, echo = FALSE, results = 'asis'}
+if ("rMD Filter" %in% FilterTable$Filter) {
+  
+  # Pull filter information
+  filterInfo <- omicDataAttr$filters[[which(FilterTypes == "rmdFilt")[1]]]
+  
+  # Generate code chunk
+  rmdFilt_code <- paste0('omicObj <- applyFilt(rmd_filter(omicData), omicsData = omicObj, pvalue_threshold = ', 
+                         filterInfo$threshold, ')')
+  
+  cat(sprintf("**Code**: `%s`", rmdFilt_code))
+}
+```
+
+`r if ("Custom Filter" %in% FilterTable$Filter) {paste0("### *Custom Filter*\n Custom filters can be used to remove samples, biomolecules or proteins. See ?custom_filter to learn how to make and apply custom filters.")}`
+
+`r if (omicDataAttr$data_info$norm_info$is_normalized) {paste0("## Normalization\n The ", biomolecule, " data **was** normalized with PMart.  Lipid objects are combined into a single object at this point and retain the sample names of the first object\n\n### *Manual*")}`
+
+```{r Normalization: Manual Plot, echo = FALSE}
+if (omicDataAttr$data_info$norm_info$is_normalized) {
+  
+  if (is.null(omicDataAttr$group_DF) == FALSE) {
+    
+    plot(omicData, order_by = pmart_inputs$gcol1, color_by = pmart_inputs$gcol1, bw_theme = TRUE)
+    
+  } else {plot(omicData, bw_theme = TRUE)}  
+
+}
+```
+
+```{r Normalization: Manual Data Table, echo = FALSE}
+if (is.null(omicDataAttr_2$data_info$norm_info$norm_type) == FALSE 
+    && omicDataAttr_2$data_info$norm_info$norm_type == "global") {
+  
+  SubsetParameters <- ifelse(is.null(omicDataAttr_2$data_info$norm_info$subset_params), "",
+    paste(lapply(names(omicDataAttr_2$data_info$norm_info$subset_params), function(name) {
+      paste0(name, ": ", omicDataAttr_2$data_info$norm_info$subset_params[[name]])}), collapse = " & "))
+  
+  # Start the normalization code
+  norm_code_start <- paste0('omicObj <- normalize_global(omicObj, subset_fn = "', omicDataAttr_2$data_info$norm_info$subset_fn, 
+    '", norm_fn = "', omicDataAttr_2$data_info$norm_info$norm_fn, '", apply_norm = TRUE, backtransform = TRUE')
+  
+  
+  if (is.null(omicDataAttr_2$data_info$norm_info$subset_params)) {
+    norm_code <- paste0(norm_code_start, ')')
+  } else {
+    
+    # Collapse the normalization parameters
+    the_norm_params <- omicDataAttr_2$data_info$norm_info$subset_params
+    the_collapsed_params <- lapply(1:length(the_norm_params), function(el) {
+      paste0('"', names(the_norm_params)[el], '" = ', the_norm_params[el])
+    }) %>% unlist() 
+    the_param_string <- paste0('list(', paste0(the_collapsed_params, collapse = ", "), ')')
+    
+    norm_code <- paste0(norm_code_start, ', params = ', the_param_string, ')')
+    
+  }
+  
+  data.table("Attribute" = c("Subset Function", "Subset Parameters", "Normalization Function"),
+             "Value" = c(omicDataAttr_2$data_info$norm_info$subset_fn, 
+                         SubsetParameters, 
+                         omicDataAttr_2$data_info$norm_info$norm_fn)) %>% kable()
+  
+  
+}
+```
+
+```{r norm code, results = 'asis'}
+if (omicDataAttr$data_info$norm_info$is_normalized){
+  cat(sprintf("**Code**: `%s`", norm_code)) 
+}
+```
+
+`r if (!is.null(omicStats)) {"## Statistics \n\n"}`
+
+```{r Statistics: Text, echo = FALSE}
+if (is.null(omicStats) == FALSE) {
+  ComparisonsText <- paste(
+    "The following groups were compared on the peptide level:",
+    paste0(paste(omicStatsAttr$comparisons, collapse = ", "), "."), 
+    "Reported below are the parameters used in the statistical analysis,",
+    "followed by the number of siginificant biomolecules for each comparison, separated by fold change direction and test type, and finally a plot with the same information.")
+}
+```  
+
+`r if (is.null(omicStats) == FALSE) {paste(ComparisonsText)}`
+
+```{r Statistics: Table, echo = FALSE}
+if (is.null(omicStats) == FALSE) {
+  
+  # Write the code 
+  stat_code <- paste0('imd_anova(omicObj, test_method = "', omicStatsAttr$statistical_test,
+                         '", pval_adjust_a = "', omicStatsAttr$adjustment_method_a,
+                         '", pval_adjust_g = "', omicStatsAttr$adjustment_method_g,
+                         '", pval_thresh = ', omicStatsAttr$pval_thresh, ')')
+
+  # Generate a data table of parameters set 
+  data.table("Attribute" = c("Test Method", 
+                             "ANOVA Multiple Comparison Adjustment", 
+                             "G-Test Multiple Comparison Adjustment",
+                             "Significance Threshold"), 
+             "Value" = c(omicStatsAttr$statistical_test, 
+                         omicStatsAttr$adjustment_method_a,
+                         omicStatsAttr$adjustment_method_g,
+                         omicStatsAttr$pval_thresh)) %>% kable()
+  
+}
+```
+
+***
+
+```{r Statistics: build significance}
+if (is.null(omicStats) == FALSE) {
+  sink("/dev/null"); sig_table <- summary(omicStats)$sig_table; sink()
+  
+  sig_table |> kable(caption = "Counts of significant (at 0.05) biomolecules grouped by fold change ('Positive'/'Negative'), and test type ('ANOVA'/'G-test') for each comparison.")
+}
+```
+
+
+```{r Statistics: Plot, echo = FALSE}  
+if (is.null(omicStats) == FALSE) {
+  
+  # Generate the plot
+  plot(omicStats, bw_theme = TRUE, stacked = F)
+  
+}
+```
+
+```{r stats code, results = 'asis'}
+if (is.null(omicStats) == FALSE) {
+  cat(sprintf("**Code**: `%s`", stat_code)) 
+}
+```
