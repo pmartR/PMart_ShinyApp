@@ -190,6 +190,16 @@ apply_filt <- function(){
         
       }
       
+      # catch overfiltering and bugs
+      if(prod(dim(tmp$e_data)) == 0) {
+        stop("All observations were filtered from your omicsData object, this may be due to aggressive settings, or trying to filter the same sample twice.")  
+      }
+      if(!is.null(tmp2)) {
+        if(prod(dim(tmp2$e_data)) == 0) {
+          stop("All observations were filtered from your second omicsData object, this may be due to aggressive settings, or trying to filter the same sample twice.")  
+        }
+      }
+      
       # store saved objects and remove temp objects, tmp2 will be null if there is only one dataset
       objects$omicsData <- tmp
       objects$omicsData_2 <- tmp2
