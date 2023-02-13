@@ -121,9 +121,6 @@ TAB_IDS <- list(
   "download_tab"
 )
 
-# global observers, modal UI elements, helper functions
-source("UI_helper_functions.R", local = TRUE)
-
 # source all resources
 for (res_folder in c("tabs_UI", "utils")) {
   for (f in Sys.glob(sprintf("./%s/*.R", res_folder))) {

@@ -220,6 +220,7 @@ observeEvent(
           plot_type = input$peptide_imdanova_plot_type,
           interactive = interactive,
           bw_theme = TRUE,
+          stacked = FALSE,
           color_low = color_low,
           color_high = color_high
         )

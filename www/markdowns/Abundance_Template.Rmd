@@ -18,7 +18,7 @@ date: "`r format(Sys.time(), '%B %d, %Y')`"
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, error = FALSE)
 library(dplyr); library(pmartR); library(knitr); library(DT); library(ggplot2);
 library(data.table); library(patchwork); library(purrr)
-options(htmlwidgets.TOJSON_ARGS = list(na = 'string'))
+options(DT.TOJSON_ARGS = list(na = 'string'))
 ```
 
 ```{r Read in Results}

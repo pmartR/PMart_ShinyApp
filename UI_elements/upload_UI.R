@@ -342,7 +342,7 @@ list(
   # e_data display
   output$head_edata <- DT::renderDT(
     {
-      if (two_lipids() & input$which_table == 2) {
+      if (two_lipids() & isTRUE(input$which_table == 2)) {
         tmp <- e_data_2()
       }
       else {
@@ -358,7 +358,7 @@ list(
   # e_meta display
   output$head_emeta <- DT::renderDT(
     {
-      if (two_lipids() & input$which_table == 2) {
+      if (two_lipids() & isTRUE(input$which_table == 2)) {
         req(!is.null(revals$e_meta_2))
         tmp <- revals$e_meta
       }

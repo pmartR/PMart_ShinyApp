@@ -155,9 +155,6 @@ shinyServer(function(session, input, output) {
     contentType = "text/csv"
   )
 
-  # Add markdown capabilities 
-  source("./generate_markdown.R", local = TRUE)
-  
   output$download_processed_data <- downloadHandler(
     filename = paste("pmartR_output_", proc.time()[1], ".zip", sep = ""),
     content = function(fname) {
