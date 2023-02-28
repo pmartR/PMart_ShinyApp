@@ -1096,10 +1096,12 @@ observeEvent(input$allow_reapply_filters, {
 observeEvent(reactiveValuesToList(objects), {
   # req(!is.null(objects$filters))
   cond_molfilts <- any(c("molfilt", "cvfilt", "imdanovafilt", "profilt", "tcfilt") %in% names(objects$filters))
-  cond_sampfilts <- any(c("rmdfilt", "customfilt", "rnafilt_libsize", "rnafilt_min_nonzero") %in% names(objects$filters))
-
+  cond_sampfilts <- any(c("rmdfilt", "rnafilt_libsize", "rnafilt_min_nonzero") %in% names(objects$filters))
+  cond_customfilt <- any(c("customfilt") %in% names(objects$filters))
+  
   toggleElement("ok_data_filters", condition = cond_molfilts, anim = TRUE)
   toggleElement("ok_sample_filters", condition = cond_sampfilts, anim = TRUE)
+  toggleElement("ok_custom_filter", condition = cond_customfilt, anim = TRUE)
 })
 
 observeEvent(input$goto_norm, {
