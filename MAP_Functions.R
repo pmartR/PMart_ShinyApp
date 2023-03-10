@@ -93,6 +93,9 @@ list(
         js$disableTab("filter_tab")
         js$disableTab("normalization_tab")
         
+        # Enable downloads tab
+        js$enableTab("download_tab")
+        
         # Add additional tabs depending on what kind of data was exported
         if (Tab %in% c("peptide_statistics_tab", "protein_rollup_tab", "statistics_tab")) {
           js$disableTab("peptide_statistics_tab")
