@@ -589,7 +589,11 @@ output$seqdata_test_method_UI <- renderUI({
 
 # display table output from imd_anova
 output$statistics_summary_table <- renderDT({
-  objects$imdanova_res
+  if (inherits(objects$omicsData, "seqData")) {
+    objects$seqstats_res
+  } else {
+    objects$imdanova_res
+  }
 }, options = list(scrollX =TRUE))
 
 #'@details UI created with the helper function style_UI to edit plot options
