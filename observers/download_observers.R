@@ -116,7 +116,7 @@ observeEvent(input$makezipfile, {
           )
           
         } else {
-          fname <- paste0(plot_name, ".png")  # create a plot name
+          fname <- paste0(gsub(":", " ", plot_name), ".png")  # create a plot name
           ggsave(file.path(tempdir(), fname), plot = plots$allplots[[i]])
         }
         fs <- c(fs, fname) 
