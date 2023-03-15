@@ -417,7 +417,7 @@ if (!is.null(omicStats)) {
 
 ```{r Statistics: significance table}
 if (is.null(omicStats) == FALSE) {
-  sink("/dev/null"); sig_table <- summary(omicStats)$sig_table; sink()
+  sink(nullfile()); sig_table <- summary(omicStats)$sig_table; sink()
   
   sig_table |> kable(caption = "Counts of significant (at 0.05) biomolecules grouped by fold change ('Positive'/'Negative') for each comparison.")
 }

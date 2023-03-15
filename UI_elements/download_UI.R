@@ -48,6 +48,21 @@ list(
       } else {
         table_use <- tables$revenge_of_tables_table
       }
+      
+      if (is.null(objects$omicsData$e_meta)) {
+        table_use = table_use[table_use$Table != "Biomolecule Information (e_meta)",]
+      }
+      
+      if (is.null(objects$imdanova_res)) {
+        table_use = table_use[table_use$Table != "iMd-Anova Table",]
+      }
+      
+      if (is.null(objects$seqstats_res)) {
+        table_use = table_use[table_use$Table != "SeqData Stats Table"]
+      }
+      
+      # Reset index numbers
+      rownames(table_use) = seq(length=nrow(table_use))
 
       table_use
     },

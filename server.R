@@ -19,7 +19,8 @@ shinyServer(function(session, input, output) {
     "Data File (e_data)" = list("objects", "omicsData", "e_data"),
     "Sample Info (f_data)" = list("objects", "omicsData", "f_data"),
     "Biomolecule Information (e_meta)" = list("objects", "omicsData", "e_meta"),
-    "iMd-Anova Table" = list("objects", "imdanova_res")
+    "iMd-Anova Table" = list("objects", "imdanova_res"),
+    "SeqData Stats Table" = list("objects", "seqstats_res")
   )
   
   resources_locations_peprollup <- list(
