@@ -44,7 +44,7 @@ list(
             "Protein" = "pro",
             "Lipidomics" = "lip",
             "Metabolomics" = "metab",
-            "Transcriptomics" = "seq"
+            "RNA-seq" = "seq"
           )
         
         # Get the data type
