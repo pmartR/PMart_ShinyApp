@@ -221,7 +221,7 @@ output$statistics_tab_sidepanel <- renderUI({
       #
       bsCollapsePanel(
         subsection_header(
-          "Group comparisons",
+          "Group Comparisons",
           "imdanova_groups_ok",
           "color:orange;float:right",
           icon("ok", lib = "glyphicon")
@@ -252,7 +252,7 @@ output$statistics_tab_sidepanel <- renderUI({
       ),
       bsCollapsePanel(
         subsection_header(
-          "iMd-ANOVA test settings",
+          "iMd-ANOVA Test Settings",
           "imdanova_settings_ok",
           "color:orange;float:right",
           icon("ok", lib = "glyphicon")
@@ -283,7 +283,7 @@ output$statistics_tab_sidepanel <- renderUI({
         #
         bsCollapsePanel(
           subsection_header(
-            "Group comparisons",
+            "Group Comparisons",
             "seqdata_groups_ok",
             "color:orange;float:right",
             icon("ok", lib = "glyphicon")
@@ -320,7 +320,7 @@ output$statistics_tab_sidepanel <- renderUI({
                 "voom" = "Limma-voom", 
                 "DESeq2" = "DESeq2", 
                 "edgeR" = "EdgeR"),
-            " test settings"),
+            " Test Settings"),
             "seqdata_settings_ok",
             "color:orange;float:right",
             icon("ok", lib = "glyphicon")
@@ -329,8 +329,8 @@ output$statistics_tab_sidepanel <- renderUI({
           uiOutput("seqdata_test_method_UI"),
           uiOutput("seqdata_pval_adjust_UI"),
           numericInput("pval_thresh", "Significance threshold", value = 0.05, step = 0.01),
-          bsButton("apply_diagnostic", "Run Trend-fitting Diagnostics", style = "primary"),
-          disabled(bsButton("apply_seqstats", "Perform Differential Expression", style = "primary")),
+          bsButton("apply_diagnostic", "Run trend-fitting diagnostics", style = "primary"),
+          disabled(bsButton("apply_seqstats", "Perform differential expression", style = "primary")),
           br(), br(),
           hidden(
             div(
@@ -656,7 +656,7 @@ output$statistics_plot_options <- renderUI({
 
 output$statistics_apply_style <- renderUI({
   second_apply_button <- if(inherits(objects$omicsData, "seqData")) {
-    bsButton("statistics_apply_style_diag", "Update Diagnostic Plot Style") 
+    bsButton("statistics_apply_style_diag", "Update diagnostic plot style") 
   } else NULL
   
   div(class = "inline-wrapper-1",

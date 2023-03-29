@@ -148,10 +148,10 @@ observeEvent(input$group_designation, {
     if(inherits(objects$omicsData, "nmrData") ||
        (inherits(objects$omicsData, "pepData") &&
         input$labeled_yn == "iso")){
-      usebutton <- actionButton("goto_reference", "Continue to Reference Tab", style = "margin:5px;width:75%")
+      usebutton <- actionButton("goto_reference", "Continue to Reference tab", style = "margin:5px;width:75%")
     } else {
-      usebutton <- div(actionButton("goto_qc", "Continue to Data Summary Tab", style = "margin:5px;width:75%"),
-                       actionButton("goto_filter", "Continue to Filter Tab", style = "margin:5px;width:75%"))
+      usebutton <- div(actionButton("goto_qc", "Continue to Data Summary tab", style = "margin:5px;width:75%"),
+                       actionButton("goto_filter", "Continue to Filter tab", style = "margin:5px;width:75%"))
     }
 
     # if grouping structure is created, show success modal

@@ -14,7 +14,7 @@ a traditional `omics analysis, are available in the GUI:
 - Exploratory data analysis.  PCA, missing-variable plots, correlation heatmaps, and more.
 - Filtering.  Filter biomolecules based on various criteria including minimum non-missing values and coefficient of variation thresholds.  Filter samples based on statistical metrics and other exploratory analyses.
 - Normalization.  Center data using a variety of methods.  Determine appropriate measures automatically using the SPANS procedure for proteomics.
-- Protein Quantification.  Various methods for rollup peptide data up to the protein level.
+- Protein Quantification.  Various methods for rolling up peptide data up to the protein level.
 - Statistical analysis.  ANOVA, G-test, and combined analyses to determine biomarkers.
 - Visualize and download all resources.
 

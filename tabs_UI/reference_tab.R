@@ -122,7 +122,7 @@ upload_reference <- function(tabname) {
                        withSpinner(uiOutput(paste0(tabname, "_ref_head_fdata_UI")))
                      ),
                      tabPanel(
-                       paste0("Uploaded ", tabname, " Data File"),
+                      paste0("Uploaded ", tabname, " Data File"),
                        br(),
                        withSpinner(uiOutput(paste0(tabname, "_ref_head_edata_UI")))
                      ),

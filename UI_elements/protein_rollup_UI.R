@@ -159,7 +159,7 @@ list(
   
   output[["rollup_plot_UI"]] <- renderUI({
     if(is.null(plots$rollup_plot)){
-      return("Please run protein roll-up to view results")
+      return("Please run protein roll up to view results")
     } else {
       return(withSpinner(plotlyOutput("rollup_plot")))
     }

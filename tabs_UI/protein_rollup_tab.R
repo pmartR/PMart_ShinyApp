@@ -1,5 +1,5 @@
 protein_rollup_UI <- function() {
-  tabPanel("Protein Rollup",
+  tabPanel("Protein Roll Up",
     value = "protein_rollup_tab",
     class = "collapse_page",
     column(
@@ -23,7 +23,7 @@ protein_rollup_UI <- function() {
           
           splitLayout(
             disabled(bsButton("bpquant",
-                              "Compute Isoforms",
+                              "Compute isoforms",
                               style = "primary")),
             prettySwitch(
               inputId = "bpquant_lock",
@@ -35,17 +35,17 @@ protein_rollup_UI <- function() {
         
         bsCollapsePanel(
           div(
-            "Protein Rollup Options",
+            "Protein Roll Up Options",
             hidden(div(id = "prorollicon", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
           ),
-          # "Protein Rollup Options",
+          # "Protein Roll Up Options",
           value = "rollup_opts",
           radioGroupButtons(
             "which_rollup",
-            "Rollup Method",
+            "Roll up method",
             c(
               "Reference" = "rrollup",
-              "Z-Score" = "zrollup",
+              "Z-score" = "zrollup",
               "Quantile" = "qrollup"
             )
           ),
@@ -60,11 +60,11 @@ protein_rollup_UI <- function() {
           div(
             id = "apply_rollup_jswrapper",
             class = "tooltip-wrapper",
-            bsButton("apply_rollup", "Roll-up", style = "primary")
+            bsButton("apply_rollup", "Roll up", style = "primary")
           ),
           hidden(
             div(
-              "Applying rollup, please wait...",
+              "Applying roll up, please wait...",
               id = "rollup_busy",
               class = "fadein-out",
               style = "color:deepskyblue;font-weight:bold;margin-bottom:5px"
@@ -80,7 +80,7 @@ protein_rollup_UI <- function() {
       tabsetPanel(
         id = "rollup_mainpanel",
         tabPanel(
-          "Rollup Results",
+          "Roll Up Results",
 
           # bsCollapse(
             # id = "rollup_mainpanel", multiple = TRUE, open = c("rollup_summary", "rollup_plot_opts"),

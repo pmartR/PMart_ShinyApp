@@ -59,7 +59,7 @@ ttext_ <- list(
   TOTAL_COUNT_FILT_INFO = "RNA-seq filter which removes transcripts that have total count across all samples less than a specified threshold.",
   REFERENCE_DISABLED_ROW = "Disabled entries contain missing values in some samples. These might be due to NAs generated in log transformation or replacement of values less than or equal to zero.",
   REFERENCE_DISABLED_COL = "Disabled entries are non-numeric.",
-  TABDISABLE_PEP_NOT_ROLLED_UP = "This tab is used to perform statistics on peptide data rolled up to the protein level.  Roll up your peptide data in the Protein Rollup tab before using this tab.  To perform stats on the peptide-level data, go to the Peptide Statistics tab.",
+  TABDISABLE_PEP_NOT_ROLLED_UP = "This tab is used to perform statistics on peptide data rolled up to the protein level.  Roll up your peptide data in the Protein Roll Up tab before using this tab.  To perform stats on the peptide-level data, go to the Peptide Statistics tab.",
   TABDISABLE_PEP_NO_EMETA = "Tab disabled because you uploaded peptide data with no biomolecule information file.  Peptide-level statistics are still available."
 ) 
 
@@ -73,7 +73,7 @@ infotext_ <- list(
   DATA_NOT_LOG = "Your data is not on the log scale and was not transformed to the log scale, some downstream methods may be disabled, consider recreating your data with a log-transform specified or that your data is already on the log scale.",
   "RESET_FILTERS_WARNING" = "Re-applying filters will delete any statistics you 
   have computed.  If your data was normalized in the normalize tab, you will 
-  have to re-normalize it.  Rolled-up protein data will revert to the peptide
+  have to re-normalize it.  Rolled up protein data will revert to the peptide
   level.",
   REFNORM_COLUMN_INFO_1 = "In the first image below, you would select 'TMT_Plex_Number' as the reference group column (1st dropdown), 'Treatment_Group' as the column containing the indicator for reference samples (2nd dropdown), and 'ReferencePool' as the value indicating reference samples (last dropdown).  ",
   REFNORM_COLUMN_INFO_2 = "In the second example, you would select 'TMT_Plex_Number' as the reference group column (1st dropdown), 'Is_Reference_Pool' as the column containing the indicator for reference samples (2nd dropdown), and 'Yes' as the value indicating reference samples (last dropdown).  "

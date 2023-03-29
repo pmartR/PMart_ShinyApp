@@ -500,7 +500,7 @@ if (is.null(omicStatsRoll) == FALSE){
 }
 ```
 
-`r if (!is.null(omicDataRoll)) {paste0("## Peptide Rollup \n\nPeptides **were** rolled up into proteins. Protein quantification was conducted with the **", pmart_inputs$which_rollup, "** method and was centered with the **", pmart_inputs$which_combine_fn, "** function. The quantile cutoff was restricted to **",  pmart_inputs$qrollup_thresh, "**. The number of quantified proteins was ", omicDataRoll$e_data[[omicDataRollAttr$cnames$edata_cname]] %>% unique() %>% length(), ".")}`
+`r if (!is.null(omicDataRoll)) {paste0("## Peptide Roll Up \n\nPeptides **were** rolled up into proteins. Protein quantification was conducted with the **", pmart_inputs$which_rollup, "** method and was centered with the **", pmart_inputs$which_combine_fn, "** function. The quantile cutoff was restricted to **",  pmart_inputs$qrollup_thresh, "**. The number of quantified proteins was ", omicDataRoll$e_data[[omicDataRollAttr$cnames$edata_cname]] %>% unique() %>% length(), ".")}`
 
 ```{r Rollup, echo = FALSE, results='asis'}
 if (!is.null(omicDataRoll)) {

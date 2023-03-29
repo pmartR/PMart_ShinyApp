@@ -24,7 +24,7 @@ add_filter_UI <- function(filter_name, title, tooltip_text, ..., add_btn_title =
               ),
               width = "100%"
             ),
-            bsButton(inputId = sprintf("plot_%s", filter_name), "Plot Preview", width = "100%") 
+            bsButton(inputId = sprintf("plot_%s", filter_name), "Plot preview", width = "100%") 
           )
         ),
         column(
@@ -207,7 +207,7 @@ apply_style_UI <-
     
   if (flip_button) {
     fbtn <- div(checkboxGroupButtons(paste0(pagename, "_flip_axes"), "",
-      choices = list("Flip Axes" = TRUE),
+      choices = list("Flip axes" = TRUE),
       checkIcon = list("yes" = icon("refresh", lib = "glyphicon"), "no" = icon("refresh", lib = "glyphicon"))
     ),
     style = "display:inline-block"
@@ -221,8 +221,8 @@ apply_style_UI <-
     tagList(
       tags$b(two_lipids_title),
       div(
-        bsButton(paste0(pagename, "_apply_style_plot_1"), "first dataset"),
-        bsButton(paste0(pagename, "_apply_style_plot_2"), "second dataset"),
+        bsButton(paste0(pagename, "_apply_style_plot_1"), "First dataset"),
+        bsButton(paste0(pagename, "_apply_style_plot_2"), "Second dataset"),
         fbtn,
         ...
       )
@@ -233,8 +233,8 @@ apply_style_UI <-
     tagList(
       tags$b(two_plot_title),
       div(
-        bsButton(paste0(pagename, "_apply_style_plot_1"), "top/left plot"),
-        bsButton(paste0(pagename, "_apply_style_plot_2"), "bottom/right plot"),
+        bsButton(paste0(pagename, "_apply_style_plot_1"), "Top/left plot"),
+        bsButton(paste0(pagename, "_apply_style_plot_2"), "Bottom/right plot"),
         fbtn,
         ...
       )

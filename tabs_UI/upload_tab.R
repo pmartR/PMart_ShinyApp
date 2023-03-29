@@ -11,7 +11,7 @@ upload_UI <- function() {
             id = "upload_collapse_left", open = c("datselect"), multiple = TRUE, # parent collapse div
             # upload edata sub-collapse div
             bsCollapsePanel(div(
-              "Specify data type and upload data file",
+              "Specify Data Type and Upload Data File",
               hidden(div(id = "ok_datselect", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
             ),
             value = "datselect",
@@ -96,7 +96,13 @@ upload_UI <- function() {
                 uiOutput("normalized_UI")
               )),
             # ),
-            div(id = "donebutton", style = "float:right", actionButton("done_idcols", div("I'm done specifying values", icon("ok-sign", lib = "glyphicon"))))
+            div(id = "donebutton", 
+                style = "float:right", 
+                actionButton("done_idcols", 
+                             div("I'm done specifying values", 
+                                 icon("ok-sign", lib = "glyphicon"))
+                             )
+                )
             ),
             # upload e_meta and specify protein column sub-collapse div
             bsCollapsePanel(div(
@@ -127,7 +133,8 @@ upload_UI <- function() {
           8,
           bsCollapse(
             id = "upload_preview_collapse",
-            bsCollapsePanel("Data Preview",
+            bsCollapsePanel(
+              "Data Preview",
               value = "summary_tables",
               hidden(div(
                 id = "toggle_table",

@@ -132,7 +132,7 @@ observeEvent(input[["bpquant_lock"]], {
         showCancelButton = T,
         type = "warning",
         title = "Careful!",
-        text = "Re-enabling isoform identification will clear previously rolled-up results. Are you sure you want to do this?",
+        text = "Re-enabling isoform identification will clear previously rolled up results. Are you sure you want to do this?",
         callbackR = function(value) {
           if (value) {
             objects$omicsData <- objects$omicsData_pre_rollup
@@ -205,7 +205,7 @@ observeEvent(input$apply_rollup, {
       updateCollapse(session, "rollup_sidebar", open = "rollup_summary", 
                      close = c("rollup_opts", "isoform_identification"))
       updateTabsetPanel(session, "rollup_mainpanel",
-                        selected = "Rollup Results"
+                        selected = "Roll Up Results"
       )
       revals$rollup_summary <- summary(objects$omicsData)
       plots$rollup_plot <- plot(objects$omicsData, bw_theme = TRUE, interactive = T, 
@@ -219,22 +219,22 @@ observeEvent(input$apply_rollup, {
                      align = "center", offset = 1,
                      tags$h4(
                        paste0(
-                         "Success! Rollup has been performed using ",
+                         "Success! Roll up has been performed using ",
                          input$which_rollup,
                          " method with ",
                          input$which_combine_fn,
                          " to combine results. ",
                          ifelse(is.null(thresh), "", 
-                                paste0("Q-rollup threshold set to:", thresh)
+                                paste0("Q-roll up threshold set to:", thresh)
                                 ),
                          ifelse(is.null(isores), "", 
-                                " Isoform results were used in during rollup.")
+                                " Isoform results were used in during roll up.")
                          )
                      ),
                      hr(),
                      actionButton("rollup_dismiss", "Review results", width = "75%"),
-                     actionButton("rollup_goto_stats", "Continue to Statistics Tab", width = "75%"),
-                     actionButton("rollup_goto_downloads", "Continue to Download Tab", width = "75%")
+                     actionButton("rollup_goto_stats", "Continue to Statistics tab", width = "75%"),
+                     actionButton("rollup_goto_downloads", "Continue to Download tab", width = "75%")
               )
             )
           }

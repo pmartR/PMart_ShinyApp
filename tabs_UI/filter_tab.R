@@ -150,7 +150,7 @@ filter_UI <- function() {
       8,
       bsCollapse(
         id = "filter_plots", multiple = TRUE, open = c("filter_plots", "axes_options"),
-        bsCollapsePanel("Visualize filters",
+        bsCollapsePanel("Visualize Filters",
           value = "filter_plots",
           uiOutput("filter_dynamic_mainplot")
         ),

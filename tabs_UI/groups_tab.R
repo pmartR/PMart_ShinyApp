@@ -21,7 +21,7 @@ groups_UI <- function() {
           radioGroupButtons("usevizsampnames", "Add trimmed sample names for plotting?", choices = c("Yes", "No"), selected = "No"),
           conditionalPanel(
             condition = "input.usevizsampnames == 'Yes'",
-            radioGroupButtons("customsampnames_opts", "Trim By:",
+            radioGroupButtons("customsampnames_opts", "Trim by:",
               choices = c("First x characters" = "first_n", "Range of characters" = "range", "Split by a character" = "split")
             ),
             uiOutput("customsampnames")
@@ -66,8 +66,8 @@ groups_UI <- function() {
             )
           )
         ), # parent collapse
-        disabled(bsButton("group_designation", "Apply Grouping", style = "primary")),
-        disabled(bsButton("group_reset", "Reset Grouping", style = "primary")),
+        disabled(bsButton("group_designation", "Apply grouping", style = "primary")),
+        disabled(bsButton("group_reset", "Reset grouping", style = "primary")),
         br(),
         br(),
         uiOutput("warnings_groups"),
