@@ -60,11 +60,29 @@ biomolecule <- switch(
 )
 ```
 
+```{r}
+## Map catcher
+
+## If running MAP, file_XXX is a string, not a list
+file_edata_name <- if(is.list(pmart_inputs$file_edata)) 
+  pmart_inputs$file_edata$name else
+    pmart_inputs$file_edata
+
+file_fdata_name <- if(is.list(pmart_inputs$file_fdata)) 
+  pmart_inputs$file_fdata$name else
+    pmart_inputs$file_fdata
+
+file_emeta_name <- if(is.list(pmart_inputs$file_emeta)) 
+  pmart_inputs$file_emeta$name else
+    pmart_inputs$file_emeta
+
+```
+
 ## Upload, Transform, and Format Data 
 
 ### *Expression Data*
 
-A `r biomolecule` expression data file called **`r pmart_inputs$file_edata$name`** 
+A `r biomolecule` expression data file called **`r file_edata_name`** 
   was uploaded to the PMart application. This file contains `r length(omicData$e_data) - 1`
 samples and `r length(unique(omicData$e_data[[omicDataAttr$cnames$edata_cname]]))` 
 biomolecules designated by the **`r omicDataAttr$cnames$edata_cname`** column.
@@ -78,7 +96,7 @@ Here is the expression data matrix:
 datatable(edata, options = list(scrollX = TRUE))
 ```
 
-`r if (is.null(omicDataAttr$cnames$emeta_cname) == FALSE) {paste0("### *Biomolecule Information*\nAn associated biomolecule information file was also uploaded called **", pmart_inputs$file_emeta$name, "** and the molecule identifier column was designated as **", omicDataAttr$cnames$emeta_cname, "**. The file contains ", length(omicData$e_meta) - 1, " columns of biomolecule information.")}`
+`r if (is.null(omicDataAttr$cnames$emeta_cname) == FALSE) {paste0("### *Biomolecule Information*\nAn associated biomolecule information file was also uploaded called **", file_emeta_name, "** and the molecule identifier column was designated as **", omicDataAttr$cnames$emeta_cname, "**. The file contains ", length(omicData$e_meta) - 1, " columns of biomolecule information.")}`
 
 ```{r Biomolecule Information}
 if (is.null(omicDataAttr$cnames$emeta_cname) == FALSE) {
@@ -87,7 +105,7 @@ if (is.null(omicDataAttr$cnames$emeta_cname) == FALSE) {
 ```
 
 
-`r if ("Var1" %in% colnames(omicData$f_data) == FALSE) {paste0("### *Sample Information*\nAn associated sample information file was also uploaded called **", pmart_inputs$file_fdata$name, "**. Trimmed samples names **", ifelse(pmart_inputs$usevizsampnames == "No", "were not", "were"), "** used. The column in the sample information file which indicates sample names was designated as **", omicDataAttr$cnames$fdata_cname, "**.")}`
+`r if ("Var1" %in% colnames(omicData$f_data) == FALSE) {paste0("### *Sample Information*\nAn associated sample information file was also uploaded called **", file_fdata_name, "**. Trimmed samples names **", ifelse(pmart_inputs$usevizsampnames == "No", "were not", "were"), "** used. The column in the sample information file which indicates sample names was designated as **", omicDataAttr$cnames$fdata_cname, "**.")}`
 
 `r if (is.null(omicDataAttr$group_DF) == FALSE) {paste0("*Grouping Information*")}`
 
@@ -114,14 +132,14 @@ To generate a **`r biomolecule` object** in pmartR for this dataset, use:
 ```{r Formulate Upload Code, echo = FALSE}
 theUploadString <- "No code can be run, as all omicData objects require an e_data and f_data file."
 
-if (!is.null(pmart_inputs$file_fdata$name)) {
-  theUploadString <- paste0('omicObj <- as.', class(omicData), '(e_data = read.csv("', pmart_inputs$file_edata$name, '"), edata_cname = "', omicDataAttr$cnames$edata_cname, '", f_data = read.csv("', pmart_inputs$file_fdata$name, '"), fdata_cname = "', omicDataAttr$cnames$fdata_cname, '")')
+if (!is.null(file_fdata_name)) {
+  theUploadString <- paste0('omicObj <- as.', class(omicData), '(e_data = read.csv("', file_edata_name, '"), edata_cname = "', omicDataAttr$cnames$edata_cname, '", f_data = read.csv("', file_fdata_name, '"), fdata_cname = "', omicDataAttr$cnames$fdata_cname, '")')
 }
 
-if (!is.null(omicDataAttr$cnames$emeta_cname) & !is.null(pmart_inputs$file_fdata$name)) {
+if (!is.null(omicDataAttr$cnames$emeta_cname) & !is.null(file_fdata_name)) {
   theUploadString <- theUploadString %>% 
     substr(1, nchar(theUploadString) - 1) %>%
-    paste0(', e_meta = read.csv("', pmart_inputs$file_emeta$name, '"), emeta_cname = "',
+    paste0(', e_meta = read.csv("', file_emeta_name, '"), emeta_cname = "',
            omicDataAttr$cnames$emeta_cname, '")')
 }
 ```
@@ -136,12 +154,12 @@ theTransformString <- paste0('omicObj <- edata_transform(omicObj, data_scale = "
 
 ``r theTransformString``
 
-`r if(!is.null(pmart_inputs$file_fdata$name)) {"Next, to set group designations, use:"}`
+`r if(!is.null(file_fdata_name)) {"Next, to set group designations, use:"}`
 
 ```{r Formulate Group Designation Code, echo = FALSE}
 theGroupString <- "No group designation was conducted."
 
-if (!is.null(pmart_inputs$file_fdata$name)) {
+if (!is.null(file_fdata_name)) {
   
   # Pull groups 
   gcols <- capture.output({c(pmart_inputs$gcol1, pmart_inputs$gcol2) %>% .[.!= "None"] %>% dput()})
