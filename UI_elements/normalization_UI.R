@@ -187,10 +187,10 @@ list(
   # go to rollup tab button only visible in peptide land
   output$goto_stats <- renderUI({
     if (inherits(objects$omicsData, "pepData")) {
-      actionButton("goto_pepstats", "Continue to Peptide Statistics Tab", style = "margin-top:5px;width:75%")
+      actionButton("goto_pepstats", "Continue to Peptide Statistics tab", style = "margin-top:5px;width:75%")
     }
     else {
-      actionButton("goto_statistics", "Continue to Statistics Tab", style = "margin-top:5px;width:75%")
+      actionButton("goto_statistics", "Continue to Statistics tab", style = "margin-top:5px;width:75%")
     }
   }),
 

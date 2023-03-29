@@ -101,7 +101,7 @@ output$peptide_statistics_tab_sidepanel <- renderUI({
       #
       bsCollapsePanel(
         subsection_header(
-          "Group comparisons",
+          "Group Comparisons",
           "peptide_imdanova_groups_ok",
           "color:orange;float:right",
           icon("ok", lib = "glyphicon")
@@ -132,7 +132,7 @@ output$peptide_statistics_tab_sidepanel <- renderUI({
       ),
       bsCollapsePanel(
         subsection_header(
-          "iMd-ANOVA test settings",
+          "iMd-ANOVA Test Settings",
           "peptide_imdanova_settings_ok",
           "color:orange;float:right",
           icon("ok", lib = "glyphicon")

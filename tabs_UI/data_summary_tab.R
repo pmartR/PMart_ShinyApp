@@ -10,8 +10,8 @@ data_summary_UI <- function() {
           class = "tooltip-wrapper",
           radioGroupButtons("which_qc_plot", "Choose a Plot Type:",
             choices = c("Boxplots" = "boxplots", 
-                        "Missing Values Barplots" = "bar", 
-                        "Missing Values Scatterplots" = "scatter")
+                        "Missing values barplots" = "bar", 
+                        "Missing values scatterplots" = "scatter")
           )
         ),
         bsCollapse(

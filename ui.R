@@ -82,12 +82,12 @@ ui <- function(request) {
         class = "inline-wrapper-1", 
         bsButton("viewplots", uiOutput("n_saved_plots"), style = "info"),
         hidden(div(id = "js_saveplot", style = "vertical-align:top",
-          bsButton("saveplot", "Save Last Plot", style = "info")
+          bsButton("saveplot", "Save last plot", style = "info")
         )),
         # Add UI if MAP is enabled
         if (MAP_ACTIVE) {
           div(id = "js_midpoint", style = "vertical-align:top", class="tooltip-wrapper",
-              bsButton("exportMid", "Save and Export Progress", style = "success")
+              bsButton("exportMid", "Save and export progress", style = "success")
           )
         } else NULL
       )

@@ -100,15 +100,15 @@ observeEvent(input$peptide_apply_imdanova, {
         buttons <- div(
           actionButton("pepstats_dismiss", "Review results", width = "75%"),
           br(), 
-          actionButton("pep_goto_downloads", "Continue to Download Tab", width = "75%")
+          actionButton("pep_goto_downloads", "Continue to Download tab", width = "75%")
         )
       } else {
         buttons <- div(
           actionButton("pepstats_dismiss", "Review results", width = "75%"),
           br(), 
-          actionButton("goto_rollup", "Continue to Protein Rollup Tab", width = "75%"),
+          actionButton("goto_rollup", "Continue to Protein Roll Up tab", width = "75%"),
           br(), 
-          actionButton("pep_goto_downloads", "Continue to Download Tab", width = "75%")
+          actionButton("pep_goto_downloads", "Continue to Download tab", width = "75%")
         )
       }
       
