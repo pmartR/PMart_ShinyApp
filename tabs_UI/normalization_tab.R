@@ -37,7 +37,7 @@ normalization_UI <- function() {
               ),
 
               pickerInput("norm_fn", "Normalization Function",
-                choices = c("Mean" = "mean", "Median" = "median", "Z-norm" = "zscore", "Median Absolute Distance" = "mad")
+                choices = c("Median" = "median", "Mean" = "mean", "Z-norm" = "zscore", "Median Absolute Distance" = "mad")
               ),
               radioGroupButtons("backtransform", "Apply backtransformation?", choices = c("Yes" = TRUE, "No" = FALSE)),
               hr(),
