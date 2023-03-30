@@ -6,7 +6,7 @@ list(
       "Complete" = "complete", "Rank invariant (rip)" = "rip", "Percentage present and rank invariant (ppp+rip)" = "ppp_rip"
     )
 
-    norm_fn_choices <- c("Mean" = "mean", "Median" = "median", "Z-norm" = "zscore", "Median Absolute Distance" = "mad")
+    norm_fn_choices <- c("Median" = "median", "Mean" = "mean", "Z-norm" = "zscore", "Median Absolute Distance" = "mad")
 
     spans_subset_fn_choices <- prettyCheckboxGroup("spans_which_subset_fn", "Test which subset functions?", choices = subset_fn_choices, selected = subset_fn_choices)
     spans_norm_fn_choices <- prettyCheckboxGroup("spans_which_norm_fn", "Test which normalization functions?", choices = norm_fn_choices, selected = norm_fn_choices, inline = TRUE)
