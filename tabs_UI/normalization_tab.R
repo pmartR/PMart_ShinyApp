@@ -78,7 +78,7 @@ normalization_UI <- function() {
               hidden(
                 bsButton(
                 "inspect_norm", 
-                "Analyze currently selected normalization method",
+                "Diagnostics for normalization selection",
                 style = "primary"
                 )
               ),
