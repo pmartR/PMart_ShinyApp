@@ -210,10 +210,40 @@ shinyServer(function(session, input, output) {
     }))
     
     if (is_conda) {
-      reticulate::use_condaenv(python_venv, required = TRUE)
+      tryCatch({
+        reticulate::use_condaenv(python_venv, required = TRUE)
+      }, error = function(e)
+        tryCatch({
+          reticulate::use_condaenv(reticulate::miniconda_path())
+        }, error = function(e){
+          reticulate::install_miniconda()
+          reticulate::use_condaenv(reticulate::miniconda_path())
+        })
+        )
     } else {
-      reticulate::use_virtualenv(python_venv, required = TRUE)
+      tryCatch({
+        reticulate::use_virtualenv(python_venv, required = TRUE)
+      }, error = function(e){
+          tryCatch({
+            ## for the python installed folks
+            reticulate::virtualenv_create("default", packages = c("numpy", "gunicorn", "plotly", "kaleido"))
+            reticulate::virtualenv_install("default", packages = c("numpy", "gunicorn", "plotly", "kaleido"))
+            reticulate::use_virtualenv("default")
+          }, error = function(e){
+            ## This will work, but takes a long time to do the install and ought to have a 
+            # warning attached for local users, as it installs to your system
+            ## SSL error dodging needed for silly things, user specific ##
+            
+            ## rn can comment out the install and get through all but download
+            version <- "3.9.12"
+            reticulate::install_python(version)
+            reticulate::virtualenv_create("default", packages = c("numpy", "gunicorn", "plotly", "kaleido"))
+            reticulate::virtualenv_install("default", packages = c("numpy", "gunicorn", "plotly", "kaleido"))
+            reticulate::use_virtualenv("default")
+          })
+        })
     }
+    
   }
   
 })
