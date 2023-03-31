@@ -45,7 +45,7 @@ list(
             "Lipidomics" = "lip",
             "Metabolomics" = "metab",
             "RNA-seq" = "seq",
-            "Transcriptomics" = "seq"
+            "Transcriptomics" = "seq" ## Keep for backwards compatibility with old project objects
           )
 
         # Get the data type
