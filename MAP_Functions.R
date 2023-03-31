@@ -44,9 +44,10 @@ list(
             "Protein" = "pro",
             "Lipidomics" = "lip",
             "Metabolomics" = "metab",
-            "RNA-seq" = "seq"
+            "RNA-seq" = "seq",
+            "Transcriptomics" = "seq"
           )
-        
+
         # Get the data type
         theDataType <- convertList[lapply(names(convertList), function(name) {
           grepl(name, project$Project$DataType)}) %>% unlist()] %>% unlist()

@@ -29,12 +29,9 @@ output$ReportDownload <- downloadHandler(
       
       ### OG files ###
       # Pull the original edata, emeta, and fdata 
-      if (is.null(input$file_edata$datapath)) edata <- NULL else 
-        edata <- read.csv(input$file_edata$datapath)
-      if (is.null(input$file_emeta$datapath)) emeta <- NULL else 
-        emeta <- read.csv(input$file_emeta$datapath)
-      if (is.null(input$file_fdata$datapath)) fdata <- NULL else 
-        fdata <- read.csv(input$file_fdata$datapath)
+      edata <- if (!isTruthy(e_data())) NULL else e_data()
+      emeta <- if (!isTruthy(f_data())) NULL else f_data()
+      fdata <- if (!isTruthy(revals$e_meta)) NULL else revals$e_meta
           
       ### Different rmd parameters per datatype ###
       
