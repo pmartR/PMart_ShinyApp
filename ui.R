@@ -28,9 +28,10 @@ ui <- function(request) {
       div(class = "fadein-out busy relative-centered", style = "font-size:xx-large", "Loading app resources...")
     ), 
     
+    inlineCSS('.navbar-default .navbar-brand {padding: 2px;}'),
     
     navbarPage(
-      title = tags$span(tags$img(src = "pmartlogo.png", style = "max-height:100%"), "pmartR"),
+      title = tags$img(src = "pmartlogo.png", style = "max-height:100%"),
       id = "top_page", theme = "pmartR.css",
 
       #### All tab UI's are built by functions defined in ./tabs_UI/ ####
