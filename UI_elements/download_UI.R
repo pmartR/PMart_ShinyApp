@@ -43,6 +43,7 @@ list(
 
   output$download_tables_table <- renderDT(
     {
+      
       if(is.null(objects$omicsData_pre_rollup)){
         table_use <- tables$tables_table
       } else {
@@ -58,7 +59,7 @@ list(
       }
       
       if (is.null(objects$seqstats_res)) {
-        table_use = table_use[table_use$Table != "SeqData Stats Table"]
+        table_use = table_use[table_use$Table != "SeqData Stats Table",]
       }
       
       # Reset index numbers
