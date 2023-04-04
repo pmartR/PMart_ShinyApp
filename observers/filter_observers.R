@@ -1066,8 +1066,8 @@ observeEvent(input$apply_filters, {
       )
     }
     
-    applied_filters <- attributes(objects$omicsData)$filters[(n_orig_filters + 1):length(attributes(objects$omicsData)$filters)]
-    applied_filters_2 <- attributes(objects$omicsData_2)$filters[(n_orig_filters_2 + 1):length(attributes(objects$omicsData_2)$filters)]
+    applied_filters <- attributes(objects$omicsData)$filters[n_orig_filters:length(attributes(objects$omicsData)$filters)]
+    applied_filters_2 <- attributes(objects$omicsData_2)$filters[n_orig_filters_2:length(attributes(objects$omicsData_2)$filters)]
     
     non_applied_filters <- FILTER_NAMES %>% # 
       filter(
