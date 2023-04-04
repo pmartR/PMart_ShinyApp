@@ -24,6 +24,48 @@ makegroup <- function(){
   pair_group = if(isTRUE(input$pair_group_col == "None") | !isTruthy(input$pair_group_col)) NULL else input$pair_group_col
   pair_denom = if(isTRUE(input$pair_denom_col == "None") | !isTruthy(input$pair_denom_col)) NULL else input$pair_denom_col
   
+  f_data <- f_data()
+  
+  ## Throw warning for bad seqdata col values
+  
+  all_column_choices <- list(
+    main_effects()[1],
+    main_effects()[2],
+    covariates()[1],
+    covariates()[2],
+    pair_id,
+    pair_group,
+    pair_denom
+  )
+  
+  column_conds <- map_lgl(all_column_choices, 
+          function(col){
+            if(is.null(col) || is.na(col)) return(F)
+            !identical(f_data[[col]], make.names(f_data[[col]]))
+          })
+  
+  if(input$datatype == "seq" && any(column_conds)){
+    
+    break_text <- if(length(all_column_choices[column_conds]) == 1){
+      "(s) "
+    } else " "
+    
+    shinyalert(
+      title = "Adjusting Column Values", 
+      text = paste0("The selected column", 
+                    break_text,
+                    toString(all_column_choices[column_conds]),
+                    " contain", break_text,
+                    "invalid characters that will interfere with ",
+                    "subsequent processing. Invalid characters will be",
+                    " replaced with '.'.")
+    )
+    
+    for(col in all_column_choices[column_conds]){
+      f_data[[col]] <- make.names(f_data[[col]])
+    }
+  }
+  
   ## To process the data, we will replace fdata and fdata cname,
   ## call group_designation, and apply custom sampnames if specified.
   
@@ -34,7 +76,7 @@ makegroup <- function(){
     .tmp_obj_2 <- tryCatch(
       {
         tmp <- objects$omicsData_2
-        tmp$f_data <- f_data()
+        tmp$f_data <- f_data
         attr(tmp, "cnames")$fdata_cname <- input$fdata_id_col_2
         
         tmp <- group_designation(tmp,
