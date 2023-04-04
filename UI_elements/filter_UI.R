@@ -25,7 +25,7 @@ list(
     fdata_cname_2 <- attributes(objects$omicsData_2)$cnames$fdata_cname
 
     # indices of which filters/HTML elements belong to each object
-    obj2_inds <- which(grepl("_2", names(objects$filters)))
+    obj2_inds <- which(grepl("_2$", names(objects$filters)))
     obj1_inds <- setdiff(1:length(objects$filters), obj2_inds)
     
     if(length(objects$filters) == 0) return(
@@ -38,7 +38,6 @@ list(
     )
     
     #' instantiate this outside of the for loop, since it is used in multiple
-    #' nodes in the flow control
     #' TODO: collect all samples and perform differences at the end?
     rmd_removed_samps <- if (any(grepl("rmdfilt", names(objects$filters)))) {
       tmp_idx = which(grepl("rmdfilt", names(objects$filters)))
@@ -52,6 +51,14 @@ list(
       
       unique(collect_samps_rmv)
       
+    } else NULL
+
+    rmd_removed_samps <- if (!is.null(objects$filters[['rmdfilt']])) {
+      summary(objects$filters[['rmdfilt']], pvalue_threshold = input$pvalue_threshold)$filtered_samples
+    } else NULL
+
+    rmd_removed_samps_2 <- if (!is.null(objects$filters[['rmdfilt_2']])) {
+      summary(objects$filters[['rmdfilt_2']], pvalue_threshold = input$pvalue_threshold)$filtered_samples
     } else NULL
     
     rnafilt_libsize_removed_samps <- if(any(grepl("rnafilt_libsize", names(objects$filters)))) {
@@ -102,10 +109,12 @@ list(
       
       # rmd filter
       else if (grepl("rmdfilt", names(objects$filters)[i])) {
+        .to_rmv = summary(objects$filters[[i]], pvalue_threshold = input$pvalue_threshold)$filtered_samples
+        .cond = is.null(.to_rmv) || .to_rmv == "NULL" # second condition is a bug in pmartR summary()
         divs[[i]] <- tagList(
           tags$b("rMd Filter:"),
           tags$p(sprintf("p-value threshold: %s", input$pvalue_threshold)),
-          tags$p(sprintf("Removed Samples: %s", ifelse(length(rmd_removed_samps > 0), paste(rmd_removed_samps, collapse = " | "), "None"))),
+          tags$p(sprintf("Removed Samples: %s", ifelse(!.cond, paste(.to_rmv, collapse = " | "), "None"))),
           hr()
         )
       }

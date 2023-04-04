@@ -993,8 +993,12 @@ observeEvent(input$review_filters, {
 #################
 observeEvent(input$apply_filters, {
   req(!is.null(objects$omicsData))
+  
+  n_orig_filters <- length(attributes(objects$omicsData)$filters)
+  n_orig_filters_2 <- length(attributes(objects$omicsData_2)$filters)
+  
   res <- apply_filt()
-
+  
   # two logicals that are TRUE is something went wrong, used to determine if success modal appears
   error_msg <- is.character(res)
   if (!is.null(objects$omicsData_2)) {
@@ -1062,6 +1066,39 @@ observeEvent(input$apply_filters, {
       )
     }
     
+    applied_filters <- attributes(objects$omicsData)$filters[n_orig_filters:length(attributes(objects$omicsData)$filters)]
+    applied_filters_2 <- attributes(objects$omicsData_2)$filters[n_orig_filters_2:length(attributes(objects$omicsData_2)$filters)]
+    
+    non_applied_filters <- FILTER_NAMES %>% # 
+      filter(
+        attribute %in% map_chr(objects$filters, ~class(.x)[1]),
+        !(attribute %in% map_chr(applied_filters, 1))
+      ) %>%
+      pluck("text")
+
+    non_applied_filters_2 <- if(two_lipids()) {
+      FILTER_NAMES %>% # 
+        filter(
+          attribute %in% map_chr(objects$filters, ~class(.x)[1]),
+          !(attribute %in% map_chr(applied_filters_2, 1))
+        ) %>%
+        pluck("text")
+    } else NULL
+
+    nofilt_div <- if (length(non_applied_filters) > 0) {
+      div(sprintf("%s%s", cond_text1, paste(non_applied_filters, collapse = ", ")))
+    } else NULL
+    
+    nofilt_div2 <- if (length(non_applied_filters_2) > 0) {
+      div(sprintf("%s%s", cond_text2, paste(non_applied_filters_2, collapse = ", ")))
+    } else NULL
+    
+    nofilt_header = if(is.null(nofilt_div) & is.null(nofilt_div2)) {
+      NULL
+    } else tags$h4(style= "color:#1A5276", "The following filters had no effect:")
+    
+    nofilt_hr = if(is.null(nofilt_header)) NULL else hr()
+
     showModal(
       modalDialog(
         title = "Filters Applied",
@@ -1072,6 +1109,10 @@ observeEvent(input$apply_filters, {
             HTML(paste0(cond_text1, filters1)),
             hr(),
             filters2_div,
+            nofilt_header,
+            nofilt_div,
+            nofilt_div2,
+            nofilt_hr,
             buttons
           )
         ),
