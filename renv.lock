@@ -1008,12 +1008,13 @@
     },
     "shinyalert": {
       "Package": "shinyalert",
-      "Version": "2.0.0",
+      "Version": "3.0.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "a130b62f6d5533fcc1cab6c8161358d9",
+      "Hash": "2fd42421abd79dcaf0855fa1d21599a3",
       "Requirements": [
         "htmltools",
+        "knitr",
         "shiny",
         "uuid"
       ]

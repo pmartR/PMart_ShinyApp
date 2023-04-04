@@ -45,18 +45,11 @@ makegroup <- function(){
           })
   
   if(input$datatype == "seq" && any(column_conds)){
-    
-    break_text <- if(length(all_column_choices[column_conds]) == 1){
-      "(s) "
-    } else " "
-    
     shinyalert(
       title = "Adjusting Column Values", 
-      text = paste0("The selected column", 
-                    break_text,
-                    toString(all_column_choices[column_conds]),
-                    " contain", break_text,
-                    "invalid characters that will interfere with ",
+      text = paste0("The selected columns: ", 
+                    "(", toString(all_column_choices[column_conds]), ")",
+                    " contain invalid characters that will interfere with ",
                     "subsequent processing. Invalid characters will be",
                     " replaced with '.'.")
     )
@@ -110,8 +103,8 @@ makegroup <- function(){
     {
       tmp <- objects$omicsData
       ## as it turns out, having an f_data with samples not in e_data is problematic
-      ref_catch <- f_data()[[input$fdata_id_col]] %in% colnames(objects$omicsData$e_data)
-      tmp$f_data <- f_data()[ref_catch,]
+      ref_catch <- f_data[[input$fdata_id_col]] %in% colnames(objects$omicsData$e_data)
+      tmp$f_data <- f_data[ref_catch,]
       attr(tmp, "cnames")$fdata_cname <- input$fdata_id_col
       
       cov_type = c(input$cv_type_1, input$cv_type_2)
