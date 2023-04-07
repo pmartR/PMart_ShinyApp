@@ -134,15 +134,16 @@ list(
         }
         
         #
-        e_data_remove = objects$filters$customfilt$e_data_remove
-        e_meta_remove = objects$filters$customfilt$e_meta_remove
+        e_data_remove = objects$filters[[i]]$e_data_remove
+        e_meta_remove = objects$filters[[i]]$e_meta_remove
         
         #' construct divs containing info about what was removed by the custom filter
         e_data_remove_div <- if(length(e_data_remove) > 0) {
           tagList(tags$p(
             "Biomolecules Removed: ",
             div(style = "overflow-x:auto;max-height:150px", paste(e_data_remove, collapse = " | ")),
-            div(sprintf("Total: %s", length(e_data_remove)))
+            div(sprintf("Total: %s", length(e_data_remove))),
+            hr(),
           ))
         } else {
           NULL
@@ -151,7 +152,8 @@ list(
         f_data_remove_div <- if(length(f_data_remove) > 0) {
           tagList(
             tags$p("Samples Removed: ", div(style = "overflow-x:auto", paste(f_data_remove, collapse = " | "))),
-            tags$p("Remaining Samples:", div(style = "overflow-x:auto", paste(f_data_keep, collapse = " | ")))
+            tags$p("Remaining Samples:", div(style = "overflow-x:auto", paste(f_data_keep, collapse = " | "))),
+            hr()
           )
         } else {
           NULL
@@ -161,7 +163,8 @@ list(
           tagList(tags$p(
             "Biomolecules removed by association with extra biomolecule information:",
             div(style = "overflow-x:auto;max-height:150px", paste(e_meta_remove, collapse = " | ")),
-            div(sprintf("Total: %s", length(e_meta_remove)))
+            div(sprintf("Total: %s", length(e_meta_remove))),
+            hr()
           ))
         } else {
           NULL
@@ -170,11 +173,8 @@ list(
         divs[[i]] <- tagList(
           tags$b("Custom Filter:"),
           f_data_remove_div,
-          hr(),
           e_data_remove_div,
-          hr(),
           e_meta_remove_div,
-          hr()
         )
         
       # cv filter
@@ -541,11 +541,12 @@ list(
       mols2 = objects$omicsData_2$e_data[,get_edata_cname(objects$omicsData_2)]
       
       tagList(
-        h5("Filter by data file identifiers:"),
+        h4("Filter by data file identifiers:"),
         fluidRow(
           column(6,
              pickerInput(
                "edata_customfilt_remove_mols_1",
+               "(Dataset 1)",
                choices = mols1,
                multiple = T,
                options = list(`live-search` = TRUE, `actions-box` = TRUE)
@@ -554,6 +555,7 @@ list(
           column(6, 
              pickerInput(
                "edata_customfilt_remove_mols_2",
+               "(Dataset 2)",
                choices = mols2,
                multiple = T,
                options = list(`live-search` = TRUE, `actions-box` = TRUE)
@@ -581,20 +583,21 @@ list(
     
     if(two_lipids()) {
       validate(need(!is.null(objects$omicsData_2), "No second object"))
-      choices2 = colnames(objects$omicsData_2)
+      choices2 = colnames(objects$omicsData_2$e_meta)
       
       tagList(
         tags$p("Filter by which columns:"),
-        div(
-          class = 'inline-wrapper-1',
+        fluidSplitLayout(
           pickerInput(
             "emeta_customfilt_which_col_1",
+            "(Dataset 1)",
             choices = choices1
           ),
           pickerInput(
-            "emta_customfilt_which_col_2",
-            choices = mols2
-          ) 
+            "emeta_customfilt_which_col_2",
+            "(Dataset 2)",
+            choices = choices2
+          )
         )
       )
     } else {
@@ -628,20 +631,21 @@ list(
       
       tagList(
         tags$p("Filter which biomolecule information values:"),
-        div(
-          class = 'inline-wrapper-1',
+        fluidSplitLayout(
           pickerInput(
             "emeta_customfilt_which_values_1",
+            "(Dataset 1)",
             choices = choices1,
             multiple = T,
             options = list(`live-search` = TRUE, `actions-box` = TRUE)
           ),
           pickerInput(
-            "emta_customfilt_which_values_2",
+            "emeta_customfilt_which_values_2",
+            "(Dataset 2)",
             choices = choices2,
             multiple = T,
             options = list(`live-search` = TRUE, `actions-box` = TRUE)
-          ) 
+          )
         )
       )
       
