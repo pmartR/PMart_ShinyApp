@@ -133,6 +133,9 @@ list(
       if (!is.null(objects$omicsData_2)) {
         plots_show[[3]] <- plots$loc_boxplot_2
         plots_show[[4]] <-  plots$scale_boxplot_2
+        
+        plots_show = Filter(Negate(is.null), plots_show)
+        
         plots$last_plot <- subplot(plots_show, nrows = ifelse(length(plots_show) > 1, 2, 1))
         
         tagList(
