@@ -79,20 +79,30 @@ observeEvent(input$peptide_apply_imdanova, {
       comps <- as.data.frame(comp_df_holder$comp_df)[1:2]
       colnames(comps) <- c("Control", "Test")
       
-      pval_adjust_a = if (!is.null(input$peptide_imdanova_pval_adjust_a)) {
-        input$peptide_imdanova_pval_adjust_a
+      pval_adjust_a_mc = if (!is.null(input$peptide_imdanova_pval_adjust_a_multcomp)) {
+        input$peptide_imdanova_pval_adjust_a_multcomp
       } else "none"
       
-      pval_adjust_g = if (!is.null(input$peptide_imdanova_pval_adjust_g)) {
-        input$peptide_imdanova_pval_adjust_g
+      pval_adjust_g_mc = if (!is.null(input$peptide_imdanova_pval_adjust_g_multcomp)) {
+        input$peptide_imdanova_pval_adjust_g_multcomp
+      } else "none"
+      
+      pval_adjust_a_fdr = if (!is.null(input$peptide_imdanova_pval_adjust_a_fdr)) {
+        input$peptide_imdanova_pval_adjust_a_fdr
+      } else "none"
+      
+      pval_adjust_g_fdr = if (!is.null(input$peptide_imdanova_pval_adjust_g_fdr)) {
+        input$peptide_imdanova_pval_adjust_g_fdr
       } else "none"
       
       objects$peptide_imdanova_res <- imd_anova(
         objects$omicsData, 
         comparisons = comps,
         test_method = input$peptide_imdanova_test_method, 
-        pval_adjust_a_multcomp = pval_adjust_a,
-        pval_adjust_g_multcomp = pval_adjust_g,
+        pval_adjust_a_multcomp = pval_adjust_a_mc,
+        pval_adjust_g_multcomp = pval_adjust_g_mc,
+        pval_adjust_a_fdr = pval_adjust_a_fdr,
+        pval_adjust_g_fdr = pval_adjust_g_fdr,
         pval_thresh = input$peptide_pval_thresh
       )
       
@@ -112,11 +122,18 @@ observeEvent(input$peptide_apply_imdanova, {
         )
       }
       
-      pval_adjust_modal_text <- switch(
+      pval_adjust_mc_modal_text <- switch(
         input$peptide_imdanova_test_method,
-        "combined" = sprintf("ANOVA: %s, G-test: %s", str_to_title(pval_adjust_g), str_to_title(pval_adjust_a)),
-        "anova" = str_to_title(pval_adjust_a),
-        "gtest" = str_to_title(pval_adjust_g)
+        "combined" = sprintf("ANOVA: %s, G-test: %s", pval_adjust_g_mc, pval_adjust_a_mc),
+        "anova" = pval_adjust_a_mc,
+        "gtest" = pval_adjust_g_mc
+      )
+      
+      pval_adjust_fdr_modal_text <- switch(
+        input$peptide_imdanova_test_method,
+        "combined" = sprintf("ANOVA: %s, G-test: %s", pval_adjust_g_fdr, pval_adjust_a_fdr),
+        "anova" = pval_adjust_a_fdr,
+        "gtest" = pval_adjust_g_fdr
       )
 
       # success modal if all is well
@@ -127,16 +144,30 @@ observeEvent(input$peptide_apply_imdanova, {
               column(10,
                      align = "center", offset = 1,
                      tags$h4(
-                       paste0(
-                         "Statistical analysis has been performed using ",
-                         input$peptide_imdanova_test_method,
-                         " test method from pmartR's iMd-ANOVA function. ",
-                         "Multiple comparisons P-value correction peformed: ",
-                         pval_adjust_modal_text,
-                         ". P-value threshold: ",
-                         input$peptide_pval_thresh
-                       )
-                       ),
+                        paste0(
+                          "Statistical analysis has been performed using ",
+                          input$peptide_imdanova_test_method,
+                          " test method from pmartR's iMd-ANOVA function"
+                        )
+                      ),
+                      tags$h4(
+                        sprintf(
+                          "Multiple comparisons P-value correction peformed: %s",
+                          pval_adjust_mc_modal_text
+                        ),
+                      ),
+                      tags$h4(
+                        sprintf(
+                          "FDR p-value adjustment correction performed: %s",
+                          pval_adjust_fdr_modal_text
+                        )
+                      ),
+                      tags$h4(
+                        sprintf(
+                          "P-value threshold: %s",
+                          input$peptide_pval_thresh
+                        )
+                      ),
                      hr(),
                      buttons
               )

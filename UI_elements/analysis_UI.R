@@ -135,8 +135,8 @@ output$imdanova_pval_adjust_UI <- renderUI({
     ""
   } else "Multiple comparisons adjustment "
   
-  anova_picker <-  pickerInput(
-    "imdanova_pval_adjust_a",
+  anova_picker_mc <-  pickerInput(
+    "imdanova_pval_adjust_a_multcomp",
     sprintf("%s(ANOVA)", prepend),
     choices = c(
       "Holm" = "holm",
@@ -147,9 +147,9 @@ output$imdanova_pval_adjust_UI <- renderUI({
     ),
     selected = character(0)
   )
-  
-  gtest_picker <- pickerInput(
-    "imdanova_pval_adjust_g",
+
+  gtest_picker_mc <- pickerInput(
+    "imdanova_pval_adjust_g_multcomp",
     sprintf("%s(G-test)", prepend),
     choices = c(
       "Holm" = "holm",
@@ -158,17 +158,44 @@ output$imdanova_pval_adjust_UI <- renderUI({
     ),
     selected = character(0)
   )
+
+  anova_picker_fdr <-  pickerInput(
+    "imdanova_pval_adjust_a_fdr",
+    "FDR adjustment (ANOVA)",
+    choices = c(
+      "Benjamini-Hochberg (FDR)" = "BH",
+      "Benjamini-Yekutieli" = "BY",
+      "Bonferroni" = "bonferroni",
+      "None" = "none"
+    ),
+    selected = character(0)
+  )
+
+  gtest_picker_fdr <- pickerInput(
+    "imdanova_pval_adjust_g_fdr",
+    "FDR adjustment (G-test)",
+    choices = c(
+      "Benjamini-Hochberg (FDR)" = "BH",
+      "Benjamini-Yekutieli" = "BY",
+      "Bonferroni" = "bonferroni",
+      "None" = "none"
+    ),
+    selected = character(0)
+  )
   
+  anova_pickers = tagList(anova_picker_mc, anova_picker_fdr)
+  gtest_pickers = tagList(gtest_picker_mc, gtest_picker_fdr)
+
   if (input$imdanova_test_method == "anova") {
-    return(anova_picker)
+    return(anova_pickers)
   }
   else if (input$imdanova_test_method == "gtest") {
-    return(gtest_picker)
+    return(gtest_pickers)
   } 
   else if(input$imdanova_test_method == "combined") {
     return(tagList(
       tags$b("Multiple comparisons adjustment"),
-      fluidSplitLayout(anova_picker, gtest_picker) 
+      fluidSplitLayout(anova_pickers, gtest_pickers) 
     ))
   }
 })

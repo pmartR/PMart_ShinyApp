@@ -76,28 +76,45 @@ observeEvent(input$apply_imdanova, {
       comps <- as.data.frame(comp_df_holder$comp_df)[1:2]
       colnames(comps) <- c("Test", "Control")
       
-      pval_adjust_a = if (!is.null(input$imdanova_pval_adjust_a)) {
-        input$imdanova_pval_adjust_a
+      pval_adjust_a_mc = if (!is.null(input$imdanova_pval_adjust_a_multcomp)) {
+        input$imdanova_pval_adjust_a_multcomp
       } else "none"
       
-      pval_adjust_g = if (!is.null(input$imdanova_pval_adjust_g)) {
-        input$imdanova_pval_adjust_g
+      pval_adjust_g_mc = if (!is.null(input$imdanova_pval_adjust_g_multcomp)) {
+        input$imdanova_pval_adjust_g_multcomp
+      } else "none"
+      
+      pval_adjust_a_fdr = if (!is.null(input$imdanova_pval_adjust_a_fdr)) {
+        input$imdanova_pval_adjust_a_fdr
+      } else "none"
+      
+      pval_adjust_g_fdr = if (!is.null(input$imdanova_pval_adjust_g_fdr)) {
+        input$imdanova_pval_adjust_g_fdr
       } else "none"
       
       objects$imdanova_res <- imd_anova(
         objects$omicsData,
         comparisons = comps,
         test_method = input$imdanova_test_method,
-        pval_adjust_a_multcomp = pval_adjust_a,
-        pval_adjust_g_multcomp = pval_adjust_g,
+        pval_adjust_a_multcomp = pval_adjust_a_mc,
+        pval_adjust_g_multcomp = pval_adjust_g_mc,
+        pval_adjust_a_fdr = pval_adjust_a_fdr,
+        pval_adjust_g_fdr = pval_adjust_g_fdr,
         pval_thresh = input$pval_thresh
       )
       
-      pval_adjust_modal_text <- switch(
+      pval_adjust_mc_modal_text <- switch(
         input$imdanova_test_method,
-        "combined" = sprintf("ANOVA: %s, G-test: %s", str_to_title(pval_adjust_g), str_to_title(pval_adjust_a)),
-        "anova" = str_to_title(pval_adjust_a),
-        "gtest" = str_to_title(pval_adjust_g)
+        "combined" = sprintf("ANOVA: %s, G-test: %s", str_to_title(pval_adjust_g_mc), str_to_title(pval_adjust_a_mc)),
+        "anova" = str_to_title(pval_adjust_a_mc),
+        "gtest" = str_to_title(pval_adjust_g_mc)
+      )
+
+      pval_adjust_fdr_modal_text <- switch(
+        input$imdanova_test_method,
+        "combined" = sprintf("ANOVA: %s, G-test: %s", str_to_title(pval_adjust_g_fdr), str_to_title(pval_adjust_a_fdr)),
+        "anova" = str_to_title(pval_adjust_a_fdr),
+        "gtest" = str_to_title(pval_adjust_g_fdr)
       )
       
       # success modal if all is well
@@ -106,21 +123,35 @@ observeEvent(input$apply_imdanova, {
           {
             fluidRow(
               column(10,
-                     align = "center", offset = 1,
-                     tags$h4(
-                       paste0(
-                         "Statistical analysis has been performed using ",
-                         input$imdanova_test_method,
-                         " test method from pmartR's iMd-ANOVA function. ",
-                         "Multiple comparisons P-value correction peformed: ",
-                         pval_adjust_modal_text,
-                         ". P-value threshold: ",
-                         input$pval_thresh
-                       )
-                     ),
-                     hr(),
-                     actionButton("stats_dismiss", "Review results", width = "75%"),
-                     actionButton("goto_downloads", "Continue to Download tab", width = "75%")
+                      align = "center", offset = 1,
+                      tags$h4(
+                        paste0(
+                          "Statistical analysis has been performed using ",
+                          input$imdanova_test_method,
+                          " test method from pmartR's iMd-ANOVA function"
+                        )
+                      ),
+                      tags$h4(
+                        sprintf(
+                          "Multiple comparisons P-value correction peformed: %s",
+                          pval_adjust_mc_modal_text
+                        ),
+                      ),
+                      tags$h4(
+                        sprintf(
+                          "FDR p-value adjustment correction performed: %s",
+                          pval_adjust_fdr_modal_text
+                        )                       
+                      ),
+                      tags$h4(
+                        sprintf(
+                          "P-value threshold: %s",
+                          input$pval_thresh
+                        )
+                      ),
+                      hr(),
+                      actionButton("stats_dismiss", "Review results", width = "75%"),
+                      actionButton("goto_downloads", "Continue to Download tab", width = "75%")
               )
             )
           },
