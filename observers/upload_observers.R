@@ -7,8 +7,9 @@ makeobject <- function(use_iso = T){
   if (two_lipids()) {
     req(e_data_2(), f_data_upload_2())
     edata2 <- e_data_2()
+    edata_cname2 <- input$id_col_2
     emeta2 <- revals$e_meta_2 
-    emeta_cname2 <- colnames(emeta2)[1] #### should emeta cname just be the same regardless? this does force the emeta cname
+    emeta_cname2 <- input$id_col_2
     fdata2 <- f_data_upload_2()
   }
   
@@ -19,7 +20,11 @@ makeobject <- function(use_iso = T){
   edata <- e_data()
   edata_cname <- input$id_col
   emeta <- revals$e_meta
-  emeta_cname <- input$protein_column
+  emeta_cname <- if(!is.null(input$protein_column)) {
+    input$protein_column
+  } else {
+    input$id_col
+  }
   fdata <- f_data_upload()
   data_scale <- input$data_scale
   transform <- input$transform
@@ -66,7 +71,7 @@ makeobject <- function(use_iso = T){
       {
         object_fn(
           e_data = edata2, e_meta = emeta2, f_data = fdata2,
-          edata_cname = edata_cname, emeta_cname = emeta_cname2,
+          edata_cname = edata_cname2, emeta_cname = emeta_cname2,
           fdata_cname = "SampleId",
           data_scale = data_scale, is_normalized = is_normalized
         ) %>%
@@ -198,12 +203,10 @@ observe({
       input$id_col %in% colnames(e_data()),
       input$id_col_2 %in% colnames(e_data_2())
     )
-    cond_idcol_emeta <- all(sapply(
-      list(revals$e_meta, revals$e_meta_2),
-      function(df) {
-        isTRUE(input$id_col %in% colnames(df)) | is.null(df)
-      }
-    )) | !isTruthy(input$emeta_yn)
+    cond_idcol_emeta <- all(
+      isTRUE(input$id_col %in% colnames(revals$e_meta)) | is.null(revals$e_meta),
+      isTRUE(input$id_col %in% colnames(revals$e_meta_2)) | is.null(revals$e_meta_2)
+    ) | !isTruthy(input$emeta_yn)
     cond_nasymbol <- !is.null(input$na_symbol)
     cond_shared_ids <-
       all(e_data()[[input$id_col]] %in% revals$e_meta[[input$id_col]]) &

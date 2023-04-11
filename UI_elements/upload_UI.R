@@ -168,10 +168,7 @@ list(
       )
     }
     else {
-      choices <- colnames(revals$e_meta)
-      hidden(pickerInput("protein_column", "Which column in your biomolecule file contains protein identifiers?",
-        choices = choices, selected = input$id_col # this should exist in choices
-      ))
+      return(NULL)
     }
   }),
   
