@@ -241,7 +241,10 @@ observeEvent(input$apply_seqstats, {
         comparisons = comps,
         test_method = input$seqdata_test_method, ### _test_method for options
         p_adjust = pval_adjust,
-        p_cutoff = input$pval_thresh
+        p_cutoff = input$pval_thresh,
+        BPPARAM = BiocParallel::MulticoreParam(
+          min(BiocParallel::multicoreWorkers() - 1, 4)
+        )
       )
       
       
