@@ -20,6 +20,7 @@ library(reshape2)
 
 # Pull app version from global variable
 MAP_ACTIVE <- ifelse(Sys.getenv("MAP_VERSION") == "1", TRUE, FALSE)
+is_local <- Sys.getenv('SHINY_PORT') == ""
 
 # static objects
 FILTER_NAMES <- read.csv("./filter_names.csv", stringsAsFactors = F, check.names = F)
