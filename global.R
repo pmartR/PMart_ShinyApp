@@ -60,7 +60,9 @@ ttext_ <- list(
   REFERENCE_DISABLED_ROW = "Disabled entries contain missing values in some samples. These might be due to NAs generated in log transformation or replacement of values less than or equal to zero.",
   REFERENCE_DISABLED_COL = "Disabled entries are non-numeric.",
   TABDISABLE_PEP_NOT_ROLLED_UP = "This tab is used to perform statistics on peptide data rolled up to the protein level.  Roll up your peptide data in the Protein Roll Up tab before using this tab.  To perform stats on the peptide-level data, go to the Peptide Statistics tab.",
-  TABDISABLE_PEP_NO_EMETA = "Tab disabled because you uploaded peptide data with no biomolecule information file.  Peptide-level statistics are still available."
+  TABDISABLE_PEP_NO_EMETA = "Tab disabled because you uploaded peptide data with no biomolecule information file.  Peptide-level statistics are still available.",
+  WHAT_IS_MC = "This option defines p-value adjustment for multiple comparisons within a single biomolecule.  For example, if you have three groups A, B, and C and you want to test comparisons A vs B, A vs C, and B vs C, you will run adjustment on the resulting three p-values for all biomolecules.",
+  WHAT_IS_FDR = "This option defines p-value adjustment for multiple tests arising from many biomolecules.  For example, if you have 100 biomolecules and some number of comparisons, you will run adjustment on the resulting 100 p-values for each comparison."
 ) 
 
 #'@details info text NOT displayed in tooltips.  Usually in warnings UI elements

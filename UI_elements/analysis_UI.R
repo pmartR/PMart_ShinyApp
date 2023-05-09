@@ -131,13 +131,34 @@ output$imdanova_pval_adjust_UI <- renderUI({
   ))
   
   # to make things look nice
-  prepend <- if(input$imdanova_test_method == 'combined') {
-    ""
-  } else "Multiple comparisons adjustment "
+  if(input$imdanova_test_method == 'combined') {
+    title_anova_mc <- title_anova_fdr <- "(ANOVA)"
+    title_gtest_mc <- title_gtest_fdr <- "(G-test)"
+  } else {
+    title_anova_mc <- div(
+      div(style = "float:left", "Multiple comparisons adjustment (ANOVA)"),
+      tipify(blueq, ttext_[["WHAT_IS_MC"]])
+    )
+
+    title_gtest_mc <- div(
+      div(style = "float:left", "Multiple comparisons adjustment (G-test)"),
+      tipify(blueq, ttext_[["WHAT_IS_MC"]])
+    )
+
+    title_anova_fdr <- div(
+      div(style = "float:left", "FDR adjustment (ANOVA)"),
+      tipify(blueq, ttext_[["WHAT_IS_FDR"]])
+    )
+
+    title_gtest_fdr <- div(
+      div(style = "float:left", "FDR adjustment (G-test)"),
+      tipify(blueq, ttext_[["WHAT_IS_FDR"]])
+    )
+  }
   
   anova_picker_mc <-  pickerInput(
     "imdanova_pval_adjust_a_multcomp",
-    sprintf("%s(ANOVA)", prepend),
+    title_anova_mc,
     choices = c(
       "Holm" = "holm",
       "Bonferroni" = "bonferroni",
@@ -150,7 +171,7 @@ output$imdanova_pval_adjust_UI <- renderUI({
 
   gtest_picker_mc <- pickerInput(
     "imdanova_pval_adjust_g_multcomp",
-    sprintf("%s(G-test)", prepend),
+    title_gtest_mc,
     choices = c(
       "Holm" = "holm",
       "Bonferroni" = "bonferroni",
@@ -161,7 +182,7 @@ output$imdanova_pval_adjust_UI <- renderUI({
 
   anova_picker_fdr <-  pickerInput(
     "imdanova_pval_adjust_a_fdr",
-    "FDR adjustment (ANOVA)",
+    title_anova_fdr,
     choices = c(
       "Benjamini-Hochberg (FDR)" = "BH",
       "Benjamini-Yekutieli" = "BY",
@@ -173,7 +194,7 @@ output$imdanova_pval_adjust_UI <- renderUI({
 
   gtest_picker_fdr <- pickerInput(
     "imdanova_pval_adjust_g_fdr",
-    "FDR adjustment (G-test)",
+    title_gtest_fdr,
     choices = c(
       "Benjamini-Hochberg (FDR)" = "BH",
       "Benjamini-Yekutieli" = "BY",
@@ -194,8 +215,16 @@ output$imdanova_pval_adjust_UI <- renderUI({
   } 
   else if(input$imdanova_test_method == "combined") {
     return(tagList(
-      tags$b("Multiple comparisons adjustment"),
-      fluidSplitLayout(anova_pickers, gtest_pickers) 
+      div(class='inline-wrapper-1', 
+        tags$b("Multiple comparisons adjustment"),
+        tipify(blueq, ttext_[["WHAT_IS_MC"]])
+      ),
+      fluidSplitLayout(anova_picker_mc, gtest_picker_mc),
+      div(class='inline-wrapper-1', 
+        tags$b("FDR adjustment"),
+        tipify(blueq, ttext_[["WHAT_IS_FDR"]])
+      ),
+      fluidSplitLayout(anova_picker_fdr, gtest_picker_fdr)
     ))
   }
 })
