@@ -49,8 +49,6 @@ test_that("pmartR loads MAP projects", {
                        height = 1187, width = 1263, wait = FALSE,
                        timeout = 15000)
   
-  app$view()
-  
   app$wait_for_idle(timeout = 60000)
   
   expect_equal(app$get_value(input = "top_page"), "upload_data_tab")

@@ -50,8 +50,6 @@ test_that("pmartR loads MAP midpoints", {
                        height = 1187, width = 1263, wait = FALSE,
                        timeout = 15000)
   
-  app$view()
-  
   app$wait_for_idle(timeout = 60000)
   
   expect_equal(app$get_value(input = "top_page"), "statistics_tab")
@@ -81,8 +79,6 @@ test_that("pmartR loads MAP midpoints", {
   app <- AppDriver$new(name = "pmart_standalone", variant = platform_variant(),
                        height = 1187, width = 1263, wait = FALSE,
                        timeout = 15000)
-  
-  app$view()
   
   app$wait_for_idle(timeout = 60000)
   
