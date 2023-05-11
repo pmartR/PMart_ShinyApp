@@ -8,8 +8,12 @@ list(
   
   observeEvent(input$`__startup__`, {
     
-    # Parse the query string at the url header
-    query <- parseQueryString(session$clientData$url_search)
+    if (!is.null(Sys.getenv("SHINYTEST_LOAD_MAP_OBJECT"))) {
+      query <- list(data = Sys.getenv("SHINYTEST_LOAD_MAP_OBJECT"))
+    } else {
+      # Parse the query string at the url header
+      query <- parseQueryString(session$clientData$url_search)
+    }
     
     # Set a conditional test. We only care if the "data" parameter exists. 
     cond <- length(query) != 0 && "data" %in% names(query) 
