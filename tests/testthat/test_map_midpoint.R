@@ -2,6 +2,9 @@ library(shinytest2)
 library(mapDataAccess)
 
 test_that("pmartR loads MAP midpoints", {
+  if (is.null(Sys.getenv("MAP_VERSION")) || Sys.getenv("MAP_VERSION") < 1)
+    skip("MAP not enabled")
+  
   cfg_path = if(isTruthy(Sys.getenv("MAP_CONFIG"))) Sys.getenv("MAP_CONFIG")
              else "./cfg/minio_config.yml"
   
@@ -106,7 +109,7 @@ test_that("pmartR loads MAP midpoints", {
   
   app$click("apply_rollup")
 
-  app$wait_for_idle()
+  app$wait_for_idle(timeout = 60000)
   
   app$click("rollup_goto_stats")
 

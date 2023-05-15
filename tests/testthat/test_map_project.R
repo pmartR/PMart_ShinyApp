@@ -2,6 +2,9 @@ library(shinytest2)
 library(mapDataAccess)
 
 test_that("pmartR loads MAP projects", {
+  if (is.null(Sys.getenv("MAP_VERSION")) || Sys.getenv("MAP_VERSION") < 1)
+    skip("MAP not enabled")
+  
   cfg_path = if(isTruthy(Sys.getenv("MAP_CONFIG"))) Sys.getenv("MAP_CONFIG")
   else "./cfg/minio_config.yml"
   
@@ -65,9 +68,8 @@ test_that("pmartR loads MAP projects", {
   app$set_inputs(protein_column = "ProteinList")
   app$click("makeobject")
   
-  app$wait_for_idle()
+  app$wait_for_idle(timeout = 60000)
   
-  app$click("upload_dismiss")
   app$click("goto_groups")
   
   app$wait_for_idle()
@@ -96,7 +98,7 @@ test_that("pmartR loads MAP projects", {
   app$set_inputs(spans_submenu = "choose_params")
   app$set_inputs(subset_fn = "rip")
   app$click("inspect_norm")
-  app$wait_for_idle()
+  app$wait_for_idle(timeout = 60000)
   app$set_inputs(norm_modal_plot_select = "ba")
   app$click("apply_normalization_modal")
   
@@ -117,7 +119,7 @@ test_that("pmartR loads MAP projects", {
   
   app$wait_for_idle()
   app$click("apply_rollup")
-  app$wait_for_idle()
+  app$wait_for_idle(timeout = 60000)
   app$click("rollup_goto_stats")
   
   app$wait_for_idle()
