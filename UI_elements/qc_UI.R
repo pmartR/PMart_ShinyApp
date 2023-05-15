@@ -15,20 +15,24 @@ list(
   output$qc_order_by_UI <- renderUI({
     req(!is.null(objects$omicsData))
     choices <- colnames(objects$omicsData$f_data %>% dplyr::select(-one_of(attributes(objects$omicsData)$cnames$fdata_cname)))
+
     pickerInput("qc_order_by", NULL,
       choices = c("Select one", choices, "Group Levels" = "Group"),
       selected = all_inputs()$qc_order_by,
       options = pickerOptions(dropupAuto = FALSE)
     )
+    
   }),
 
   output$qc_order_by_2_UI <- renderUI({
     req(!is.null(objects$omicsData_2))
     choices <- colnames(objects$omicsData_2$f_data %>% dplyr::select(-one_of(attributes(objects$omicsData_2)$cnames$fdata_cname)))
+
     pickerInput("qc_order_by_2", NULL,
       choices = c("Select one(dataset 2)" = "Select one", choices, "Group Levels" = "Group"),
       selected = all_inputs()$qc_order_by_2
     )
+    
   }),
   #
 
@@ -36,20 +40,47 @@ list(
   output$qc_color_by_UI <- renderUI({
     req(!is.null(objects$omicsData))
     choices <- colnames(objects$omicsData$f_data %>% dplyr::select(-one_of(attributes(objects$omicsData)$cnames$fdata_cname)))
+
     pickerInput("qc_color_by", NULL,
       choices = c("Select one", choices, "Group Levels" = "Group"),
       selected = all_inputs()$qc_color_by
     )
+    
   }),
 
   output$qc_color_by_2_UI <- renderUI({
     req(!is.null(objects$omicsData_2))
     choices <- colnames(objects$omicsData_2$f_data %>% dplyr::select(-one_of(attributes(objects$omicsData_2)$cnames$fdata_cname)))
+
     pickerInput("qc_color_by_2", NULL,
       choices = c("Select one (dataset 2)" = "Select one", choices, "Group Levels" = "Group"),
       selected = all_inputs()$qc_color_by_2
     )
+    
   }),
+  
+  output$qc_shape_by_UI <- renderUI({
+    req(!is.null(objects$omicsData))
+    choices <- colnames(objects$omicsData$f_data %>% dplyr::select(-one_of(attributes(objects$omicsData)$cnames$fdata_cname)))
+
+    pickerInput("qc_shape_by", NULL,
+      choices = c("Select one", choices, "Group Levels" = "Group"),
+      selected = all_inputs()$qc_color_by
+    )
+    
+  }),
+
+  output$qc_shape_by_2_UI <- renderUI({
+    req(!is.null(objects$omicsData_2))
+    choices <- colnames(objects$omicsData_2$f_data %>% dplyr::select(-one_of(attributes(objects$omicsData_2)$cnames$fdata_cname)))
+
+    pickerInput("qc_shape_by_2", NULL,
+      choices = c("Select one (dataset 2)" = "Select one", choices, "Group Levels" = "Group"),
+      selected = all_inputs()$qc_color_by_2
+    )
+    
+  }),
+  
   #
 
   # qc tab plot panel
@@ -105,6 +136,7 @@ list(
     
     order_by <- if (isTRUE(input$qc_order_by == "Select one")) NULL else input$qc_order_by
     color_by <- if (isTRUE(input$qc_color_by == "Select one")) NULL else input$qc_color_by
+    shape_by <- if (isTRUE(input$qc_shape_by == "Select one")) NULL else input$qc_shape_by
     
     transformation <- if(input$datatype == "seq") "lcpm" else NULL
     
@@ -121,6 +153,10 @@ list(
       if(!is.null(transformation)) pargs[['transformation']] <- transformation
       
       p <- do.call(plot, pargs)
+    }
+    else if(input$which_qc_plot == 'pca') {
+      .dimres <- dim_reduction(objects$omicsData)
+      p <- plot(.dimres, omicsData = objects$omicsData, color_by = color_by, shape_by = shape_by)
     }
     else {
       p <- plot(missingval_result(objects$omicsData),
@@ -149,17 +185,21 @@ list(
     # commonly used params
     use_VizSampNames <- "VizSampNames" %in% colnames(objects$omicsData_2$f_data)
 
+    order_by <- if (isTRUE(input$qc_order_by_2 == "Select one")) NULL else input$qc_order_by_2
+    color_by <- if (isTRUE(input$qc_color_by_2 == "Select one")) NULL else input$qc_color_by_2
+    shape_by <- if (isTRUE(input$qc_shape_by_2 == "Select one")) NULL else input$qc_shape_by_2
+
     # ifelse chain for which type of plot
     if (input$which_qc_plot == "boxplots") {
-      # specific boxplot options
-      order_by <- if (isTRUE(input$qc_order_by_2 == "Select one")) NULL else input$qc_order_by_2
-      color_by <- if (isTRUE(input$qc_color_by_2 == "Select one")) NULL else input$qc_color_by_2
-
       p <- plot(objects$omicsData_2,
         order_by = order_by, color_by = color_by,
         bw_theme = TRUE,
         use_VizSampNames = use_VizSampNames
       )
+    }
+    else if(input$which_qc_plot == 'pca') {
+      .dimres <- dim_reduction(objects$omicsData_2)
+      p <- plot(.dimres, omicsData = objects$omicsData, color_by = color_by, shape_by = shape_by)
     }
     else {
       p <- plot(missingval_result(objects$omicsData_2),

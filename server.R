@@ -23,6 +23,11 @@ shinyServer(function(session, input, output) {
     "SeqData Statistics" = list("objects", "seqstats_res")
   )
   
+  if(getOption("shiny.testmode", FALSE)) {
+    message("App is running in test mode")
+    set.seed(555115)
+  }
+  
   resources_locations_peprollup <- list(
     "Protein Expression Data (e_data)" = list("objects", "omicsData", "e_data"),
     "Peptide Expression Data (e_data)" = list("objects", "omicsData_pre_rollup", "e_data"),

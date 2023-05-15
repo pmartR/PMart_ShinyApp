@@ -1,6 +1,6 @@
 bioconductor.version:
 external.libraries:
-ignored.packages: pmartR, mapDataAccess, shinytest2, testthat
+ignored.packages: pmartR, mapDataAccess, shinytest2, testthat, vdiffr
 package.dependency.fields: Depends, Imports
 r.version:
 snapshot.type: implicit

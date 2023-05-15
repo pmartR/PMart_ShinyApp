@@ -34,5 +34,9 @@ Depends:
 Remotes:
   mapDataAccess,
   pmartR
+Suggests:
+  shinytest2,
+  testthat,
+  vdiffr (== 1.0.5)
 
 

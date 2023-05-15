@@ -1,6 +1,14 @@
 ## Code and Dockerfile Changelog
 
-#### Code 
+### Code 
+
+#### 2023
+
+February
+    - Downloadable reports for all data types 
+    - Options to adjust p-values in iMd-ANOVA for multiple comparisons and/or multiple biomolecules (FDR)
+
+#### 2022
 
 November
     - More options for plot downloads, can select:
@@ -18,7 +26,17 @@ Feb/March
 
 #### Docker Containers
 
-### Base:
+**1.7**
+- Updates to pmartR
+- Fixes for two lipids dataset
+
+**1.6**
+- Downloadable reports
+- Accomodate new changes to `imd_anova` in pmartR package
+
+**1.5**
+- Statistics for seqdata
+
 **1.4**
 mapDataAccess and pmartR moved inside dockerfile (instead of lockfile) to reduce build times.  
 - 1.4.2:

@@ -54,7 +54,13 @@ test_that("App completes a basic workflow on peptide-level data", {
   app$click("qc_apply_style_plot_1")
   app$click("saveplot")
   
-  saved_plot <- app$get_value(export = "saved_plot_data")
+  saved_plot <- app$get_value(export = "cur_plot")
+  vdiffr::expect_doppelganger("qc_boxplot", saved_plot, writer=write_plotly_svg)
+  
+  app$set_inputs(which_qc_plot = "pca")
+  app$click("saveplot")
+  saved_plot <- app$get_value(export = "cur_plot")
+  vdiffr::expect_doppelganger("qc_pca_plot", saved_plot, writer=write_plotly_svg)
   
   # TODO:  Find some way to consitently test parts of a plot
   # expect_equal(digest::digest(saved_plot), "2facd08eb8de3b8f685d80631e2a26b2")
@@ -215,6 +221,17 @@ test_that("App completes a basic workflow on peptide-level data", {
   
   app$wait_for_value(input = "stats_dismiss")
   app$click("stats_dismiss")
+  
+  app$run_js(open_collapse("statistics_collapse_left", "stats-statistics-options"))
+  app$set_inputs("stats_select_method" = "pca")
+  app$wait_for_idle()
+  app$click("apply_dimreduction")
+  app$wait_for_idle()
+  app$set_inputs("analysis_pca_shape_by" = "Condition2")
+  app$click("saveplot")
+  
+  saved_plot <- app$get_value(export = "cur_plot")
+  vdiffr::expect_doppelganger("analysis_pca_plot", saved_plot, writer=write_plotly_svg)
   
   # Download
   app$set_inputs(top_page = "download_tab")

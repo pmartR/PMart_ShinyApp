@@ -179,7 +179,7 @@ observeEvent(input$apply_imdanova, {
 })
 
 
-# make statres object
+# compute diagnostics for seqdata
 observeEvent(input$apply_diagnostic, {
   req(!is.null(objects$omicsData) && 
         input$top_page == "statistics_tab")
@@ -212,7 +212,7 @@ observeEvent(input$apply_diagnostic, {
   )
 })
 
-# make statres object
+# make statres object for seeqdata
 observeEvent(input$apply_seqstats, {
   req(!is.null(objects$omicsData) && 
         input$top_page == "statistics_tab" && 
@@ -311,6 +311,63 @@ observeEvent(input$apply_seqstats, {
     }
   )
 })
+
+# make statres object for seeqdata
+observeEvent(input$apply_dimreduction, {
+  req(!is.null(objects$omicsData) && 
+        input$top_page == "statistics_tab")
+  
+  shinyjs::show("analysis_busy")
+  on.exit({
+    hide("analysis_busy")
+    enable("apply_seqstats")
+  })
+    
+  tryCatch(
+    {
+      objects$dimred_res <- dim_reduction(objects$omicsData)
+    },
+    error = function(e) {
+      msg <- paste0("Something went wrong computing pca.  \n System error:  ", e)
+      showNotification(
+        msg, 
+        duration = NULL,
+        type = "error"
+      )
+      objects$dimred_res <- NULL
+      plots$statistics_mainplot <- NULL
+    }
+  )
+})
+
+#
+observeEvent(
+  c(
+    objects$dimred_res,
+    input$pca_update_plot_content
+  ),
+  {
+    req(!is.null(objects$dimred_res))
+    
+    pca_color_by = if (!isTruthy(input$analysis_pca_color_by) ||
+                       input$analysis_pca_color_by == NULLSELECT_) {
+      NULL
+    } else input$analysis_pca_color_by
+    
+    pca_shape_by = if (!isTruthy(input$analysis_pca_shape_by) ||
+                       input$analysis_pca_shape_by == NULLSELECT_) {
+      NULL
+    } else input$analysis_pca_shape_by
+    
+    plots$statistics_mainplot <- plot(
+      objects$dimred_res,
+      objects$omicsData,
+      color_by = pca_color_by,
+      shape_by = pca_shape_by
+    )
+  }
+)
+
 
 observeEvent(input$stats_dismiss, removeModal())
 observeEvent(input$goto_downloads,{
@@ -450,6 +507,11 @@ observeEvent(
   }
 )
 
+#' @details open plot panel when pca is computed
+observeEvent(objects$dimred_res, {
+    updateCollapse(session, "statistics_collapse_main", open = "statistics_plots")
+    updateCollapse(session, "statistics_collapse_main", open = "statistics_plot_opts")
+})
 
 observeEvent(
   c(

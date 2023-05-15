@@ -6,7 +6,7 @@ on.exit({Sys.setenv("MAP_VERSION" = orig_envvar)})
 
 test_that("{shinytest2} recording: pmart_standalone", {
     # app <- AppDriver$new("http://127.0.0.1:3858", name = "pmart_standalone", height = 1187, width = 1263) 
-    app <- AppDriver$new(name = "pmart_standalone", variant = platform_variant(), height = 1187, width = 1263, timeout = 15000)
+    app <- AppDriver$new(name = "pmart_standalone", variant = platform_variant(), height = 1187, width = 1263, seed = 5237, timeout = 15000)
     app$set_inputs(datatype = "lip")
     app$set_inputs(upload_collapse_left = "datselect")
     app$upload_file(file_edata = file.path(testthat::test_path(), "../../example_data/test_lipid_pos_edata.csv"))
@@ -32,6 +32,36 @@ test_that("{shinytest2} recording: pmart_standalone", {
     
     app$wait_for_value(input = "goto_qc")
     app$click("goto_qc")
+    
+    app$wait_for_value(input = "qc_order_by")
+    app$set_inputs(qc_order_by = "Condition1")
+    app$set_inputs(qc_color_by = "Condition2")
+    
+    app$set_inputs(qc_order_by_2 = "Group")
+    app$set_inputs(qc_color_by_2 = "Condition2")
+    
+    app$set_inputs(qc_xlab = "Sampname")
+    app$set_inputs(qc_ylab = "log2abund")
+    app$set_inputs(qc_title = "New Title")
+    app$click("qc_apply_style_plot_1")
+    app$click("qc_apply_style_plot_2")
+    app$click("saveplot")
+    
+    saved_plot <- app$get_value(export = "cur_plot")
+    vdiffr::expect_doppelganger("qc_boxplot", saved_plot, writer=write_plotly_svg)
+    
+    saved_plot <- app$get_value(export = "cur_plot_2")
+    vdiffr::expect_doppelganger("qc_boxplot_2", saved_plot, writer=write_plotly_svg)
+    
+    app$set_inputs(which_qc_plot = "pca")
+    app$set_inputs(qc_color_by_2 = "Group")
+    
+    app$click("saveplot")
+    saved_plot <- app$get_value(export = "cur_plot")
+    vdiffr::expect_doppelganger("qc_pca_plot", saved_plot, writer=write_plotly_svg)
+    
+    saved_plot <- app$get_value(export = "cur_plot_2")
+    vdiffr::expect_doppelganger("qc_pca_plot_2", saved_plot, writer=write_plotly_svg)
 
     app$set_inputs(top_page = "filter_tab")
     
@@ -87,7 +117,18 @@ test_that("{shinytest2} recording: pmart_standalone", {
     app$wait_for_idle()
     app$click("apply_imdanova")
     app$wait_for_idle()
-    app$click("goto_downloads")
+    app$click("stats_dismiss")
+    app$run_js(open_collapse("statistics_collapse_left", "stats-statistics-options"))
+    app$set_inputs("stats_select_method" = "pca")
+    app$click("apply_dimreduction")
+    app$wait_for_idle()
+    app$set_inputs("analysis_pca_shape_by" = "Condition2")
+    app$click("saveplot")
+    
+    saved_plot <- app$get_value(export = "cur_plot")
+    vdiffr::expect_doppelganger("analysis_pca_plot", saved_plot, writer=write_plotly_svg)
+    
+    app$set_inputs(top_page = "download_tab")
     
     app$run_js(open_collapse("download_collapse", "Generate Report"))
     report_name = app$get_value(input = "ReportName")

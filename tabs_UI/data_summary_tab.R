@@ -11,7 +11,8 @@ data_summary_UI <- function() {
           radioGroupButtons("which_qc_plot", "Choose a Plot Type:",
             choices = c("Boxplots" = "boxplots", 
                         "Missing values barplots" = "bar", 
-                        "Missing values scatterplots" = "scatter")
+                        "Missing values scatterplots" = "scatter",
+                        "Principal components" = "pca")
           )
         ),
         bsCollapse(
@@ -19,30 +20,43 @@ data_summary_UI <- function() {
           bsCollapsePanel("Plot Options",
             value = "qc_plot_params",
             conditionalPanel(
-              "input.which_qc_plot != 'scatter'",
+              "['boxplots', 'bar'].includes(input.which_qc_plot)",
               tagList(
-                div("Order Samples By:", style = "font-weight:bold"),
+                div("Order By:", style = "font-weight:bold"),
                 fluidRow(
                   column(6, uiOutput("qc_order_by_UI")),
                   column(6, uiOutput("qc_order_by_2_UI"))
                 )
-              ),
-              # color selection
+              )    
+            ),
+            # color selection
+            tagList(
+              div("Color By:", style = "font-weight:bold"),
+              fluidRow(
+                column(6, uiOutput("qc_color_by_UI")),
+                column(6, uiOutput("qc_color_by_2_UI"))
+              )
+            ),
+            # shape selection
+            conditionalPanel(
+              "['pca'].includes(input.which_qc_plot)",
               tagList(
-                div("Color Samples By:", style = "font-weight:bold"),
+                div("Shape By:", style = "font-weight:bold"),
                 fluidRow(
-                  column(6, uiOutput("qc_color_by_UI")),
-                  column(6, uiOutput("qc_color_by_2_UI"))
+                  column(6, uiOutput("qc_shape_by_UI")),
+                  column(6, uiOutput("qc_shape_by_2_UI"))
                 )
               )
             ),
-            div(
-              id = "js_qc_colors",
-              pickerInput(
-                "qc_colors",
-                "Missing Values Colors",
-                choices = global_input_choices$MISSINGVAL_COLORS
-            ))
+            conditionalPanel(
+              "['bar', 'scatter'].includes(input.which_qc_plot)",
+                id = "js_qc_colors",
+                pickerInput(
+                  "qc_colors",
+                  "Missing Values Colors",
+                  choices = global_input_choices$MISSINGVAL_COLORS
+              )
+            )
           )
         ), # parent collapse
         

@@ -46,44 +46,30 @@ output$statistics_diagplot <- renderUI({
 
 output$stats_select_method_UI <- renderUI({
   
-  seq_disables <- c(F, T, F, F, F)
-  
-  if(inherits(objects$omicsData, "seqData")){
-    pickerInput(
-      "stats_select_method",
-      "Select statistics method:",
-      choices = c(
-        "Select one" = NULLSELECT_,
-        "iMd-ANOVA" = "imdanova",
-        "DESeq2" = "DESeq2",
-        "Limma-voom" = "voom",
-        "EdgeR" = "edgeR"
-      ),
-      choicesOpt = list(
-        disabled = seq_disables
-      ),
-      multiple = TRUE,
-      options = pickerOptions(maxOptions = 1)
-    )
+  seq_disables <- if(inherits(objects$omicsData, "seqData")) {
+    c(F, T, T, F, F, F, F)
   } else {
-    pickerInput(
-      "stats_select_method",
-      "Select statistics method:",
-      choices = c(
-        "Select one" = NULLSELECT_,
-        "iMd-ANOVA" = "imdanova",
-        "DESeq2" = "DESeq2",
-        "Limma-voom" = "voom",
-        "EdgeR" = "edgeR"
-      ),
-      choicesOpt = list(
-        disabled = c(F, F, T, T, T)
-      ),
-      multiple = TRUE,
-      options = pickerOptions(maxOptions = 1)
-    )
+    c(F, F, F, T, T, T, T)
   }
   
+  pickerInput(
+    "stats_select_method",
+    "Select analysis method:",
+    choices = c(
+      "Select one" = NULLSELECT_,
+      "iMd-ANOVA" = "imdanova",
+      "PCA" = "pca",
+      "GLM-PCA" = 'glmpca',
+      "DESeq2" = "DESeq2",
+      "Limma-voom" = "voom",
+      "EdgeR" = "edgeR"
+    ),
+    choicesOpt = list(
+      disabled = seq_disables
+    ),
+    multiple = TRUE,
+    options = pickerOptions(maxOptions = 1)
+  )
 })
 
 #'@details Conditional radiogroupbuttons depending on what plot types are valid
@@ -270,7 +256,7 @@ output$seqdata_pval_adjust_UI <- renderUI({
 output$statistics_tab_sidepanel <- renderUI({
   req(input$stats_select_method != NULLSELECT_)
   
-  if (input$stats_select_method == "imdanova"){
+  if (input$stats_select_method %in% c("imdanova")){
     bsCollapse(
       id = "imdanova-sidepanel-options", multiple = TRUE, 
       open = c("imdanova-specify-comparisons", "imdanova-select-settings"), 
@@ -413,7 +399,32 @@ output$statistics_tab_sidepanel <- renderUI({
       )
       
     }
-    
+  } else if (input$stats_select_method %in% c("pca", "glmpca")) {
+    bsCollapse(
+        id = "pca-sidepanel-options", multiple = TRUE, open = c("dimred-select-settings"),
+        #
+        bsCollapsePanel(
+          subsection_header(
+            "Dimension Reduction Options",
+            "pca_settings_ok",
+            "color:orange;float:right",
+            icon("ok", lib = "glyphicon")
+          ),
+          value = "dimred-select-settings",
+          div(class = "grey_text", "No options for this method currently"),
+          br(),
+          bsButton("apply_dimreduction", "Apply dimension reduction", style = "primary"),
+          br(), br(),
+          hidden(
+            div(
+              "Calculating, please wait...",
+              id = "analysis_busy",
+              class = "fadein-out",
+              style = "color:deepskyblue;font-weight:bold;margin-bottom:5px"
+            )
+          )
+        )
+      )
   }
 })
 
@@ -464,12 +475,21 @@ output$statistics_tab_mainpanel <- renderUI({
                         withSpinner(DTOutput("statistics_summary_table"))
         )
       )
-      
-    }
-    
+    } 
+  } else if (input$stats_select_method %in% c("pca", "glmpca")){
+    bsCollapse(
+      id = "statistics_collapse_main", multiple = TRUE,
+      bsCollapsePanel("Plots",
+                      value = "statistics_plots",
+                      withSpinner(uiOutput("statistics_mainplot"))
+      ),
+      bsCollapsePanel("Plot Options",
+                      value = "statistics_plot_opts",
+                      uiOutput("dimres_plot_options")
+      )
+    )
   }
 })
-
 
 #'@details Give options for comparisons depending on what user selected as the
 #' method to perform comparisons (All comparisons, control vs treatment, custom)
@@ -653,6 +673,35 @@ output$statistics_summary_table <- renderDT({
 }, options = list(scrollX =TRUE))
 
 #'@details UI created with the helper function style_UI to edit plot options
+#'for the dimension reduction plots
+output$dimres_plot_options <- renderUI({
+  tagList(
+    div(
+      class = 'inline-wrapper-1',
+      pickerInput(
+        inputId = "analysis_pca_color_by",
+        label = "Color by:",
+        choices = c("Select one" = NULLSELECT_, colnames(objects$omicsData$f_data), "Group"),
+        selected = "Group"
+      ),
+      pickerInput(
+        inputId = "analysis_pca_shape_by",
+        label = "Shape by:",
+        choices = c("Select one" = NULLSELECT_, colnames(objects$omicsData$f_data), "Group"),
+        selected = NULLSELECT_
+      ),
+      actionButton("pca_update_plot_content", "Update plot")
+    ),
+    style_UI(
+        "statistics",
+        hr(),
+        h4("Axes styling")
+      ),
+      uiOutput("statistics_apply_style")
+    )
+})
+
+#'@details UI created with the helper function style_UI to edit plot options
 #'in plot.<object> function as well as axes values (if it is a ggplot)
 output$statistics_plot_options <- renderUI({
   cpicker_args <- list(
@@ -699,14 +748,14 @@ output$statistics_plot_options <- renderUI({
       conditionalPanel("input.stats_interactive_yn == 'TRUE'",
                        tipify(blueexcl, ttext_[["IMD_INTERACTIVE_MANY_POINTS"]]))
     ),
-      tagList(
-        style_UI(
-          "statistics",
-          hr(),
-          h4("Axes styling")
-        ),
-        uiOutput("statistics_apply_style")
-      )
+    tagList(
+      style_UI(
+        "statistics",
+        hr(),
+        h4("Axes styling")
+      ),
+      uiOutput("statistics_apply_style")
+    )
   )
 })
 
@@ -720,7 +769,7 @@ output$statistics_apply_style <- renderUI({
         "statistics",
          FALSE,
          inherits(plots$statistics_mainplot, "list"),
-         one_plot_title="Update Analysis Plot style"
+         one_plot_title="Update main plot style"
       ), 
     second_apply_button
   )
