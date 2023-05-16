@@ -177,11 +177,52 @@ list(
       max_elements <- sapply(sample_names(), strsplit, input$delimiter) %>%
         sapply(length) %>%
         max()
+      
+      items <- map(1:max_elements, function(n){
+        toString(map_chr(sapply(sample_names(), strsplit, input$delimiter), n))
+      })
+      
       tagList(
         textInput("delimiter", "Split on character:", value = input$delimiter),
-        pickerInput("split_el", "Which elements to keep after splitting?", choices = 1:max_elements, multiple = T)
+        pickerInput("split_el", 
+                    "Which elements to keep after splitting?", 
+                    choices = 1:max_elements, 
+                    multiple = T,
+                    choicesOpt = list(
+                      subtext = items
+                    ))
       )
     }
+  }),
+  
+  output$preview_trim <- renderUI({
+    
+    
+    if (input$usevizsampnames == "Yes") {
+      if (input$customsampnames_opts == "first_n") {
+        sampname_args <- list(firstn = input$first_n)
+      }
+      else if (input$customsampnames_opts == "range") {
+        sampname_args <- list(from = input$range_low, to = input$range_high)
+      }
+      else if (input$customsampnames_opts == "split") {
+        sampname_args <- list(delim = input$delimiter, components = as.numeric(input$split_el))
+      }
+    }
+    
+    tmp <- objects$omicsData
+    text <- tryCatch({
+      tmp <- do.call(custom_sampnames, args = c(omicsData = list(tmp), sampname_args))
+      tmp$f_data[["VizSampNames"]]
+    }, error = function(e){
+      "Current selection does not produce unique trimmed names. Please update selection."
+    })
+    
+    div(
+      br(),
+      strong("Preview trim:"), br(), br(),
+      toString(text)
+    )
   }),
 
   # grouped data summaries
