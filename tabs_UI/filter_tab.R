@@ -57,7 +57,7 @@ filter_UI <- function() {
             trailing_hr = FALSE,
             tooltip_text = ttext_[["TOTAL_COUNT_FILT_INFO"]],
             numericInput("min_num_trans", "Minimum number of transcript counts:", 
-                         10, step = 1, min = 0)
+                         15, step = 1, min = 0)
           )
         ), # end biomolecule filter collapse
 
