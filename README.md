@@ -76,7 +76,12 @@ We use [renv](https://rstudio.github.io/renv/articles/renv.html) to track depend
 1.  Set renv to only install sub-dependencies in the "Depends" and "Imports" field of installed packages. `renv::settings$package.dependency.fields("Depends", "Imports")`.  This should get recorded in ./renv/settings.dcf so you only have to do it once.
 2.  Snapshot only packages mentioned in the project (including in the DESCRIPTION file), as well as any packages mentioned in their "Depends" and "Imports" field by calling `renv::snapshot(type="implicit")`
 
-#### **4. Misc**
+#### **4. Running tests**
+
+An easy way to run tests is to run `shinytest2::test_app()`. However, the MAP tests will not run unless `MAP_VERSION` is set.
+If you want to run just the MAP tests, you can use the MAP tests script by running `source("run_map_tests.R")`. This script will walk you through the environment setup and then run the MAP tests.
+
+#### **5. Misc**
 
 **Long text**:  Long tooltips or info text should go in the `ttext_` or `infotext_` global variables in `global.R` and then referenced in the app to keep code tidy.
 
