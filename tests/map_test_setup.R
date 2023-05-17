@@ -1,4 +1,28 @@
-library(mapDataAccess)
+if (!requireNamespace("mapDataAccess")) {
+  cat("mapDataAccess is not installed. Do you want to download it?\n")
+  cat("[Y/n]")
+  resp <- readline()
+  if (tolower(resp) != 'y') {
+    stop("\n  Error: mapDataAccess not installed.")
+  }
+  
+  pat_env = FALSE
+  if (!is.null(Sys.getenv("GITLAB_PAT")) && Sys.getenv("GITLAB_PAT") != "")
+    pat_env = TRUE
+  else  {
+    cat("Enter your GITLAB_PAT: ")
+    resp <- readline()
+    Sys.setenv("GITLAB_PAT"=resp)
+  }
+  
+  renv::install('gitlab@code.emsl.pnl.gov::multiomics-analyses/mapdataaccess-lib@7225058a1563944d2f20b10655cb2b92ae23ed71')
+  
+  if (!pat_env)
+    Sys.unsetenv("GITLAB_PAT")
+    
+  rm(resp)
+  gc()
+}
 
 if (system2("docker", "--version") != 0) {
   stop("\n  Error: docker not found. Please ensure it is installed.")
