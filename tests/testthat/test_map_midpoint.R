@@ -57,7 +57,6 @@ test_that("pmartR loads MAP midpoints", {
   
   expect_equal(app$get_value(input = "top_page"), "statistics_tab")
   
-  
   app$set_inputs(stats_select_method = "edgeR")
 
   app$wait_for_idle()
@@ -67,10 +66,18 @@ test_that("pmartR loads MAP midpoints", {
   app$click("apply_diagnostic")
 
   app$wait_for_idle(timeout = 60000)
+  app$click("saveplot")
+  stats_diagplot <- app$get_value(export = "cur_plot")
+  vdiffr::expect_doppelganger("midpoint_01_stats_diagplot", stats_diagplot)
   
   app$click("apply_seqstats")
 
   app$wait_for_idle(timeout = 60000)
+  app$click("saveplot")
+  stats_mainplot <- app$get_value(export = "cur_plot")
+  vdiffr::expect_doppelganger("midpoint_01_stats_mainplot", stats_mainplot)
+  
+  Sys.sleep(30)
   
   app$click("stats_dismiss")
   app$click("goto_downloads")
@@ -124,4 +131,8 @@ test_that("pmartR loads MAP midpoints", {
   app$click("apply_imdanova")
   
   app$wait_for_idle()
+  app$click("saveplot")
+  imdanova_stats_plot <- app$get_value(export = "cur_plot")
+  vdiffr::expect_doppelganger("midpoint_02_imdanova_stats_plot",
+                              imdanova_stats_plot)
 })

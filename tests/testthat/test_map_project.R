@@ -130,5 +130,10 @@ test_that("pmartR loads MAP projects", {
   app$set_inputs(imdanova_test_method = "combined")
   app$wait_for_idle()
   app$click("apply_imdanova")
+  app$wait_for_idle()
+  app$click("saveplot")
+  imdanova_stats_plot <- app$get_value(export = "cur_plot")
+  vdiffr::expect_doppelganger("project_01_imdanova_stats_plot",
+                              imdanova_stats_plot)
   app$click("goto_downloads")
 })

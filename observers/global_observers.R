@@ -30,7 +30,7 @@ observeEvent(input$saveplot, {
   plots$plot_table[nrow(plots$plot_table) + 1, ] <- c(plot_name, dt_checkmark)
   
   exportTestValues(
-    saved_plot_data = plots$allplots[[plot_name]]$x$data   
+    cur_plot = plots$allplots[[plot_name]]
   )
   
   if (!is.null(plots$last_plot_2)) {
@@ -40,7 +40,7 @@ observeEvent(input$saveplot, {
     plots$plot_table[nrow(plots$plot_table) + 1, ] <- c(plot_name_2, dt_checkmark)
     
     exportTestValues(
-      saved_plot_data_2 = plots$allplots[[plot_name_2]]$x$data   
+      cur_plot_2 = plots$allplots[[plot_name_2]]
     )
   }
 

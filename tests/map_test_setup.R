@@ -24,6 +24,8 @@ if (!requireNamespace("mapDataAccess")) {
   gc()
 }
 
+library(mapDataAccess)
+
 if (system2("docker", "--version") != 0) {
   stop("\n  Error: docker not found. Please ensure it is installed.")
 }
