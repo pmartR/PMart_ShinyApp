@@ -5,23 +5,34 @@ test_that("pmartR loads MAP projects", {
   if (is.null(Sys.getenv("MAP_VERSION")) || Sys.getenv("MAP_VERSION") < 1)
     skip("MAP not enabled")
   
-  cfg_path = if(isTruthy(Sys.getenv("MAP_CONFIG"))) Sys.getenv("MAP_CONFIG")
-  else "./cfg/minio_config.yml"
-  
   setwd("../..")
   
-  if (!file.exists(cfg_path)) {
-    fail(paste0("Could not find MAP config file (", cfg_path, ")"))
+  if (Sys.getenv("MAP_SHINYTEST") != "1") {
+    cfg_path = if(isTruthy(Sys.getenv("MAP_CONFIG"))) Sys.getenv("MAP_CONFIG")
+    else "./cfg/minio_config.yml"
+    
+    if (!file.exists(cfg_path)) {
+      fail(paste0("Could not find MAP config file (", cfg_path, ")"))
+    }
   }
   
   tryCatch(
     {
-      MapConnect <- map_data_connection(cfg_path)
+      if (Sys.getenv("MAP_SHINYTEST") == "1") {
+        MapConnect <- map_data_connection()
+      } else {
+        MapConnect <- map_data_connection(cfg_path)
+      }
     }, 
     error = function(cond) {
-      fail(paste0("Failed to connect to MAP. Please ensure your config file (",
-                  cfg_path,
-                  ") is properly configured and the minio server is running."))
+      if (Sys.getenv("MAP_SHINYTEST") == "1") {
+        fail(paste("Failed to connect to MAP.",
+                   "Please restart your R session and try again."))
+      } else {
+        fail(paste0("Failed to connect to MAP. Please ensure your config file",
+                    " (", cfg_path, ")",
+                    " is properly configured and the minio server is running."))
+      }
     }
   )
   
