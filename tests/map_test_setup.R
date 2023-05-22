@@ -102,3 +102,5 @@ while (TRUE) {
 for (f in dir("tests/map_test_data")) {
   put_file(MapConnect, paste0("tests/map_test_data/", f), id=f)
 }
+
+Sys.setenv("MAP_SHINYTEST"=1)
