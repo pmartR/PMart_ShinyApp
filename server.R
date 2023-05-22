@@ -187,7 +187,7 @@ shinyServer(function(session, input, output) {
     
     # If we are testing, use the MAP_* environment variables
     if (Sys.getenv("MAP_SHINYTEST") == "1") {
-      cfg_path <- NULL
+      cfg_path <- NA
     }
       
     # Create a reactive value to hold MAP-specific objects
