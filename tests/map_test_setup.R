@@ -30,9 +30,9 @@ if (system2("docker", "--version") != 0) {
   stop("\n  Error: docker not found. Please ensure it is installed.")
 }
 
-containers <- system2("docker", "container list", stdout = TRUE)
+images <- system2("docker", "images", stdout = TRUE)
 
-if (!grepl("minio", containers[2])) {
+if (!any(grepl("minio/minio", images))) {
   cat("Minio container not detected. Do you wish to download it?\n")
   cat("[Y/n] ")
   resp <- readline()
@@ -68,8 +68,8 @@ if (is.null(Sys.getenv("MAP_PYTHON_VENV")) || Sys.getenv("MAP_PYTHON_VENV") == "
   cat("  3. Install a new Python venv\n\n")
   cat("[Select option] ")
   option <- readline()
-  if (strtoi(option) == 1) {
-    Sys.setenv("MAP_PYTHON_VENV"="./venv")
+  if (!is.null(python_venv) && strtoi(option) == 1) {
+    Sys.setenv("MAP_PYTHON_VENV"=python_venv)
   } else if (strtoi(option) == 2) {
     cat("[Enter full path of Python venv] ")
     python_venv <- readline()
