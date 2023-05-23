@@ -24,7 +24,8 @@ groups_UI <- function() {
             radioGroupButtons("customsampnames_opts", "Trim by:",
               choices = c("First x characters" = "first_n", "Range of characters" = "range", "Split by a character" = "split")
             ),
-            uiOutput("customsampnames")
+            uiOutput("customsampnames"),
+            uiOutput("preview_trim")
           )
           ),
           # ID column collapse sub-div

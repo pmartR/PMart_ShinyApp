@@ -162,26 +162,76 @@ list(
   ## options for creating custom sample names
   output$customsampnames <- renderUI({
     req(sample_names())
-    min_char <- min(sapply(sample_names(), nchar))
+    max_char <- max(sapply(sample_names(), nchar))
 
     if (input$customsampnames_opts == "first_n") {
-      numericInput("first_n", "Number of characters to keep:", value = min_char, step = 1)
+      numericInput("first_n", "Number of characters to keep:", min = 1, max = max_char, value = max_char, step = 1)
     }
     else if (input$customsampnames_opts == "range") {
       splitLayout(
-        numericInput("range_low", "From", value = 1, step = 1),
-        numericInput("range_high", "To", value = min_char, step = 1)
+        numericInput("range_low", "From", min = 1, max = max_char, value = 1, step = 1),
+        numericInput("range_high", "To", min = 1, max = max_char, value = max_char, step = 1)
       )
     }
     else if (input$customsampnames_opts == "split") {
       max_elements <- sapply(sample_names(), strsplit, input$delimiter) %>%
         sapply(length) %>%
         max()
+      
+      items <- map(1:max_elements, function(n){
+        htmltools::doRenderTags(div(
+          style = "overflow-x:auto;max-width:500px;",
+          toString(lapply(sapply(sample_names(), strsplit, input$delimiter),
+                          function(x) as.character(x[n])))
+        ))
+      }) %>% unlist()
+      
       tagList(
         textInput("delimiter", "Split on character:", value = input$delimiter),
-        pickerInput("split_el", "Which elements to keep after splitting?", choices = 1:max_elements, multiple = T)
+        pickerInput("split_el", 
+                    "Which elements to keep after splitting?", 
+                    choices = 1:max_elements, 
+                    multiple = T,
+                    choicesOpt = list(
+                      content = items
+                    ),
+                    options = pickerOptions(showContent = FALSE)
+                    )
       )
     }
+  }),
+  
+  output$preview_trim <- renderUI({
+    
+    
+    if (input$usevizsampnames == "Yes") {
+      if (input$customsampnames_opts == "first_n") {
+        sampname_args <- list(firstn = input$first_n)
+      }
+      else if (input$customsampnames_opts == "range") {
+        sampname_args <- list(from = input$range_low, to = input$range_high)
+      }
+      else if (input$customsampnames_opts == "split") {
+        sampname_args <- list(delim = input$delimiter, components = as.numeric(input$split_el))
+      }
+    }
+    
+    tmp <- objects$omicsData
+    text <- tryCatch({
+      tmp <- do.call(custom_sampnames, args = c(omicsData = list(tmp), sampname_args))
+      tmp$f_data[["VizSampNames"]]
+    }, error = function(e){
+      "Current selection does not produce unique trimmed names. Please update selection."
+    })
+    
+    div(
+      br(),
+      strong("Preview trim:"), br(), br(),
+      div(
+        style = "overflow-y:auto;max-height:300px;",
+        toString(text)
+      )
+    )
   }),
 
   # grouped data summaries
