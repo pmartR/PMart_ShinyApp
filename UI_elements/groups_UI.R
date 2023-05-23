@@ -179,8 +179,11 @@ list(
         max()
       
       items <- map(1:max_elements, function(n){
-        toString(map_chr(sapply(sample_names(), strsplit, input$delimiter), n))
-      })
+        htmltools::doRenderTags(div(
+          style = "overflow-x:auto;max-width:500px;",
+          toString(map_chr(sapply(sample_names(), strsplit, input$delimiter), n))
+        ))
+      }) %>% unlist()
       
       tagList(
         textInput("delimiter", "Split on character:", value = input$delimiter),
@@ -189,7 +192,7 @@ list(
                     choices = 1:max_elements, 
                     multiple = T,
                     choicesOpt = list(
-                      subtext = items
+                      content = items
                     ))
       )
     }
@@ -221,7 +224,10 @@ list(
     div(
       br(),
       strong("Preview trim:"), br(), br(),
-      toString(text)
+      div(
+        style = "overflow-y:auto;max-height:300px;",
+        toString(text)
+      )
     )
   }),
 
