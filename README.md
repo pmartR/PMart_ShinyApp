@@ -78,8 +78,7 @@ We use [renv](https://rstudio.github.io/renv/articles/renv.html) to track depend
 
 #### **4. Running tests**
 
-An easy way to run tests is to run `shinytest2::test_app()`. However, the MAP tests will not run unless `MAP_VERSION` is set.
-If you want to run just the MAP tests, you can use the MAP tests script by running `source("run_map_tests.R")`. This script will walk you through the environment setup and then run the MAP tests.
+An easy way to run tests is to run `shinytest2::test_app()`. However, the MAP tests will not run by default. To run the MAP tests, set `Sys.setenv("MAP_SHINYTEST" = 1)` before running `devtools::test()`. The first run will walk through the installation of the environment required for MAP testing.
 
 #### **5. Misc**
 

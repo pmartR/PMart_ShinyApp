@@ -2,46 +2,29 @@ library(shinytest2)
 library(mapDataAccess)
 
 test_that("pmartR loads MAP projects", {
-  if (is.null(Sys.getenv("MAP_VERSION")) || Sys.getenv("MAP_VERSION") < 1)
-    skip("MAP not enabled")
-  
-  setwd("../..")
-  
-  if (Sys.getenv("MAP_SHINYTEST") != "1") {
-    cfg_path = if(isTruthy(Sys.getenv("MAP_CONFIG"))) Sys.getenv("MAP_CONFIG")
-    else "./cfg/minio_config.yml"
-    
-    if (!file.exists(cfg_path)) {
-      fail(paste0("Could not find MAP config file (", cfg_path, ")"))
-    }
-  }
+  if (is.null(Sys.getenv("MAP_SHINYTEST")) || Sys.getenv("MAP_SHINYTEST") != 1)
+    skip("MAP testing not enabled. See README for info on how to enable it.")
   
   tryCatch(
     {
-      if (Sys.getenv("MAP_SHINYTEST") == "1") {
-        MapConnect <- map_data_connection()
-      } else {
-        MapConnect <- map_data_connection(cfg_path)
-      }
+      MapConnect <- map_data_connection()
     }, 
     error = function(cond) {
-      if (Sys.getenv("MAP_SHINYTEST") == "1") {
-        fail(paste("Failed to connect to MAP.",
-                   "Please restart your R session and try again."))
-      } else {
-        fail(paste0("Failed to connect to MAP. Please ensure your config file",
-                    " (", cfg_path, ")",
-                    " is properly configured and the minio server is running."))
-      }
+      fail(paste("Failed to connect to MAP.",
+                 "Please restart your R session and try again."))
     }
   )
+  
+  orig_envvar = Sys.getenv("MAP_VERSION")
+  Sys.setenv("MAP_VERSION"=1)
+  on.exit({Sys.setenv("MAP_VERSION" = orig_envvar)})
   
   # All object names used throughout the test should go here
   map_data_ids <- c(
     "test_map_project_01"
   )
   
-  for (data_id in map_data_ids)
+  for (data_id in map_data_ids) {
     tryCatch(
       {
         get_data(MapConnect, data_id)
@@ -49,13 +32,10 @@ test_that("pmartR loads MAP projects", {
       error = function(cond) {
         fail(paste0("Could not download data ", data_id, " from MAP. ",
                     "Please ensure the MAP bucket contains this data.\n",
-                    "The data can be found in tests/MAP_test_data."))
+                    "The data can be found in tests/map_test_data."))
       }
     )
-  
-  setwd("tests/testthat")
-  
-  Sys.setenv("MAP_VERSION"=1)
+  }
   
   Sys.setenv("SHINYTEST_LOAD_MAP_OBJECT" = map_data_ids[1])
   set.seed(314159265)
