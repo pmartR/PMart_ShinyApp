@@ -181,7 +181,8 @@ list(
       items <- map(1:max_elements, function(n){
         htmltools::doRenderTags(div(
           style = "overflow-x:auto;max-width:500px;",
-          toString(map_chr(sapply(sample_names(), strsplit, input$delimiter), n))
+          toString(lapply(sapply(sample_names(), strsplit, input$delimiter),
+                          function(x) as.character(x[n])))
         ))
       }) %>% unlist()
       
