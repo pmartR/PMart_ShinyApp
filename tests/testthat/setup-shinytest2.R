@@ -7,6 +7,8 @@ open_collapse <- function(id, value) {
 }
 
 if (Sys.getenv("MAP_SHINYTEST") == 1) {
+  project_root = file.path(testthat::test_path(), "../..")
+  
   if (!requireNamespace("mapDataAccess")) {
     cat("mapDataAccess is not installed. Do you want to download it?\n")
     cat("[Y/n]")
@@ -64,13 +66,21 @@ if (Sys.getenv("MAP_SHINYTEST") == 1) {
   Sys.setenv("MINIO_SECRET_KEY"="minioadmin")
   Sys.setenv("MINIO_BUCKET"="map")
   Sys.setenv("MINIO_SECURE"="False")
-  cfg_path = if(!is.null(Sys.getenv("MAP_CONFIG")) && Sys.getenv("MAP_CONFIG") != "") Sys.getenv("MAP_CONFIG") else "../../cfg/minio_config.yml"
-  python_venv <- NULL
-  if (file.exists(cfg_path)) {
-    cfg <- yaml::read_yaml(cfg_path)
-    python_venv <- cfg$python_venv
+
+  cfg_path = if (!is.null(Sys.getenv("MAP_CONFIG")) &&
+                 Sys.getenv("MAP_CONFIG") != "") {
+    Sys.getenv("MAP_CONFIG")
+  } else {
+    file.path(project_root, "cfg/minio_config.yml")
   }
+  python_venv <- NULL
   
+  withr::with_dir(project_root,{
+    if (file.exists(cfg_path)) {
+      cfg <- yaml::read_yaml(cfg_path)
+      python_venv <- cfg$python_venv
+    }
+  })
   
   if (is.null(Sys.getenv("MAP_PYTHON_VENV")) || Sys.getenv("MAP_PYTHON_VENV") == ""){
     cat("Please select an option for Python virtual environment:\n")
@@ -88,8 +98,8 @@ if (Sys.getenv("MAP_SHINYTEST") == 1) {
       Sys.setenv("MAP_PYTHON_VENV"=python_venv)
     } else if (strtoi(option) == 3) {
       if (system2("python", "-m pip install virtualenv") != 0 ||
-          system2("python", "-m virtualenv ../venv") != 0 ||
-          system2("../venv/bin/python", "-m pip install -r ../requirements.txt")) {
+          system2("python", sprintf("-m virtualenv %s", file.path(project_root, "venv"))) != 0 ||
+          system2(file.path(project_root, "venv/bin/python"), sprintf("-m pip install -r %s", file.path(project_root, "requirements.txt")))) {
         stop("  Error: failed to create Python venv.")
       }
       Sys.setenv("MAP_PYTHON_VENV"="./venv")
@@ -111,7 +121,9 @@ if (Sys.getenv("MAP_SHINYTEST") == 1) {
         stop("  Error: failed to connect to minio after 20 seconds.")
   }
   
-  for (f in dir("tests/map_test_data")) {
-    put_file(MapConnect, paste0("tests/map_test_data/", f), id=f)
-  }
+  withr::with_dir(project_root,
+    for (f in dir("tests/map_test_data")) {
+      put_file(MapConnect, paste0("tests/map_test_data/", f), id=f)
+    }
+  )
 }
