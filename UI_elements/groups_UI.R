@@ -193,7 +193,9 @@ list(
                     multiple = T,
                     choicesOpt = list(
                       content = items
-                    ))
+                    ),
+                    options = pickerOptions(showContent = FALSE)
+                    )
       )
     }
   }),
