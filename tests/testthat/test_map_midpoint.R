@@ -107,8 +107,6 @@ test_that("pmartR loads MAP midpoints", {
   
   app$click("apply_rollup")
 
-  app$view()
-  
   app$wait_for_idle(timeout = 60000)
   
   app$click("rollup_goto_stats")
