@@ -162,15 +162,15 @@ list(
   ## options for creating custom sample names
   output$customsampnames <- renderUI({
     req(sample_names())
-    min_char <- min(sapply(sample_names(), nchar))
+    max_char <- max(sapply(sample_names(), nchar))
 
     if (input$customsampnames_opts == "first_n") {
-      numericInput("first_n", "Number of characters to keep:", value = min_char, step = 1)
+      numericInput("first_n", "Number of characters to keep:", min = 1, max = max_char, value = max_char, step = 1)
     }
     else if (input$customsampnames_opts == "range") {
       splitLayout(
-        numericInput("range_low", "From", value = 1, step = 1),
-        numericInput("range_high", "To", value = min_char, step = 1)
+        numericInput("range_low", "From", min = 1, max = max_char, value = 1, step = 1),
+        numericInput("range_high", "To", min = 1, max = max_char, value = max_char, step = 1)
       )
     }
     else if (input$customsampnames_opts == "split") {
