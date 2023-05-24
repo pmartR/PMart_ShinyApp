@@ -70,14 +70,10 @@ refnorm <- function(){
   
   req(!cond && input[[paste0(tab, "_ref_done_idcols")]] > 0)
   
-  showNotification("Normalizing, please wait....",
-                   duration = NULL,
-                   closeButton = FALSE,
-                   id = paste0(tab, "_reference_note")
-  )
+  show("ref_norm_busy")
   
   on.exit({
-    removeNotification(paste0(tab, "_reference_note"))
+    hide("ref_norm_busy")
   })
   
   if (tab == "Isobaric") {

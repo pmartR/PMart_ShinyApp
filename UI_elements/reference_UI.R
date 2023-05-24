@@ -210,7 +210,19 @@ assign_ref_uploads <- function(tabname) {
       if(cond_disable_apply) apply_button <- disabled(apply_button)
       if(cond_disable_reset) reset_button <- disabled(reset_button)
       
-      return(div(class = "inline-wrapper-1 inline-btn-margin", apply_button, reset_button))
+      return(
+        div(class = "inline-wrapper-1 inline-btn-margin",
+            apply_button,
+            reset_button,
+            hidden(
+              div(
+                "Normalizing, please wait...",
+                id = "ref_norm_busy", class = "fadein-out",
+                style = "color:deepskyblue;font-weight:bold;margin-bottom:5px"
+              )
+            )
+        )
+      )
     })
   } else {
     ## Upload

@@ -192,6 +192,14 @@ list(
       ),
       title = HTML('<p style="text-align: center;">Confirm Save and Export?</p>'),
       footer = list(
+        hidden(
+          div(
+            "Exporting midpoint object...",
+            id = "export_mid_busy",
+            class = "fadein-out",
+            style = "color:deepskyblue;font-weight:bold;margin-bottom:5px"
+          )
+        ),
         actionButton(
           "exportMidConfirm",
           "Export Data",
@@ -206,9 +214,9 @@ list(
   # If the confirm exit button is clicked, midpoint data is exported to MAP and the app closes. 
   observeEvent(input$exportMidConfirm, {
     req(input$MidpointName)
-    showNotification("Uploading your data...", type="message", id = "map-export-busy")
+    show("export_mid_busy")
     on.exit(
-      removeNotification('map-export-busy')
+      hide("export_mid_busy")
     )
     
     tryCatch({
