@@ -421,7 +421,7 @@ observe({
 
 #'@details navigate to the data requirements sub-tab
 observeEvent(input$upload_to_datareqs, {
-  updateTabsetPanel(session, "top_page", "data_requirements")
+  updateCollapse(session, "upload_preview_collapse", open = "data_requirements")
 })
 
 # modal dialog behavior
