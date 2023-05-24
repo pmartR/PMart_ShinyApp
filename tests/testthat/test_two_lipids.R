@@ -1,5 +1,9 @@
 library(shinytest2)
 
+orig_envvar = Sys.getenv("MAP_VERSION")
+Sys.setenv("MAP_VERSION"=0)
+on.exit({Sys.setenv("MAP_VERSION" = orig_envvar)})
+
 test_that("{shinytest2} recording: pmart_standalone", {
     # app <- AppDriver$new("http://127.0.0.1:3858", name = "pmart_standalone", height = 1187, width = 1263) 
     app <- AppDriver$new(name = "pmart_standalone", variant = platform_variant(), height = 1187, width = 1263, timeout = 15000)

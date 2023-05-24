@@ -264,7 +264,7 @@ observeEvent(input$apply_seqstats, {
         paste0("Statistical analysis has been performed using ",
                switch(input$stats_select_method, edgeR = "empirical Bayes quasi-likelihood F-",
                       voom = "empirical Bayes moderated t-statistics "),
-               "test method from pmartR's", input$stats_select_method, "wrapper functions. ")
+               "test method from pmartR's ", input$stats_select_method, " wrapper functions. ")
       }
       
       # success modal if all is well

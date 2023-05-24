@@ -185,6 +185,11 @@ shinyServer(function(session, input, output) {
     # Soure MAP-specific functionality (reading from header, etc)
     source("./MAP_Functions.R", local = TRUE)
     
+    # If we are testing, use the MAP_* environment variables
+    if (Sys.getenv("MAP_SHINYTEST") == "1") {
+      cfg_path <- NA
+    }
+      
     # Create a reactive value to hold MAP-specific objects
     MapConnect <- reactiveValues(MapConnect = map_data_connection(cfg_path),
                                  Project = NULL, Midpoint = NULL)

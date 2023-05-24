@@ -1,8 +1,10 @@
 context("basic workflow - peptides")
-
 library(shinytest2)
 
-# http://127.0.0.1:4951
+orig_envvar = Sys.getenv("MAP_VERSION")
+Sys.setenv("MAP_VERSION"=0)
+on.exit({Sys.setenv("MAP_VERSION" = orig_envvar)})
+
 test_that("App completes a basic workflow on peptide-level data", {
   # To test with the a browser run something like the following with a
   # shiny app running in a different R session and paste its address into
