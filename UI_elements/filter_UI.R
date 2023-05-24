@@ -13,7 +13,7 @@ list(
     
     title = sprintf("Maximum CV (between 1 and %s)", round(max_cv, 2))
     
-    numericInput("cv_threshold", title, round(max_cv*0.9, 2), step = 1)
+    numericInput("cv_threshold", title, min = 1, max = max_cv, value = round(max_cv*0.9, 2), step = 1)
   }),
 
   # Summary of current filters and parameters

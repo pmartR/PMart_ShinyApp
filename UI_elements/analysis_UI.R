@@ -316,7 +316,7 @@ output$statistics_tab_sidepanel <- renderUI({
         value = "imdanova-select-settings",
         uiOutput("imdanova_test_method_UI"),
         uiOutput("imdanova_pval_adjust_UI"),
-        numericInput("pval_thresh", "Significance threshold", value = 0.05, step = 0.01),
+        numericInput("pval_thresh", "Significance threshold", min = 0, max = 1, value = 0.05, step = 0.01),
         bsButton("apply_imdanova", "Perform iMd-ANOVA", style = "primary"),
         br(), br(),
         hidden(
@@ -384,7 +384,7 @@ output$statistics_tab_sidepanel <- renderUI({
           value = "seqdata-select-settings",
           uiOutput("seqdata_test_method_UI"),
           uiOutput("seqdata_pval_adjust_UI"),
-          numericInput("pval_thresh", "Significance threshold", value = 0.05, step = 0.01),
+          numericInput("pval_thresh", "Significance threshold", min = 0, max = 1, value = 0.05, step = 0.01),
           bsButton("apply_diagnostic", "Run trend-fitting diagnostics", style = "primary"),
           disabled(bsButton("apply_seqstats", "Perform differential expression", style = "primary")),
           br(), br(),

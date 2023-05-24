@@ -84,8 +84,8 @@ list(
       column(3, selectInput("download_file_type", "File Type", c("HTML Widget", "PNG", "JPG", "SVG"), c(plot_file_type))),
       conditionalPanel(
         "input.download_file_type!='HTML Widget'",
-        column(3, numericInput("download_plot_width", "Width", plot_save_width)),
-        column(3, numericInput("download_plot_height", "Height", plot_save_height)),
+        column(3, numericInput("download_plot_width", "Width", plot_save_width, min = 0)),
+        column(3, numericInput("download_plot_height", "Height", plot_save_height, min = 0)),
         column(3, numericInput("download_plot_scale", "Scale", plot_save_scale, min = 0, step = 0.25))
       )
     )
