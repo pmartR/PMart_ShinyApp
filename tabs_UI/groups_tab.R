@@ -13,7 +13,7 @@ groups_UI <- function() {
             hidden(div(id = "ok_fdata_upload", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
           ),
           value = "fdata_upload",
-          div(id = "upload_fdata", style = "display:inline-block", uiOutput("fdata_UI")),
+          div(id = "upload_fdata", style = "display:inline-block;width:100%", uiOutput("fdata_UI")),
           div(
             id = "js_download_fdata", class = "inline_top", style = "float:right",
             disabled(downloadButton("download_fdata", "Download file template"))
