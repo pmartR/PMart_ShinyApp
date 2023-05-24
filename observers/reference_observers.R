@@ -112,9 +112,9 @@ refnorm <- function(){
         applied_norm
       },
       error = function(e) {
-        msg <- paste0("Something went wrong reference normalizing your omicsData object.  \n System error:  ", e)
+        msg <- paste0("Something went wrong reference normalizing your omicsData object.  <br> System error:  ", e)
         message(msg)
-        revals$warnings_reference$bad_norm <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+        revals$warnings_reference$bad_norm <<- messageBox(type = "error", msg)
         objects$omicsData
       }
     )
@@ -141,9 +141,9 @@ refnorm <- function(){
       applied_norm
     },
     error = function(e){
-      msg <- paste0("Something went wrong reference normalizing your omicsData object.  \n System error:  ", e)
+      msg <- paste0("Something went wrong reference normalizing your omicsData object.  <br> System error:  ", e)
       message(msg)
-      revals$warnings_reference$bad_norm <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+      revals$warnings_reference$bad_norm <<- messageBox(type = "error", msg)
       objects$omicsData
     })
     

@@ -153,13 +153,11 @@ list(
     req(length(colnames(revals$e_meta))> 0)
     if(!(input$id_col %in% colnames(revals$e_meta))){
       return(
-        div(
-          style = "color:red;margin-bottom:5px",
-          paste0("Unique biomolecule column '", input$id_col, 
-                 "' also required in biomolecule file.",
-                 " Current biomolecule file contains the following columns: ",
-                 toString(colnames(revals$e_meta)))
-        )
+        HTML(messageBox(type = "error", 
+                        paste0("Unique biomolecule column '", input$id_col, 
+                            "' also required in biomolecule file.",
+                            " Current biomolecule file contains the following columns: ",
+                            toString(colnames(revals$e_meta)))))
       )
     } else if (input$datatype == "pep" & isTRUE(as.logical(input$proteins_yn))) {
       choices <- colnames(revals$e_meta)[-which(colnames(revals$e_meta) == input$id_col)]

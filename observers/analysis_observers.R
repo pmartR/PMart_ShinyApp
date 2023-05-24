@@ -169,9 +169,9 @@ observeEvent(input$apply_imdanova, {
       
     },
     error = function(e) {
-      msg <- paste0("Something went wrong running the statistics.  \n System error:  ", e)
+      msg <- paste0("Something went wrong running the statistics.  <br> System error:  ", e)
       message(msg)
-      revals$warnings_statistics$bad_imdanova <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+      revals$warnings_statistics$bad_imdanova <<- messageBox(type = "error", msg)
       objects$imdanova_res <- NULL
       plots$statistics_mainplot <- NULL
     }
@@ -203,9 +203,9 @@ observeEvent(input$apply_diagnostic, {
       
     },
     error = function(e) {
-      msg <- paste0("Something went wrong running the diagnostics  \n System error:  ", e)
+      msg <- paste0("Something went wrong running the diagnostics  <br> System error:  ", e)
       message(msg)
-      revals$warnings_statistics$bad_seqdiag <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+      revals$warnings_statistics$bad_seqdiag <<- messageBox(type = "error", msg)
       objects$diagnostic_res <- NULL
       plots$statistics_diagplot <- NULL
     }
@@ -303,9 +303,9 @@ observeEvent(input$apply_seqstats, {
       
     },
     error = function(e) {
-      msg <- paste0("Something went wrong running the statistics.  \n System error:  ", e)
+      msg <- paste0("Something went wrong running the statistics.  <br> System error:  ", e)
       message(msg)
-      revals$warnings_statistics$bad_seqstats <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+      revals$warnings_statistics$bad_seqstats <<- messageBox(type = "error", msg)
       objects$seqstats_res <- NULL
       plots$statistics_mainplot <- NULL
     }
@@ -374,11 +374,11 @@ observeEvent(
     },
     error = function(e) {
       msg <-
-        paste0("Something went wrong plotting your imdanovaRes object.  \n System error:  ",
+        paste0("Something went wrong plotting your imdanovaRes object.  <br> System error:  ",
                e)
       message(msg)
       revals$warnings_statistics$bad_imdanova_plot <<-
-        sprintf("<p style = 'color:red'>%s</p>", msg)
+        messageBox(type = "error", msg)
       plots$statistics_mainplot <- NULL
     })
   }
@@ -440,11 +440,11 @@ observeEvent(
     },
     error = function(e) {
       msg <-
-        paste0("Something went wrong plotting your statRes object.  \n System error:  ",
+        paste0("Something went wrong plotting your statRes object.  <br> System error:  ",
                e)
       message(msg)
       revals$warnings_statistics$bad_imdanova_plot <<-
-        sprintf("<p style = 'color:red'>%s</p>", msg)
+        messageBox(type = "error", msg)
       plots$statistics_mainplot <- NULL
     })
   }
@@ -504,11 +504,11 @@ observeEvent(
     },
     error = function(e) {
       msg <-
-        paste0("Something went wrong plotting your statRes object.  \n System error:  ",
+        paste0("Something went wrong plotting your statRes object.  <br> System error:  ",
                e)
       message(msg)
       revals$warnings_statistics$bad_imdanova_plot <<-
-        sprintf("<p style = 'color:red'>%s</p>", msg)
+        messageBox(type = "error", msg)
       plots$statistics_mainplot <- NULL
     })
   }
@@ -530,11 +530,11 @@ observeEvent(
     },
     error = function(e) {
       msg <-
-        paste0("Something went wrong plotting your diagnostic object.  \n System error:  ",
+        paste0("Something went wrong plotting your diagnostic object.  <br> System error:  ",
                e)
       message(msg)
       revals$warnings_statistics$bad_diag_plot <<-
-        sprintf("<p style = 'color:red'>%s</p>", msg)
+        messageBox(type = "error", msg)
       plots$statistics_diagplot <- NULL
     })
   }

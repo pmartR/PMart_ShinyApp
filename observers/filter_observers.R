@@ -210,7 +210,7 @@ apply_filt <- function(){
       res <- NULL
     },
     error = function(e) {
-      res <<- paste0("Something went wrong applying your filters:  \n System error:  ", e)
+      res <<- paste0("Something went wrong applying your filters:  <br> System error:  ", e)
     }
   )
 }
@@ -320,8 +320,8 @@ observeEvent(input$add_molfilt, {
         molecule_filter(objects$omicsData)
       },
       error = function(e) {
-        msg <- paste0("Something went wrong updating your molecule filter object \n System error:  ", e)
-        revals$warnings_filter$molecule_filter1 <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+        msg <- paste0("Something went wrong updating your molecule filter object <br> System error:  ", e)
+        revals$warnings_filter$molecule_filter1 <<- messageBox(type = "error", msg)
         NULL
       }
     )
@@ -332,8 +332,8 @@ observeEvent(input$add_molfilt, {
           molecule_filter(objects$omicsData_2)
         },
         error = function(e) {
-          msg <- paste0("Something went wrong updating your second molecule filter object \n System error:  ", e)
-          revals$warnings_filter$molecule_filter2 <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+          msg <- paste0("Something went wrong updating your second molecule filter object <br> System error:  ", e)
+          revals$warnings_filter$molecule_filter2 <<- messageBox(type = "error", msg)
           NULL
         }
       )
@@ -360,8 +360,8 @@ observeEvent(input$add_cvfilt, {
         tmp_cvfilt
       },
       error = function(e) {
-        msg <- paste0("Something went wrong updating your CV filter object \n System error:  ", e)
-        revals$warnings_filter$cv_filter1 <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+        msg <- paste0("Something went wrong updating your CV filter object <br> System error:  ", e)
+        revals$warnings_filter$cv_filter1 <<- messageBox(type = "error", msg)
         NULL
       }
     )
@@ -377,8 +377,8 @@ observeEvent(input$add_cvfilt, {
           cv_filter(objects$omicsData_2)
         },
         error = function(e) {
-          msg <- paste0("Something went wrong updating your second CV filter object \n System error:  ", e)
-          revals$warnings_filter$cv_filter2 <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+          msg <- paste0("Something went wrong updating your second CV filter object <br> System error:  ", e)
+          revals$warnings_filter$cv_filter2 <<- messageBox(type = "error", msg)
           NULL
         }
       )
@@ -399,8 +399,8 @@ observeEvent(input$add_profilt, {
         proteomics_filter(objects$omicsData)
       },
       error = function(e) {
-        msg <- paste0("Something went wrong updating your proteomics filter object \n System error:  ", e)
-        revals$warnings_filter$profilt <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+        msg <- paste0("Something went wrong updating your proteomics filter object <br> System error:  ", e)
+        revals$warnings_filter$profilt <<- messageBox(type = "error", msg)
         objects$filters$profilt
       }
     )
@@ -443,8 +443,8 @@ observeEvent(input$add_imdanovafilt, {
         imdanova_filter(objects$omicsData)
       },
       error = function(e) {
-        msg <- paste0("Something went wrong updating your imd-ANOVA filter object \n System error:  ", e)
-        revals$warnings_filter$imdanovafilt1 <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+        msg <- paste0("Something went wrong updating your imd-ANOVA filter object <br> System error:  ", e)
+        revals$warnings_filter$imdanovafilt1 <<- messageBox(type = "error", msg)
         NULL
       }
     )
@@ -456,8 +456,8 @@ observeEvent(input$add_imdanovafilt, {
           imdanova_filter(objects$omicsData_2)
         },
         error = function(e) {
-          msg <- paste0("Something went wrong updating your second imd-ANOVA filter object \n System error:  ", e)
-          revals$warnings_filter$imdanovafilt2 <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+          msg <- paste0("Something went wrong updating your second imd-ANOVA filter object <br> System error:  ", e)
+          revals$warnings_filter$imdanovafilt2 <<- messageBox(type = "error", msg)
           NULL
         }
       )
@@ -482,8 +482,8 @@ observeEvent(input$add_tcfilt, {
         total_count_filter(objects$omicsData)
       },
       error = function(e) {
-        msg <- paste0("Something went wrong updating your total count filter object \n System error:  ", e)
-        revals$warnings_filter$tcfilt <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+        msg <- paste0("Something went wrong updating your total count filter object <br> System error:  ", e)
+        revals$warnings_filter$tcfilt <<- messageBox(type = "error", msg)
         NULL
       }
     )
@@ -506,8 +506,8 @@ observeEvent(input$add_rmdfilt, {
         rmd_filter(objects$omicsData, metrics = input$rmd_metrics)
       },
       error = function(e) {
-        msg <- paste0("Something went wrong updating your rMd filter object \n System error:  ", e)
-        revals$warnings_filter$rmdfilt1 <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+        msg <- paste0("Something went wrong updating your rMd filter object <br> System error:  ", e)
+        revals$warnings_filter$rmdfilt1 <<- messageBox(type = "error", msg)
         NULL
       }
     )
@@ -518,8 +518,8 @@ observeEvent(input$add_rmdfilt, {
           rmd_filter(objects$omicsData_2, metrics = input$rmd_metrics)
         },
         error = function(e) {
-          msg <- paste0("Something went wrong updating your second rMd filter object \n System error:  ", e)
-          revals$warnings_filter$rmdfilt2 <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+          msg <- paste0("Something went wrong updating your second rMd filter object <br> System error:  ", e)
+          revals$warnings_filter$rmdfilt2 <<- messageBox(type = "error", msg)
           NULL
         }
       )
@@ -543,8 +543,8 @@ observeEvent(input$add_rnafilt_libsize, {
         RNA_filter(objects$omicsData)
       },
       error = function(e) {
-        msg <- paste0("Something went wrong updating your RNA filter object \n System error:  ", e)
-        revals$warnings_filter$rnafilt_libsize <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+        msg <- paste0("Something went wrong updating your RNA filter object <br> System error:  ", e)
+        revals$warnings_filter$rnafilt_libsize <<- messageBox(type = "error", msg)
         NULL
       }
     )
@@ -565,8 +565,8 @@ observeEvent(input$add_rnafilt_min_nonzero, {
         RNA_filter(objects$omicsData)
       },
       error = function(e) {
-        msg <- paste0("Something went wrong updating your RNA filter object \n System error:  ", e)
-        revals$warnings_filter$rnafilt_min_nonzero <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+        msg <- paste0("Something went wrong updating your RNA filter object <br> System error:  ", e)
+        revals$warnings_filter$rnafilt_min_nonzero <<- messageBox(type = "error", msg)
         NULL
       }
     )
@@ -604,8 +604,8 @@ observeEvent(input$add_customfilt, {
         } else NULL
       },
       error = function(e) {
-        msg <- paste0("Something went wrong updating your custom sample filter object \n System error:  ", e)
-        revals$warnings_filter$customfilt1 <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+        msg <- paste0("Something went wrong updating your custom sample filter object <br> System error:  ", e)
+        revals$warnings_filter$customfilt1 <<- messageBox(type = "error", msg)
         NULL
       }
     )
@@ -630,8 +630,8 @@ observeEvent(input$add_customfilt, {
           } else NULL
         },
         error = function(e) {
-          msg <- paste0("Something went wrong updating your second custom sample filter object \n System error:  ", e)
-          revals$warnings_filter$customfilt2 <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+          msg <- paste0("Something went wrong updating your second custom sample filter object <br> System error:  ", e)
+          revals$warnings_filter$customfilt2 <<- messageBox(type = "error", msg)
           NULL
         }
       )
@@ -675,8 +675,8 @@ observeEvent(input$plot_tcfilt, {
       p
     },
     error = function(e) {
-      msg <- paste0("Something went wrong plotting your total count filter plot \n System error: ", e)
-      revals$warnings_filter$rnafilt_plot <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+      msg <- paste0("Something went wrong plotting your total count filter plot <br> System error: ", e)
+      revals$warnings_filter$rnafilt_plot <<- messageBox(type = "error", msg)
       NULL
     }
   )
@@ -703,8 +703,8 @@ observeEvent(input$plot_rnafilt_libsize, {
       p
     },
     error = function(e) {
-      msg <- paste0("Something went wrong plotting your rna filter plot \n System error: ", e)
-      revals$warnings_filter$rnafilt_plot <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+      msg <- paste0("Something went wrong plotting your rna filter plot <br> System error: ", e)
+      revals$warnings_filter$rnafilt_plot <<- messageBox(type = "error", msg)
       NULL
     }
   )
@@ -731,8 +731,8 @@ observeEvent(input$plot_rnafilt_min_nonzero, {
       p
     },
     error = function(e) {
-      msg <- paste0("Something went wrong plotting your rna filter plot \n System error: ", e)
-      revals$warnings_filter$rnafilt_plot <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+      msg <- paste0("Something went wrong plotting your rna filter plot <br> System error: ", e)
+      revals$warnings_filter$rnafilt_plot <<- messageBox(type = "error", msg)
       NULL
     }
   )
@@ -760,8 +760,8 @@ observeEvent(c(input$plot_rmdfilt, input$rmd_metrics, input$pvalue_threshold, in
         p
       },
       error = function(e) {
-        msg <- paste0("Something went wrong making your rmd filter plot \n System error: ", e)
-        revals$warnings_filter$rmdfilt_plot <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+        msg <- paste0("Something went wrong making your rmd filter plot <br> System error: ", e)
+        revals$warnings_filter$rmdfilt_plot <<- messageBox(type = "error", msg)
         NULL
       }
     )
@@ -779,8 +779,8 @@ observeEvent(c(input$plot_rmdfilt, input$rmd_metrics, input$pvalue_threshold, in
           p
         },
         error = function(e) {
-          msg <- paste0("Something went wrong making your second rmd filter plot \n System error: ", e)
-          revals$warnings_filter$rmdfilt_plot_2 <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+          msg <- paste0("Something went wrong making your second rmd filter plot <br> System error: ", e)
+          revals$warnings_filter$rmdfilt_plot_2 <<- messageBox(type = "error", msg)
           NULL
         }
       )
@@ -803,8 +803,8 @@ observeEvent(c(input$plot_profilt, input$min_num_peps, input$degen_peps),
              )
       },
       error = function(e) {
-        msg <- paste0("Something went wrong making your proteomics filter plot \n System error: ", e)
-        revals$warnings_filter$profilt_plot <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+        msg <- paste0("Something went wrong making your proteomics filter plot <br> System error: ", e)
+        revals$warnings_filter$profilt_plot <<- messageBox(type = "error", msg)
         NULL
       }
     )
@@ -825,8 +825,8 @@ observeEvent(c(input$plot_molfilt, input$mol_min_num),
              )
       },
       error = function(e) {
-        msg <- paste0("Something went wrong making your molecule filter plot \n System error: ", e)
-        revals$warnings_filter$molfilt_plot <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+        msg <- paste0("Something went wrong making your molecule filter plot <br> System error: ", e)
+        revals$warnings_filter$molfilt_plot <<- messageBox(type = "error", msg)
         NULL
       }
     )
@@ -840,8 +840,8 @@ observeEvent(c(input$plot_molfilt, input$mol_min_num),
                )
         },
         error = function(e) {
-          msg <- paste0("Something went wrong making your second molecule filter plot \n System error: ", e)
-          revals$warnings_filter$molfilt_plot_2 <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+          msg <- paste0("Something went wrong making your second molecule filter plot <br> System error: ", e)
+          revals$warnings_filter$molfilt_plot_2 <<- messageBox(type = "error", msg)
           NULL
         }
       )
@@ -867,8 +867,8 @@ observeEvent(c(input$plot_cvfilt, input$cv_threshold),
         ggplotly(p)
       },
       error = function(e) {
-        msg <- paste0("Something went wrong making your CV filter plot \n System error: ", e)
-        revals$warnings_filter$cvfilt_plot <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+        msg <- paste0("Something went wrong making your CV filter plot <br> System error: ", e)
+        revals$warnings_filter$cvfilt_plot <<- messageBox(type = "error", msg)
         NULL
       }
     )
@@ -885,8 +885,8 @@ observeEvent(c(input$plot_cvfilt, input$cv_threshold),
           ggplotly(p)
         },
         error = function(e) {
-          msg <- paste0("Something went wrong making your second CV filter plot \n System error: ", e)
-          revals$warnings_filter$cvfilt_plot_2 <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+          msg <- paste0("Something went wrong making your second CV filter plot <br> System error: ", e)
+          revals$warnings_filter$cvfilt_plot_2 <<- messageBox(type = "error", msg)
           NULL
         }
       )
@@ -910,8 +910,8 @@ observeEvent(c(input$plot_imdanovafilt, input$min_nonmiss_anova, input$min_nonmi
              )
       },
       error = function(e) {
-        msg <- paste0("Something went wrong making your iMd-ANOVA filter plot \n System error: ", e)
-        revals$warnings_filter$imdanova_plot <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+        msg <- paste0("Something went wrong making your iMd-ANOVA filter plot <br> System error: ", e)
+        revals$warnings_filter$imdanova_plot <<- messageBox(type = "error", msg)
         NULL
       }
     )
@@ -926,8 +926,8 @@ observeEvent(c(input$plot_imdanovafilt, input$min_nonmiss_anova, input$min_nonmi
                )
         },
         error = function(e) {
-          msg <- paste0("Something went wrong making your second iMd-ANOVA filter plot \n System error: ", e)
-          revals$warnings_filter$imdanova_plot_2 <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+          msg <- paste0("Something went wrong making your second iMd-ANOVA filter plot <br> System error: ", e)
+          revals$warnings_filter$imdanova_plot_2 <<- messageBox(type = "error", msg)
           NULL
         }
       )

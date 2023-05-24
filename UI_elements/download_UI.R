@@ -2,7 +2,10 @@ list(
   
   output$download_plot_UI <- renderUI({
 
-    validate(need(input$download_plot_table_rows_selected >= 1, "Select a plot to preview/edit"))
+    if (is.null(input$download_plot_table_rows_selected) ||
+        input$download_plot_table_rows_selected <= 0) {
+      return(HTML(messageBox("Select a plot to preview/edit")))
+    }
     
     plot_name <- plots$plot_table[input$download_plot_table_rows_selected, 1]
     p <- plots$allplots[[plot_name]]

@@ -7,8 +7,8 @@ observeEvent(c(input$transform, objects$omicsData, objects$omicsData_2), {
   else if (!is.null(objects$omicsData)) cond_scale <- (attr(objects$omicsData, "data_info")$data_scale == input$transform)
 
   toggleState("apply_transform", condition = !cond_scale & !(input$transform == "Select one"))
-  revals$warnings_transform$scale_mismatch <- if (isTRUE(cond_scale)) "<p style = 'color:grey'>Your data is already on the selected scale.</p>" else NULL
-  revals$warnings_transform$no_selection <- if (isTRUE(input$transform == "Select one")) "<p style = 'color:grey'>Select a transformation to apply.</p>" else NULL
+  revals$warnings_transform$scale_mismatch <- if (isTRUE(cond_scale)) messageBox(type = "warning", "Your data is already on the selected scale") else NULL
+  revals$warnings_transform$no_selection <- if (isTRUE(input$transform == "Select one")) messageBox(type = "warning", "Select a transformation to apply") else NULL
 })
 
 observeEvent(input$which_qc_plot, {

@@ -231,3 +231,57 @@
     opacity: 1;
   }
 }
+
+.message-box {
+  color: black;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  margin: 5px;
+}
+
+.message-box>i {
+  font-size: xx-large;
+  padding-right: 10px;
+}
+
+.message-box>p {
+  width: 100%;
+  margin: 0;
+}
+
+.message-box>div.fa {
+  align-self: start;
+  padding-right: 3px;
+}
+
+.message-box>div.fa:hover {
+  color: white;
+}
+
+.message-info {
+  background-color: skyblue;
+  border: 10px solid skyblue;
+}
+
+.message-info>i {
+  color: black;
+}
+
+.message-warning {
+  background-color: lightyellow;
+  border: 10px solid lightyellow;
+}
+
+.message-warning>i {
+  color: black;
+}
+
+.message-error {
+  background-color: red;
+  border: 10px solid red;
+}
+
+.message-error>i {
+  color: white;
+}

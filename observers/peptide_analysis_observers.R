@@ -188,9 +188,9 @@ observeEvent(input$peptide_apply_imdanova, {
       
     },
     error = function(e) {
-      msg <- paste0("Something went wrong running the statistics.  \n System error:  ", e)
+      msg <- paste0("Something went wrong running the statistics.  <br> System error:  ", e)
       message(msg)
-      revals$warnings_peptide_statistics$bad_imdanova <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+      revals$warnings_peptide_statistics$bad_imdanova <<- messageBox(type = "error", msg)
       objects$peptide_imdanova_res <- NULL
       plots$peptide_statistics_mainplot <- NULL
     }
@@ -259,11 +259,11 @@ observeEvent(
     },
     error = function(e) {
       msg <-
-        paste0("Something went wrong plotting your imdanovaRes object.  \n System error:  ",
+        paste0("Something went wrong plotting your imdanovaRes object.  <br> System error:  ",
                e)
       message(msg)
       revals$warnings_peptide_statistics$bad_imdanova_plot <<-
-        sprintf("<p style = 'color:red'>%s</p>", msg)
+        messageBox(type = "error", msg)
       plots$peptide_statistics_mainplot <- NULL
     })
   },
