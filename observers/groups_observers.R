@@ -264,6 +264,8 @@ observe({
 
   req(!is.null(f_data()))
   
+  req(all(main_effects() %in% colnames(f_data())))
+  
   # input column exists in fdata
   # there is at 1 main effect, and all specified main effects and covariates exist in f_data
   cond_files <- !is.null(input$file_fdata)
