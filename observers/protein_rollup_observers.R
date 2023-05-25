@@ -208,8 +208,8 @@ observeEvent(input$apply_rollup, {
                         selected = "Roll Up Results"
       )
       revals$rollup_summary <- summary(objects$omicsData)
-      plots$rollup_plot <- plot(objects$omicsData, bw_theme = TRUE, interactive = T, 
-                                color_by = "Group", order_by = "Group")
+      plots$rollup_plot <- plot(objects$omicsData, bw_theme = TRUE, use_VizSampNames = "VizSampNames" %in% colnames(objects$omicsData$f_data),
+                                interactive = T, color_by = "Group", order_by = "Group")
       
       showModal(
         modalDialog(
