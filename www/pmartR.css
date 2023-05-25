@@ -253,6 +253,7 @@
 .message-box>div.fa {
   align-self: start;
   padding-right: 3px;
+  cursor: pointer;
 }
 
 .message-box>div.fa:hover {
