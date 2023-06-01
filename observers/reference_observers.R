@@ -122,7 +122,7 @@ refnorm <- function(){
   } else if (tab == "NMR") {
 
     applied_norm <- tryCatch({
-      if (input$NMR_reference_source == "Row in Data File (e.g. metabolite)") {
+      if (input$NMR_reference_source == "Row in Expression Data (e.g. metabolite)") {
         applied_norm <- normalize_nmr(objects$omicsData,
                                            apply_norm = TRUE,
                                            backtransform = TRUE,
@@ -228,7 +228,7 @@ observeEvent(
                       selected = "Reference Normalized"
     )
     updateTabsetPanel(session, paste0(tab, "_ref_preview_tables"),
-                      selected = paste0("Reference Normalized ", tab, " Data File")
+                      selected = paste0("Reference Normalized ", tab, " Expression Data")
     )
   }
 )
@@ -293,7 +293,7 @@ observeEvent(input$ref_reset,
     )
     
     updateTabsetPanel(session, paste0(tab, "_ref_preview_tables"),
-                      selected = paste0("Uploaded ", tab, " Data File")
+                      selected = paste0("Uploaded ", tab, " Expression Data")
     )
   }
 )

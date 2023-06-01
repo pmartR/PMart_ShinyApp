@@ -16,20 +16,20 @@ shinyServer(function(session, input, output) {
   # Named list whose values are either references to objects or filepaths for certain resources
   # needs to exist here because session doesnt exist in global.R
   resources_locations <- list(
-    "Data File (e_data)" = list("objects", "omicsData", "e_data"),
-    "Sample Info (f_data)" = list("objects", "omicsData", "f_data"),
+    "Expression Data (e_data)" = list("objects", "omicsData", "e_data"),
+    "Sample Information (f_data)" = list("objects", "omicsData", "f_data"),
     "Biomolecule Information (e_meta)" = list("objects", "omicsData", "e_meta"),
-    "iMd-Anova Table" = list("objects", "imdanova_res"),
-    "SeqData Stats Table" = list("objects", "seqstats_res")
+    "Statistics" = list("objects", "imdanova_res"),
+    "SeqData Statistics" = list("objects", "seqstats_res")
   )
   
   resources_locations_peprollup <- list(
-    "Protein Data File (e_data)" = list("objects", "omicsData", "e_data"),
-    "Peptide Data File (e_data)" = list("objects", "omicsData_pre_rollup", "e_data"),
-    "Sample Info (f_data)" = list("objects", "omicsData", "f_data"),
+    "Protein Expression Data (e_data)" = list("objects", "omicsData", "e_data"),
+    "Peptide Expression Data (e_data)" = list("objects", "omicsData_pre_rollup", "e_data"),
+    "Sample Information (f_data)" = list("objects", "omicsData", "f_data"),
     "Biomolecule Information (e_meta)" = list("objects", "omicsData", "e_meta"),
-    "Protein iMd-Anova Table" = list("objects", "imdanova_res"),
-    "Peptide iMd-Anova Table" = list("objects", "peptide_imdanova_res")
+    "Protein Statistics" = list("objects", "imdanova_res"),
+    "Peptide Statistics" = list("objects", "peptide_imdanova_res")
   )
   
   # misc reactive values

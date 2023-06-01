@@ -15,14 +15,14 @@ list(
       
       div(
         id = "js_file_fdata",
-        textInput("file_fdata", "Upload CSV Data File for Sample Assignment", 
+        textInput("file_fdata", "Upload CSV Sample Information file", 
                   value = FileName)
       )
       
     } else {
       div(
         id = "js_file_fdata",
-        fileInput("file_fdata", "Upload CSV Data File for Sample Assignment",
+        fileInput("file_fdata", "Upload CSV Sample Information file",
                   multiple = FALSE,
                   accept = c(
                     "text/csv",

@@ -9,7 +9,7 @@ groups_UI <- function() {
           id = "groups_collapse_left", open = "fdata_upload", multiple = TRUE, # parent collapse div
           # file upload collapse sub-div
           bsCollapsePanel(div(
-            "Upload Groups File",
+            "Upload Sample Information",
             hidden(div(id = "ok_fdata_upload", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
           ),
           value = "fdata_upload",

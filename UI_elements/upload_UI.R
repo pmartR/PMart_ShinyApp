@@ -38,7 +38,7 @@ list(
 
         div(
           id = "js_file_edata",
-          textInput("file_edata", "Uploaded CSV Data File", 
+          textInput("file_edata", "Uploaded CSV Expression Data file", 
                     value = MapConnect$Project$Data$e_data_filename %>% strsplit("/") %>% unlist() %>% tail(1))
         )
         
@@ -46,7 +46,7 @@ list(
         
         div(
           id = "js_file_edata",
-          fileInput("file_edata", "Upload CSV Data File",
+          fileInput("file_edata", "Upload CSV Expression Data file",
                     multiple = FALSE,
                     accept = c(
                       "text/csv",
@@ -194,7 +194,7 @@ list(
       
       title_upload_div <- disabled(div(
         id = "js_file_emeta",
-        textInput("file_emeta", "Uploaded CSV Biomolecule Information File", 
+        textInput("file_emeta", "Uploaded CSV Biomolecule Information file", 
                   value = fname_tmp)
       ))
       
@@ -202,7 +202,7 @@ list(
       
       title_upload_div <- div(
         id = "js_file_emeta",
-        fileInput("file_emeta", "Upload CSV Biomolecule Information File",
+        fileInput("file_emeta", "Upload CSV Biomolecule Information file",
                   multiple = FALSE,
                   accept = c(
                     "text/csv",

@@ -9,7 +9,7 @@ upload_UI <- function() {
           id = "upload_collapse_left", open = c("datselect"), multiple = TRUE, # parent collapse div
           # upload edata sub-collapse div
           bsCollapsePanel(div(
-            "Specify Data Type and Upload Data File",
+            "Specify Data Type and Upload Expression Data",
             hidden(div(id = "ok_datselect", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
           ),
           value = "datselect",
