@@ -75,13 +75,14 @@ normalization_UI <- function() {
               hr(),
               hidden(bsButton("use_selected_spans", 
                               "Use parameters from table selection")),
-              hidden(
+              hidden(tagAppendAttributes(
                 bsButton(
                 "inspect_norm", 
                 "Diagnostics for normalization selection",
                 style = "primary"
-                )
-              ),
+                ),
+                style = "width: 100%;"
+              )),
               hidden(
                 div(
                   "Analyzing, please wait...",

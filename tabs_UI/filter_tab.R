@@ -86,7 +86,7 @@ filter_UI <- function() {
             div(
               id = "rmd_metrics_js", 
               class = "inline-wrapper-1",
-              uiOutput("rmd_metrics_out"),
+              uiOutput("rmd_metrics_out", style = "width: 100%;"),
               uiOutput("rmd_propmis_warn_icon")
             ),
             pickerInput("rmdfilt_plot_type", "Plot everything or inspect certain samples?", choices = c("Plot all samples" = "all", "Select from all samples" = "subset", "Select from outliers" = "outliers")),
@@ -137,7 +137,7 @@ filter_UI <- function() {
             label = div("Add/Remove custom filter", hidden(
               div(id = "customfilt_exists", style = "color:orange;float:right", icon("ok", lib = "glyphicon"))
             )), 
-            width = "50%"
+            style = "width: 100%;"
           )
         )
       ), # parent collapse
