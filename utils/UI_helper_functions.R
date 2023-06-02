@@ -342,22 +342,6 @@ fluidSplitLayout <- function(col1_content, col2_content, width1 = 6, width2 = 6)
   )
 }
 
-infoMessage <- function(msg, id = NULL) {
-  if (is.null(id)) {
-    id <- paste0("warning_", rlang::hash(msg))
-  }
-  return(
-    paste0(
-      '<div class="message-box message-info" id="', id,'">',
-      '<i class="fa fa-info-circle"></i>',
-      '<p>',
-      msg,
-      '</p>',
-      '</div>'
-    )
-  )
-}
-
 messageBox <- function(msg, type = "info", id = NULL, closeButton = NULL, icon = NULL) {
   if (is.null(id)) {
     id <- paste0(type, "_", rlang::hash(msg))
