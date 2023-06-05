@@ -196,7 +196,7 @@ output$peptide_statistics_tab_sidepanel <- renderUI({
         value = "peptide_imdanova-select-settings",
         uiOutput("peptide_imdanova_test_method_UI"),
         uiOutput("peptide_imdanova_pval_adjust_UI"),
-        numericInput("peptide_pval_thresh", "Significance threshold", value = 0.05, step = 0.01),
+        numericInput("peptide_pval_thresh", "Significance threshold", min = 0, max = 1, value = 0.05, step = 0.01),
         div(
           id = "peptide_apply_imdanova_jswrapper", 
           class= "tooltip-wrapper",

@@ -39,8 +39,8 @@ assign_ref_uploads <- function(tabname) {
             "NMR_reference_source",
             label = "Select reference source:",
             choices = c(
-              "Row in Data File (e.g. metabolite)",
-              "Column in Group File (e.g. sample concentration)"
+              "Row in Expression Data (e.g. metabolite)",
+              "Column in Sample Information (e.g. sample concentration)"
             ),
             selected = ifelse(is.null(isolate(input$NMR_reference_source)), 
                               character(0), 
@@ -54,8 +54,8 @@ assign_ref_uploads <- function(tabname) {
               "NMR_reference_source",
               label = "Select reference source:",
               choices = c(
-                "Row in Data File (e.g. metabolite)",
-                "Column in Group File (e.g. sample concentration)"
+                "Row in Expression Data (e.g. metabolite)",
+                "Column in Sample Information (e.g. sample concentration)"
               ),
               selected = character(0)
             )
@@ -210,7 +210,19 @@ assign_ref_uploads <- function(tabname) {
       if(cond_disable_apply) apply_button <- disabled(apply_button)
       if(cond_disable_reset) reset_button <- disabled(reset_button)
       
-      return(div(class = "inline-wrapper-1 inline-btn-margin", apply_button, reset_button))
+      return(
+        div(class = "inline-wrapper-1 inline-btn-margin",
+            apply_button,
+            reset_button,
+            hidden(
+              div(
+                "Normalizing, please wait...",
+                id = "ref_norm_busy", class = "fadein-out",
+                style = "color:deepskyblue;font-weight:bold;margin-bottom:5px"
+              )
+            )
+        )
+      )
     })
   } else {
     ## Upload
@@ -406,7 +418,7 @@ assign_ref_uploads <- function(tabname) {
     selection = "none"
   )
 
-  output[[paste0(tabname, "_no_fdata")]] <- renderText("No Data File loaded")
+  output[[paste0(tabname, "_no_fdata")]] <- renderText("No Sample Information loaded")
 
   # Edata
   output[[paste0(tabname, "_ref_head_edata_UI")]] <- renderUI({

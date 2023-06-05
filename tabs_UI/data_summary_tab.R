@@ -18,19 +18,22 @@ data_summary_UI <- function() {
           id = "qc_collapse", multiple = TRUE, open = c("qc_plot_params"),
           bsCollapsePanel("Plot Options",
             value = "qc_plot_params",
-            tagList(
-              div("Order Samples By:", style = "font-weight:bold"),
-              fluidRow(
-                column(6, uiOutput("qc_order_by_UI")),
-                column(6, uiOutput("qc_order_by_2_UI"))
-              )
-            ),
-            # color selection
-            tagList(
-              div("Color Samples By:", style = "font-weight:bold"),
-              fluidRow(
-                column(6, uiOutput("qc_color_by_UI")),
-                column(6, uiOutput("qc_color_by_2_UI"))
+            conditionalPanel(
+              "input.which_qc_plot != 'scatter'",
+              tagList(
+                div("Order Samples By:", style = "font-weight:bold"),
+                fluidRow(
+                  column(6, uiOutput("qc_order_by_UI")),
+                  column(6, uiOutput("qc_order_by_2_UI"))
+                )
+              ),
+              # color selection
+              tagList(
+                div("Color Samples By:", style = "font-weight:bold"),
+                fluidRow(
+                  column(6, uiOutput("qc_color_by_UI")),
+                  column(6, uiOutput("qc_color_by_2_UI"))
+                )
               )
             ),
             div(

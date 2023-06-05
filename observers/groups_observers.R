@@ -88,9 +88,9 @@ makegroup <- function(){
         tmp
       },
       error = function(e) {
-        msg <- paste0("Something went wrong grouping your second omicsData object \n System error:  ", e)
+        msg <- paste0("Something went wrong grouping your second omicsData object <br> System error:  ", e)
         message(msg)
-        revals$warnings_groups$obj_2 <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+        revals$warnings_groups$obj_2 <<- messageBox(type = "error", msg)
         NULL
       }
     )
@@ -125,9 +125,9 @@ makegroup <- function(){
       tmp
     },
     error = function(e) {
-      msg <- paste0("Something went wrong grouping your omicsData object \n System error:  ", e)
+      msg <- paste0("Something went wrong grouping your omicsData object <br> System error:  ", e)
       message(msg)
-      revals$warnings_groups$obj_1 <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+      revals$warnings_groups$obj_1 <<- messageBox(type = "error", msg)
       NULL
     }
   )
@@ -211,7 +211,7 @@ observeEvent(input$group_designation, {
     revals$groups_summary_2 <- if (two_lipids()) summary(objects$omicsData_2) else NULL
   }
   else {
-    revals$warnings_groups$failed_groupdes <- "<p style = 'color:grey'>Something went wrong grouping your objects$omicsData object(s), please verify all fields are correct.</p>"
+    revals$warnings_groups$failed_groupdes <- messageBox(type = "warning", "Something went wrong grouping your objects$omicsData object(s), please verify all fields are correct")
     revals$groups_summary <- NULL
     revals$groups_summary_2 <- NULL
   }
@@ -264,6 +264,8 @@ observe({
 
   req(!is.null(f_data()))
   
+  req(all(main_effects() %in% colnames(f_data())))
+  
   # input column exists in fdata
   # there is at 1 main effect, and all specified main effects and covariates exist in f_data
   cond_files <- !is.null(input$file_fdata)
@@ -280,14 +282,14 @@ observe({
   
   cond <- all(cond_files, cond_idcol_fdata, cond_main_effects, cond_covariates, cond_sample_names, pairs_complete()[['pass']])
 
-  revals$warnings_groups$files <- if (!cond_files) "<p style = 'color:grey'>No f_data uploaded or one file missing.</p>" else NULL
-  revals$warnings_groups$sample_names <- if (!cond_sample_names) "<p style = 'color:grey'>The chosen sample ID columns do not contain the sample names for one or more files</p>" else NULL
-  revals$warnings_groups$idcol_fdata <- if (!cond_idcol_fdata) "<p style = 'color:grey'>Selected ID columns were not found in one or more grouping files.</p>" else NULL
-  revals$warnings_groups$main_effects <- if (!cond_main_effects) "<p style = 'color:grey'>No main effect or pairing structure specified or main effects not found in one or more grouping files.</p>" else NULL
-  revals$warnings_groups$covariates <- if (!cond_covariates) "<p style = 'color:grey'>Specified covariates not found in one or more grouping files.</p>" else NULL
-  revals$warnings_groups$NA_groups <- if(cond_NA_groups) "<p style = 'color:grey'>Specified main effect(s) are not assigned for all samples; samples with missing main effect(s) will be removed. </p>" else NULL
-  revals$warnings_groups$reference <- if(cond_NA_groups && cond_iso_nrm) "<p style = 'color:grey'>Note: Reference samples without assigned main effect(s) will still be available for downstream reference normalization.</p>" else NULL
-  revals$warnings_groups$pairs <- if(!pairs_complete()[['pass']]) "<p style = 'color:grey'>Please enter all pairing information.</p>" else NULL
+  revals$warnings_groups$files <- if (!cond_files) messageBox(type = "warning", "No f_data uploaded or one file missing.") else NULL
+  revals$warnings_groups$sample_names <- if (!cond_sample_names) messageBox(type = "warning", "The chosen sample ID columns do not contain the sample names for one or more files.") else NULL
+  revals$warnings_groups$idcol_fdata <- if (!cond_idcol_fdata) messageBox(type = "warning", "Selected ID columns were not found in one or more grouping files") else NULL
+  revals$warnings_groups$main_effects <- if (!cond_main_effects) messageBox(type = "warning", "No main effect or pairing structure specified or main effects not found in one or more grouping files") else NULL
+  revals$warnings_groups$covariates <- if (!cond_covariates) messageBox(type = "warning", "Specified covariates not found in one or more grouping files") else NULL
+  revals$warnings_groups$NA_groups <- if(cond_NA_groups) messageBox(type = "warning", "Specified main effect(s) are not assigned for all samples; samples with missing main effect(s) will be removed.") else NULL
+  revals$warnings_groups$reference <- if(cond_NA_groups && cond_iso_nrm) messageBox(type = "warning", "Note: Reference samples without assigned main effect(s) will still be available for downstream reference normalization") else NULL
+  revals$warnings_groups$pairs <- if(!pairs_complete()[['pass']]) messageBox(type = "warning", "Please enter all pairing information") else NULL
   
   groups_not_applied <- is.null(attributes(objects$omicsData)$group_DF)
   

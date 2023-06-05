@@ -13,7 +13,7 @@ list(
     
     title = sprintf("Maximum CV (between 1 and %s)", round(max_cv, 2))
     
-    numericInput("cv_threshold", title, round(max_cv*0.9, 2), step = 1)
+    numericInput("cv_threshold", title, min = 1, max = max_cv, value = round(max_cv*0.9, 2), step = 1)
   }),
 
   # Summary of current filters and parameters
@@ -541,7 +541,7 @@ list(
       mols2 = objects$omicsData_2$e_data[,get_edata_cname(objects$omicsData_2)]
       
       tagList(
-        h4("Filter by data file identifiers:"),
+        h4("Filter by expression data identifiers:"),
         fluidRow(
           column(6,
              pickerInput(
@@ -566,7 +566,7 @@ list(
     } else {
       pickerInput(
         "edata_customfilt_remove_mols_1",
-        "Filter by data file identifiers:",
+        "Filter by expression data identifiers:",
         choices = mols1,
         multiple = T,
         options = list(`live-search` = TRUE, `actions-box` = TRUE)

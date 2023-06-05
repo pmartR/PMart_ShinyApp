@@ -25,9 +25,9 @@ global_norm_1 <- reactive({
       )
     },
     error = function(e) {
-      msg <- paste0("Something went wrong creating your normRes object.  \n System error:  ", e)
+      msg <- paste0("Something went wrong creating your normRes object.  <br> System error:  ", e)
       message(msg)
-      revals$warnings_normalize$bad_normres_1 <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+      revals$warnings_normalize$bad_normres_1 <<- messageBox(type = "error", msg)
       NULL
     }
   )

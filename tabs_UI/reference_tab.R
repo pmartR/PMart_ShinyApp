@@ -117,17 +117,17 @@ upload_reference <- function(tabname) {
                    tabsetPanel(
                      id = paste0(tabname, "_ref_preview_tables"),
                      tabPanel(
-                       "Reference Groups File",
+                       "Reference Sample Information",
                        br(),
                        withSpinner(uiOutput(paste0(tabname, "_ref_head_fdata_UI")))
                      ),
                      tabPanel(
-                      paste0("Uploaded ", tabname, " Data File"),
+                      paste0("Uploaded ", tabname, " Expression Data"),
                        br(),
                        withSpinner(uiOutput(paste0(tabname, "_ref_head_edata_UI")))
                      ),
                      tabPanel(
-                       paste0("Reference Normalized ", tabname, " Data File"),
+                       paste0("Reference Normalized ", tabname, " Expression Data"),
                        br(),
                        withSpinner(uiOutput(paste0(tabname, "_norm_edata_UI")))
                      )

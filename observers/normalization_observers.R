@@ -149,9 +149,9 @@ observeEvent(input$execute_spans, {
       spans_procedure(objects$omicsData, subset_fn = input$spans_which_subset_fn, norm_fn = input$spans_which_norm_fn, params = revals$spans_params)
     },
     error = function(e) {
-      msg <- paste0("Something went wrong computing spans.  \n System error:  ", e)
+      msg <- paste0("Something went wrong computing spans.  <br> System error:  ", e)
       message(msg)
-      revals$warnings_normalize$bad_spans <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+      revals$warnings_normalize$bad_spans <<- messageBox(type = "error", msg)
       NULL
     }
   )
@@ -325,9 +325,9 @@ observeEvent(c(input$apply_normalization, input$apply_normalization_modal), {
       enable("reset_normalization")
     },
     error = function(e) {
-      msg <- paste0("Something went wrong normalizing your data.  \n System error:  ", e)
+      msg <- paste0("Something went wrong normalizing your data.  <br> System error:  ", e)
       message(msg)
-      revals$warnings_normalize$bad_norm_obj1 <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+      revals$warnings_normalize$bad_norm_obj1 <<- messageBox(type = "error", msg)
     }
   )
 })
@@ -390,9 +390,9 @@ observeEvent(input$inspect_norm, {
       inspect_norm(objects$omicsData, subset_fn = input$subset_fn, norm_fn = input$norm_fn, params = params)
     },
     error = function(e) {
-      msg <- paste0("Something went wrong inspecting your omicsData object.  \n System error:  ", e)
+      msg <- paste0("Something went wrong inspecting your omicsData object.  <br> System error:  ", e)
       message(msg)
-      revals$warnings_normalize$bad_inspection_obj1 <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+      revals$warnings_normalize$bad_inspection_obj1 <<- messageBox(type = "error", msg)
       NULL
     }
   )
@@ -403,9 +403,9 @@ observeEvent(input$inspect_norm, {
         inspect_norm(objects$omicsData_2, subset_fn = input$subset_fn, norm_fn = input$norm_fn, params = params)
       },
       error = function(e) {
-        msg <- paste0("Something went wrong inspecting your second omicsData object.  \n System error:  ", e)
+        msg <- paste0("Something went wrong inspecting your second omicsData object.  <br> System error:  ", e)
         message(msg)
-        revals$warnings_normalize$bad_inspection_obj2 <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+        revals$warnings_normalize$bad_inspection_obj2 <<- messageBox(type = "error", msg)
         NULL
       }
     )

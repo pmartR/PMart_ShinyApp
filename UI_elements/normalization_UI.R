@@ -42,8 +42,7 @@ list(
   # spans score plot
   output$spans_plot <- renderPlotly({
     req(!is.null(objects$spans_res))
-    p <- plot(objects$spans_res, interactive = T
-              )
+    p <- plot(objects$spans_res, interactive = T)
     plots$last_plot <- p
     return(p)
   }),
@@ -162,14 +161,14 @@ list(
   # plot normalized data after modal dismiss
   output$normalized_boxplots <- renderPlotly({
     req(pluck(attributes(objects$omicsData), "data_info", "norm_info", "is_normalized") == TRUE)
-    p <- plot(objects$omicsData, bw_theme = TRUE, color_by = "Group", order_by = "Group", interactive = T)
+    p <- plot(objects$omicsData, bw_theme = TRUE, color_by = "Group", order_by = "Group", use_VizSampNames = "VizSampNames" %in% colnames(objects$omicsData$f_data), interactive = T)
     plots$last_plot <- p
     p
   }),
 
   output$normalized_boxplots_2 <- renderPlotly({
     req(pluck(attributes(objects$omicsData_2), "data_info", "norm_info", "is_normalized") == TRUE)
-    p <- plot(objects$omicsData_2, bw_theme = TRUE, interactive = T, color_by = "Group", order_by = "Group")
+    p <- plot(objects$omicsData_2, bw_theme = TRUE, use_VizSampNames = "VizSampNames" %in% colnames(objects$omicsData$f_data), interactive = T, color_by = "Group", order_by = "Group")
     plots$last_plot_2 <- p
     p
   }),

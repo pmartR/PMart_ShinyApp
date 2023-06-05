@@ -70,14 +70,10 @@ refnorm <- function(){
   
   req(!cond && input[[paste0(tab, "_ref_done_idcols")]] > 0)
   
-  showNotification("Normalizing, please wait....",
-                   duration = NULL,
-                   closeButton = FALSE,
-                   id = paste0(tab, "_reference_note")
-  )
+  show("ref_norm_busy")
   
   on.exit({
-    removeNotification(paste0(tab, "_reference_note"))
+    hide("ref_norm_busy")
   })
   
   if (tab == "Isobaric") {
@@ -116,9 +112,9 @@ refnorm <- function(){
         applied_norm
       },
       error = function(e) {
-        msg <- paste0("Something went wrong reference normalizing your omicsData object.  \n System error:  ", e)
+        msg <- paste0("Something went wrong reference normalizing your omicsData object.  <br> System error:  ", e)
         message(msg)
-        revals$warnings_reference$bad_norm <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+        revals$warnings_reference$bad_norm <<- messageBox(type = "error", msg)
         objects$omicsData
       }
     )
@@ -126,7 +122,7 @@ refnorm <- function(){
   } else if (tab == "NMR") {
 
     applied_norm <- tryCatch({
-      if (input$NMR_reference_source == "Row in Data File (e.g. metabolite)") {
+      if (input$NMR_reference_source == "Row in Expression Data (e.g. metabolite)") {
         applied_norm <- normalize_nmr(objects$omicsData,
                                            apply_norm = TRUE,
                                            backtransform = TRUE,
@@ -145,9 +141,9 @@ refnorm <- function(){
       applied_norm
     },
     error = function(e){
-      msg <- paste0("Something went wrong reference normalizing your omicsData object.  \n System error:  ", e)
+      msg <- paste0("Something went wrong reference normalizing your omicsData object.  <br> System error:  ", e)
       message(msg)
-      revals$warnings_reference$bad_norm <<- sprintf("<p style = 'color:red'>%s</p>", msg)
+      revals$warnings_reference$bad_norm <<- messageBox(type = "error", msg)
       objects$omicsData
     })
     
@@ -232,7 +228,7 @@ observeEvent(
                       selected = "Reference Normalized"
     )
     updateTabsetPanel(session, paste0(tab, "_ref_preview_tables"),
-                      selected = paste0("Reference Normalized ", tab, " Data File")
+                      selected = paste0("Reference Normalized ", tab, " Expression Data")
     )
   }
 )
@@ -297,7 +293,7 @@ observeEvent(input$ref_reset,
     )
     
     updateTabsetPanel(session, paste0(tab, "_ref_preview_tables"),
-                      selected = paste0("Uploaded ", tab, " Data File")
+                      selected = paste0("Uploaded ", tab, " Expression Data")
     )
   }
 )

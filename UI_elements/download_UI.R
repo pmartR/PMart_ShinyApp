@@ -2,7 +2,10 @@ list(
   
   output$download_plot_UI <- renderUI({
 
-    validate(need(input$download_plot_table_rows_selected >= 1, "Select a plot to preview/edit"))
+    if (is.null(input$download_plot_table_rows_selected) ||
+        input$download_plot_table_rows_selected <= 0) {
+      return(HTML(messageBox("Select a plot to preview/edit")))
+    }
     
     plot_name <- plots$plot_table[input$download_plot_table_rows_selected, 1]
     p <- plots$allplots[[plot_name]]
@@ -84,8 +87,8 @@ list(
       column(3, selectInput("download_file_type", "File Type", c("HTML Widget", "PNG", "JPG", "SVG"), c(plot_file_type))),
       conditionalPanel(
         "input.download_file_type!='HTML Widget'",
-        column(3, numericInput("download_plot_width", "Width", plot_save_width)),
-        column(3, numericInput("download_plot_height", "Height", plot_save_height)),
+        column(3, numericInput("download_plot_width", "Width", plot_save_width, min = 0)),
+        column(3, numericInput("download_plot_height", "Height", plot_save_height, min = 0)),
         column(3, numericInput("download_plot_scale", "Scale", plot_save_scale, min = 0, step = 0.25))
       )
     )

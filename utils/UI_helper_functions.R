@@ -341,3 +341,41 @@ fluidSplitLayout <- function(col1_content, col2_content, width1 = 6, width2 = 6)
     )
   )
 }
+
+messageBox <- function(msg, type = "info", id = NULL, closeButton = NULL, icon = NULL) {
+  if (is.null(id)) {
+    id <- paste0(type, "_", rlang::hash(msg))
+  }
+  
+  if (is.null(closeButton)) {
+    closeButton <- switch(type,
+                          "info" = FALSE,
+                          "warning" = TRUE,
+                          "error" = TRUE)
+  }
+    
+  if (is.null(icon)) {
+    icon <- switch(type,
+                   "info" = "info-circle",
+                   "warning" = "exclamation-triangle",
+                   "error" = "exclamation-circle")
+  }
+  
+  return(
+    paste0(
+      '<div class="message-box message-', type, '" id="', id,'">',
+      '<i class="fa fa-', icon, '"></i>',
+      '<p>',
+      ifelse(type == "warning", '<b>Warning:</b> ', ''),
+      ifelse(type == "error", '<b>Error:</b> ', ''),
+      msg,
+      '</p>',
+      ifelse(
+        closeButton,
+        paste0('<div class="fa fa-window-close" onclick="$(\'#', id, '\').hide()"></div>'),
+        ''
+      ),
+      '</div>'
+    )
+  )
+}

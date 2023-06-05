@@ -20,7 +20,7 @@ filter_UI <- function() {
             filter_name = "molfilt",
             title = "Molecule Filter",
             tooltip_text = ttext_[["MOLECULE_FILTER_INFO"]],
-            numericInput("mol_min_num", "Minimum number observed", 2, step = 1)
+            numericInput("mol_min_num", "Minimum number observed", min = 1, value = 2, step = 1)
           ),
           
           # cv filter options
@@ -36,8 +36,8 @@ filter_UI <- function() {
             filter_name = "imdanovafilt",
             title = "IMD-ANOVA Filter",
             tooltip_text = ttext_[["IMDANOVA_FILTER_INFO"]],
-            numericInput("min_nonmiss_anova", "Minimum number observed to perform ANOVA", 2, step = 1),
-            numericInput("min_nonmiss_gtest", "Minimum number observed to perform G-test", 3, step = 1)
+            numericInput("min_nonmiss_anova", "Minimum number observed to perform ANOVA", min = 1, value = 2, step = 1),
+            numericInput("min_nonmiss_gtest", "Minimum number observed to perform G-test", min = 1, value = 3, step = 1)
           ),
           
           # proteomics filter
@@ -45,7 +45,7 @@ filter_UI <- function() {
             filter_name = "profilt",
             title = "Proteomics Filter",
             tooltip_text = ttext_[["PROTEOMICS_FILTER_INFO"]],
-            numericInput("min_num_peps", "Minimum number of peptides mapped to each protein:", 2, step = 1),
+            numericInput("min_num_peps", "Minimum number of peptides mapped to each protein:", min = 1, value = 2, step = 1),
             checkboxInput("degen_peps", "Remove Degenerate Peptides?", TRUE)
           ),
           
@@ -82,11 +82,11 @@ filter_UI <- function() {
               )
             ),
             colsize_l = 5, colsize_r = 7,
-            numericInput("pvalue_threshold", "P-value threshold:", 0.0001, step = 0.001),
+            numericInput("pvalue_threshold", "P-value threshold:", min = 0, max = 1, value = 0.0001, step = 0.001),
             div(
               id = "rmd_metrics_js", 
               class = "inline-wrapper-1",
-              uiOutput("rmd_metrics_out"),
+              uiOutput("rmd_metrics_out", style = "width: 100%;"),
               uiOutput("rmd_propmis_warn_icon")
             ),
             pickerInput("rmdfilt_plot_type", "Plot everything or inspect certain samples?", choices = c("Plot all samples" = "all", "Select from all samples" = "subset", "Select from outliers" = "outliers")),
@@ -122,7 +122,7 @@ filter_UI <- function() {
           ),
           value = "customfilt",
           div(class = "inline-wrapper-1",
-            uiOutput("fdata_customfilt"),
+            uiOutput("fdata_customfilt", style = "width: 100%;"),
             radioGroupButtons("remove_or_keep", label = "Remove or keep these choices?", choices = c("Remove", "Keep"), selected = "Remove")
           ), 
           hr(),
@@ -137,7 +137,7 @@ filter_UI <- function() {
             label = div("Add/Remove custom filter", hidden(
               div(id = "customfilt_exists", style = "color:orange;float:right", icon("ok", lib = "glyphicon"))
             )), 
-            width = "50%"
+            style = "width: 100%;"
           )
         )
       ), # parent collapse

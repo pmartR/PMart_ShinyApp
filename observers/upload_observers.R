@@ -59,8 +59,8 @@ makeobject <- function(use_iso = T){
       res
     },
     error = function(e) {
-      msg <- paste0("Something went wrong processing your omicsData object \n System error:  ", e)
-      revals$warnings_upload$badupload <- sprintf("<p style = color:red>%s</p>", msg)
+      msg <- paste0("Something went wrong processing your omicsData object <br> System error:  ", e)
+      revals$warnings_upload$badupload <- messageBox(type = "error", msg)
       NULL
     }
   )
@@ -78,8 +78,8 @@ makeobject <- function(use_iso = T){
           edata_replace(na_replace, NA)
       },
       error = function(e) {
-        msg <- paste0("Something went wrong processing the second object \n System error:  ", e)
-        revals$warnings_upload$badupload_2 <<- sprintf("<p style = color:red>%s</p>", msg)
+        msg <- paste0("Something went wrong processing the second object <br> System error:  ", e)
+        revals$warnings_upload$badupload_2 <<- messageBox(type = "error", msg)
         NULL
       }
     )
@@ -98,8 +98,8 @@ makeobject <- function(use_iso = T){
           edata_transform(objects$uploaded_omicsData, data_scale = transform)
         },
         error = function(e) {
-          msg <- paste0("Something went wrong processing your omicsData object \n System error:  ", e)
-          revals$warnings_upload$bad_transform <<- sprintf("<p style = color:red>%s</p>", msg)
+          msg <- paste0("Something went wrong processing your omicsData object <br> System error:  ", e)
+          revals$warnings_upload$bad_transform <<- messageBox(type = "error", msg)
           NULL
         }
       )
@@ -115,8 +115,8 @@ makeobject <- function(use_iso = T){
           edata_transform(objects$uploaded_omicsData_2, data_scale = transform)
         },
         error = function(e) {
-          msg <- paste0("Something went wrong processing the second object \n System error:  ", e)
-          revals$warnings_upload$bad_transform_2 <<- sprintf("<p style = color:red>%s</p>", msg)
+          msg <- paste0("Something went wrong processing the second object <br> System error:  ", e)
+          revals$warnings_upload$bad_transform_2 <<- messageBox(type = "error", msg)
           NULL
         }
       )
@@ -257,7 +257,7 @@ observe({
     if (any(!cond_idcol_edata,!cond_idcol_emeta,!cond_shared_ids) &
         cond_files &
         isTruthy(as.logical(input$emeta_yn))) {
-      "<p style = 'color:red'>One or more of your identifier columns are not found in or have inconsistent values across the e_data and e_meta files.</p>" 
+      messageBox(type = "error", "One or more of your identifier columns are not found in or have inconsistent values across the e_data and e_meta files.")
     } else NULL
   
   toggle("ok_metadata", condition = cond)
@@ -303,7 +303,7 @@ observe({
   
   if(!lipids_edata_unq()) {
     isolate({
-      revals$warnings_upload$edata_not_unique <- "<p style = 'color:red'>There were duplicate entries in the identifier columns of your lipid datasets.</p>"
+      revals$warnings_upload$edata_not_unique <- messageBox(type = "error", "There were duplicate entries in the identifier columns of your lipid datasets.")
     })
   }
   isolate({
@@ -318,7 +318,7 @@ observeEvent(input$makeobject, {
 
   # store warning message if data did not successfully create
   if(is.null(objects$omicsData) | (two_lipids() & is.null(objects$omicsData_2))){
-    revals$warnings_upload$failed_object <- "<p style = 'color:grey'>Something went wrong processing your objects$omicsData object(s), please verify all fields are correct.</p>"
+    revals$warnings_upload$failed_object <- messageBox(type = "warning", "Something went wrong processing your objects$omicsData object(s), please verify all fields are correct")
   } else revals$warnings_upload$failed_object <- NULL
   
   cond_one_obj <- !two_lipids() & !is.null(objects$omicsData)
@@ -421,7 +421,7 @@ observe({
 
 #'@details navigate to the data requirements sub-tab
 observeEvent(input$upload_to_datareqs, {
-  updateTabsetPanel(session, "top_page", "data_requirements")
+  updateCollapse(session, "upload_preview_collapse", open = "data_requirements")
 })
 
 # modal dialog behavior
