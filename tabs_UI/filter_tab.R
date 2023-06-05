@@ -122,7 +122,7 @@ filter_UI <- function() {
           ),
           value = "customfilt",
           div(class = "inline-wrapper-1",
-            uiOutput("fdata_customfilt"),
+            uiOutput("fdata_customfilt", style = "width: 100%;"),
             radioGroupButtons("remove_or_keep", label = "Remove or keep these choices?", choices = c("Remove", "Keep"), selected = "Remove")
           ), 
           hr(),
