@@ -56,7 +56,7 @@ test_that("App completes a basic workflow on peptide-level data", {
   # expect_equal(digest::digest(saved_plot), "2facd08eb8de3b8f685d80631e2a26b2")
   
   # Filter tab
-  app$set_inputs(top_page = "filter_tab")
+  app$click("go_to_filter")
   app$click("add_molfilt")
   app$click("add_cvfilt")
   app$click("add_imdanovafilt")

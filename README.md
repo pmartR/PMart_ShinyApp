@@ -8,7 +8,7 @@ of the package to be available to the user without the need for familiarity with
 R or the package itself.  The following capabilities, presented in the order of
 a traditional `omics analysis, are available in the GUI:
 
-- Data upload.  Upload data files, sample information, and biomolecule metadata.  See the data-requirements section for details.
+- Data upload.  Upload expression data, sample information, and biomolecule metadata.  See the data-requirements section for details.
 - Data transformation (raw to log2)
 - Group assignment (main effects, covariates, pairing structure)
 - Exploratory data analysis.  PCA, missing-variable plots, correlation heatmaps, and more.

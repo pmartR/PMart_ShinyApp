@@ -49,7 +49,7 @@ test_that("{shinytest2} recording: pmart_standalone", {
     app$set_inputs(which_qc_plot = "pca")
     app$set_inputs(qc_color_by_2 = "Group")
     
-    app$set_inputs(top_page = "filter_tab")
+    app$click("go_to_filter")
     
     app$wait_for_value(input = "cv_threshold")
     app$set_inputs(cv_threshold = 50)
