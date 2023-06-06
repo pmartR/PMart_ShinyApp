@@ -33,7 +33,8 @@ test_that("{shinytest2} recording: pmart_standalone", {
     app$wait_for_value(input = "goto_qc")
     app$click("goto_qc")
 
-    app$set_inputs(top_page = "filter_tab")
+    app$wait_for_value(input = "go_to_filter")
+    app$click("go_to_filter")
     
     app$wait_for_value(input = "cv_threshold")
     app$set_inputs(cv_threshold = 50)
