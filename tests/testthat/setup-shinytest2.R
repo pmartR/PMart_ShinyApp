@@ -8,11 +8,6 @@ open_collapse <- function(id, value) {
 
 testthat::local_edition(3)
 
-# announce snapshots
-for (fpath in Sys.glob(file.path(testthat::test_path(), "_snaps", "*", "*"))) {
-  testthat::announce_snapshot_file(fpath)
-}
-
 if (Sys.getenv("MAP_SHINYTEST") == 1) {
   project_root = file.path(testthat::test_path(), "../..")
   

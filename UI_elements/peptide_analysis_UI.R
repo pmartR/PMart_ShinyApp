@@ -79,7 +79,7 @@ output$peptide_imdanova_pval_adjust_UI <- renderUI({
       "Dunnet" = "dunnett",
       "None" = "none"
     ),
-    selected = "holm"
+    selected = "none"
   )
   
   gtest_picker_mc <- pickerInput(
@@ -90,7 +90,7 @@ output$peptide_imdanova_pval_adjust_UI <- renderUI({
       "Bonferroni" = "bonferroni",
       "None" = "none"
     ),
-    selected = "holm"
+    selected = "none"
   )
   
   anova_picker_fdr <-  pickerInput(

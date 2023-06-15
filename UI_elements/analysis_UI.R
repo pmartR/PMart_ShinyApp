@@ -152,7 +152,7 @@ output$imdanova_pval_adjust_UI <- renderUI({
       "Dunnet" = "dunnett",
       "None" = "none"
     ),
-    selected = character(0)
+    selected = "none"
   )
 
   gtest_picker_mc <- pickerInput(
@@ -163,7 +163,7 @@ output$imdanova_pval_adjust_UI <- renderUI({
       "Bonferroni" = "bonferroni",
       "None" = "none"
     ),
-    selected = character(0)
+    selected = "none"
   )
 
   anova_picker_fdr <-  pickerInput(

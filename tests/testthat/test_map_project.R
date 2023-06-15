@@ -120,6 +120,9 @@ test_that("pmartR loads MAP projects", {
   app$wait_for_idle()
   app$set_inputs(imdanova_test_method = "combined")
   app$wait_for_idle()
+  app$set_inputs(imdanova_pval_adjust_a_fdr = "none")
+  app$set_inputs(imdanova_pval_adjust_g_fdr = "none")
+  
   app$click("apply_imdanova")
   app$wait_for_idle()
   app$click("saveplot")

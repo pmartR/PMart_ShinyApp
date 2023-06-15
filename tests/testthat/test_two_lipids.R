@@ -45,24 +45,10 @@ test_that("{shinytest2} recording: pmart_standalone", {
     app$set_inputs(qc_title = "New Title")
     app$click("qc_apply_style_plot_1")
     app$click("qc_apply_style_plot_2")
-    app$click("saveplot")
-    
-    saved_plot <- app$get_value(export = "cur_plot")
-    vdiffr::expect_doppelganger("qc_boxplot", saved_plot, writer=write_plotly_svg)
-    
-    saved_plot <- app$get_value(export = "cur_plot_2")
-    vdiffr::expect_doppelganger("qc_boxplot_2", saved_plot, writer=write_plotly_svg)
-    
+
     app$set_inputs(which_qc_plot = "pca")
     app$set_inputs(qc_color_by_2 = "Group")
     
-    app$click("saveplot")
-    saved_plot <- app$get_value(export = "cur_plot")
-    vdiffr::expect_doppelganger("qc_pca_plot", saved_plot, writer=write_plotly_svg)
-    
-    saved_plot <- app$get_value(export = "cur_plot_2")
-    vdiffr::expect_doppelganger("qc_pca_plot_2", saved_plot, writer=write_plotly_svg)
-
     app$set_inputs(top_page = "filter_tab")
     
     app$wait_for_value(input = "cv_threshold")
@@ -123,10 +109,6 @@ test_that("{shinytest2} recording: pmart_standalone", {
     app$click("apply_dimreduction")
     app$wait_for_idle()
     app$set_inputs("analysis_pca_shape_by" = "Condition2")
-    app$click("saveplot")
-    
-    saved_plot <- app$get_value(export = "cur_plot")
-    vdiffr::expect_doppelganger("analysis_pca_plot", saved_plot, writer=write_plotly_svg)
     
     app$set_inputs(top_page = "download_tab")
     

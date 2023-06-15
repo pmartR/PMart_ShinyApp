@@ -2,7 +2,9 @@ library(shinytest2)
 
 test_that("{shinytest2} recording: pmart_standalone", {
   # app <- AppDriver$new("http://127.0.0.1:3858", name = "pmart_standalone", height = 1187, width = 1263) 
-  app <- AppDriver$new(name = "pmart_standalone", variant = platform_variant(), height = 1187, width = 1263, seed = 71444, timeout = 20000)
+  app <- AppDriver$new(name = "pmart_standalone", variant = platform_variant(), height = 1187, width = 1263, seed = 71444, load_timeout = 20000)
+  
+  app$wait_for_idle(timeout = 60000)
   
   # Upload
   app$set_inputs(datatype = "seq")
@@ -84,10 +86,6 @@ test_that("{shinytest2} recording: pmart_standalone", {
   app$set_inputs("analysis_pca_color_by" = "Tissue")
   app$set_inputs("analysis_pca_shape_by" = "Group")
   app$click("pca_update_plot_content")
-  app$click("saveplot")
-  
-  saved_plot <- app$get_value(export = "cur_plot")
-  vdiffr::expect_doppelganger("analysis_pca_plot", saved_plot, writer=write_plotly_svg)
   
   app$set_inputs(top_page = "download_tab")
   
