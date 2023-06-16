@@ -7,9 +7,9 @@ open_collapse <- function(id, value) {
 }
 
 testthat::local_edition(3)
+project_root <- file.path(testthat::test_path(), "../..")
 
 if (Sys.getenv("MAP_SHINYTEST") == 1) {
-  project_root = file.path(testthat::test_path(), "../..")
   
   if (!requireNamespace("mapDataAccess")) {
     cat("mapDataAccess is not installed. Do you want to download it?\n")
@@ -128,6 +128,41 @@ if (Sys.getenv("MAP_SHINYTEST") == 1) {
       put_file(MapConnect, paste0("tests/map_test_data/", f), id=f)
     }
   )
+} else {
+  
+  cfg_path = if (!is.null(Sys.getenv("MAP_CONFIG")) &&
+                 Sys.getenv("MAP_CONFIG") != "") {
+    Sys.getenv("MAP_CONFIG")
+  } else {
+    "cfg/minio_config.yml"
+  }
+  python_venv <- NULL
+  
+  withr::with_dir(project_root,{
+    if (file.exists(cfg_path)) {
+      cfg <- yaml::read_yaml(cfg_path)
+      python_venv <- cfg$python_venv
+    }
+  })
+  
+  conda_envs <- tryCatch(
+    {
+      reticulate::conda_list()$python
+    },
+    error = function(e) {
+      NULL
+    }
+  )
+  
+  is_conda <- any(sapply(conda_envs, function(envpath) {
+    grepl(sprintf("^%s", normalizePath(python_venv)), envpath)
+  }))
+  
+  if (is_conda) {
+    reticulate::use_condaenv(python_venv, required = TRUE)
+  } else {
+    reticulate::use_virtualenv(python_venv, required = TRUE)
+  }
 }
 
 # for testing plotly plots, see https://rdrr.io/cran/plotly/src/tests/testthat/helper-vdiffr.R
