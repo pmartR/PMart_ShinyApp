@@ -2,9 +2,11 @@
 
 ***
 
-The following datasets are available to pmartR
+PMart accepts the following data types:
+
 * **Metabolomics**
     * GC-MS
+    * NMR
 * **Lipidomics**
     * Single ionization
     * Both negative and positive ionizations
@@ -12,7 +14,8 @@ The following datasets are available to pmartR
     *	Peptide data or protein data (not both)
         * Label-free
         * Isobaric labeled
-
+* **Transcriptomics (RNA-seq)**
+        
 ***
 
 csv files containing the following information must be uploaded:

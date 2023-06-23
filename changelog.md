@@ -4,6 +4,9 @@
 
 #### 2023
 
+June
+    - PCA plots on data summary tab and analysis tab
+
 February
     - Downloadable reports for all data types 
     - Options to adjust p-values in iMd-ANOVA for multiple comparisons and/or multiple biomolecules (FDR)
