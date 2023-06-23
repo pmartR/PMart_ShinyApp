@@ -102,7 +102,7 @@ output$peptide_imdanova_pval_adjust_UI <- renderUI({
       "Bonferroni" = "bonferroni",
       "None" = "none"
     ),
-    selected = "BH"
+    selected = "none"
   )
   
   gtest_picker_fdr <- pickerInput(
@@ -114,7 +114,7 @@ output$peptide_imdanova_pval_adjust_UI <- renderUI({
       "Bonferroni" = "bonferroni",
       "None" = "none"
     ),
-    selected = "BH"
+    selected = "none"
   )
   
   anova_pickers = tagList(anova_picker_mc, anova_picker_fdr)
