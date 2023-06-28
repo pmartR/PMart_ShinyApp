@@ -1,12 +1,12 @@
 # absolute pain to have to do this for two lipid objects
-inspect_norm <- function(omicsData, subset_fn, norm_fn, params) {
+inspect_norm <- function(omicsData, subset_fn, norm_fn, params, backtransform) {
   # align groups in group_DF with column names in e_data (otherwise kruskal-wallis test is sad)
   group_df <- attr(omicsData, "group_DF")
   reorder <- match(colnames(omicsData$e_data)[-which(colnames(omicsData$e_data) == get_edata_cname(omicsData))], as.character(group_df[, get_fdata_cname(omicsData)]))
   group <- group_df[reorder, ]$Group
 
   # create norm object and pull normalization parameters
-  norm_object <- normalize_global(omicsData, subset_fn, norm_fn, params = params, apply_norm = FALSE)
+  norm_object <- normalize_global(omicsData, subset_fn, norm_fn, params = params, apply_norm = FALSE, backtransform = backtransform)
   params <- norm_object$parameters$normalization
 
   # p value and dataframe of normalization factors for location
