@@ -58,16 +58,16 @@ list(
       }
       
       if (is.null(objects$imdanova_res)) {
-        table_use = table_use[table_use$Table != "iMd-Anova Table",]
+        table_use = table_use[table_use$Table != "Statistics",]
       }
       
       if (is.null(objects$seqstats_res)) {
-        table_use = table_use[table_use$Table != "SeqData Stats Table",]
+        table_use = table_use[table_use$Table != "SeqData Statistics",]
       }
       
       # Reset index numbers
       rownames(table_use) = seq(length=nrow(table_use))
-
+      
       table_use
     },
     selection = list(selection = "single", selected = 1),
