@@ -176,11 +176,14 @@ observe({
   
   isolate(
     revals$warnings_upload$bad_transform <- if(isTRUE(cond)) {
-      sprintf("<div style = 'color:red'>%s</div>",
+      messageBox(
         sprintf(
           infotext_[["LOG_TRANSFORM_ZEROS"]], 
-          ifelse(trimws(input$na_symbol) == "", "-no selection-", input$na_symbol)
-        )
+          "<b>",
+          ifelse(trimws(input$na_symbol) == "", "-no selection-", input$na_symbol),
+          "</b>"
+        ),
+        type = "error"
       )
     } else NULL
   )
