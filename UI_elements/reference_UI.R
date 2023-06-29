@@ -643,8 +643,7 @@ assign_ref_uploads <- function(tabname) {
       temp <- as.isobaricpepData(
         e_data = edata, e_meta = emeta, f_data = fdata,
         edata_cname = edata_cname, emeta_cname = emeta_cname, fdata_cname = fdata_cname,
-        data_scale = data_scale, norm_info = list(is_normalized = norm_info),
-        check.names = F
+        data_scale = data_scale, norm_info = list(is_normalized = norm_info)
       ) %>%
         edata_replace(na_replace, NA)
       

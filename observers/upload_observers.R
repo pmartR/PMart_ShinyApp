@@ -51,8 +51,7 @@ makeobject <- function(use_iso = T){
       res <- object_fn(
         e_data = edata, e_meta = emeta, f_data = fdata,
         edata_cname = edata_cname, emeta_cname = emeta_cname, fdata_cname = "SampleId",
-        data_scale = data_scale, is_normalized = is_normalized,
-        check.names = F
+        data_scale = data_scale, is_normalized = is_normalized
       )
       
       if(selection != "seq") res <- res %>% edata_replace(na_replace, NA)
