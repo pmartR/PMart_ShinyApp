@@ -70,12 +70,16 @@ shinyServer(function(session, input, output) {
                            )
 
   # local file, not tracked by git.  Create one if you would like to perform postmortem debugging
-  tryCatch(
-    {
-      source("store_postmortem_objects.R", local = TRUE)
-    },
-    error = function(e) message("Not storing postmortem objects")
-  )
+  if (!file.exists("store_postmortem_objects.R")) {
+    message("Not storing postmortem objects")
+  } else {
+    tryCatch(
+      {
+        source("store_postmortem_objects.R", local = TRUE)
+      },
+      error = function(e) message("Not storing postmortem objects")
+    )
+  }
   #
   # EXAMPLE store_postmortem_objects.R:
   #

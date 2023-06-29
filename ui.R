@@ -15,12 +15,6 @@ ui <- function(request) {
     ),
     list(tags$head(HTML('<link rel="icon", href="pmartlogo.png", 
                                  type="image/png" />'))),
-    div(
-      style = "display:none",
-      titlePanel(
-        title = "", windowTitle = "pmartR"
-      )
-    ),
     
     div(
       id = "loading-gray-overlay",
@@ -32,6 +26,7 @@ ui <- function(request) {
     
     navbarPage(
       title = tags$img(src = "pmartlogo.png", style = "max-height:100%"),
+      windowTitle = "pmartR",
       id = "top_page", theme = "pmartR.css",
 
       #### All tab UI's are built by functions defined in ./tabs_UI/ ####
