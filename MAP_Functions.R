@@ -8,7 +8,7 @@ list(
   
   observeEvent(input$`__startup__`, {
     
-    if (!is.null(Sys.getenv("SHINYTEST_LOAD_MAP_OBJECT"))) {
+    if (isTruthy(Sys.getenv("SHINYTEST_LOAD_MAP_OBJECT"))) {
       query <- list(data = Sys.getenv("SHINYTEST_LOAD_MAP_OBJECT"))
     } else {
       # Parse the query string at the url header
