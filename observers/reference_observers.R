@@ -99,8 +99,7 @@ refnorm <- function(){
           emeta_cname = get_emeta_cname(objects$omicsData),
           data_scale = get_data_scale(objects$omicsData),
           is_normalized = get_data_norm(objects$omicsData),
-          isobaric_norm = get_isobaric_norm(objects$omicsData),
-          check.names = F
+          isobaric_norm = get_isobaric_norm(objects$omicsData)
         )
         
         applied_norm <- normalize_isobaric(applied_norm,

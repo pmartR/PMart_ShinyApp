@@ -690,6 +690,13 @@ output$dimres_plot_options <- renderUI({
         choices = c("Select one" = NULLSELECT_, colnames(objects$omicsData$f_data), "Group"),
         selected = NULLSELECT_
       ),
+      br(),
+      radioGroupButtons(
+        inputId = "analysis_pca_interactive",
+        choices = c("Static" = F, "Interactive" = T),
+        selected = F
+      ),
+      br(),
       actionButton("pca_update_plot_content", "Update plot")
     ),
     style_UI(
@@ -721,13 +728,13 @@ output$statistics_plot_options <- renderUI({
       class = "inline-wrapper-1",
       conditionalPanel(
         "['volcano'].includes(input.imdanova_plot_type) || ['volcano'].includes(input.seqdata_plot_type)",
-        numericInput("imd_plot_fc_thresh", "Fold-change Threshold", value = NULL) 
+        numericInput("imd_plot_fc_thresh", "Fold-change Threshold", value = NULL),
       ),
       conditionalPanel(
         "['volcano', 'gheatmap'].includes(input.imdanova_plot_type) || ['volcano', 'gheatmap'].includes(input.seqdata_plot_type)",
         radioGroupButtons(
           "stats_interactive_yn",
-          choices = c("Interactive" = T, "Static" = F),
+          choices = c("Static" = F, "Interactive" = T),
           selected = F
         )
       )

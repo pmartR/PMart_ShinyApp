@@ -396,11 +396,12 @@ output$peptide_statistics_plot_options <- renderUI({
         "['volcano'].includes(input.peptide_imdanova_plot_type)",
         numericInput("peptide_imd_plot_fc_thresh", "Fold-change Threshold", value = NULL) 
       ),
+      br(),
       conditionalPanel(
         "['volcano', 'gheatmap'].includes(input.peptide_imdanova_plot_type)",
         radioGroupButtons(
           "peptide_stats_interactive_yn",
-          choices = c("Interactive" = T, "Static" = F),
+          choices = c("Static" = F, "Interactive" = T),
           selected = F
         )
       )

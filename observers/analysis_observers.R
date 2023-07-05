@@ -359,12 +359,19 @@ observeEvent(
       NULL
     } else input$analysis_pca_shape_by
     
-    plots$statistics_mainplot <- plot(
+    p <- plot(
       objects$dimred_res,
       objects$omicsData,
       color_by = pca_color_by,
       shape_by = pca_shape_by
     )
+    
+    if (isTruthy(input$analysis_pca_interactive) &&
+        input$analysis_pca_interactive == "TRUE") {
+      p <- p %>% ggplotly()
+    }
+    
+    plots$statistics_mainplot <- p
   }
 )
 

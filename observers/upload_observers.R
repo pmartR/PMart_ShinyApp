@@ -51,8 +51,7 @@ makeobject <- function(use_iso = T){
       res <- object_fn(
         e_data = edata, e_meta = emeta, f_data = fdata,
         edata_cname = edata_cname, emeta_cname = emeta_cname, fdata_cname = "SampleId",
-        data_scale = data_scale, is_normalized = is_normalized,
-        check.names = F
+        data_scale = data_scale, is_normalized = is_normalized
       )
       
       if(selection != "seq") res <- res %>% edata_replace(na_replace, NA)
@@ -176,11 +175,14 @@ observe({
   
   isolate(
     revals$warnings_upload$bad_transform <- if(isTRUE(cond)) {
-      sprintf("<div style = 'color:red'>%s</div>",
+      messageBox(
         sprintf(
           infotext_[["LOG_TRANSFORM_ZEROS"]], 
-          ifelse(trimws(input$na_symbol) == "", "-no selection-", input$na_symbol)
-        )
+          "<b>",
+          ifelse(trimws(input$na_symbol) == "", "-no selection-", input$na_symbol),
+          "</b>"
+        ),
+        type = "error"
       )
     } else NULL
   )
