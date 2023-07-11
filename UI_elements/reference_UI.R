@@ -39,8 +39,8 @@ assign_ref_uploads <- function(tabname) {
             "NMR_reference_source",
             label = "Select reference source:",
             choices = c(
-              "Row in Expression Data (e.g. metabolite)",
-              "Column in Sample Information (e.g. sample concentration)"
+              "Row in Expression Data (e.g. metabolite)" = "e_data",
+              "Column in Sample Information (e.g. sample concentration)" = "f_data"
             ),
             selected = ifelse(is.null(isolate(input$NMR_reference_source)), 
                               character(0), 
@@ -54,8 +54,8 @@ assign_ref_uploads <- function(tabname) {
               "NMR_reference_source",
               label = "Select reference source:",
               choices = c(
-                "Row in Expression Data (e.g. metabolite)",
-                "Column in Sample Information (e.g. sample concentration)"
+                "Row in Expression Data (e.g. metabolite)" = "e_data",
+                "Column in Sample Information (e.g. sample concentration)" = "f_data"
               ),
               selected = character(0)
             )
@@ -86,7 +86,7 @@ assign_ref_uploads <- function(tabname) {
             )
           ))
         )
-      } else if (input$NMR_reference_source == "Column in Group File (e.g. sample concentration)" &&
+      } else if (input$NMR_reference_source == "f_data" &&
                  is.null(objects$omicsData$f_data)) {
         return(
           disabled(pickerInput(
@@ -97,7 +97,7 @@ assign_ref_uploads <- function(tabname) {
             )
           ))
         )
-      } else if (input$NMR_reference_source == "Column in Group File (e.g. sample concentration)") {
+      } else if (input$NMR_reference_source == "f_data") {
   
         df <- f_data()
         # Only colplete, numeric columns are valid
@@ -535,7 +535,7 @@ assign_ref_uploads <- function(tabname) {
         !is.null(input$NMR_picker_reference) &&
         input$NMR_picker_reference != "Please upload Group file"
     ) {
-      if (input$NMR_reference_source == "Column in Group File (e.g. sample concentration)") {
+      if (input$NMR_reference_source == "f_data") {
         
         expected_cols <- colnames(objects$omicsData$e_data)[
           !(colnames(objects$omicsData$e_data) %in%

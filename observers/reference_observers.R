@@ -121,7 +121,7 @@ refnorm <- function(){
   } else if (tab == "NMR") {
 
     applied_norm <- tryCatch({
-      if (input$NMR_reference_source == "Row in Expression Data (e.g. metabolite)") {
+      if (input$NMR_reference_source == "e_data") {
         applied_norm <- normalize_nmr(objects$omicsData,
                                            apply_norm = TRUE,
                                            backtransform = TRUE,
