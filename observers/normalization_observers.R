@@ -286,6 +286,7 @@ observeEvent(c(input$apply_normalization, input$apply_normalization_modal), {
           retain_groups = TRUE,
           retain_filters = TRUE
         )
+        attributes(.tmp_obj)[['data_info']][['is_combined']] <- TRUE
         
         objects$omicsData_2 <- .tmp_obj_2
       }

@@ -27,6 +27,7 @@ dt_checkmark <- '<span class="glyphicon glyphicon-ok" style="color:deepskyblue">
 dt_minus <- '<span class="glyphicon glyphicon-minus"></span>'
 blueq = icon("question-sign", lib="glyphicon", style = "color:deepskyblue;")
 blueexcl = icon("exclamation-sign", lib="glyphicon", style = "color:deepskyblue;")
+blue_info = icon("info-sign", lib="glyphicon", style = "color:deepskyblue")
 
 #'@details text displayed in tooltips
 ttext_ <- list(
@@ -78,7 +79,8 @@ infotext_ <- list(
   have to re-normalize it.  Rolled up protein data will revert to the peptide
   level.",
   REFNORM_COLUMN_INFO_1 = "In the first image below, you would select 'TMT_Plex_Number' as the reference group column (1st dropdown), 'Treatment_Group' as the column containing the indicator for reference samples (2nd dropdown), and 'ReferencePool' as the value indicating reference samples (last dropdown).  ",
-  REFNORM_COLUMN_INFO_2 = "In the second example, you would select 'TMT_Plex_Number' as the reference group column (1st dropdown), 'Is_Reference_Pool' as the column containing the indicator for reference samples (2nd dropdown), and 'Yes' as the value indicating reference samples (last dropdown).  "
+  REFNORM_COLUMN_INFO_2 = "In the second example, you would select 'TMT_Plex_Number' as the reference group column (1st dropdown), 'Is_Reference_Pool' as the column containing the indicator for reference samples (2nd dropdown), and 'Yes' as the value indicating reference samples (last dropdown).  ",
+  STATS_OBJECTS_COMBINED = "Your objects have been combined into a single dataset.  If navigating to previous tabs, the first object shown in plots is now the combined data."
 ) 
 
 global_input_choices = list(

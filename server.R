@@ -16,7 +16,8 @@ shinyServer(function(session, input, output) {
   # Named list whose values are either references to objects or filepaths for certain resources
   # needs to exist here because session doesnt exist in global.R
   resources_locations <- list(
-    "Expression Data (e_data)" = list("objects", "omicsData", "e_data"),
+    "Processed Expression Data (e_data)" = list("objects", "omicsData", "e_data"),
+    "Processed Expression Data (e_data) dataset 2" = list("objects", "omicsData_2", "e_data"),
     "Sample Information (f_data)" = list("objects", "omicsData", "f_data"),
     "Biomolecule Information (e_meta)" = list("objects", "omicsData", "e_meta"),
     "Statistics" = list("objects", "imdanova_res"),
@@ -29,8 +30,8 @@ shinyServer(function(session, input, output) {
   }
   
   resources_locations_peprollup <- list(
-    "Protein Expression Data (e_data)" = list("objects", "omicsData", "e_data"),
-    "Peptide Expression Data (e_data)" = list("objects", "omicsData_pre_rollup", "e_data"),
+    "Processed Protein Expression Data (e_data)" = list("objects", "omicsData", "e_data"),
+    "Processed Peptide Expression Data (e_data)" = list("objects", "omicsData_pre_rollup", "e_data"),
     "Sample Information (f_data)" = list("objects", "omicsData", "f_data"),
     "Biomolecule Information (e_meta)" = list("objects", "omicsData", "e_meta"),
     "Protein Statistics" = list("objects", "imdanova_res"),

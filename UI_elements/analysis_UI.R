@@ -3,6 +3,13 @@ output$statistics_mainplot <- renderUI({
   req(!is.null(plots$statistics_mainplot))
   p <- plots$statistics_mainplot
   plots$last_plot <- p
+  
+  # Objects should be combined by this point, don't save the second plot, which
+  # may be stored from previous tabs.
+  if(!is.null(objects$omicsData_2)) {
+    plots$last_plot_2 <- NULL
+  }
+  
   if (inherits(p, "plotly")) {
     output$statistics_mainplot_plotly <- renderPlotly(p)
     plotlyOutput("statistics_mainplot_plotly")

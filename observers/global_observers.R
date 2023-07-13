@@ -24,7 +24,7 @@ observeEvent(input$saveplot, {
 
   # store the plot in a named element of the plots$allplots reactive list
   # store the name of that element in a table as well
-  plot_name <- sprintf("Plot %s:%s_tab", input$saveplot, input$top_page)
+  plot_name <- sprintf("Plot %s:%s", input$saveplot, input$top_page)
   plots$allplots[[plot_name]] <- plots$last_plot
   plots$plot_save_options[[plot_name]] <- list(type = "HTML Widget", width = 800, height = 400, scale = 1)
   plots$plot_table[nrow(plots$plot_table) + 1, ] <- c(plot_name, dt_checkmark)
@@ -34,7 +34,7 @@ observeEvent(input$saveplot, {
   )
   
   if (!is.null(plots$last_plot_2)) {
-    plot_name_2 <- sprintf("Plot %s, object 2:%s tab", input$saveplot, input$top_page)
+    plot_name_2 <- sprintf("Plot %s, object 2:%s", input$saveplot, input$top_page)
     plots$allplots[[plot_name_2]] <- plots$last_plot_2
     plots$plot_save_options[[plot_name_2]] <- list(type = "HTML Widget", width = 800, height = 400, scale = 1)
     plots$plot_table[nrow(plots$plot_table) + 1, ] <- c(plot_name_2, dt_checkmark)

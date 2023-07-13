@@ -63,10 +63,8 @@ observeEvent(input$makezipfile, {
   })
   
   if(is.null(objects$omicsData_pre_rollup)){
-    table_use <- tables$tables_table
     resloc_use <- resources_locations
   } else {
-    table_use <- tables$revenge_of_tables_table
     resloc_use <- resources_locations_peprollup
   }
 
@@ -74,7 +72,7 @@ observeEvent(input$makezipfile, {
   fs <- vector()
 
   plots_marked_for_death <- which(plots$plot_table[, 2] == dt_checkmark)
-  tables_marked_for_death <- which(table_use[, 2] == dt_checkmark)
+  tables_marked_for_death <- which(download_table()[, 2] == dt_checkmark)
   
   total_files <- length(c(plots_marked_for_death, tables_marked_for_death))
 
@@ -128,12 +126,12 @@ observeEvent(input$makezipfile, {
     # do.call('pluck', c(list(get('omicsData_postmortem')),list('e_data')))
     if (length(tables_marked_for_death) > 0) {
       for (i in tables_marked_for_death) {
-        table_name <- table_use[i, 1]
+        table_name <- download_table()[i, 1]
         resloc <- resloc_use[[table_name]]
 
         if (inherits(resloc, "list")) {
           # use pluck to extract the table from its location within the reactive variables
-          resource <- do.call(pluck, c(list(get(resloc[[1]])), resloc[2:length(resloc)]))
+          resource <- do.call(purrr::pluck, c(list(get(resloc[[1]])), resloc[2:length(resloc)]))
           if (is.null(resource)) next()
 
           fname <- paste0(table_name, ".csv") # create a table name
