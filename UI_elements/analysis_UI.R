@@ -175,7 +175,7 @@ output$imdanova_pval_adjust_UI <- renderUI({
       "Bonferroni" = "bonferroni",
       "None" = "none"
     ),
-    selected = "none"
+    selected = if(inherits(objects$omicsData, "seqData")) "BH" else 'none'
   )
 
   gtest_picker_fdr <- pickerInput(
@@ -187,7 +187,7 @@ output$imdanova_pval_adjust_UI <- renderUI({
       "Bonferroni" = "bonferroni",
       "None" = "none"
     ),
-    selected = "none"
+    selected = if(inherits(objects$omicsData, "seqData")) "BH" else 'none'
   )
   
   anova_pickers = tagList(anova_picker_mc, anova_picker_fdr)

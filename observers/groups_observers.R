@@ -285,7 +285,7 @@ observe({
   revals$warnings_groups$files <- if (!cond_files) messageBox(type = "warning", "No f_data uploaded or one file missing.") else NULL
   revals$warnings_groups$sample_names <- if (!cond_sample_names) messageBox(type = "warning", "The chosen sample ID columns do not contain the sample names for one or more files.") else NULL
   revals$warnings_groups$idcol_fdata <- if (!cond_idcol_fdata) messageBox(type = "warning", "Selected ID columns were not found in one or more grouping files") else NULL
-  revals$warnings_groups$main_effects <- if (!cond_main_effects) messageBox(type = "warning", "No main effect or pairing structure specified or main effects not found in one or more grouping files") else NULL
+  revals$warnings_groups$main_effects <- if (!cond_main_effects) messageBox(type = "info", "No main effect or pairing structure specified or main effects not found in one or more grouping files") else NULL
   revals$warnings_groups$covariates <- if (!cond_covariates) messageBox(type = "warning", "Specified covariates not found in one or more grouping files") else NULL
   revals$warnings_groups$NA_groups <- if(cond_NA_groups) messageBox(type = "warning", "Specified main effect(s) are not assigned for all samples; samples with missing main effect(s) will be removed.") else NULL
   revals$warnings_groups$reference <- if(cond_NA_groups && cond_iso_nrm) messageBox(type = "warning", "Note: Reference samples without assigned main effect(s) will still be available for downstream reference normalization") else NULL

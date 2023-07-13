@@ -126,3 +126,22 @@ observeEvent(input$remove_plot, {
   plots$allplots[[plot_name]] <- NULL
   plots$plot_save_options[[plot_name]] <- NULL
 })
+
+# make the logo go to the welcome page
+observe({
+  shinyjs::onclick("pmart-logo", updateTabsetPanel(inputId = "top_page", selected="intro_panel"))
+})
+
+#'@details Triggers a modal that displays a markdown with info
+#'on how to use the current page.
+observeEvent(input$how_use_page, {
+  req(input$top_page)
+
+  showModal(
+    modalDialog(
+      includeMarkdown(sprintf("www/help_modals/%s.md", input$top_page)),
+      size = "l", 
+      easyClose = TRUE
+    )
+  )
+})

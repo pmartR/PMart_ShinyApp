@@ -25,10 +25,18 @@ ui <- function(request) {
     inlineCSS('.navbar-default .navbar-brand {padding: 2px;}'),
     
     navbarPage(
-      title = tags$img(src = "pmartlogo.png", style = "max-height:100%"),
+      title = tags$img(id = "pmart-logo", src = "pmartlogo.png", style = "max-height:100%;cursor:pointer;"),
       windowTitle = "pmartR",
       id = "top_page", theme = "pmartR.css",
-
+      tabPanel(
+        'intro_panel',
+        wellPanel(style='width:75%',
+          includeMarkdown("www/welcome.md"),
+          downloadButton("download_example_data", "Download example data"),
+          downloadButton("download_example_report", "Download example report")
+        )
+      ),
+      
       #### All tab UI's are built by functions defined in ./tabs_UI/ ####
 
       ##### UPLOAD TAB ######
@@ -67,7 +75,10 @@ ui <- function(request) {
 
       #### DOWNLOAD TAB ####
 
-      download_UI()
+      download_UI(),
+
+      # just a help button
+      tabPanel(div(style = "height:20px", uiOutput("how_use_page_UI")), value = "nav_help_options")
     ), # end Navbarpage
 
     ## Plot saving buttons

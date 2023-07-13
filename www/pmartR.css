@@ -2,6 +2,8 @@
   *background:#f6941d;
 }*/
 
+#top_page li a[data-value=intro_panel] {display: none;}
+
 .nav li a.disabled {
   background-color: #aaa !important;
   color: #333 !important;
