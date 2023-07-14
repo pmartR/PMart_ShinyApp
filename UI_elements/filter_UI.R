@@ -343,10 +343,10 @@ list(
       withSpinner(plotlyOutput("filter_mainplot"))
     }
     else if (any(!is.null(objects$omicsData), !is.null(objects$omicsData_2))) {
-      tagList(
-        withSpinner(plotlyOutput("filter_mainplot")),
-        withSpinner(plotlyOutput("filter_mainplot_2"))
-      )
+      ui1 = withSpinner(plotlyOutput("filter_mainplot"))
+      ui2 = withSpinner(plotlyOutput("filter_mainplot_2"))
+
+      lipid_tabset_plots(ui1, ui2, input$lipid_1_name, input$lipid_2_name)
     }
   }),
 
@@ -702,7 +702,11 @@ list(
 
   # apply filter plot style options
   output$filter_apply_style <- renderUI({
-    apply_style_UI("filter", two_lipids(), inherits(plots$filter_mainplot, "list"))
+    apply_style_UI("filter",
+                   two_lipids(),
+                   inherits(plots$filter_mainplot, "list"),
+                   lipid_1_name = lipid_1_name(),
+                   lipid_2_name = lipid_2_name())
   }),
 
   # summary tables
@@ -715,8 +719,8 @@ list(
       if (two_lipids()) {
         req(!is.null(revals$filter_summary_2), cancelOutput = TRUE)
         splitLayout(
-          DTOutput("filter_summary"),
-          DTOutput("filter_summary_2")
+          tagList(lipid_1_name(), DTOutput("filter_summary")),
+          tagList(lipid_2_name(), DTOutput("filter_summary_2"))
         )
       }
       else {

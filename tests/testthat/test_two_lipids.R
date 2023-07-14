@@ -7,8 +7,10 @@ on.exit({Sys.setenv("MAP_VERSION" = orig_envvar)})
 test_that("{shinytest2} recording: pmart_standalone", {
     # app <- AppDriver$new("http://127.0.0.1:3858", name = "pmart_standalone", height = 1187, width = 1263) 
     app <- AppDriver$new(name = "pmart_standalone", variant = platform_variant(), height = 1187, width = 1263, seed = 5237, timeout = 15000)
+    app$set_inputs(top_page = "upload_data_tab")
     app$set_inputs(datatype = "lip")
     app$set_inputs(upload_collapse_left = "datselect")
+    app$wait_for_idle()
     app$upload_file(file_edata = file.path(testthat::test_path(), "../../example_data/test_lipid_pos_edata.csv"))
     app$upload_file(file_edata_2 = file.path(testthat::test_path(), "../../example_data/test_lipid_neg_edata.csv"))
     

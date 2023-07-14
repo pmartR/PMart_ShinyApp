@@ -11,8 +11,10 @@ test_that("App completes a basic workflow on peptide-level data", {
   # app <- AppDriver$new("http://127.0.0.1:6608", name = "pmart_standalone", height = 1199, width = 1299, variant = platform_variant(), timeout = 10000, seed = 551313)
   
   app <- AppDriver$new(name = "pmart_standalone", height = 1199, width = 1299, variant = platform_variant(), timeout = 10000, seed = 551313)
+  app$set_inputs(top_page = "upload_data_tab")
   app$set_inputs(datatype = "pep")
   app$set_inputs(upload_collapse_left = "datselect")
+  app$wait_for_idle()
   app$upload_file(file_edata = file.path(testthat::test_path(), "../../example_data/test_pep_edata.csv"))
   
   app$set_inputs(upload_collapse_left = "columnids")

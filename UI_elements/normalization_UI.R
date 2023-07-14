@@ -115,10 +115,10 @@ list(
         p <- subplot(plots$norm_modal_ba_plots_2, shareY = T, titleX = T, titleY = T)
         plots$last_plot_2 <- p
         
-        tagList(
-          withSpinner(plotlyOutput("norm_modal_ba_plots")),
-          withSpinner(plotlyOutput("norm_modal_ba_plots_2"))
-        )
+        ui1 <- withSpinner(plotlyOutput("norm_modal_ba_plots"))
+        ui2 <- withSpinner(plotlyOutput("norm_modal_ba_plots_2"))
+
+        lipid_tabset_plots(ui1, ui2, input$lipid_1_name, input$lipid_2_name)
       }
       else {
         withSpinner(plotlyOutput("norm_modal_ba_plots"))
@@ -137,16 +137,18 @@ list(
         
         plots$last_plot <- subplot(plots_show, nrows = ifelse(length(plots_show) > 1, 2, 1))
         
-        tagList(
-          splitLayout(
+        
+        ui1 <- splitLayout(
             withSpinner(plotlyOutput("norm_modal_loc_boxplot")),
             withSpinner(plotlyOutput("norm_modal_scale_boxplot"))
-          ),
-          splitLayout(
+        )
+        
+        ui2 <- splitLayout(
             withSpinner(plotlyOutput("norm_modal_loc_boxplot_2")),
             withSpinner(plotlyOutput("norm_modal_scale_boxplot_2"))
-          )
         )
+
+        lipid_tabset_plots(ui1, ui2, input$lipid_1_name, input$lipid_2_name)
       }
       else {
         plots$last_plot <- subplot(plots_show, nrows = ifelse(length(plots_show) > 1, 2, 1))
@@ -176,10 +178,9 @@ list(
 
   output$normalized_boxplots_cond <- renderUI({
     if (!is.null(objects$omicsData_2)) {
-      tagList(
-        withSpinner(plotlyOutput("normalized_boxplots")),
-        withSpinner(plotlyOutput("normalized_boxplots_2"))
-      )
+      ui1 <- withSpinner(plotlyOutput("normalized_boxplots"))
+      ui2 <- withSpinner(plotlyOutput("normalized_boxplots_2"))
+      lipid_tabset_plots(ui1, ui2, input$lipid_1_name, input$lipid_2_name)
     }
     else {
       withSpinner(plotlyOutput("normalized_boxplots"))

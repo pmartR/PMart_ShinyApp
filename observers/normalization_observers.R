@@ -448,7 +448,7 @@ observeEvent(input$inspect_norm, {
     }
 
     combine_msg <- if (two_lipids()) {
-      tags$b(tags$h4("Data will be combined into a single object for subsequent tabs", style="color:deepskyblue"))
+      HTML(messageBox(type = 'info', "After normalization, both datasets will be combined into a single object for subsequent tabs.  Navigating to previous tabs will display the combined data for the first object."))
     } else NULL
 
     # display the modal which will warns of low p-values and gives option to apply normalization

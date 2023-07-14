@@ -86,16 +86,15 @@ list(
   # qc tab plot panel
   output$qc_plots <- renderUI({
     if (two_lipids()) {
-      tagList(
-        div(id = "qc_plots_1", 
+      d1 = div(id = "qc_plots_1", 
             style = "border-style:solid;border-width:1px;", 
             withSpinner(plotlyOutput("omicsData_plot"))
-            ),
-        div(id = "qc_plots_2", 
+            )
+      d2 = div(id = "qc_plots_2", 
             style = "border-style:solid;border-width:1px;",
             withSpinner(plotlyOutput("omicsData_plot_2"))
             )
-      )
+      lipid_tabset_plots(d1, d2, input$lipid_1_name, input$lipid_2_name)
     }
     else {
       div(id = "qc_plots_1", 
@@ -115,8 +114,8 @@ list(
       if (two_lipids()) {
         req(!is.null(revals$groups_summary_2), cancelOutput = TRUE)
         splitLayout(
-          DTOutput("qc_summary"),
-          DTOutput("qc_summary_2")
+          tagList(tags$h4(lipid_1_name()), DTOutput("qc_summary")),
+          tagList(tags$h4(lipid_2_name()),  DTOutput("qc_summary_2"))
         )
       }
       else {
@@ -225,7 +224,7 @@ list(
 
   # apply filter plot style options
   output$qc_apply_style <- renderUI({
-    apply_style_UI("qc", two_lipids(), two_lipids(), TRUE)
+    apply_style_UI("qc", two_lipids(), two_lipids(), TRUE, lipid_1_name = lipid_1_name(), lipid_2_name = lipid_2_name())
   }),
 
   output$warnings_transform <- renderUI({

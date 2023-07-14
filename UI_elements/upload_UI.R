@@ -1,5 +1,8 @@
 list(
   output$edata_UI <- renderUI({
+    label1 = HTML("<input type = 'text' id = 'lipid_1_name' placeholder = 'Positive' style = 'border-style:solid;border-width:1px;'/>")
+    label2 = HTML("<input type = 'text' id = 'lipid_2_name' placeholder = 'Negative' style = 'border-style:solid;border-width:1px;'/>")
+    
     if (two_lipids()) {
       tagList(
         HTML("<p style = 'font-weight:bold'>Upload CSV Data Files for Positive and Negative Lipids</p>"),
@@ -8,7 +11,7 @@ list(
           div(
             id = "js_file_edata",
             fileInput("file_edata",
-              label = NULL,
+              label = label1,
               multiple = FALSE,
               accept = c(
                 "text/csv",
@@ -20,7 +23,7 @@ list(
           div(
             id = "js_file_edata_2",
             fileInput("file_edata_2",
-              label = NULL,
+              label = label2,
               multiple = FALSE,
               accept = c(
                 "text/csv",
@@ -290,16 +293,13 @@ list(
   # ...boxplots...
   output$upload_boxplots <- renderUI({
     if (two_lipids()) {
-      tagList(
-        div(id = "upload_boxplots_1", 
-            style = "border-style:solid;border-width:1px;", 
-            withSpinner(plotlyOutput("omicsData_upload_boxplot"))
-            ),
-        div(id = "upload_boxplots_2", 
-            style = "border-style:solid;border-width:1px;", 
-            withSpinner(plotlyOutput("omicsData_2_upload_boxplot"))
-            )
-      )
+      d1 <- div(id = "upload_boxplots_1",
+                style = "border-style:solid;border-width:1px;",
+                withSpinner(plotlyOutput("omicsData_upload_boxplot")))
+      d2 <- div(id = "upload_boxplots_2",
+                style = "border-style:solid;border-width:1px;",
+                withSpinner(plotlyOutput("omicsData_2_upload_boxplot")))
+      lipid_tabset_plots(d1, d2, input$lipid_1_name, input$lipid_2_name)
     }
     else {
       div(id = "upload_boxplots_1", 
@@ -317,8 +317,8 @@ list(
         if (two_lipids()) {
           req(!is.null(revals$upload_summary_2))
           splitLayout(
-            div(id = "upload_summary_1", DTOutput("omicsData_upload_summary")),
-            div(id = "upload_summary_2", DTOutput("omicsData_upload_summary_2"))
+            div(id = "upload_summary_1", tagList(lipid_1_name(), DTOutput("omicsData_upload_summary"))),
+            div(id = "upload_summary_2", tagList(lipid_2_name(), DTOutput("omicsData_upload_summary_2")))
           )
         }
         else {
@@ -334,6 +334,19 @@ list(
     HTML(paste(revals$warnings_upload, collapse = ""))
   }),
 
+  output$upload_tables_toggle <- renderUI({
+    tagList(
+      div(style = "float:left;margin-top:10px;margin-right:10px;font-weight:bold", "Display dataset:"),
+      radioGroupButtons(
+        "which_table", 
+        choices = c(
+          setNames(1, ifelse(isTruthy(input$lipid_1_name), input$lipid_1_name, "Positive")), 
+          setNames(2, ifelse(isTruthy(input$lipid_2_name), input$lipid_2_name, "Negative"))
+        )
+      )
+    )
+  }),
+  
   # e_data display
   output$head_edata <- DT::renderDT(
     {
