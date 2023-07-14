@@ -99,7 +99,6 @@ global_input_choices = list(
 #'@details input id's that need to be mutually exclusive in the groups tab ...
 GROUPS_ME_IDS <- c(
   "fdata_id_col",
-  "fdata_id_col_2",
   "gcol1",
   "gcol2", 
   "cvcol1", 

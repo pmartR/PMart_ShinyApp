@@ -64,8 +64,8 @@ test_that("{shinytest2} recording: pmart_standalone", {
     app$set_inputs(fdata_customfilt_choices = "Project_LipidPos_A_Y_1")
     app$set_inputs(fdata_customfilt_choices = c("Project_LipidPos_A_Y_1", "Project_LipidPos_A_Y_2"))
     
-    app$set_inputs(fdata_customfilt_choices_2 = "Project_LipidNeg_B_Y_1")
-    app$set_inputs(fdata_customfilt_choices_2 = c("Project_LipidNeg_B_Y_1", "Project_LipidNeg_B_Y_2"))
+    app$set_inputs(fdata_customfilt_choices_2 = "Project_LipidPos_B_Y_1")
+    app$set_inputs(fdata_customfilt_choices_2 = c("Project_LipidPos_B_Y_1", "Project_LipidPos_B_Y_2"))
     
     app$click("add_customfilt")
     app$click("review_filters")
