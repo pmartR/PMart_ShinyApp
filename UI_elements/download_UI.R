@@ -48,7 +48,7 @@ list(
     {
       download_table()
     },
-    selection = list(selection = "single", selected = 1),
+    selection = "single",
     escape = FALSE
   ),
   

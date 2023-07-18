@@ -411,10 +411,27 @@ observeEvent(input$inspect_norm, {
       }
     )
 
-    extra_text <- " (Dataset 1)"
+    extra_text <- sprintf(" (%s)", lipid_1_name())
 
-    location_msg_2 <- tags$b(tags$h4(sprintf("P-value from Kruskal-Wallis test on location parameters (Dataset 2):  %s", round(res_2$p_location, 3))))
-    scale_msg_2 <- if (!is.null(res_2$p_scale)) tags$b(tags$h4(sprintf("P-value from Kruskal-Wallis test on scale parameters (Dataset 2):  %s", round(res_2$p_scale, 3)))) else NULL
+    location_msg_2 <-
+      tags$b(tags$h4(
+        sprintf(
+          "P-value from Kruskal-Wallis test on location parameters (%s):  %s",
+          lipid_2_name(),
+          round(res_2$p_location, 3)
+        )
+      ))
+    scale_msg_2 <-
+      if (!is.null(res_2$p_scale))
+        tags$b(tags$h4(
+          sprintf(
+            "P-value from Kruskal-Wallis test on scale parameters (%s):  %s",
+            lipid_2_name(),
+            round(res_2$p_scale, 3)
+          )
+        ))
+    else
+      NULL
   }
   else {
     location_msg_2 <- scale_msg_2 <- NULL

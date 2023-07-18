@@ -15,9 +15,13 @@ list(
   output$qc_order_by_UI <- renderUI({
     req(!is.null(objects$omicsData))
     choices <- colnames(objects$omicsData$f_data %>% dplyr::select(-one_of(attributes(objects$omicsData)$cnames$fdata_cname)))
-
+    
+    name_append = if (two_lipids()) sprintf(" (%s)", lipid_1_name()) else ""
+    
     pickerInput("qc_order_by", NULL,
-      choices = c("Select one", choices, "Group Levels" = "Group"),
+      choices = c(
+        setNames("Select one", sprintf("Select one%s", name_append)), 
+        choices, "Group Levels" = "Group"),
       selected = all_inputs()$qc_order_by,
       options = pickerOptions(dropupAuto = FALSE)
     )
@@ -28,8 +32,11 @@ list(
     req(!is.null(objects$omicsData_2))
     choices <- colnames(objects$omicsData_2$f_data %>% dplyr::select(-one_of(attributes(objects$omicsData_2)$cnames$fdata_cname)))
 
+    name_append = if (two_lipids()) sprintf(" (%s)", lipid_2_name()) else ""
+    
     pickerInput("qc_order_by_2", NULL,
-      choices = c("Select one(dataset 2)" = "Select one", choices, "Group Levels" = "Group"),
+      choices = c(setNames("Select one", sprintf("Select one%s", name_append)),
+                  choices, "Group Levels" = "Group"),
       selected = all_inputs()$qc_order_by_2
     )
     
@@ -41,8 +48,11 @@ list(
     req(!is.null(objects$omicsData))
     choices <- colnames(objects$omicsData$f_data %>% dplyr::select(-one_of(attributes(objects$omicsData)$cnames$fdata_cname)))
 
+    name_append = if (two_lipids()) sprintf(" (%s)", lipid_1_name()) else ""
+    
     pickerInput("qc_color_by", NULL,
-      choices = c("Select one", choices, "Group Levels" = "Group"),
+      choices = c(setNames("Select one", sprintf("Select one%s", name_append)),
+                  choices, "Group Levels" = "Group"),
       selected = all_inputs()$qc_color_by
     )
     
@@ -52,8 +62,11 @@ list(
     req(!is.null(objects$omicsData_2))
     choices <- colnames(objects$omicsData_2$f_data %>% dplyr::select(-one_of(attributes(objects$omicsData_2)$cnames$fdata_cname)))
 
+    name_append = if (two_lipids()) sprintf(" (%s)", lipid_2_name()) else ""
+    
     pickerInput("qc_color_by_2", NULL,
-      choices = c("Select one (dataset 2)" = "Select one", choices, "Group Levels" = "Group"),
+      choices = c(setNames("Select one", sprintf("Select one%s", name_append)),
+                  choices, "Group Levels" = "Group"),
       selected = all_inputs()$qc_color_by_2
     )
     
@@ -62,9 +75,11 @@ list(
   output$qc_shape_by_UI <- renderUI({
     req(!is.null(objects$omicsData))
     choices <- colnames(objects$omicsData$f_data %>% dplyr::select(-one_of(attributes(objects$omicsData)$cnames$fdata_cname)))
-
+    
+    noselect = if(two_lipids()) sprintf("Select one (%s)", lipid_1_name()) else "Select one"
+    
     pickerInput("qc_shape_by", NULL,
-      choices = c("Select one", choices, "Group Levels" = "Group"),
+      choices = c(setNames("Select one", noselect), choices, "Group Levels" = "Group"),
       selected = all_inputs()$qc_color_by
     )
     
@@ -74,8 +89,10 @@ list(
     req(!is.null(objects$omicsData_2))
     choices <- colnames(objects$omicsData_2$f_data %>% dplyr::select(-one_of(attributes(objects$omicsData_2)$cnames$fdata_cname)))
 
+    noselect = sprintf("Select one (%s)", lipid_2_name())
+    
     pickerInput("qc_shape_by_2", NULL,
-      choices = c("Select one (dataset 2)" = "Select one", choices, "Group Levels" = "Group"),
+      choices = c(setNames("Select one", noselect), choices, "Group Levels" = "Group"),
       selected = all_inputs()$qc_color_by_2
     )
     

@@ -51,7 +51,7 @@ list(
       matching_col2 <- colnames(f_data())[which(matching_col_n2 == max(matching_col_n2))[1]]
       
       return(tagList(
-        splitLayout(cellArgs = list(style = "text-align:center"), "Dataset 1", "Dataset 2"),
+        splitLayout(cellArgs = list(style = "text-align:center"), lipid_1_name(), lipid_2_name()),
         br(style = "padding:2px"),
         HTML(
           "<p style = 'font-weight:bold'>Which columns in these files specify the respective sample names?</p>"

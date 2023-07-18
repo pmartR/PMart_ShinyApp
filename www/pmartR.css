@@ -2,6 +2,12 @@
   *background:#f6941d;
 }*/
 
+.split-title {
+  font-weight:bold;
+  text-align:center;
+  margin-bottom:5px;
+}
+
 #top_page li a[data-value=intro_panel] {display: none;}
 
 .nav li a.disabled {

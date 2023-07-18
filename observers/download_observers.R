@@ -36,13 +36,15 @@ observeEvent(input$mark_table_download, {
     table_use <- tables$revenge_of_tables_table
   }
   
-  cond <- table_use[input$download_tables_table_rows_selected, 2] == dt_minus
-
+  cond <- download_table()[input$download_tables_table_rows_selected, 2] == dt_minus
+  
+  table_use_index <- which(table_use[, 1] %in% download_table()[input$download_tables_table_rows_selected, 1])
+  
   if (cond) {
-    table_use[input$download_tables_table_rows_selected, 2] <- dt_checkmark
+    table_use[table_use_index, 2] <- dt_checkmark
   }
   else {
-    table_use[input$download_tables_table_rows_selected, 2] <- dt_minus
+    table_use[table_use_index, 2] <- dt_minus
   }
   
   if(is.null(objects$omicsData_pre_rollup)){

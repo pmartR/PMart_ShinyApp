@@ -1026,8 +1026,8 @@ observeEvent(input$apply_filters, {
 
     # text summarizing the effect of filters...
 
-    cond_text1 <- if (is.null(objects$omicsData_2)) "" else "Object1:  "
-    cond_text2 <- if (is.null(objects$omicsData_2)) "" else "Object2:  "
+    cond_text1 <- if (is.null(objects$omicsData_2)) "" else sprintf("%s:  ", lipid_1_name())
+    cond_text2 <- if (is.null(objects$omicsData_2)) "" else sprintf("%s:  ", lipid_2_name())
 
     filters1 <- FILTER_NAMES %>% # filter_names is a global variable defined in global.R
       filter(attribute %in% map_chr(attributes(objects$omicsData)$filters, 1)) %>%

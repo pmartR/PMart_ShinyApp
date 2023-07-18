@@ -22,7 +22,7 @@ data_summary_UI <- function() {
             conditionalPanel(
               "['boxplots', 'bar'].includes(input.which_qc_plot)",
               tagList(
-                div("Order By:", style = "font-weight:bold"),
+                div("Order By:", class='split-title'),
                 fluidRow(
                   column(6, uiOutput("qc_order_by_UI")),
                   column(6, uiOutput("qc_order_by_2_UI"))
@@ -31,7 +31,7 @@ data_summary_UI <- function() {
             ),
             # color selection
             tagList(
-              div("Color By:", style = "font-weight:bold"),
+              div("Color By:", class = 'split-title'),
               fluidRow(
                 column(6, uiOutput("qc_color_by_UI")),
                 column(6, uiOutput("qc_color_by_2_UI"))
@@ -41,7 +41,7 @@ data_summary_UI <- function() {
             conditionalPanel(
               "['pca'].includes(input.which_qc_plot)",
               tagList(
-                div("Shape By:", style = "font-weight:bold"),
+                div("Shape By:", class='split-title'),
                 fluidRow(
                   column(6, uiOutput("qc_shape_by_UI")),
                   column(6, uiOutput("qc_shape_by_2_UI"))
