@@ -1,0 +1,28 @@
+# Normalize samples in your data
+
+In this tab you can apply normalization to your samples to make sure they are comparable to each other.  This tab specifically deals with global statistical normalization, where every sample has normalization parameters computed based on its data characteristics.
+
+The options for the way normalization is applied include:
+
+1.  **Subset function:**  Which biomolecules to use when computing normalization parameters, and assocated parameters for the subset method.
+2.  **Normalization function:**  Which function to use to normalize the data once normalization parameters are computed (e.g. median, mean, zscore), and appropriate parameters where applicable.
+3.  **Whether to backtransform the data:**  Often you will want to transform the data back to its original scale, if so set this option to "Yes".
+
+**There are two options** for selecting these parameters:
+
+1.  Manually select them using the dropdowns and input boxes.
+2.  Use SPANS, which attempts to select a normalization scheme which introduces as little normalization bias across groups as possible.
+
+## Manual
+
+Select your normalization scheme and hit 'Evaluate normaliazation parameters'.  The app will first check if you inducing bias through this normalization scheme.  When finished, a modal will appear displaying the results of the analysis.  If you are satisfied with the current settings for normalization, hit 'Apply normalization'.
+
+## SPANS
+
+SPANS is a method for selecting normalization parameters which minimizes the bias introduced by normalization across groups.  If you choose to use SPANS, you will be presented with options for which subset functions and normalization functions to test.  You can also specify which parameters for subset functions to test.  
+
+Hit the 'Run SPANS procedure' button and wait (it can often take a long time on larger datasets, > 10 minutes).  Once finished, a plot of the different normalization parameters and some options for the best set will be shown on the right.
+
+You can select a set of parameters from the table or manually enter them on the left.  Once you are satisfied hit 'Apply normalization'.
+
+
