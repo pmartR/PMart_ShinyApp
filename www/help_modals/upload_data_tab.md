@@ -8,7 +8,7 @@ On the left column of panels, you will be prompted to specify the following in r
 
 - **Upload your data** An input will appear where you can browse to a file to upload your expression data.  Navigate to and select the file on your computer.
 
-- **Specify ID columns and other data properties**:  You must specify which column contains the biomolecule identifiers, as well as other properties of your data such as the scale it is on, a scaling transformation to be applied, and what value denotes missing data.
+- **Specify ID columns and other data properties**:  You must specify which column contains the biomolecule identifiers, as well as other properties of your data such as the scale it is on (raw abundance versus a log-transformed scale), a scaling transformation to be applied, and what value denotes missing data.
 
 - **(Optional) Upload a metadata file**:  In the final panel on the left side, you can upload a metadata file that contains additional information about each biomolecule.  This is most common for peptide level data, for which you will also need to specify the column which contains protein identifiers.
 
