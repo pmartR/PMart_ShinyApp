@@ -2,7 +2,7 @@
 
 The filter tab allows you to visualize and apply filters to your data.
 
-On the left side are various filters with buttons to 'Add/Remove' those filters to a queue *to be applied at the end*, and a button to preview a plot of the effects of that individual filter.  Filter options may differ between datatypes.  See the [pmartR](https://github.com/pmartR/pmartR) for precise details about each filter.
+On the left side are various filters with buttons to 'Add/Remove' those filters to a queue *to be applied at the end*, and a button to preview a plot of the effects of that individual filter.  Filter options may differ between datatypes.  See the [pmartR package](https://github.com/pmartR/pmartR) for precise details about each filter.
 
 **Biomolecule Filters** filter the biomolecules (rows) of your data by criteria such as minimum number of samples with non-missing values.
 
