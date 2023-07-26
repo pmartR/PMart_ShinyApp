@@ -78,6 +78,7 @@ infotext_ <- list(
   have computed.  If your data was normalized in the normalize tab, you will 
   have to re-normalize it.  Rolled up protein data will revert to the peptide
   level.",
+  GROUPS_IN_FDATA = "The column 'Group' was found in your sample identification file, but is reserved for PMart.  It has been rename to '%s' (lower case g)",
   REFNORM_COLUMN_INFO_1 = "In the first image below, you would select 'TMT_Plex_Number' as the reference group column (1st dropdown), 'Treatment_Group' as the column containing the indicator for reference samples (2nd dropdown), and 'ReferencePool' as the value indicating reference samples (last dropdown).  ",
   REFNORM_COLUMN_INFO_2 = "In the second example, you would select 'TMT_Plex_Number' as the reference group column (1st dropdown), 'Is_Reference_Pool' as the column containing the indicator for reference samples (2nd dropdown), and 'Yes' as the value indicating reference samples (last dropdown).  ",
   STATS_OBJECTS_COMBINED = "Your objects have been combined into a single dataset.  If navigating to previous tabs, the first object shown in plots is now the combined data."

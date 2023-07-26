@@ -318,8 +318,8 @@ observe({
   revals$warnings_groups$NA_groups <- if(cond_NA_groups) messageBox(type = "warning", "Specified main effect(s) are not assigned for all samples; samples with missing main effect(s) will be removed.") else NULL
   revals$warnings_groups$reference <- if(cond_NA_groups && cond_iso_nrm) messageBox(type = "warning", "Note: Reference samples without assigned main effect(s) will still be available for downstream reference normalization") else NULL
   revals$warnings_groups$pairs <- if(!pairs_complete()[['pass']]) messageBox(type = "warning", "Please enter all pairing information") else NULL
-  revals$warnings_groups$fdata_diff <- if(cond_diff_fdata_id) messageBox(type = "info", "You selected different columns to identify the sample names, samples names must match.  The sample names in the second dataset will be converted to match those in the first dataset.") else NULL
-  
+  revals$warnings_groups$fdata_diff <- if(cond_diff_fdata_id) messageBox(closeButton = TRUE, type = "info", "You selected different columns to identify the sample names, samples names must match.  The sample names in the second dataset will be converted to match those in the first dataset.") else NULL
+
   groups_not_applied <- is.null(attributes(objects$omicsData)$group_DF)
   
   toggleState("group_designation", condition = cond && groups_not_applied)
