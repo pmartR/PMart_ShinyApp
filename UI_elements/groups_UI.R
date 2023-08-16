@@ -51,7 +51,7 @@ list(
       matching_col2 <- colnames(f_data())[which(matching_col_n2 == max(matching_col_n2))[1]]
       
       return(tagList(
-        splitLayout(cellArgs = list(style = "text-align:center"), "Dataset 1", "Dataset 2"),
+        splitLayout(cellArgs = list(style = "text-align:center"), lipid_1_name(), lipid_2_name()),
         br(style = "padding:2px"),
         HTML(
           "<p style = 'font-weight:bold'>Which columns in these files specify the respective sample names?</p>"
@@ -139,16 +139,13 @@ list(
   # then conditionally display one or two plots
   output$group_barplots <- renderUI({
     if (two_lipids()) {
-      tagList(
-        div(id = "sample_barplots_1", 
-            style = "border-style:solid;border-width:1px;", 
-            withSpinner(plotlyOutput("group_barplots_1"))
-            ),
-        div(id = "sample_barplots_2", 
-            style = "border-style:solid;border-width:1px;", 
-            withSpinner(plotlyOutput("group_barplots_2"))
-            )
-      )
+      d1 = div(id = "sample_barplots_1",
+               style = "border-style:solid;border-width:1px;",
+               withSpinner(plotlyOutput("group_barplots_1")))
+      d2 = div(id = "sample_barplots_2",
+               style = "border-style:solid;border-width:1px;",
+               withSpinner(plotlyOutput("group_barplots_2")))
+      lipid_tabset_plots(d1, d2, input$lipid_1_name, input$lipid_2_name)
     }
     else {
       div(id = "sample_barplots_1", 
@@ -246,8 +243,8 @@ list(
         if (two_lipids()) {
           req(!is.null(revals$groups_summary_2), cancelOutput = TRUE)
           splitLayout(
-            div(id = "groups_summary_1", DTOutput("omicsData_groups_summary")),
-            div(id = "groups_summary_2", DTOutput("omicsData_groups_summary_2"))
+            div(id = "groups_summary_1", tagList(lipid_1_name(), DTOutput("omicsData_groups_summary"))),
+            div(id = "groups_summary_2", tagList(lipid_2_name(), DTOutput("omicsData_groups_summary_2")))
           )
         }
         else {

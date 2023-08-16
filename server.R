@@ -16,7 +16,8 @@ shinyServer(function(session, input, output) {
   # Named list whose values are either references to objects or filepaths for certain resources
   # needs to exist here because session doesnt exist in global.R
   resources_locations <- list(
-    "Expression Data (e_data)" = list("objects", "omicsData", "e_data"),
+    "Processed Expression Data (e_data)" = list("objects", "omicsData", "e_data"),
+    "Processed Expression Data (e_data) dataset 2" = list("objects", "omicsData_2", "e_data"),
     "Sample Information (f_data)" = list("objects", "omicsData", "f_data"),
     "Biomolecule Information (e_meta)" = list("objects", "omicsData", "e_meta"),
     "Statistics" = list("objects", "imdanova_res"),
@@ -29,8 +30,8 @@ shinyServer(function(session, input, output) {
   }
   
   resources_locations_peprollup <- list(
-    "Protein Expression Data (e_data)" = list("objects", "omicsData", "e_data"),
-    "Peptide Expression Data (e_data)" = list("objects", "omicsData_pre_rollup", "e_data"),
+    "Processed Protein Expression Data (e_data)" = list("objects", "omicsData", "e_data"),
+    "Processed Peptide Expression Data (e_data)" = list("objects", "omicsData_pre_rollup", "e_data"),
     "Sample Information (f_data)" = list("objects", "omicsData", "f_data"),
     "Biomolecule Information (e_meta)" = list("objects", "omicsData", "e_meta"),
     "Protein Statistics" = list("objects", "imdanova_res"),
@@ -184,6 +185,46 @@ shinyServer(function(session, input, output) {
     contentType = "application/zip"
   )
   
+  #' @details download hander for example data - two sets of data with e_data
+  #' and f_data at least.
+  output$download_example_data <- downloadHandler(
+    filename = paste("pmartR_examples_", proc.time()[1], ".zip", sep = ""),
+    content = function(fname) {
+      files = file.path("./example_data", c(
+        'example_data_metab',
+        'example_data_rnaseq'
+      ))
+      zip(zipfile = fname, files = files, flags = "-r")
+      if (file.exists(paste0(fname, ".zip"))) {
+        file.rename(paste0(fname, ".zip"), fname)
+      }
+    }
+  )
+  
+  #' @details download hander for an example report on proteomics data.
+  output$download_example_report <- downloadHandler(
+    filename = paste("pmartR_report_", proc.time()[1], ".html", sep = ""),
+    content = function(fname) {
+      report_file = file.path("./example_data", "PMart_Report_Example.html")
+      file.copy(report_file, fname)
+    }
+  )
+
+  #'@details Dropdown menu with buttons for things like a help page.
+  output$how_use_page_UI <- renderUI({
+    req(input$top_page)
+    
+    req(file.exists(sprintf("./www/help_modals/%s.md", input$top_page)))
+
+    div(
+      style = "margin-top:-5px",
+      shinyWidgets::actionBttn("how_use_page", "Help", icon=blue_info, size="sm")
+    )
+  })
+
+  # disable wrapper of nav help button
+  js$disableTab("nav_help_options", "")
+
   cfg_path = if(isTruthy(Sys.getenv("MAP_CONFIG"))) Sys.getenv("MAP_CONFIG") else "./cfg/minio_config.yml"
   
   if (MAP_ACTIVE) {

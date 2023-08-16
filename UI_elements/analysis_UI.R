@@ -3,6 +3,13 @@ output$statistics_mainplot <- renderUI({
   req(!is.null(plots$statistics_mainplot))
   p <- plots$statistics_mainplot
   plots$last_plot <- p
+  
+  # Objects should be combined by this point, don't save the second plot, which
+  # may be stored from previous tabs.
+  if(!is.null(objects$omicsData_2)) {
+    plots$last_plot_2 <- NULL
+  }
+  
   if (inherits(p, "plotly")) {
     output$statistics_mainplot_plotly <- renderPlotly(p)
     plotlyOutput("statistics_mainplot_plotly")
@@ -175,7 +182,7 @@ output$imdanova_pval_adjust_UI <- renderUI({
       "Bonferroni" = "bonferroni",
       "None" = "none"
     ),
-    selected = character(0)
+    selected = if(inherits(objects$omicsData, "seqData")) "BH" else 'none'
   )
 
   gtest_picker_fdr <- pickerInput(
@@ -187,7 +194,7 @@ output$imdanova_pval_adjust_UI <- renderUI({
       "Bonferroni" = "bonferroni",
       "None" = "none"
     ),
-    selected = character(0)
+    selected = if(inherits(objects$omicsData, "seqData")) "BH" else 'none'
   )
   
   anova_pickers = tagList(anova_picker_mc, anova_picker_fdr)
@@ -675,19 +682,24 @@ output$statistics_summary_table <- renderDT({
 #'@details UI created with the helper function style_UI to edit plot options
 #'for the dimension reduction plots
 output$dimres_plot_options <- renderUI({
+  choices <- colnames(objects$omicsData$f_data %>%
+                        dplyr::select(-one_of(
+                          attributes(objects$omicsData)$cnames$fdata_cname
+                        )))
+  
   tagList(
     div(
       class = 'inline-wrapper-1',
       pickerInput(
         inputId = "analysis_pca_color_by",
         label = "Color by:",
-        choices = c("Select one" = NULLSELECT_, colnames(objects$omicsData$f_data), "Group"),
+        choices = c("Select one" = NULLSELECT_, choices, "Group"),
         selected = "Group"
       ),
       pickerInput(
         inputId = "analysis_pca_shape_by",
         label = "Shape by:",
-        choices = c("Select one" = NULLSELECT_, colnames(objects$omicsData$f_data), "Group"),
+        choices = c("Select one" = NULLSELECT_, choices, "Group"),
         selected = NULLSELECT_
       ),
       br(),

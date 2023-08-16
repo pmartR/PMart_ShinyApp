@@ -7,8 +7,10 @@ on.exit({Sys.setenv("MAP_VERSION" = orig_envvar)})
 test_that("{shinytest2} recording: pmart_standalone", {
     # app <- AppDriver$new("http://127.0.0.1:3858", name = "pmart_standalone", height = 1187, width = 1263) 
     app <- AppDriver$new(name = "pmart_standalone", variant = platform_variant(), height = 1187, width = 1263, seed = 5237, timeout = 15000)
+    app$set_inputs(top_page = "upload_data_tab")
     app$set_inputs(datatype = "lip")
     app$set_inputs(upload_collapse_left = "datselect")
+    app$wait_for_idle()
     app$upload_file(file_edata = file.path(testthat::test_path(), "../../example_data/test_lipid_pos_edata.csv"))
     app$upload_file(file_edata_2 = file.path(testthat::test_path(), "../../example_data/test_lipid_neg_edata.csv"))
     
@@ -62,8 +64,8 @@ test_that("{shinytest2} recording: pmart_standalone", {
     app$set_inputs(fdata_customfilt_choices = "Project_LipidPos_A_Y_1")
     app$set_inputs(fdata_customfilt_choices = c("Project_LipidPos_A_Y_1", "Project_LipidPos_A_Y_2"))
     
-    app$set_inputs(fdata_customfilt_choices_2 = "Project_LipidNeg_B_Y_1")
-    app$set_inputs(fdata_customfilt_choices_2 = c("Project_LipidNeg_B_Y_1", "Project_LipidNeg_B_Y_2"))
+    app$set_inputs(fdata_customfilt_choices_2 = "Project_LipidPos_B_Y_1")
+    app$set_inputs(fdata_customfilt_choices_2 = c("Project_LipidPos_B_Y_1", "Project_LipidPos_B_Y_2"))
     
     app$click("add_customfilt")
     app$click("review_filters")

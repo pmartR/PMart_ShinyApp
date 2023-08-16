@@ -10,7 +10,18 @@ f_data <- reactive({
     disable(id = "file_fdata")
     
     # Return data 
-    return(MapConnect$Project$Data$f_data)
+    .f_data <- MapConnect$Project$Data$f_data
+    
+    if ("Group" %in% colnames(.f_data)) {
+      newcol = make.unique(c(colnames(.f_data), 'group')) %>% tail(1)
+      
+      .f_data <- .f_data %>%
+        dplyr::rename(!!rlang::sym(newcol) := Group)
+      
+      revals$warnings_groups$groups_in_fdata <-
+        messageBox(closeButton = TRUE, type = "info", sprintf(infotext_[['GROUPS_IN_FDATA']], newcol))
+      
+    }
     
   } else {
     
@@ -18,9 +29,20 @@ f_data <- reactive({
     req(input$file_fdata$datapath)
     # Load file
     filename <- input$file_fdata$datapath
-    read.csv(filename, stringsAsFactors = FALSE, check.names = F)
+    .f_data <- read.csv(filename, stringsAsFactors = FALSE, check.names = F)
     
+    if ("Group" %in% colnames(.f_data)) {
+      newcol = make.unique(c(colnames(.f_data), 'group')) %>% tail(1)
+      
+      .f_data <- .f_data %>%
+        dplyr::rename(!!rlang::sym(newcol) := Group)
+      
+      revals$warnings_groups$groups_in_fdata <-
+        messageBox(closeButton = TRUE, type = "info", sprintf(infotext_[['GROUPS_IN_FDATA']], newcol))
+    }
   }
+  
+  return(.f_data)
 
 })
 

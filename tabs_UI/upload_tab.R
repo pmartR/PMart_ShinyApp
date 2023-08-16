@@ -136,8 +136,7 @@ upload_UI <- function() {
             value = "summary_tables",
             hidden(div(
               id = "toggle_table",
-              div(style = "float:left;margin-top:10px;margin-right:10px;font-weight:bold", "Display dataset:"),
-              radioGroupButtons("which_table", choices = c("1" = 1, "2" = 2))
+              uiOutput("upload_tables_toggle")
             )),
             DTOutput("head_edata"),
             uiOutput("head_emeta_wrapper")

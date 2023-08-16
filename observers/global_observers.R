@@ -20,21 +20,27 @@ observeEvent(input$top_page,
 
 # store the current plot in a list of all plots
 observeEvent(input$saveplot, {
-  req(!is.null(plots$last_plot))
-
-  # store the plot in a named element of the plots$allplots reactive list
-  # store the name of that element in a table as well
-  plot_name <- sprintf("Plot %s:%s_tab", input$saveplot, input$top_page)
-  plots$allplots[[plot_name]] <- plots$last_plot
-  plots$plot_save_options[[plot_name]] <- list(type = "HTML Widget", width = 800, height = 400, scale = 1)
-  plots$plot_table[nrow(plots$plot_table) + 1, ] <- c(plot_name, dt_checkmark)
+  req(!is.null(plots$last_plot) || !is.null(plots$last_plot_2))
   
-  exportTestValues(
-    cur_plot = plots$allplots[[plot_name]]
-  )
+  if (!is.null(plots$last_plot)) {
+    # store the plot in a named element of the plots$allplots reactive list
+    # store the name of that element in a table as well
+    plot_name <- if(!isTruthy(lipid_1_name())) {
+      sprintf("Plot %s, %s:%s", input$saveplot, lipid_1_name(), input$top_page)
+    } else {
+      sprintf("Plot %s:%s", input$saveplot, input$top_page)
+    }
+    plots$allplots[[plot_name]] <- plots$last_plot
+    plots$plot_save_options[[plot_name]] <- list(type = "HTML Widget", width = 800, height = 400, scale = 1)
+    plots$plot_table[nrow(plots$plot_table) + 1, ] <- c(plot_name, dt_checkmark)
+    
+    exportTestValues(
+      cur_plot = plots$allplots[[plot_name]]
+    )
+  }
   
   if (!is.null(plots$last_plot_2)) {
-    plot_name_2 <- sprintf("Plot %s, object 2:%s tab", input$saveplot, input$top_page)
+    plot_name_2 <- sprintf("Plot %s, %s:%s", input$saveplot, lipid_2_name(), input$top_page)
     plots$allplots[[plot_name_2]] <- plots$last_plot_2
     plots$plot_save_options[[plot_name_2]] <- list(type = "HTML Widget", width = 800, height = 400, scale = 1)
     plots$plot_table[nrow(plots$plot_table) + 1, ] <- c(plot_name_2, dt_checkmark)
@@ -125,4 +131,23 @@ observeEvent(input$remove_plot, {
   plots$plot_table <- plots$plot_table %>% filter(`Select a plot` != plot_name)
   plots$allplots[[plot_name]] <- NULL
   plots$plot_save_options[[plot_name]] <- NULL
+})
+
+# make the logo go to the welcome page
+observe({
+  shinyjs::onclick("pmart-logo", updateTabsetPanel(inputId = "top_page", selected="intro_panel"))
+})
+
+#'@details Triggers a modal that displays a markdown with info
+#'on how to use the current page.
+observeEvent(input$how_use_page, {
+  req(input$top_page)
+
+  showModal(
+    modalDialog(
+      includeMarkdown(sprintf("www/help_modals/%s.md", input$top_page)),
+      size = "l", 
+      easyClose = TRUE
+    )
+  )
 })

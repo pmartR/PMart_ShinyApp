@@ -66,6 +66,8 @@ observeEvent(input$apply_imdanova, {
         input$top_page == "statistics_tab" && 
         !is.null(comp_df_holder$comp_df))
   
+  .tmp <- .tmp_imd <- objects$omicsData
+
   shinyjs::show("analysis_busy")
   on.exit(hide("analysis_busy"))
   
@@ -92,8 +94,24 @@ observeEvent(input$apply_imdanova, {
         input$imdanova_pval_adjust_g_fdr
       } else "none"
       
+      if (two_lipids() && !isTRUE(attributes(.tmp)[['data_info']][['is_combined']])) {
+        .tmp_imd <- pmartR::combine_lipidData(
+          .tmp,
+          objects$omicsData_2,
+          retain_groups = TRUE,
+          retain_filters = TRUE
+        )
+        attributes(.tmp_imd)[['data_info']][['is_combined']] <- TRUE
+
+        objects$omicsData <- .tmp_imd
+        
+        revals$warnings_statistics$objs_combined <<-
+          messageBox(type = "info", infotext_[['STATS_OBJECTS_COMBINED']], closeButton=TRUE)
+        
+      }
+
       objects$imdanova_res <- imd_anova(
-        objects$omicsData,
+        .tmp_imd,
         comparisons = comps,
         test_method = input$imdanova_test_method,
         pval_adjust_a_multcomp = pval_adjust_a_mc,
@@ -174,6 +192,7 @@ observeEvent(input$apply_imdanova, {
       revals$warnings_statistics$bad_imdanova <<- messageBox(type = "error", msg)
       objects$imdanova_res <- NULL
       plots$statistics_mainplot <- NULL
+      objects$omicsData <- .tmp
     }
   )
 })

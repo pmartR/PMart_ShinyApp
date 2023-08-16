@@ -287,10 +287,10 @@ list(
         n_edata_2_div,
         n_fdata_2_div,
         hr(),
-        h3(tags$b("Filters to be applied to Object 1:  ")),
+        h3(tags$b(sprintf("Filters to be applied to %s:  ", lipid_1_name()))),
         hr(),
         divs[obj1_inds],
-        h3(tags$b("Filters to be applied to Object 2:  ")),
+        h3(tags$b(sprintf("Filters to be applied to %s:  ", lipid_2_name()))),
         hr(),
         divs[obj2_inds]
       )
@@ -343,10 +343,10 @@ list(
       withSpinner(plotlyOutput("filter_mainplot"))
     }
     else if (any(!is.null(objects$omicsData), !is.null(objects$omicsData_2))) {
-      tagList(
-        withSpinner(plotlyOutput("filter_mainplot")),
-        withSpinner(plotlyOutput("filter_mainplot_2"))
-      )
+      ui1 = withSpinner(plotlyOutput("filter_mainplot"))
+      ui2 = withSpinner(plotlyOutput("filter_mainplot_2"))
+
+      lipid_tabset_plots(ui1, ui2, input$lipid_1_name, input$lipid_2_name)
     }
   }),
 
@@ -370,7 +370,7 @@ list(
           div(
             pickerInput(
               "fdata_customfilt_choices",
-              "Filter samples (dataset 1)",
+              sprintf("Filter samples (%s)", lipid_1_name()),
               choices = fdata_IDS,
               multiple = TRUE,
               options = list(`live-search` = TRUE, `actions-box` = TRUE)
@@ -382,7 +382,7 @@ list(
           div(
             pickerInput(
               "fdata_customfilt_choices_2",
-              "Filter samples (dataset 2)",
+              sprintf("Filter samples (%s)", lipid_2_name()),
               choices = fdata_IDS_2,
               multiple = TRUE,
               options = list(`live-search` = TRUE, `actions-box` = TRUE)
@@ -546,7 +546,7 @@ list(
           column(6,
              pickerInput(
                "edata_customfilt_remove_mols_1",
-               "(Dataset 1)",
+               sprintf("(%s)", lipid_1_name()),
                choices = mols1,
                multiple = T,
                options = list(`live-search` = TRUE, `actions-box` = TRUE)
@@ -555,7 +555,7 @@ list(
           column(6, 
              pickerInput(
                "edata_customfilt_remove_mols_2",
-               "(Dataset 2)",
+               sprintf("(%s)", lipid_2_name()),
                choices = mols2,
                multiple = T,
                options = list(`live-search` = TRUE, `actions-box` = TRUE)
@@ -590,12 +590,12 @@ list(
         fluidSplitLayout(
           pickerInput(
             "emeta_customfilt_which_col_1",
-            "(Dataset 1)",
+            sprintf("(%s)", lipid_1_name()),
             choices = choices1
           ),
           pickerInput(
             "emeta_customfilt_which_col_2",
-            "(Dataset 2)",
+            sprintf("(%s)", lipid_2_name()),
             choices = choices2
           )
         )
@@ -634,14 +634,14 @@ list(
         fluidSplitLayout(
           pickerInput(
             "emeta_customfilt_which_values_1",
-            "(Dataset 1)",
+            sprintf("(%s)", lipid_1_name()),
             choices = choices1,
             multiple = T,
             options = list(`live-search` = TRUE, `actions-box` = TRUE)
           ),
           pickerInput(
             "emeta_customfilt_which_values_2",
-            "(Dataset 2)",
+            sprintf("(%s)", lipid_1_name()),
             choices = choices2,
             multiple = T,
             options = list(`live-search` = TRUE, `actions-box` = TRUE)
@@ -702,7 +702,11 @@ list(
 
   # apply filter plot style options
   output$filter_apply_style <- renderUI({
-    apply_style_UI("filter", two_lipids(), inherits(plots$filter_mainplot, "list"))
+    apply_style_UI("filter",
+                   two_lipids(),
+                   inherits(plots$filter_mainplot, "list"),
+                   lipid_1_name = lipid_1_name(),
+                   lipid_2_name = lipid_2_name())
   }),
 
   # summary tables
@@ -715,8 +719,8 @@ list(
       if (two_lipids()) {
         req(!is.null(revals$filter_summary_2), cancelOutput = TRUE)
         splitLayout(
-          DTOutput("filter_summary"),
-          DTOutput("filter_summary_2")
+          tagList(lipid_1_name(), DTOutput("filter_summary")),
+          tagList(lipid_2_name(), DTOutput("filter_summary_2"))
         )
       }
       else {

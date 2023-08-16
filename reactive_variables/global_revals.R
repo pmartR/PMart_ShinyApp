@@ -32,3 +32,11 @@ global_norm_1 <- reactive({
     }
   )
 })
+
+lipid_1_name <- reactive({
+  ifelse(isTruthy(input$lipid_1_name), input$lipid_1_name, "Positive")
+})
+
+lipid_2_name <- reactive({
+  ifelse(isTruthy(input$lipid_2_name), input$lipid_2_name, "Negative")
+})

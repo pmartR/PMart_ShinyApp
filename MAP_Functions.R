@@ -51,7 +51,9 @@ list(
             "RNA-seq" = "seq",
             "Transcriptomics" = "seq" ## Keep for backwards compatibility with old project objects
           )
-
+        
+        updateTabsetPanel(session, inputId = "top_page", selected = "upload_data_tab")
+        
         # Get the data type
         theDataType <- convertList[lapply(names(convertList), function(name) {
           grepl(name, project$Project$DataType)}) %>% unlist()] %>% unlist()

@@ -200,9 +200,11 @@ apply_style_UI <-
            two_lipids,
            two_plots,
            flip_button = FALSE,
-           two_lipids_title = "Update plots style for the:",
+           two_lipids_title = "Update plots style for dataset:",
            one_plot_title = "Update plot style",
            two_plot_title = "Update plots style for the:",
+           lipid_1_name = "Positive",
+           lipid_2_name = "Negative",
            ...) {
     
   if (flip_button) {
@@ -221,8 +223,8 @@ apply_style_UI <-
     tagList(
       tags$b(two_lipids_title),
       div(
-        bsButton(paste0(pagename, "_apply_style_plot_1"), "First dataset"),
-        bsButton(paste0(pagename, "_apply_style_plot_2"), "Second dataset"),
+        bsButton(paste0(pagename, "_apply_style_plot_1"), lipid_1_name),
+        bsButton(paste0(pagename, "_apply_style_plot_2"), lipid_2_name),
         fbtn,
         ...
       )
@@ -376,6 +378,21 @@ messageBox <- function(msg, type = "info", id = NULL, closeButton = NULL, icon =
         ''
       ),
       '</div>'
+    )
+  )
+}
+
+#' @details Specifically for a UI when handling two lipids, creates a tabsetpanel
+#' for viewing each plot individually.
+lipid_tabset_plots <- function(plot_output_1, plot_output_2, name_1="", name_2="") {
+  tabsetPanel(
+    tabPanel(
+      title = ifelse(isTruthy(name_1), name_1, "Positive"),
+      plot_output_1
+    ),
+    tabPanel(
+      title = ifelse(isTruthy(name_2), name_2, "Negative"),
+      plot_output_2
     )
   )
 }

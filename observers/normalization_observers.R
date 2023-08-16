@@ -286,6 +286,7 @@ observeEvent(c(input$apply_normalization, input$apply_normalization_modal), {
           retain_groups = TRUE,
           retain_filters = TRUE
         )
+        attributes(.tmp_obj)[['data_info']][['is_combined']] <- TRUE
         
         objects$omicsData_2 <- .tmp_obj_2
       }
@@ -410,10 +411,27 @@ observeEvent(input$inspect_norm, {
       }
     )
 
-    extra_text <- " (Dataset 1)"
+    extra_text <- sprintf(" (%s)", lipid_1_name())
 
-    location_msg_2 <- tags$b(tags$h4(sprintf("P-value from Kruskal-Wallis test on location parameters (Dataset 2):  %s", round(res_2$p_location, 3))))
-    scale_msg_2 <- if (!is.null(res_2$p_scale)) tags$b(tags$h4(sprintf("P-value from Kruskal-Wallis test on scale parameters (Dataset 2):  %s", round(res_2$p_scale, 3)))) else NULL
+    location_msg_2 <-
+      tags$b(tags$h4(
+        sprintf(
+          "P-value from Kruskal-Wallis test on location parameters (%s):  %s",
+          lipid_2_name(),
+          round(res_2$p_location, 3)
+        )
+      ))
+    scale_msg_2 <-
+      if (!is.null(res_2$p_scale))
+        tags$b(tags$h4(
+          sprintf(
+            "P-value from Kruskal-Wallis test on scale parameters (%s):  %s",
+            lipid_2_name(),
+            round(res_2$p_scale, 3)
+          )
+        ))
+    else
+      NULL
   }
   else {
     location_msg_2 <- scale_msg_2 <- NULL
@@ -447,7 +465,7 @@ observeEvent(input$inspect_norm, {
     }
 
     combine_msg <- if (two_lipids()) {
-      tags$b(tags$h4("Data will be combined into a single object for subsequent tabs", style="color:deepskyblue"))
+      HTML(messageBox(type = 'info', "After normalization, both datasets will be combined into a single object for subsequent tabs.  Navigating to previous tabs will display the combined data for the first object."))
     } else NULL
 
     # display the modal which will warns of low p-values and gives option to apply normalization

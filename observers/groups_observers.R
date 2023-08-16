@@ -65,12 +65,18 @@ makegroup <- function(){
   ## Check two lipids requirements and process second object first ...
   if (two_lipids()) {
     req(!is.null(objects$omicsData_2))
+
+    # rearrange sample names to match the first object
+    edata_idx = which(colnames(objects$omicsData_2$e_data) == get_edata_cname(objects$omicsData_2))
+    dat2_colnames = colnames(objects$omicsData_2$e_data)[-edata_idx]
+    match_idx = match(dat2_colnames, f_data[[input$fdata_id_col_2]])
+    colnames(objects$omicsData_2$e_data)[-edata_idx] <- f_data[match_idx, input$fdata_id_col]
     
     .tmp_obj_2 <- tryCatch(
       {
         tmp <- objects$omicsData_2
         tmp$f_data <- f_data
-        attr(tmp, "cnames")$fdata_cname <- input$fdata_id_col_2
+        attr(tmp, "cnames")$fdata_cname <- input$fdata_id_col
         
         tmp <- group_designation(tmp,
                                  main_effects = main_effects(),
@@ -260,17 +266,37 @@ observeEvent(c(
 
 # error checking for groups tab
 observe({
-  fdata_idcol <- if (length(input$fdata_id_col) == 0) "__NULLSELECT__" else input$fdata_id_col
-
   req(!is.null(f_data()))
-  
   req(all(main_effects() %in% colnames(f_data())))
+  req(objects$omicsData)
   
   # input column exists in fdata
   # there is at 1 main effect, and all specified main effects and covariates exist in f_data
   cond_files <- !is.null(input$file_fdata)
   cond_idcol_fdata <- isTRUE(input$fdata_id_col %in% colnames(f_data()))
-  cond_sample_names <- all(f_data()[[fdata_idcol]] %in% sample_names())
+  
+  fdata_idcol <- fdata_idcol_2 <- if (length(input$fdata_id_col) == 0) "__NULLSELECT__" else input$fdata_id_col
+  edata_idx = which(colnames(objects$omicsData$e_data) == get_edata_cname(objects$omicsData))
+  sample_names_1 = colnames(objects$omicsData$e_data)[-edata_idx]
+  
+  cond_sample_names <- length(setdiff(
+    union(f_data()[[fdata_idcol]], sample_names_1),
+    intersect(f_data()[[fdata_idcol]], sample_names_1)
+  )) == 0
+  
+  if (two_lipids()) {
+    req(objects$omicsData_2)
+    
+    fdata_idcol_2 <- if (length(input$fdata_id_col_2) == 0) "__NULLSELECT__" else input$fdata_id_col_2
+    edata_idx = which(colnames(objects$omicsData_2$e_data) == get_edata_cname(objects$omicsData_2))
+    sample_names_2 = colnames(objects$omicsData_2$e_data)[-edata_idx]
+    
+    .cond <- length(setdiff(
+      union(f_data()[[fdata_idcol_2]], sample_names_2),
+      intersect(f_data()[[fdata_idcol_2]], sample_names_2)
+    )) == 0
+    cond_sample_names <- cond_sample_names && .cond
+  }
   
   cond_main_effects <- (length(main_effects()) != 0) & all(main_effects() %in% colnames(f_data()))
   cond_main_effects <- cond_main_effects | pairs_complete()[["valid"]] # main effect can be left blank if pairing present
@@ -280,17 +306,20 @@ observe({
   cond_iso_nrm <- inherits(objects$omicsData, "pepData") && 
                       input$labeled_yn == "iso"
   
+  cond_diff_fdata_id <- isTRUE(fdata_idcol != fdata_idcol_2)
+  
   cond <- all(cond_files, cond_idcol_fdata, cond_main_effects, cond_covariates, cond_sample_names, pairs_complete()[['pass']])
-
+  
   revals$warnings_groups$files <- if (!cond_files) messageBox(type = "warning", "No f_data uploaded or one file missing.") else NULL
-  revals$warnings_groups$sample_names <- if (!cond_sample_names) messageBox(type = "warning", "The chosen sample ID columns do not contain the sample names for one or more files.") else NULL
+  revals$warnings_groups$sample_names <- if (!cond_sample_names) messageBox(type = "warning", "The chosen sample ID column does not contain or is missing the sample names for one or more files.  Check that this column contains exactly the sample names for all files.") else NULL
   revals$warnings_groups$idcol_fdata <- if (!cond_idcol_fdata) messageBox(type = "warning", "Selected ID columns were not found in one or more grouping files") else NULL
-  revals$warnings_groups$main_effects <- if (!cond_main_effects) messageBox(type = "warning", "No main effect or pairing structure specified or main effects not found in one or more grouping files") else NULL
+  revals$warnings_groups$main_effects <- if (!cond_main_effects) messageBox(type = "info", "No main effect or pairing structure specified or main effects not found in one or more grouping files") else NULL
   revals$warnings_groups$covariates <- if (!cond_covariates) messageBox(type = "warning", "Specified covariates not found in one or more grouping files") else NULL
   revals$warnings_groups$NA_groups <- if(cond_NA_groups) messageBox(type = "warning", "Specified main effect(s) are not assigned for all samples; samples with missing main effect(s) will be removed.") else NULL
   revals$warnings_groups$reference <- if(cond_NA_groups && cond_iso_nrm) messageBox(type = "warning", "Note: Reference samples without assigned main effect(s) will still be available for downstream reference normalization") else NULL
   revals$warnings_groups$pairs <- if(!pairs_complete()[['pass']]) messageBox(type = "warning", "Please enter all pairing information") else NULL
-  
+  revals$warnings_groups$fdata_diff <- if(cond_diff_fdata_id) messageBox(closeButton = TRUE, type = "info", "You selected different columns to identify the sample names, samples names must match.  The sample names in the second dataset will be converted to match those in the first dataset.") else NULL
+
   groups_not_applied <- is.null(attributes(objects$omicsData)$group_DF)
   
   toggleState("group_designation", condition = cond && groups_not_applied)
