@@ -682,19 +682,24 @@ output$statistics_summary_table <- renderDT({
 #'@details UI created with the helper function style_UI to edit plot options
 #'for the dimension reduction plots
 output$dimres_plot_options <- renderUI({
+  choices <- colnames(objects$omicsData$f_data %>%
+                        dplyr::select(-one_of(
+                          attributes(objects$omicsData)$cnames$fdata_cname
+                        )))
+  
   tagList(
     div(
       class = 'inline-wrapper-1',
       pickerInput(
         inputId = "analysis_pca_color_by",
         label = "Color by:",
-        choices = c("Select one" = NULLSELECT_, colnames(objects$omicsData$f_data), "Group"),
+        choices = c("Select one" = NULLSELECT_, choices, "Group"),
         selected = "Group"
       ),
       pickerInput(
         inputId = "analysis_pca_shape_by",
         label = "Shape by:",
-        choices = c("Select one" = NULLSELECT_, colnames(objects$omicsData$f_data), "Group"),
+        choices = c("Select one" = NULLSELECT_, choices, "Group"),
         selected = NULLSELECT_
       ),
       br(),

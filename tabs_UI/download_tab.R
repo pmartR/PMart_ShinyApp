@@ -79,7 +79,7 @@ download_UI <- function() {
       bsCollapsePanel(
         "Generate Report", 
         textInput("ReportName", "Name report", "pmartR_Report"), 
-        pickerInput("ReportType", "Report type", c("HTML", "PDF"), "HTML"),
+        hidden(pickerInput("ReportType", "Report type", c("HTML", "PDF"), "HTML")), # TODO:  Make reports work with .pdf
         downloadButton("ReportDownload", "Make report"))
     ),
     div(
