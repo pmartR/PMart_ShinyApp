@@ -101,6 +101,20 @@ normalization_UI <- function() {
       disabled(bsButton("reset_normalization", 
                         "Remove normalization", 
                         style = "primary")),
+      
+      bsCollapsePanel("Batch Effect Correction",
+                      value = "batcheffect_panel",
+                      uiOutput("batch_effect_cond"),
+                      bsCollapsePanel("Choose Batch Correction Method",
+                                      value = "choose_bc_methods",
+                                      #
+                                      pickerInput("bc_fn", "Batch Correction Methods",
+                                                  choices = c(
+                                                    "ComBat" = "combat", 
+                                                    "EigenMS" = "eigenms", 
+                                                    "NOMIS" = "ppp"
+                                                  )
+                                      ))),
       uiOutput("warnings_normalize")
     ),
     column(
