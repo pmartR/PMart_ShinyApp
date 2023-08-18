@@ -1,0 +1,24 @@
+{
+  "bioconductor.version": [],
+  "external.libraries": [],
+  "ignored.packages": [
+    "pmartR",
+    "mapDataAccess",
+    "shinytest2",
+    "testthat",
+    "vdiffr"
+  ],
+  "package.dependency.fields": [
+    "Depends",
+    "Imports"
+  ],
+  "ppm.enabled": null,
+  "ppm.ignored.urls": [],
+  "r.version": [],
+  "snapshot.type": "implicit",
+  "use.cache": true,
+  "vcs.ignore.cellar": true,
+  "vcs.ignore.library": true,
+  "vcs.ignore.local": true,
+  "vcs.manage.ignores": true
+}
