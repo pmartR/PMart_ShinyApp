@@ -274,11 +274,11 @@ shinyServer(function(session, input, output) {
       grepl(sprintf("^%s", normalizePath(python_venv)), envpath)
     }))
     
-    if (is_conda) {
-      reticulate::use_condaenv(python_venv, required = TRUE)
-    } else {
-      reticulate::use_virtualenv(python_venv, required = TRUE)
-    }
+    # if (is_conda) {
+    #   reticulate::use_condaenv(python_venv, required = TRUE)
+    # } else {
+    #   reticulate::use_virtualenv(python_venv, required = TRUE)
+    # }
   }
   
 })
