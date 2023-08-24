@@ -200,5 +200,40 @@ list(
   # group tab warnings
   output$warnings_normalize <- renderUI({
     HTML(paste(revals$warnings_normalize, collapse = ""))
+  }),
+  
+  # batch correction pop up
+  output$batch_review <- renderUI({
+    divs = list()
+    
+    if(input$batch_fn == "none") return(
+      div(
+        br(),
+        strong("No batch correction will be applied"),
+        br(),
+        br()
+      )
+    )
+    
+    divs[[i]] <- tagList(
+      tags$b("Total Count Filter:"),
+      tags$p(
+        sprintf("Minimum Count: %s", input$batch_fn),
+        ),
+      hr()
+    )
+    
+    filtered_disclaimer <- if(length(attr(objects$omicsData, "filters")) > 0) {
+      h3(tags$b("Filters have already been applied, these filters will be applied in addition to the existing filters.", style = "color:deepskyblue"))
+    } else NULL
+    
+    tagList(
+      filtered_disclaimer,
+      hr(),
+      hr(),
+      h3(tags$b("Batch correction to be applied:  ")),
+      divs
+    )
+    
   })
 )

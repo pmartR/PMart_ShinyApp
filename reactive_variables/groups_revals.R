@@ -64,6 +64,15 @@ covariates <- reactive({
   }
 })
 
+batchids <- reactive({
+  batchids <- input$batch_id[which(input$batch_id != "None")]
+  if(length(batchids) == 0) {
+    return(NULL)
+  } else {
+    return(batchids)
+  }
+})
+
 #' @details Booleans to determine the state of pairing structure completion
 #' 
 #' @return List with the following elements:
