@@ -323,6 +323,20 @@ list(
     )
   }),
   
+  # ...batch ID
+  output$batch_id <- renderUI({
+    req(!is.null(f_data()))
+    pickerInput("batch_id", "Select Batch ID",
+                choices = c(
+                  "None",
+                  setdiff(
+                    colnames(f_data()),
+                    sapply(setdiff(GROUPS_ME_IDS,"batch_id"),function(x) input[[x]])
+                  )
+                ),
+                selected = input$batch_id)
+  }),
+  
   # ...pairs
   output$pairing_id_col <- renderUI({
     req(!is.null(f_data()))

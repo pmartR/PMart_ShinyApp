@@ -317,7 +317,7 @@ observeEvent(input$add_molfilt, {
     objects$filters$molfilt <- tryCatch(
       {
         revals$warnings_filter$molecule_filter_1 <<- NULL
-        molecule_filter(objects$omicsData)
+        molecule_filter(objects$omicsData,use_batch = input$molfilt_usebatch,use_groups = input$molfilt_usegroups)
       },
       error = function(e) {
         msg <- paste0("Something went wrong updating your molecule filter object <br> System error:  ", e)
@@ -329,7 +329,7 @@ observeEvent(input$add_molfilt, {
       objects$filters$molfilt_2 <- tryCatch(
         {
           revals$warnings_filter$molecule_filter2 <<- NULL
-          molecule_filter(objects$omicsData_2)
+          molecule_filter(objects$omicsData_2,use_batch = input$molfilt_usebatch,use_groups = input$molfilt_usegroups)
         },
         error = function(e) {
           msg <- paste0("Something went wrong updating your second molecule filter object <br> System error:  ", e)
@@ -827,7 +827,7 @@ observeEvent(c(input$plot_molfilt, input$mol_min_num),
 
     plots$filter_mainplot <- tryCatch(
       {
-        plot(molecule_filter(objects$omicsData), 
+        plot(molecule_filter(objects$omicsData,use_batch = input$molfilt_usebatch,use_groups = input$molfilt_usegroups), 
              min_num = input$mol_min_num, bw_theme = TRUE, interactive = T
              )
       },
@@ -841,7 +841,7 @@ observeEvent(c(input$plot_molfilt, input$mol_min_num),
     if (!is.null(objects$omicsData_2)) {
       plots$filter_mainplot_2 <- tryCatch(
         {
-          plot(molecule_filter(objects$omicsData_2), 
+          plot(molecule_filter(objects$omicsData_2,use_batch = input$molfilt_usebatch,use_groups = input$molfilt_usegroups), 
                min_num = input$mol_min_num, 
                bw_theme = TRUE, interactive = T
                )

@@ -101,20 +101,48 @@ normalization_UI <- function() {
       disabled(bsButton("reset_normalization", 
                         "Remove normalization", 
                         style = "primary")),
-      
-      bsCollapsePanel("Batch Effect Correction",
-                      value = "batcheffect_panel",
-                      uiOutput("batch_effect_cond"),
-                      bsCollapsePanel("Choose Batch Correction Method",
-                                      value = "choose_bc_methods",
-                                      #
-                                      pickerInput("bc_fn", "Batch Correction Methods",
-                                                  choices = c(
-                                                    "ComBat" = "combat", 
-                                                    "EigenMS" = "eigenms", 
-                                                    "NOMIS" = "ppp"
-                                                  )
-                                      ))),
+      bsCollapse(
+        id = "batch_correction_sidebar", 
+        open = "batch_correction_options",
+        bsCollapsePanel(
+          div("Batch Correction", 
+              hidden(div(
+                id = "ok_batch_correction", 
+                style = "color:orange;float:right", 
+                icon("ok", lib = "glyphicon")
+              ))
+          ),
+          value = "batch_correction_options",
+          bsCollapse(
+            id = "batch_submenu",
+            bsCollapsePanel("Choose Batch Correction Method",
+                            value = "choose_bc_params",
+                            #
+                            pickerInput("batch_fn", "Batch Correction Methods",
+                                        choices = c(
+                                          "None" = "none",
+                                          "EigenMS" = "eigenms"
+                                        )
+                            ),
+                            hr(),
+                            bsButton("review_batch_correction",
+                                     "Review and Apply Batch Correction",
+                                     style = "primary"),
+                            hidden(
+                              div(
+                                "Analyzing, please wait...",
+                                id = "analyze_batch_busy", class = "fadein-out",
+                                style = "color:deepskyblue;font-weight:bold;margin-bottom:5px"
+                              )
+                            )
+            )
+          ),
+          hr()
+        )
+      ),
+      disabled(bsButton("reset_batch_correction", 
+                        "Remove batch correction", 
+                        style = "primary")),
       uiOutput("warnings_normalize")
     ),
     column(
