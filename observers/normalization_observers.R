@@ -542,3 +542,96 @@ observeEvent(input$inspect_norm, {
     )
   }
 })
+
+# review batch correction modal
+observeEvent(input$review_batch_correction, {
+  showModal(
+    modalDialog(
+      tagList(
+        uiOutput("batch_correction_review"),
+        #uiOutput("execute_apply_batch_correction_UI"),
+        hr(),
+        #uiOutput("warnings_filter_modal")
+      ),
+      footer = NULL,
+      size = "l"
+    )
+  )
+})
+
+# apply batch correction to objects$omicsData
+# observeEvent(c(input$apply_batch_correction), {
+#   req(input$top_page == "normalization_tab", any(c(input$apply_batch_correction) > 0))
+#   ####
+#   removeModal()
+#   
+#   show("ok_batch_correction")
+#   
+#   tryCatch(
+#     {
+#       # construct parameters
+#       if (input$batch_fn %in% c("combat", "eigenms")) {
+#         params <- NULL
+#       }
+#       # else if (input$subset_fn == "los") {
+#       #   params <- list(los = input$los)
+#       # }
+#       
+#       # __SHINYTEST__
+#       if(isTRUE(getOption("shiny.testmode"))) {
+#         .omicsData_prebatch <- objects$omicsData
+#         exportTestValues(
+#           omicsData_prebatch = .omicsData_prebatch 
+#         ) 
+#       }
+#       
+#       if(input$batch_fn == "combat"){
+#         .tmp_obj <- malbacR::bc_combat(objects$omicsData)
+#       } else if(input$batch_fn == "eigenms"){
+#         # check has molecule filter been ran with use_Groups
+#         # print message
+#         # if eigenMS and warnigns -> show warning and disable button
+#         # switch function
+#         .tmp_obj <- suppressWarnings(malbacR::bc_eigenMS(objects$omicsData))
+#       }
+#       
+#       # __SHINYTEST__
+#       exportTestValues(
+#         omicsData_norm = .tmp_obj
+#       )
+#       
+#       objects$omicsData <- .tmp_obj
+#       
+#       updateCollapse(session, "batch_correction_sidebar", close = "batch_correction_options")
+#       
+#       # # success modal if all is well
+#       # showModal(
+#       #   modalDialog(
+#       #     {
+#       #       fluidRow(
+#       #         column(10,
+#       #                align = "center", offset = 1,
+#       #                tags$h4(sprintf(
+#       #                  "Your data has been corrected for batch effects"
+#       #                )),
+#       #                hr(),
+#       #                actionButton("normalization_dismiss", "Review results", width = "75%"),
+#       #                uiOutput("goto_stats")
+#       #         )
+#       #       )
+#       #     },
+#       #     footer = NULL
+#       #   )
+#       # )
+#       # # be nice and open the plot panel for them
+#       # updateCollapse(session, "normalization_mainpanel", open = "normdata_mainpanel")
+#       # 
+#       # enable("reset_normalization")
+#     }#,
+#     # error = function(e) {
+#     #   msg <- paste0("Something went wrong correcting batch effects on your data.  <br> System error:  ", e)
+#     #   message(msg)
+#     #   revals$warnings_normalize$bad_norm_obj1 <<- messageBox(type = "error", msg)
+#     # }
+#   )
+# })

@@ -44,6 +44,7 @@ groups_UI <- function() {
             uiOutput("group_col2"),
             uiOutput("cv_col1"),
             uiOutput("cv_col2"),
+            uiOutput("batch_id"),
             uiOutput("pairing_col_1"),
             uiOutput("covariates_type_picker_UI_wrapper")
           ),

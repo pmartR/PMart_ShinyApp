@@ -33,6 +33,7 @@ makegroup <- function(){
     main_effects()[2],
     covariates()[1],
     covariates()[2],
+    batchids(),
     pair_id,
     pair_group,
     pair_denom
@@ -81,6 +82,7 @@ makegroup <- function(){
         tmp <- group_designation(tmp,
                                  main_effects = main_effects(),
                                  covariates = covariates(),
+                                 batch_id = batchids(),
                                  cov_type = cov_type,
                                  pair_id = pair_id,
                                  pair_group = pair_group,
@@ -118,6 +120,7 @@ makegroup <- function(){
       tmp <- group_designation(tmp,
                                main_effects = main_effects(),
                                covariates = covariates(),
+                               batch_id = batchids(),
                                cov_type = cov_type,
                                pair_id = pair_id,
                                pair_group = pair_group,
@@ -304,19 +307,21 @@ observe({
   cond_main_effects <- cond_main_effects | pairs_complete()[["valid"]] # main effect can be left blank if pairing present
   
   cond_covariates <- if (length(covariates() == 0)) TRUE else all(covariates() %in% colnames(f_data()))
+  cond_batchids <- if (length(batchids() == 0)) TRUE else all(batchids() %in% colnames(f_data()))
   cond_NA_groups <- any(is.na(f_data()[main_effects()]))
   cond_iso_nrm <- inherits(objects$omicsData, "pepData") && 
                       input$labeled_yn == "iso"
   
   cond_diff_fdata_id <- isTRUE(fdata_idcol != fdata_idcol_2)
   
-  cond <- all(cond_files, cond_idcol_fdata, cond_main_effects, cond_covariates, cond_sample_names, pairs_complete()[['pass']])
+  cond <- all(cond_files, cond_idcol_fdata, cond_main_effects, cond_covariates, cond_batchids, cond_sample_names, pairs_complete()[['pass']])
   
   revals$warnings_groups$files <- if (!cond_files) messageBox(type = "warning", "No f_data uploaded or one file missing.") else NULL
   revals$warnings_groups$sample_names <- if (!cond_sample_names) messageBox(type = "warning", "The chosen sample ID column does not contain or is missing the sample names for one or more files.  Check that this column contains exactly the sample names for all files.") else NULL
   revals$warnings_groups$idcol_fdata <- if (!cond_idcol_fdata) messageBox(type = "warning", "Selected ID columns were not found in one or more grouping files") else NULL
   revals$warnings_groups$main_effects <- if (!cond_main_effects) messageBox(type = "info", "No main effect or pairing structure specified or main effects not found in one or more grouping files") else NULL
   revals$warnings_groups$covariates <- if (!cond_covariates) messageBox(type = "warning", "Specified covariates not found in one or more grouping files") else NULL
+  revals$warnings_groups$batchids <- if (!cond_batchids) messageBox(type = "warning", "Specified batch ID not found in one or more grouping files") else NULL
   revals$warnings_groups$NA_groups <- if(cond_NA_groups) messageBox(type = "warning", "Specified main effect(s) are not assigned for all samples; samples with missing main effect(s) will be removed.") else NULL
   revals$warnings_groups$reference <- if(cond_NA_groups && cond_iso_nrm) messageBox(type = "warning", "Note: Reference samples without assigned main effect(s) will still be available for downstream reference normalization") else NULL
   revals$warnings_groups$pairs <- if(!pairs_complete()[['pass']]) messageBox(type = "warning", "Please enter all pairing information") else NULL
