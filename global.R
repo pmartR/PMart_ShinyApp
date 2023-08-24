@@ -16,6 +16,7 @@ library(shinycssloaders)
 library(plotly)
 library(shinyalert)
 library(reshape2)
+library(malbacR)
 
 ######## GLOBAL VALUES ##########
 
