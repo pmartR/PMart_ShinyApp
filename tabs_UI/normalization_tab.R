@@ -121,11 +121,12 @@ normalization_UI <- function() {
                             pickerInput("batch_fn", "Batch Correction Methods",
                                         choices = c(
                                           "None" = "none",
-                                          "EigenMS" = "eigenms"
+                                          "EigenMS" = "eigenms",
+                                          "ComBat" = "combat"
                                         )
                             ),
                             hr(),
-                            bsButton("review_batch_correction",
+                            bsButton("inspect_batch_correction",
                                      "Review and Apply Batch Correction",
                                      style = "primary"),
                             hidden(
