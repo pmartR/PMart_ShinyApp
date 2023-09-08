@@ -240,5 +240,16 @@ list(
       divs
     )
     
+  }),
+  
+  output$batch_plots <- renderPlotly({
+    p <- subplot(plots$batch_plot_pre,plots$batch_plot_post, shareY = T, titleX = T, titleY = T)
+    # plots$last_plot <- p
+    p
+  }),
+  
+  # display before and after batch correction plots
+  output$batch_plots_mainplot <- renderUI({
+      withSpinner(plotlyOutput("batch_plots"))
   })
 )
