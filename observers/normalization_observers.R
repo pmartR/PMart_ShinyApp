@@ -365,10 +365,10 @@ observeEvent(input$inspect_norm, {
 
   # disable button while working...
   disable("inspect_norm")
-  show("analyze_norm_busy")
+  show("analyze_batch_busy")
   on.exit({
     enable("inspect_norm")
-    hide("analyze_norm_busy")
+    hide("analyze_batch_busy")
   })
   
   # initialize parameters
@@ -496,30 +496,47 @@ observeEvent(input$inspect_norm, {
 })
 
 observeEvent(input$inspect_batch_correction,{
+  req(!is.null(objects$omicsData))
   
-  res_1 <- try(malbacR::bc_combat(objects$omicsData))
+  # disable button while working...
+  disable("inspect_batch_correction")
+  show("analyze_batch_busy")
+  on.exit({
+    enable("inspect_batch_correction")
+    hide("analyze_batch_busy")
+  })
+  
   
   # determine what method we will be talking about
   if(input$batch_fn == "combat"){
     batch_method = "ComBat"
+    res_1 <- try(malbacR::bc_combat(objects$omicsData))
   } else if(input$batch_fn == "eigenms"){
     batch_method = "EigenMS"
+    res_1 <- try(malbacR::bc_combat(objects$omicsData))
   } else {
     batch_method = "None"
+    res_1 <- objects$omicsData
   }
   
   # determine a message based on the success or failure
   # option 1: we succeed in running batch effect correction
   if(class(res_1) != "try-error"){
-    batch_msg = sprintf(paste0("The batch correction method, ", batch_method, ", was able to run. Would you like to apply ", batch_method,
-                        " or select another option."))
+    batch_msg = tags$b(tags$h4(sprintf(paste0("The batch correction method, ", batch_method, ", was able to run. Would you like to apply ", batch_method,
+                        " or select another option."))))
+    # save the plots
+    plots$batch_plot_pre <- plot(dim_reduction(objects$omicsData),omicsData = objects$omicsData,color_by = input$batch_id)
+    plots$batch_plot_post <- plot(dim_reduction(res_1),omicsData = objects$omicsData,color_by = input$batch_id)
+  } else {
+    batch_msg = tags$b(tags$h4(sprintf(paste0("The batch correction method, ", batch_method, ", is not compatible with this data. Please select another method or proceed without batch correction."))))
   }
   
-  # display modal that shows we ran ComBat
+  # display modal that shows we ran batch correction
   showModal(
     modalDialog(
       batch_msg,
       hr(),
+      uiOutput("batch_plots_mainplot"),
       footer = tagList(
         div(
           style = "float:left",
