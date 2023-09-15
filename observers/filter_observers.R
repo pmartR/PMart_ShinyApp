@@ -754,7 +754,8 @@ observeEvent(c(input$plot_rmdfilt, input$rmd_metrics, input$pvalue_threshold, in
         p <- plot(rmd_filter(objects$omicsData, 
                              metrics = input$rmd_metrics),
                   pvalue_threshold = input$pvalue_threshold, 
-                  sampleID = sampleID1, bw_theme = TRUE, interactive = T
+                  sampleID = sampleID1, bw_theme = TRUE, interactive = T,
+                  use_VizSampNames = TRUE
                   )
         
         p
