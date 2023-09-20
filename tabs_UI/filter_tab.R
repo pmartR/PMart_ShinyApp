@@ -154,7 +154,7 @@ filter_UI <- function() {
           value = "filter_plots",
           uiOutput("filter_dynamic_mainplot")
         ),
-        bsCollapsePanel("Axes options",
+        bsCollapsePanel("Plot Options",
           value = "axes_options",
           uiOutput("filter_plot_options"),
           uiOutput("filter_apply_style")

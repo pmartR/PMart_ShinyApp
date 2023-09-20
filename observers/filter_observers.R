@@ -754,6 +754,7 @@ observeEvent(c(input$plot_rmdfilt, input$rmd_metrics, input$pvalue_threshold, in
         p <- plot(rmd_filter(objects$omicsData, 
                              metrics = input$rmd_metrics),
                   pvalue_threshold = input$pvalue_threshold, 
+                  order_by = if (is.null(input$filter_rmd_order_by) || input$filter_rmd_order_by == NULLSELECT_) NULL else input$filter_rmd_order_by,
                   sampleID = sampleID1, bw_theme = TRUE, interactive = T,
                   use_VizSampNames = TRUE
                   )

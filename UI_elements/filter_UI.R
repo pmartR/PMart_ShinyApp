@@ -692,12 +692,36 @@ list(
   # inputs for axes labels and sizes
   output$filter_plot_options <- renderUI({
     # Placeholder for conditional plot options based on filter type
-    if(FALSE) {
-      extra_UI <- NULL
+    if (!is.null(revals$filter_vis) &&
+        revals$filter_vis == "rmdfilt") {
+      choices <- colnames(objects$omicsData$f_data %>%
+                            dplyr::select(-one_of(
+                              attributes(objects$omicsData)$cnames$fdata_cname
+                            )))
+      
+      extra_UI <- tagList(
+        h4("Main Plot Options"),
+        pickerInput(
+          "filter_rmd_order_by", 
+          "Order By", 
+          choices = c(
+            "Select one" = NULLSELECT_,
+            choices,
+            "Group"
+          ),
+          selected = NULLSELECT_
+        ),
+        bsButton("plot_update_rmdfilt", "Update plot")
+      )
     } else {
       extra_UI <- NULL
     }
-    style_UI("filter", extra_UI)
+    
+    tagList(
+      extra_UI,
+      h4("Axes Options"),
+      style_UI("filter")
+    )
   }),
 
   # apply filter plot style options
