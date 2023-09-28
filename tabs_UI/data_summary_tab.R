@@ -9,10 +9,41 @@ data_summary_UI <- function() {
           id = "which_qc_plot_wrapper",
           class = "tooltip-wrapper",
           radioGroupButtons("which_qc_plot", "Choose a Plot Type:",
-            choices = c("Boxplots" = "boxplots", 
-                        "Missing values barplots" = "bar", 
-                        "Missing values scatterplots" = "scatter",
-                        "Principal components" = "pca")
+            choiceNames = list(
+              div(class='inline-wrapper-1', 
+                "Boxplots",
+                tipify(
+                  div(style = "max-width:750px", blueq),
+                  ttext_[["EXPLAIN_QC_BOXPLOTS"]], 
+                  options = list(container = "body")
+                )
+              ),
+              div(class='inline-wrapper-1', 
+                "Missing values barplots",
+                tipify(
+                  div(style = "max-width:750px", blueq),
+                  ttext_[["EXPLAIN_QC_BARPLOTS"]],
+                  options = list(container = "body")
+                )
+              ),
+              div(class='inline-wrapper-1', 
+                "Missing values scatterplots",
+                tipify(
+                  div(style = "max-width:750px", blueq),
+                  ttext_[["EXPLAIN_QC_SCATTERPLOTS"]],
+                  options = list(container = "body")
+                )
+              ),
+              div(class='inline-wrapper-1', 
+                "Principal components",
+                tipify(
+                  div(style = "max-width:750px", blueq),
+                  ttext_[["EXPLAIN_QC_PCA"]],
+                  options = list(container = "body")
+                )
+              )
+            ),       
+            choiceValues = c("boxplots", "bar", "scatter", "pca"),
           )
         ),
         bsCollapse(
