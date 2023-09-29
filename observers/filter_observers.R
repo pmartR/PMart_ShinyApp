@@ -686,6 +686,7 @@ observeEvent(input$plot_tcfilt, {
 # rnafilter library size plot
 observeEvent(input$plot_rnafilt_libsize, {
   req(input$plot_rnafilt_libsize > 0)
+  revals$filter_vis <- "rnafilt_libsize"
   
   size_library <- if(isTruthy(input$rnafilt_min_lib_size)) input$rnafilt_min_lib_size else NULL
   
@@ -714,6 +715,7 @@ observeEvent(input$plot_rnafilt_libsize, {
 # rnafilter minimum nonzero plot
 observeEvent(input$plot_rnafilt_min_nonzero, {
   req(input$plot_rnafilt_min_nonzero > 0)
+  revals$filter_vis <- "rnafilt_min_nonzero"
   
   min_nonzero <- if(isTruthy(input$rnafilt_min_nonzero)) input$rnafilt_min_nonzero else NULL
   
@@ -740,9 +742,10 @@ observeEvent(input$plot_rnafilt_min_nonzero, {
 }, ignoreInit = T)
 
 # rmdfilter plot
-observeEvent(c(input$plot_rmdfilt, input$rmd_metrics, input$pvalue_threshold, input$rmd_sample, input$rmdfilt_plot_type),
+observeEvent(c(input$plot_rmdfilt, input$rmd_metrics, input$pvalue_threshold, input$rmd_sample, input$rmdfilt_plot_type, input$plot_update_rmdfilt),
   {
     req(input$plot_rmdfilt > 0)
+    revals$filter_vis <- "rmdfilt"
     # store selected sample ID's or NULL if we are plotting all samples
     sampleID1 <- if (length(input$rmd_sample) > 0 & (input$rmdfilt_plot_type %in% c("subset", "outliers"))) input$rmd_sample else NULL
 
@@ -754,7 +757,9 @@ observeEvent(c(input$plot_rmdfilt, input$rmd_metrics, input$pvalue_threshold, in
         p <- plot(rmd_filter(objects$omicsData, 
                              metrics = input$rmd_metrics),
                   pvalue_threshold = input$pvalue_threshold, 
-                  sampleID = sampleID1, bw_theme = TRUE, interactive = T
+                  order_by = if (is.null(input$filter_rmd_order_by) || input$filter_rmd_order_by == NULLSELECT_) NULL else input$filter_rmd_order_by,
+                  sampleID = sampleID1, bw_theme = TRUE, interactive = T,
+                  use_VizSampNames = TRUE
                   )
         
         p
@@ -794,6 +799,7 @@ observeEvent(c(input$plot_profilt, input$min_num_peps, input$degen_peps),
   {
     req(input$plot_profilt > 0)
     revals$warnings_filter$profilt_plot <- NULL
+    revals$filter_vis <- "profilt"
 
     plots$filter_mainplot <- tryCatch(
       {
@@ -817,6 +823,7 @@ observeEvent(c(input$plot_molfilt, input$mol_min_num),
   {
     req(input$plot_molfilt > 0)
     revals$warnings_filter$molfilt_plot <- revals$warnings_filter$molfilt_plot_2 <- NULL
+    revals$filter_vis <- "molfilt"
 
     plots$filter_mainplot <- tryCatch(
       {
@@ -855,6 +862,7 @@ observeEvent(c(input$plot_cvfilt, input$cv_threshold),
   {
     req(input$plot_cvfilt > 0 && !is.na(input$cv_threshold))
     revals$warnings_filter$cvfilt_plot <- revals$warnings_filter$cvfilt_plot_2 <- NULL
+    revals$filter_vis <- "cvfilt"
     
     plots$filter_mainplot <- tryCatch(
       {
@@ -900,6 +908,7 @@ observeEvent(c(input$plot_imdanovafilt, input$min_nonmiss_anova, input$min_nonmi
   {
     req(input$plot_imdanovafilt > 0)
     revals$warnings_filter$imdanova_plot <- revals$warnings_filter$imdanova_plot_2 <- NULL
+    revals$filter_vis <- "imdanovafilt"
 
     plots$filter_mainplot <- tryCatch(
       {

@@ -43,7 +43,8 @@ shinyServer(function(session, input, output) {
     warnings_upload = list(), warnings_groups = list(), warnings_transform = list(), warnings_normalize = list(),
     e_meta = NULL, e_meta_2 = NULL, emeta_info = NULL,
     cvcol1 = NULL, cvcol2 = NULL, gcol1 = NULL, gcol2 = NULL,
-    cvcol1_2 = NULL, cvcol2_2 = NULL, gcol1_2 = NULL, gcol2_2 = NULL
+    cvcol1_2 = NULL, cvcol2_2 = NULL, gcol1_2 = NULL, gcol2_2 = NULL,
+    filter_vis = NULL
   )
 
   # data objects, other things like filter objects will be stored here
