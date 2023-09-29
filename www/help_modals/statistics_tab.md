@@ -7,3 +7,11 @@ This tab is for running statistical and other post-normalization analyses on you
 3.  Fill out any additional settings such as whether to apply one or both types of statistical tests for iMd-ANOVA, or which multiple comparison adjustments to apply.
 4.  Click the blue button at the bottom of the left column to perform the analysis.  A modal indicating success will appear and plots/tables of your results will become available in the right-side panels.
 
+**A note on non-normal distributions and the ANOVA:**  The assumption of normally distributed residuals for the ANOVA F-test can in practice be somewhat violated as the test statistic is well known to be robust to mild deviations from normality (Knief, 2021) (Lix, 1996).  Though techniques such as log transformation may be adequate to achieve approximate normality, in more extreme cases involving smaller sample sizes and more extreme/heterogenous deviations from normality, ANOVA may not be appropriate.  See (Lix, 1996) for discussion of alternative tests.
+
+***
+
+[1] Knief, Ulrich, and Wolfgang Forstmeier. 2021. “Violating the Normality Assumption May Be the Lesser of Two Evils.” Behavior Research Methods 53 (6): 2576–90. https://doi.org/10.3758/s13428-021-01587-5.
+
+[2] Lix, Lisa M., Joanne C. Keselman, and H. J. Keselman. 1996. “Consequences of Assumption Violations Revisited: A Quantitative Review of Alternatives to the One-Way Analysis of Variance ‘F’ Test.” Review of Educational Research 66 (4): 579–619. https://doi.org/10.2307/1170654.
+
