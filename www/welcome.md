@@ -4,7 +4,8 @@
 
 ## What is PMart?
 
-PMart encompasses the capabilities of the pmartR R package: https://github.com/pmartR/pmartR, which contains methods for processing and analysis of mass-spectrometry based `omics data.  
+PMart encompasses the capabilities of the pmartR R package: https://github.com/pmartR/pmartR, which contains methods for processing and analysis of a single mass-spectrometry, NMR, or RNA-seq based omics dataset. This processing is robust to missing values, meaning that no imputation is done and the methods utilized are appropriate for data where missing values are present.
+
 The core capabilities of the package, all implemented in this application are:
 
 - Quality control
@@ -27,13 +28,13 @@ Visualizations of each step are available to save and download, along with proce
 
 ***
 
-PMart accepts the following data types:
+PMart accepts a single dataset from the following data types. In all cases, PMart expects quantitated data where there is a single  measurement for a given biomolecule; any biomolecules detected with multiple signals must be collapsed into a single row of the expression data for upload.
 
 * **Metabolomics**
     * GC-MS
     * NMR
 * **Lipidomics**
-    * Single ionization
+    * LC-MS Single ionization
     * Both negative and positive ionizations
 * **Proteomics**
     *	Peptide data or protein data (not both)
