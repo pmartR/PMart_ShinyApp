@@ -34,8 +34,9 @@ PMart accepts a single dataset from the following data types. In all cases, PMar
     * GC-MS
     * NMR
 * **Lipidomics**
-    * LC-MS Single ionization
-    * Both negative and positive ionizations
+    * LC-MS 
+      * Single ionization
+      * Both negative and positive ionizations
 * **Proteomics**
     *	Peptide data or protein data (not both)
         * Label-free
