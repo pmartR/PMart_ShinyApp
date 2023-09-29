@@ -18,7 +18,7 @@ So if the user selected the molecule and rMd filters, the app will first apply t
 
 **Biomolecule Filters** filter the biomolecules (rows) of your data by criteria such as minimum number of samples with non-missing values.
 
-**Sample Filters** remove samples (columns) from your data based on criteria such as how much of an outlier they are based on various metrics.
+**Sample Filters** remove samples (columns) from your data based on criteria such as how much of an outlier they are based on various metrics.  **Removal of sample outliers should be done with caution, and ideally removal should be informed by input from the experimental scientist and/or supporting evidence from more filters than just the rMd Filter.**
 
 **Custom Filters** are where the user can choose specific samples or biomolecules to remove based on their knowledge of the data.
 
