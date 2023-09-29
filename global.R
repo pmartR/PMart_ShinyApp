@@ -40,6 +40,7 @@ ttext_ <- list(
   EXPLAIN_QC_BARPLOTS = "Barplots of missing values for each sample.  Orderable/colorable by group or other sample information",
   EXPLAIN_QC_SCATTERPLOTS = "Scatterplots of biomolecules and their level of missingness against their median abundance.",
   EXPLAIN_QC_PCA = "Principal components analysis of abundance values.  Probabilistic Principle Components Analysis is used, which does not require imputation of missing values. The R^2 value on the axes labels correspond to the percent variance of all the data explained by the corresponding principal component.  Colorable by group or other sample information",
+  IMDANOVA_FILTER_INFO = "Remove biomolecules that do not have a minimum number of non-missing values in each group to do statistical comparisons.",
   IMD_INTERACTIVE_MANY_POINTS = "If your data has many biomolecules, creating an interactive plot may take a while.",
   MAIN_EFFECTS_INFO = "Main effects are the variables of interest, those values across which you want to make comparisons.  Covariates are those values that are not of experimental interest, but must be controlled for in the statistics.",
   MIDPOINT_EXPORT_DISABLED = "Either your omicsData has not been created, or you have not finished the Normalization tab (or Statistics tab for seqData)",
