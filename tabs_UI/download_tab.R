@@ -79,7 +79,10 @@ download_UI <- function() {
       bsCollapsePanel(
         "Generate Report", 
         textInput("ReportName", "Name report", "pmartR_Report"), 
-        hidden(pickerInput("ReportType", "Report type", c("HTML", "PDF"), "HTML")), # TODO:  Make reports work with .pdf
+        pickerInput("ReportType", "Report type", c("HTML", "PDF"), "HTML"), # TODO:  Make reports work with .pdf
+        conditionalPanel("input.ReportType == 'PDF'", {
+          HTML(messageBox("PDF reports do not include table previews. Please download all tables you wish to view."))
+        }, style = "width: fit-content;"),
         downloadButton("ReportDownload", "Make report"))
     ),
     div(

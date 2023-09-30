@@ -101,7 +101,8 @@ output$ReportDownload <- downloadHandler(
           edata = edata,
           emeta = emeta,
           fdata = fdata,
-          pmart_inputs = reactiveValuesToList(input)
+          pmart_inputs = reactiveValuesToList(input),
+          output_format = input$ReportType
         ),
         add_params
       )
@@ -116,6 +117,7 @@ output$ReportDownload <- downloadHandler(
       rmarkdown::render(
         report,
         output_file = file,
+        output_format = ifelse(input$ReportType == "HTML", "html_document", "pdf_document"),
         params = params,
         envir = new.env(parent = globalenv())
       )

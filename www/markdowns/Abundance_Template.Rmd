@@ -10,6 +10,7 @@ params:
   omicStatsRoll: NULL
   pmart_inputs: NULL
   spans_results: NULL
+  output_format: NULL
 title: "`r params$titleName`"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 ---
@@ -47,6 +48,9 @@ spans_results <- params$spans_results
 # All inputs from tool 
 pmart_inputs <- params$pmart_input
 pmart_inputs$ReportCode <- TRUE
+
+# Output format
+output_format <- params$output_format
 
 # Get the file type 
 biomolecule <- switch(
@@ -90,24 +94,30 @@ biomolecules designated by the **`r omicDataAttr$cnames$edata_cname`** column.
 All missing data is denoted with **`r pmart_inputs$na_symbol`** and the expression data
 **`r ifelse(pmart_inputs$normalized_yn == "0", "was not already", "was already")`** normalized. 
 
-Here is the expression data matrix: 
+`r if (output_format == "HTML") {"Here is the expression data matrix:"} else {"See the associated Expression Data file."}`
   
 ```{r Expression Matrix}
-datatable(edata, options = list(scrollX = TRUE))
+if (output_format == "HTML") {
+  datatable(edata, options = list(scrollX = TRUE))
+}
 ```
 
 `r if (is.null(omicDataAttr$cnames$emeta_cname) == FALSE) {paste0("### *Biomolecule Information*\nAn associated biomolecule information file was also uploaded called **", file_emeta_name, "** and the molecule identifier column was designated as **", omicDataAttr$cnames$emeta_cname, "**. The file contains ", length(omicData$e_meta) - 1, " columns of biomolecule information.")}`
 
+`r if (is.null(omicDataAttr$cnames$emeta_cname) == FALSE && output_format != "HTML") {"See the associated Biomolecule Information file."}`
+
 ```{r Biomolecule Information}
 if (is.null(omicDataAttr$cnames$emeta_cname) == FALSE) {
-  datatable(emeta, options = list(scrollX = TRUE))
+  if (output_format == "HTML") {
+    datatable(emeta, options = list(scrollX = TRUE))
+  }
 }
 ```
 
 
 `r if ("Var1" %in% colnames(omicData$f_data) == FALSE) {paste0("### *Sample Information*\nAn associated sample information file was also uploaded called **", file_fdata_name, "**. Trimmed samples names **", ifelse(pmart_inputs$usevizsampnames == "No", "were not", "were"), "** used. The column in the sample information file which indicates sample names was designated as **", omicDataAttr$cnames$fdata_cname, "**.")}`
 
-`r if (is.null(omicDataAttr$group_DF) == FALSE) {paste0("*Grouping Information*")}`
+`r if (output_format == "HTML") {if (is.null(omicDataAttr$group_DF) == FALSE) {paste0("*Grouping Information*")}} else {"See the associated Sample Information file."}`
 
 ```{r Grouping Information: Main Effects and Covariates}
 if (is.null(omicDataAttr$group_DF) == FALSE) {
@@ -117,7 +127,9 @@ if (is.null(omicDataAttr$group_DF) == FALSE) {
   if (main_effects == "") {main_effects <- "not specified"}
   if (covariates == "") {covariates <- "not specified"}
   
-  datatable(fdata, options = list(scrollX = TRUE))
+  if (output_format == "HTML") {
+    datatable(fdata, options = list(scrollX = TRUE))
+  }
 }
 ```
 
@@ -497,7 +509,7 @@ if (is.null(omicStatsRoll) == FALSE) {
 
 ```{r Peptide Statistics: significance table}
 if (is.null(omicStatsRoll) == FALSE) {
-  sink("/dev/null"); sig_table <- summary(omicStatsRoll)$sig_table; sink()
+  sink(nullfile()); sig_table <- summary(omicStatsRoll)$sig_table; sink()
   
   sig_table |> kable(caption = "Counts of significant (at 0.05) peptides grouped by fold change ('Positive'/'Negative'), and test type ('ANOVA'/'G-test') for each comparison.")
 }
@@ -567,7 +579,7 @@ if (is.null(omicStats) == FALSE) {
 
 ```{r Statistics: significance table}
 if (is.null(omicStats) == FALSE) {
-  sink("/dev/null"); sig_table <- summary(omicStats)$sig_table; sink()
+  sink(nullfile()); sig_table <- summary(omicStats)$sig_table; sink()
   
   sig_table |> kable(caption = "Counts of significant (at 0.05) biomolecules grouped by fold change ('Positive'/'Negative'), and test type ('ANOVA'/'G-test') for each comparison.")
 }
