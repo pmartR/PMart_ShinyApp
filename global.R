@@ -36,6 +36,7 @@ blue_info = icon("info-sign", lib="glyphicon", style = "color:deepskyblue")
 ttext_ <- list(
   ABUNDANCE_ZEROS_TO_NA = "Zeros will be automatically transformed to NA in raw abundance data.",
   ABUNDANCE_NAS_TO_ZEROS = "NAs will be automatically transformed to zeros in transcript count data.",
+  BATCH_ID_INFO = "If your samples have been ran in batches, you may consider running batch correction to remove non-biological differences caused by running samples in multiple batches. To do so, please select the column specifying which samples belong to which batch.",
   COVARIATE_TYPE_INFO = "Suppose your covariate has values [1,1,2,2,3,3].  By default, it is treated as a factor variable, but you may want to specify it is numeric.",
   CV_FILTER_INFO = "Remove biomolecules based on minimum value of coefficient of variation, calculated per-group as the standard deviation divided by the mean, and then pooled across groups per Ahmed (1995).",
   DOWNLOAD_OPTS_DISABLED = "Currently selected parameters are the same as the ones currently stored for this plot",
