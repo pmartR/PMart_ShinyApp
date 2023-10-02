@@ -15,6 +15,20 @@ output$cv_threshold_UI <- renderUI({
   numericInput("cv_threshold", title, min = 1, max = max_cv, value = round(max_cv*0.9, 2), step = 1)
 })
 
+output$molfilt_group_UI <- renderUI({
+  req(objects$omicsData)
+  filter_logic = FALSE
+  if(input$batch_correction_id == "EigenMS"){filter_logic = TRUE}
+  checkboxInput("molfilt_usegroups", "Filter by Group", value = filter_logic)
+})
+
+output$molfilt_batch_UI <- renderUI({
+  req(objects$omicsData)
+  filter_logic = FALSE
+  if(input$batch_correction_id == "ComBat"){filter_logic = TRUE}
+  checkboxInput("molfilt_usebatch", "Filter by Batch", value = filter_logic)
+})
+
 # Summary of current filters and parameters
 output$filter_review <- renderUI({
   # store text as a list of HTML elements
