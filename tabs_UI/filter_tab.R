@@ -21,8 +21,10 @@ filter_UI <- function() {
             title = "Molecule Filter",
             tooltip_text = ttext_[["MOLECULE_FILTER_INFO"]],
             numericInput("mol_min_num", "Minimum number observed", min = 1, value = 2, step = 1),
-            checkboxInput("molfilt_usegroups", "Filter by Group", FALSE),
-            checkboxInput("molfilt_usebatch", "Filter by Batch", FALSE)
+            uiOutput("molfilt_group_UI"),
+            uiOutput("molfilt_batch_UI")
+            #checkboxInput("molfilt_usegroups", "Filter by Group", FALSE),
+            #checkboxInput("molfilt_usebatch", "Filter by Batch", FALSE)
           ),
           
           # cv filter options
