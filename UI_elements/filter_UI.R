@@ -15,18 +15,33 @@ output$cv_threshold_UI <- renderUI({
   numericInput("cv_threshold", title, min = 1, max = max_cv, value = round(max_cv*0.9, 2), step = 1)
 })
 
+#'@details Input for molecule_filter inside a reactive UI so that 
+#' the box can be checked or not depending on what batch correction is selected
 output$molfilt_group_UI <- renderUI({
   req(objects$omicsData)
   filter_logic = FALSE
-  if(input$batch_correction_id == "EigenMS"){filter_logic = TRUE}
+  if(!is.null(input$batch_correction_id) && input$batch_correction_id == "EigenMS"){filter_logic = TRUE}
   checkboxInput("molfilt_usegroups", "Filter by Group", value = filter_logic)
 })
 
 output$molfilt_batch_UI <- renderUI({
   req(objects$omicsData)
   filter_logic = FALSE
-  if(input$batch_correction_id == "ComBat"){filter_logic = TRUE}
+  if(!is.null(input$batch_correction_id) && input$batch_correction_id == "ComBat"){filter_logic = TRUE}
   checkboxInput("molfilt_usebatch", "Filter by Batch", value = filter_logic)
+})
+
+output$review_filter_disabled_UI <- renderUI({
+  req(objects$omicsData)
+  #disable_logic = FALSE
+  # odd/even not == 0
+  #if(!is.null(input$batch_correction_id) && input$batch_correction_id == "ComBat" & (input$add_molfilt %% 2 == 0|input$molfilt_usebatch == FALSE)){disable_logic = TRUE}
+  #if(!is.null(input$batch_correction_id) && input$batch_correction_id == "EigenMS" & (input$add_molfilt %% 2 == 0|input$molfilt_usegroups == FALSE)){disable_logic = TRUE}
+  div(
+    id = "review_filters_tooltip",
+    class= "tooltip-wrapper",
+    bsButton("review_filters", "Review and apply filters", style = "primary")
+  )
 })
 
 # Summary of current filters and parameters

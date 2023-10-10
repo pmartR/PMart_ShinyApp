@@ -349,6 +349,7 @@ observeEvent(input$reset_normalization, {
 
 # dismiss and move to next tabs
 observeEvent(input$normalization_dismiss, removeModal())
+observeEvent(input$batch_dismiss, removeModal())
 observeEvent(input$goto_statistics, {
   updateTabsetPanel(session, "top_page", selected = "statistics_tab")
   removeModal()
@@ -495,65 +496,17 @@ observeEvent(input$inspect_norm, {
   }
 })
 
-observeEvent(input$inspect_batch_correction,{
+observeEvent(input$apply_bc_method,{
+  req(input$top_page == "normalization_tab")
   req(!is.null(objects$omicsData))
   
   # disable button while working...
-  disable("inspect_batch_correction")
+  disable("apply_bc_method")
   show("analyze_batch_busy")
   on.exit({
-    enable("inspect_batch_correction")
     hide("analyze_batch_busy")
   })
   
-  
-  # determine what method we will be talking about
-  if(input$batch_fn == "combat"){
-    batch_method = "ComBat"
-    res_1 <- try(malbacR::bc_combat(objects$omicsData))
-  } else if(input$batch_fn == "eigenms"){
-    batch_method = "EigenMS"
-    res_1 <- try(malbacR::bc_combat(objects$omicsData))
-  } else {
-    batch_method = "None"
-    res_1 <- objects$omicsData
-  }
-  
-  # determine a message based on the success or failure
-  # option 1: we succeed in running batch effect correction
-  if(class(res_1) != "try-error"){
-    batch_msg = tags$b(tags$h4(sprintf(paste0("The batch correction method, ", batch_method, ", was able to run. Would you like to apply ", batch_method,
-                        " or select another option."))))
-    # save the plots
-    plots$batch_plot_pre <- plot(dim_reduction(objects$omicsData),omicsData = objects$omicsData,color_by = input$batch_id)
-    plots$batch_plot_post <- plot(dim_reduction(res_1),omicsData = objects$omicsData,color_by = input$batch_id)
-  } else {
-    batch_msg = tags$b(tags$h4(sprintf(paste0("The batch correction method, ", batch_method, ", is not compatible with this data. Please select another method or proceed without batch correction."))))
-  }
-  
-  # display modal that shows we ran batch correction
-  showModal(
-    modalDialog(
-      batch_msg,
-      hr(),
-      uiOutput("batch_plots_mainplot"),
-      footer = tagList(
-        div(
-          style = "float:left",
-          bsButton("apply_batch_correction_modal","Apply Batch Correction Method",style = "primary")
-        ),
-        modalButton("Choose another batch correction method"),
-        size = "l"
-      )
-    )
-  )
-  
-})
-
-observeEvent(input$apply_batch_correction_modal,{
-  req(input$top_page == "normalization_tab", any(c(input$apply_normalization, input$apply_normalization_modal) > 0))
-  
-  show("ok_batch_correction")
   tryCatch({
     # __SHINYTEST__
     if(isTRUE(getOption("shiny.testmode"))) {
@@ -563,7 +516,12 @@ observeEvent(input$apply_batch_correction_modal,{
       ) 
     }
     
-    .tmp_obj <- malbacR::bc_combat(objects$omicsData)
+    if(input$batch_correction_id == "ComBat"){
+      .tmp_obj <- malbacR::bc_combat(objects$omicsData)
+    }
+    if(input$batch_correction_id == "EigenMS"){
+      .tmp_obj <- malbacR::bc_eigenMS(objects$omicsData)
+    }
   
     # __SHINYTEST__
     exportTestValues(
@@ -571,7 +529,7 @@ observeEvent(input$apply_batch_correction_modal,{
     )
     
     objects$omicsData <- .tmp_obj
-    updateCollapse(session, "normalization_sidebar", close = "batch_correction_sidebar")
+    #updateCollapse(session, "normalization_sidebar", close = "batch_correction_sidebar")
     
     # success modal if all is well
     showModal(
@@ -592,18 +550,26 @@ observeEvent(input$apply_batch_correction_modal,{
       )
     )
     
-    # be nice and open the plot panel for them
-    updateCollapse(session, "normalization_mainpanel", open = "normdata_mainpanel")
-    
-    enable("reset_batch_correction")
+    # # be nice and open the plot panel for them
+    # updateCollapse(session, "normalization_mainpanel", open = "normdata_mainpanel")
+    # 
+    # enable("reset_batch_correction")
     },
     error = function(e) {
-      msg <- paste0("Something went wrong normalizing your data.  <br> System error:  ", e)
+      msg <- paste0("Something went wrong when applying batch correction to your data.  <br> System error:  ", e)
       message(msg)
       revals$warnings_normalize$bad_norm_obj1 <<- messageBox(type = "error", msg)
       }
     )
 })
+
+observeEvent(c(input$top_page, input$batch_correction_id),{
+  req(input$top_page == "normalization_tab" && input$batch_correction_id == "EigenMS")
+  
+  disable("inspect_norm")
+  disable("apply_normalization")
+})
+
 
 # # reset batch correction; really only needed where no batch correction desired
 # observeEvent(input$reset_batch_correction, {
@@ -618,8 +584,6 @@ observeEvent(input$apply_batch_correction_modal,{
 #   hide("ok_normalization")
 #   updateCollapse(session, "normalization_sidebar", open = "normalize_global_sidebar")
 # })
-    
-    
     
 
 
