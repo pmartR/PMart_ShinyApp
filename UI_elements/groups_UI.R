@@ -378,16 +378,19 @@ list(
                           sapply(setdiff(GROUPS_ME_IDS, "pair_id_col"), function(x) input[[x]])
                           )
                 ),
-                selected = input$batch_id,
+                selected = isolate(input$batch_id),
                 options = pickerOptions(dropupAuto = FALSE)
                 )
   }),
   
   output$batch_correction_id <- renderUI({
     req(!is.null(f_data()))
+    bc_options = c("None","ComBat")
+    if(input$normalized_yn == 0){bc_options <- c(bc_options,"EigenMS")}
     pickerInput("batch_correction_id","Select Batch Correction Method",
-                choices = c("None","ComBat","EigenMS"),
-                selected = input$batch_correction_id,
+                choices = bc_options,
+                # isolate
+                selected = isolate(input$batch_correction_id),
                 options = pickerOptions(dropupAuto = FALSE))
   }),
   
