@@ -21,17 +21,30 @@ list(
   output$molfilt_group_UI <- renderUI({
     req(objects$omicsData)
     filter_logic = FALSE
-    if(input$batch_correction_id == "EigenMS"){filter_logic = TRUE}
+    if(!is.null(input$batch_correction_id) && input$batch_correction_id == "EigenMS"){filter_logic = TRUE}
     checkboxInput("molfilt_usegroups", "Filter by Group", value = filter_logic)
   }),
   
   output$molfilt_batch_UI <- renderUI({
     req(objects$omicsData)
     filter_logic = FALSE
-    if(input$batch_correction_id == "ComBat"){filter_logic = TRUE}
+    if(!is.null(input$batch_correction_id) && input$batch_correction_id == "ComBat"){filter_logic = TRUE}
     checkboxInput("molfilt_usebatch", "Filter by Batch", value = filter_logic)
   }),
-
+  
+  output$review_filter_disabled_UI <- renderUI({
+    req(objects$omicsData)
+    #disable_logic = FALSE
+    # odd/even not == 0
+    #if(!is.null(input$batch_correction_id) && input$batch_correction_id == "ComBat" & (input$add_molfilt %% 2 == 0|input$molfilt_usebatch == FALSE)){disable_logic = TRUE}
+    #if(!is.null(input$batch_correction_id) && input$batch_correction_id == "EigenMS" & (input$add_molfilt %% 2 == 0|input$molfilt_usegroups == FALSE)){disable_logic = TRUE}
+    div(
+      id = "review_filters_tooltip",
+      class= "tooltip-wrapper",
+      bsButton("review_filters", "Review and apply filters", style = "primary")
+    )
+  }),
+  
   # Summary of current filters and parameters
   output$filter_review <- renderUI({
     # store text as a list of HTML elements
