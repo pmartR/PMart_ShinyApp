@@ -149,7 +149,8 @@ filter_UI <- function() {
           )
         )
       ), # parent collapse
-      bsButton("review_filters", "Review and apply filters", style = "primary"),
+      uiOutput("review_filter_disabled_UI"),
+      #bsButton("review_filters", "Review and apply filters", style = "primary"),
       bsButton("reset_filters", "Unselect all filters", style = "primary"),
       uiOutput("warnings_filter"),
       uiOutput("filter_data_summary", style="margin-top:3px")

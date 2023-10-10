@@ -168,20 +168,19 @@ list(
   # plot normalized data after modal dismiss
   output$normalized_boxplots <- renderPlotly({
     req(pluck(attributes(objects$omicsData), "data_info", "norm_info", "is_normalized") == TRUE)
-    # req has attribute to cancel output, look for batch effect being applied
-    # cancel out being true in that instance will stay as is
-    # if they come in with batch corrected data, could lead to wonky behavior
-    # if batch corrected disable normalization tab
-    # need button for has been batch corrected and give pop up
-    
-    # messageBox() to keep things aesthetically pleasing
-    p <- plot(objects$omicsData, bw_theme = TRUE, color_by = "Group", order_by = "Group", use_VizSampNames = "VizSampNames" %in% colnames(objects$omicsData$f_data), interactive = T)
+    bc_addition <- ifelse(attributes(objects$omicsData)$data_info$batch_info$is_bc," (with Batch Correction)","")
+    p_init <- plot(objects$omicsData, bw_theme = TRUE, color_by = "Group", order_by = "Group", use_VizSampNames = "VizSampNames" %in% colnames(objects$omicsData$f_data), interactive = F)
+    title_text <- paste0(p_init$labels$title,bc_addition)
+    p <- plot(objects$omicsData, bw_theme = TRUE, color_by = "Group", order_by = "Group", use_VizSampNames = "VizSampNames" %in% colnames(objects$omicsData$f_data), title_lab = title_text, interactive = T)
     plots$last_plot <- p
     p
   }),
 
   output$normalized_boxplots_2 <- renderPlotly({
     req(pluck(attributes(objects$omicsData_2), "data_info", "norm_info", "is_normalized") == TRUE)
+    bc_addition <- ifelse(attributes(objects$omicsData_2)$data_info$batch_info$is_bc," (with Batch Correction)","")
+    p_init <- plot(objects$omicsData_2, bw_theme = TRUE, use_VizSampNames = "VizSampNames" %in% colnames(objects$omicsData$f_data), interactive = F, color_by = "Group", order_by = "Group")
+    title_text <- paste0(p_init$labels$title,bc_addition)
     p <- plot(objects$omicsData_2, bw_theme = TRUE, use_VizSampNames = "VizSampNames" %in% colnames(objects$omicsData$f_data), interactive = T, color_by = "Group", order_by = "Group")
     plots$last_plot_2 <- p
     p
@@ -254,6 +253,13 @@ list(
     
   }),
   
+  # output$inspect_norm_disabled_UI <- renderUI({
+  #   req(objects$omicsData)
+  #   disable_logic = FALSE
+  #   if(input$batch_correction_id == "EigenMS"){disable_logic = TRUE}
+  #   bsButton("inspect_norm", "Diagnostics for normalization selection",style = "primary",disabled = disable_logic)
+  # }),
+  
   output$batch_plots <- renderPlotly({
     p <- subplot(plots$batch_plot_pre,plots$batch_plot_post, shareY = T, titleX = T, titleY = T)
     # plots$last_plot <- p
@@ -263,5 +269,58 @@ list(
   # display before and after batch correction plots
   output$batch_plots_mainplot <- renderUI({
       withSpinner(plotlyOutput("batch_plots"))
+  }),
+  
+  output$apply_bc_method_UI <- renderUI({
+    req(objects$omicsData)
+    # assume that this will be disabled and people won't be using batch correction
+    disable_logic = TRUE
+    # however if we have batch correction that is not null and molecule filter was added we set button to be enabled
+    if(!is.null(input$batch_correction_id) && input$batch_correction_id != "None" && input$add_molfilt %% 2 != 0){disable_logic = FALSE}
+    # if batch correction has already been ran we disable it again
+    if(attributes(objects$omicsData)$data_info$batch_info$is_bc){disable_logic = TRUE}
+    # we also disable the button if combat has been selected but the data has not been normalized yet
+    if(attributes(objects$omicsData)$data_info$norm_info$is_norm == FALSE && input$batch_correction_id == "ComBat"){disable_logic = TRUE}
+    bsButton("apply_bc_method", "Apply batch correction", style = "primary",disabled = disable_logic)
+  }),
+  
+  # plot normalized data after modal dismiss
+  output$batch_boxplots <- renderPlotly({
+    req(pluck(attributes(objects$omicsData), "data_info", "batch_info", "is_bc") == TRUE)
+    # if they come in with batch corrected data, could lead to wonky behavior
+    # if batch corrected disable normalization tab
+    # need button for has been batch corrected and give pop up
+    
+    # messageBox() to keep things aesthetically pleasing
+    bc_addition <- ifelse(attributes(objects$omicsData)$data_info$batch_info$is_bc," (with Batch Correction)","")
+    p_init <- plot(objects$omicsData, bw_theme = TRUE, color_by = "Group", order_by = "Group", use_VizSampNames = "VizSampNames" %in% colnames(objects$omicsData$f_data), interactive = F)
+    title_text <- paste0(p_init$labels$title,bc_addition)
+    p <- plot(objects$omicsData, bw_theme = TRUE, color_by = "Group", order_by = "Group", use_VizSampNames = "VizSampNames" %in% colnames(objects$omicsData$f_data), title_lab = title_text, interactive = T)
+    plots$last_plot <- p
+    p
+  }),
+  
+  output$batch_boxplots_2 <- renderPlotly({
+    req(pluck(attributes(objects$omicsData_2), "data_info", "batch_info", "is_bc") == TRUE)
+    bc_addition <- ifelse(attributes(objects$omicsData_2)$data_info$batch_info$is_bc," (with Batch Correction)","")
+    p_init <- plot(objects$omicsData_2, bw_theme = TRUE, use_VizSampNames = "VizSampNames" %in% colnames(objects$omicsData$f_data), interactive = F, color_by = "Group", order_by = "Group")
+    title_text <- paste0(p_init$labels$title,bc_addition)
+    p <- plot(objects$omicsData_2, bw_theme = TRUE, use_VizSampNames = "VizSampNames" %in% colnames(objects$omicsData$f_data), interactive = T, color_by = "Group", order_by = "Group")
+    plots$last_plot_2 <- p
+    p
+  }),
+  #
+  
+  output$batch_boxplots_cond <- renderUI({
+    if (!is.null(objects$omicsData_2)) {
+      ui1 <- withSpinner(plotlyOutput("batch_boxplots"))
+      ui2 <- withSpinner(plotlyOutput("batch_boxplots_2"))
+      lipid_tabset_plots(ui1, ui2, input$lipid_1_name, input$lipid_2_name)
+    }
+    else {
+      withSpinner(plotlyOutput("batch_boxplots"))
+    }
   })
+  
+  
 )
