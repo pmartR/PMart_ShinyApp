@@ -77,7 +77,7 @@ normalization_UI <- function() {
                               "Use parameters from table selection")),
               hidden(tagAppendAttributes(
                 bsButton(
-                "inspect_norm", 
+                "inspect_norm",
                 "Diagnostics for normalization selection",
                 style = "primary"
                 ),
@@ -93,18 +93,23 @@ normalization_UI <- function() {
             )
           ),
           hr(),
-          hidden(bsButton("apply_normalization", 
-                          "Apply normalization", 
-                          style = "primary"))
+          hidden(
+            bsButton("apply_normalization", "Apply normalization", style = "primary")
+            )
+        )
+      ),
+      uiOutput("apply_bc_method_UI"),
+      hidden(
+        div(
+          "Analyzing, please wait...",
+          id = "analyze_batch_busy", class = "fadein-out",
+          style = "color:deepskyblue;font-weight:bold;margin-bottom:5px"
         )
       ),
       disabled(bsButton("reset_normalization", 
                         "Remove normalization", 
                         style = "primary"))
       ,
-      disabled(bsButton("apply_batch",
-                        "Apply Batch Correction",
-                        style = "primary")),
       uiOutput("warnings_normalize")
     ),
     column(
@@ -127,7 +132,8 @@ normalization_UI <- function() {
         bsCollapsePanel("Normalized Data Plots",
           value = "normdata_mainpanel",
           uiOutput("normalized_boxplots_cond")
-        ),
+        )
+        ,
         bsCollapsePanel("Normalized Data Plots (Batch Correction)",
                         value = "batchdata_mainpanel",
                         uiOutput("batch_boxplots_cond"))
