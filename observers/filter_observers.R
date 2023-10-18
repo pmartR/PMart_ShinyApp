@@ -1159,16 +1159,14 @@ observeEvent(input$filter_dismiss, {
   removeModal()
 })
 
-observe({
-  isolate({
-    req(objects$omicsData)
-    req(input$top_page == "filter_tab")
-  })
-  browser()
+observeEvent(c(input$add_molfilt,input$molfilt_usebatch,input$molfilt_usegroups),{
+  req(objects$omicsData)
+  req(input$top_page == "filter_tab")
+  #browser()
   disable_logic = FALSE
   # odd/even not == 0
   if(!is.null(input$batch_correction_id) && input$batch_correction_id == "ComBat" & (input$add_molfilt %% 2 == 0|input$molfilt_usebatch == FALSE)){disable_logic = TRUE}
   if(!is.null(input$batch_correction_id) && input$batch_correction_id == "EigenMS" & (input$add_molfilt %% 2 == 0|input$molfilt_usegroups == FALSE)){disable_logic = TRUE}
   
-  togglestate_add_tooltip(session,"review_filters_tooltip",!disable_logic,"REVIEW_FILTERS_DISABLED")
+  togglestate_add_tooltip(session,"review_filters_tooltip",!disable_logic,ttext_[["REVIEW_FILTERS_DISABLED"]])
 })

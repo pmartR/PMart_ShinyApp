@@ -1,6 +1,7 @@
 # toggle display of spans panel if they are in pep/pro land and have chosen to use spans
 observeEvent(c(input$top_page, input$spans_or_manual), {
   req(input$top_page == "normalization_tab" && !is.null(objects$omicsData))
+  #browser()
 
   is_peppro <- inherits(objects$omicsData, c("pepData", "proData"))
   using_spans <- input$spans_or_manual == "spans" & is_peppro
@@ -8,14 +9,14 @@ observeEvent(c(input$top_page, input$spans_or_manual), {
   # show appropriate buttons/panels depending on whether spans is being (or can be) used
   toggle("spans_or_manual", anim = T, condition = is_peppro)
   toggle(selector = 'div[value="use_spans"]', condition = using_spans)
-  toggle("inspect_norm", condition = !using_spans)
+  toggle("inspect_norm_tooltip", condition = !using_spans)
   toggle("use_selected_spans", condition = using_spans)
-  toggle("apply_normalization", condition = using_spans)
+  toggle("apply_normalization_tooltip", condition = using_spans)
   
   if(get_data_norm(objects$omicsData)){
-    updateButton(session,"apply_normalization", label = "Update normalization")
+    updateButton(session,"apply_normalization_tooltip", label = "Update normalization")
   } else {
-    updateButton(session,"apply_normalization", label = "Apply normalization")
+    updateButton(session,"apply_normalization_tooltip", label = "Apply normalization")
   }
 
   if (using_spans) {
@@ -312,7 +313,8 @@ observeEvent(c(input$apply_normalization, input$apply_normalization_modal), {
                   input$subset_fn, paste(unlist(ifelse(is.null(params), "None", params)), collapse = " | "), input$norm_fn
                 )),
                 hr(),
-                actionButton("normalization_dismiss", "Review results", width = "75%"),
+                uiOutput("normalization_dismiss_UI"),
+                #actionButton("normalization_dismiss", "Review results", width = "75%"),
                 uiOutput("goto_stats")
                 )
             )
@@ -550,8 +552,10 @@ observeEvent(input$apply_bc_method,{
       )
     )
     
-    # # be nice and open the plot panel for them
-    # updateCollapse(session, "normalization_mainpanel", open = "normdata_mainpanel")
+    # be nice and open the plot panel for them
+    updateCollapse(session, "normalization_mainpanel", open = "batchdata_mainpanel")
+    updateCollapse(session, "normalization_mainpanel", close = "normdata_mainpanel")
+    
     # 
     # enable("reset_batch_correction")
     },
@@ -564,26 +568,48 @@ observeEvent(input$apply_bc_method,{
 })
 
 observeEvent(c(input$top_page, input$batch_correction_id),{
-  req(input$top_page == "normalization_tab" && input$batch_correction_id == "EigenMS")
+  req(objects$omicsData)
+  req(input$top_page == "normalization_tab")
   
-  disable("inspect_norm")
-  disable("apply_normalization")
-})
+  #browser()
+  
+  enable_logic = TRUE
+  if(!is.null(input$batch_correction_id) && input$batch_correction_id == "EigenMS"){enable_logic = FALSE}
+  #disable("inspect_norm")
+  #disable("apply_normalization")
+  togglestate_add_tooltip(session,"inspect_norm_tooltip",enable_logic,"When using EigenMS for batch correction, no separate normalization step is required.")
+  togglestate_add_tooltip(session,"apply_normalization_tooltip",enable_logic,"When using EigenMS for batch correction, no separate normalization step is required.")
+  
+}, priority = -10)
 
+observeEvent(c(input$top_page,input$batch_correction_id),{
+  
+  req(objects$omicsData)
+  req(input$top_page == "normalization_tab")
+  # assume that this will be disabled and people won't be using batch correction
+  enable_logic = FALSE
+  # however if we have batch correction that is not null and molecule filter was added we set button to be enabled
+  if(!is.null(input$batch_correction_id) && input$batch_correction_id != "None" && input$add_molfilt %% 2 != 0){enable_logic = TRUE}
+  # if batch correction has already been ran we disable it again
+  if(attributes(objects$omicsData)$data_info$batch_info$is_bc){enable_logic = FALSE}
+  # we also disable the button if combat has been selected but the data has not been normalized yet
+  if(attributes(objects$omicsData)$data_info$norm_info$is_norm == FALSE & input$batch_correction_id == "ComBat"){enable_logic = FALSE}
+ 
+  togglestate_add_tooltip(session,"apply_bc_method_tooltip",enable_logic,ttext_[["APPLY_BC_METHOD_DISABLED"]])
+},priority = 10)
 
-# # reset batch correction; really only needed where no batch correction desired
-# observeEvent(input$reset_batch_correction, {
-#   disable("reset_batch_correction")
-#   ## If not using reference normalized isobaric, make sure to render as pepdata
-#   makeobject(use_iso = (inherits(objects$omicsData, "isobaricpepData") && 
-#                           !is.null(get_isobaric_norm(objects$omicsData))))
-#   refnorm()
-#   makegroup()
-#   apply_filt()
-#   
-#   hide("ok_normalization")
-#   updateCollapse(session, "normalization_sidebar", open = "normalize_global_sidebar")
-# })
-    
+observeEvent(c(input$top_page,input$batch_correction_id,attributes(objects$omicsData)$data_info$norm_info$norm_type),{
 
+  req(objects$omicsData)
+  req(input$top_page == "normalization_tab")
+  # assume that this will be disabled and people won't be using batch correction
+  enable_logic = FALSE
+  # however if we have batch correction that is not null and molecule filter was added we set button to be enabled
+  if(!is.null(input$batch_correction_id) && input$batch_correction_id != "None" && input$add_molfilt %% 2 != 0){enable_logic = TRUE}
+  # if batch correction has already been ran we disable it again
+  if(attributes(objects$omicsData)$data_info$batch_info$is_bc){enable_logic = FALSE}
+  # we also disable the button if combat has been selected but the data has not been normalized yet
+  if(attributes(objects$omicsData)$data_info$norm_info$is_norm == FALSE & input$batch_correction_id == "ComBat"){enable_logic = FALSE}
 
+  togglestate_add_tooltip(session,"apply_bc_method_tooltip",enable_logic,ttext_[["APPLY_BC_METHOD_DISABLED"]])
+},priority = 10)
