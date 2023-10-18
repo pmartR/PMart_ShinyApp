@@ -188,6 +188,7 @@ list(
   #
 
   output$normalized_boxplots_cond <- renderUI({
+    req(pluck(attributes(objects$omicsData),"data_info","batch_info","is_bc") != TRUE)
     if (!is.null(objects$omicsData_2)) {
       ui1 <- withSpinner(plotlyOutput("normalized_boxplots"))
       ui2 <- withSpinner(plotlyOutput("normalized_boxplots_2"))
@@ -271,21 +272,45 @@ list(
       withSpinner(plotlyOutput("batch_plots"))
   }),
   
-  output$apply_bc_method_UI <- renderUI({
-    req(objects$omicsData)
-    # assume that this will be disabled and people won't be using batch correction
-    disable_logic = TRUE
-    # however if we have batch correction that is not null and molecule filter was added we set button to be enabled
-    if(!is.null(input$batch_correction_id) && input$batch_correction_id != "None" && input$add_molfilt %% 2 != 0){disable_logic = FALSE}
-    # if batch correction has already been ran we disable it again
-    if(attributes(objects$omicsData)$data_info$batch_info$is_bc){disable_logic = TRUE}
-    # we also disable the button if combat has been selected but the data has not been normalized yet
-    if(attributes(objects$omicsData)$data_info$norm_info$is_norm == FALSE && input$batch_correction_id == "ComBat"){disable_logic = TRUE}
-    bsButton("apply_bc_method", "Apply batch correction", style = "primary",disabled = disable_logic)
-  }),
+  # output$apply_bc_method_UI <- renderUI({
+  #   req(objects$omicsData)
+  #   # # assume that this will be disabled and people won't be using batch correction
+  #   # disable_logic = TRUE
+  #   # # however if we have batch correction that is not null and molecule filter was added we set button to be enabled
+  #   # if(!is.null(input$batch_correction_id) && input$batch_correction_id != "None" && input$add_molfilt %% 2 != 0){disable_logic = FALSE}
+  #   # # if batch correction has already been ran we disable it again
+  #   # if(attributes(objects$omicsData)$data_info$batch_info$is_bc){disable_logic = TRUE}
+  #   # # we also disable the button if combat has been selected but the data has not been normalized yet
+  #   # if(attributes(objects$omicsData)$data_info$norm_info$is_norm == FALSE && input$batch_correction_id == "ComBat"){disable_logic = TRUE}
+  #   div(
+  #     id = "apply_bc_method_tooltip",
+  #     class = "tooltip-wrapper",
+  #     bsButton("apply_bc_method", "Apply batch correction", style = "primary")
+  #   )
+  # }),
+  
+  # output$inspect_norm_UI <- renderUI({
+  #   req(objects$omicsData)
+  #   div(
+  #     id = "inspect_norm_tooltip",
+  #     class = "tooltip-wrapper",
+  #     bsButton("inspect_norm","Diagnostics for normalization selection",style = "primary"),
+  #     style = "width: 100%;"
+  #   )
+  # }),
+  
+  # output$apply_normalization_UI <- renderUI({
+  #   req(objects$omicsData)
+  #   div(
+  #     id = "apply_normalization_tooltip",
+  #     class = "tooltip-wrapper",
+  #     bsButton("apply_normalization", "Apply normalization", style = "primary")
+  #   )
+  # }),
   
   # plot normalized data after modal dismiss
   output$batch_boxplots <- renderPlotly({
+    # req data not be batch corrected
     req(pluck(attributes(objects$omicsData), "data_info", "batch_info", "is_bc") == TRUE)
     # if they come in with batch corrected data, could lead to wonky behavior
     # if batch corrected disable normalization tab
@@ -319,6 +344,16 @@ list(
     }
     else {
       withSpinner(plotlyOutput("batch_boxplots"))
+    }
+  }),
+  
+  output$normalization_dismiss_UI <- renderUI({
+    req(!is.null(input$batch_correction_id))
+    
+    if(input$batch_correction_id %in% c("ComBat","EigenMS")){
+      actionButton("normalization_dismiss", "Review results and apply batch correction", width = "75%")
+    } else {
+      actionButton("normalization_dismiss", "Review results", width = "75%")
     }
   })
   
