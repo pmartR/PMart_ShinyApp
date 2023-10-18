@@ -72,7 +72,8 @@ ttext_ <- list(
   WHAT_IS_MC = "This option defines p-value adjustment for multiple comparisons within a single biomolecule.  For example, if you have three groups A, B, and C and you want to test comparisons A vs B, A vs C, and B vs C, you will run adjustment on the resulting three p-values for all biomolecules.",
   WHAT_IS_FDR = "This option defines p-value adjustment for multiple tests arising from many biomolecules.  For example, if you have 100 biomolecules and some number of comparisons, you will run adjustment on the resulting 100 p-values for each comparison.",
   REVIEW_FILTERS_DISABLED = "Review and Apply Filters disabled due to your selection of batch correction method. ComBat requires that a molecule filter filtered by batch applied to proceed. EigenMS requires that a molecule filter filtered by groups applied to proceed.",
-  APPLY_BC_METHOD_DISABLED = "Apply Batch Correction disabled. This means that batch correction has either already been applied or a pre-processing step required for batch correction has not been applied. If using ComBat, please normalize the data prior to running batch correction. If running EigenMS, please doublecheck previous steps have been applied correctly."
+  APPLY_BC_METHOD_DISABLED = "Apply Batch Correction disabled. This means that batch correction has either already been applied or a pre-processing step required for batch correction has not been applied. If using ComBat, please normalize the data prior to running batch correction. If running EigenMS, please doublecheck previous steps have been applied correctly.",
+  EIGENMS_NORM_DISABLED = "When using EigenMS for batch correction, no separate normalization step is required."
 ) 
 
 #'@details info text NOT displayed in tooltips.  Usually in warnings UI elements

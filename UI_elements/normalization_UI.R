@@ -348,9 +348,8 @@ list(
   }),
   
   output$normalization_dismiss_UI <- renderUI({
-    req(!is.null(input$batch_correction_id))
     
-    if(input$batch_correction_id %in% c("ComBat","EigenMS")){
+    if(!is.null(input$batch_correction_id) && input$batch_correction_id %in% c("ComBat","EigenMS")){
       actionButton("normalization_dismiss", "Review results and apply batch correction", width = "75%")
     } else {
       actionButton("normalization_dismiss", "Review results", width = "75%")

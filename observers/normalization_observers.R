@@ -549,7 +549,8 @@ observeEvent(input$inspect_norm, {
 observeEvent(input$apply_bc_method,{
   req(input$top_page == "normalization_tab")
   req(!is.null(objects$omicsData))
-  
+  req(!is.null(input$batch_correction_id))
+
   # disable button while working...
   disable("apply_bc_method")
   show("analyze_batch_busy")
@@ -615,7 +616,7 @@ observeEvent(input$apply_bc_method,{
     )
 })
 
-observeEvent(c(input$top_page, input$batch_correction_id),{
+observeEvent(c(input$top_page),{
   req(objects$omicsData)
   req(input$top_page == "normalization_tab")
   
@@ -625,12 +626,12 @@ observeEvent(c(input$top_page, input$batch_correction_id),{
   if(!is.null(input$batch_correction_id) && input$batch_correction_id == "EigenMS"){enable_logic = FALSE}
   #disable("inspect_norm")
   #disable("apply_normalization")
-  togglestate_add_tooltip(session,"inspect_norm_tooltip",enable_logic,"When using EigenMS for batch correction, no separate normalization step is required.")
-  togglestate_add_tooltip(session,"apply_normalization_tooltip",enable_logic,"When using EigenMS for batch correction, no separate normalization step is required.")
+  togglestate_add_tooltip(session,"inspect_norm_tooltip",enable_logic,ttext_[["EIGENMS_NORM_DISABLED"]])
+  togglestate_add_tooltip(session,"apply_normalization_tooltip",enable_logic,ttext_[["EIGENMS_NORM_DISABLED"]])
   
 }, priority = -10)
 
-observeEvent(c(input$top_page,input$batch_correction_id),{
+observeEvent(c(input$top_page),{
   
   req(objects$omicsData)
   req(input$top_page == "normalization_tab")
@@ -641,12 +642,12 @@ observeEvent(c(input$top_page,input$batch_correction_id),{
   # if batch correction has already been ran we disable it again
   if(attributes(objects$omicsData)$data_info$batch_info$is_bc){enable_logic = FALSE}
   # we also disable the button if combat has been selected but the data has not been normalized yet
-  if(attributes(objects$omicsData)$data_info$norm_info$is_norm == FALSE & input$batch_correction_id == "ComBat"){enable_logic = FALSE}
+  if(attributes(objects$omicsData)$data_info$norm_info$is_norm == FALSE & !is.null(input$batch_correction_id) && input$batch_correction_id == "ComBat"){enable_logic = FALSE}
  
   togglestate_add_tooltip(session,"apply_bc_method_tooltip",enable_logic,ttext_[["APPLY_BC_METHOD_DISABLED"]])
 },priority = 10)
 
-observeEvent(c(input$top_page,input$batch_correction_id,attributes(objects$omicsData)$data_info$norm_info$norm_type),{
+observeEvent(c(input$top_page,attributes(objects$omicsData)$data_info$norm_info$norm_type),{
 
   req(objects$omicsData)
   req(input$top_page == "normalization_tab")
@@ -657,7 +658,7 @@ observeEvent(c(input$top_page,input$batch_correction_id,attributes(objects$omics
   # if batch correction has already been ran we disable it again
   if(attributes(objects$omicsData)$data_info$batch_info$is_bc){enable_logic = FALSE}
   # we also disable the button if combat has been selected but the data has not been normalized yet
-  if(attributes(objects$omicsData)$data_info$norm_info$is_norm == FALSE & input$batch_correction_id == "ComBat"){enable_logic = FALSE}
+  if(attributes(objects$omicsData)$data_info$norm_info$is_norm == FALSE & !is.null(input$batch_correction_id) && input$batch_correction_id == "ComBat"){enable_logic = FALSE}
 
   togglestate_add_tooltip(session,"apply_bc_method_tooltip",enable_logic,ttext_[["APPLY_BC_METHOD_DISABLED"]])
 },priority = 10)
