@@ -26,6 +26,7 @@ normalization_UI <- function() {
           # spans sub-collapse
           bsCollapse(
             id = "spans_submenu",
+            open = "choose_params",
             hidden(
               bsCollapsePanel(
                 "Use SPANS to Identify Normalization (Peptides or Proteins Only)",
@@ -75,14 +76,14 @@ normalization_UI <- function() {
               hr(),
               hidden(bsButton("use_selected_spans", 
                               "Use parameters from table selection")),
-              hidden(tagAppendAttributes(
-                bsButton(
-                "inspect_norm",
-                "Diagnostics for normalization selection",
-                style = "primary"
-                ),
-                style = "width: 100%;"
-              )),
+              tagAppendAttributes(
+                hidden(div(
+                  id = "inspect_norm_tooltip",
+                  class = "tooltip-wrapper",
+                  bsButton("inspect_norm","Diagnostics for normalization selection",style = "primary"),
+                  style = "width: 100%;"
+                ))
+              ),
               hidden(
                 div(
                   "Analyzing, please wait...",
@@ -94,11 +95,23 @@ normalization_UI <- function() {
           ),
           hr(),
           hidden(
-            bsButton("apply_normalization", "Apply normalization", style = "primary")
+            div(
+              id = "apply_normalization_tooltip",
+              class = "tooltip-wrapper",
+              bsButton("apply_normalization", "Apply normalization", style = "primary")
+            )
+            # need to have observer run when that button is visible in the panel
+            # observer maybe run on spans or manual
+            # update priorities so that it runs last
+            # does it need to be hidden?
             )
         )
       ),
-      uiOutput("apply_bc_method_UI"),
+      div(
+        id = "apply_bc_method_tooltip",
+        class = "tooltip-wrapper",
+        bsButton("apply_bc_method", "Apply batch correction", style = "primary")
+      ),
       hidden(
         div(
           "Analyzing, please wait...",
