@@ -7,7 +7,7 @@ This tab is for running statistical and other post-normalization analyses on you
 3.  Fill out any additional settings such as whether to apply one or both types of statistical tests for iMd-ANOVA, or which multiple comparison adjustments to apply.
 4.  Click the blue button at the bottom of the left column to perform the analysis.  A modal indicating success will appear and plots/tables of your results will become available in the right-side panels.
 
-**A note on non-normal distributions and the ANOVA:**  The assumption of normally distributed residuals for the ANOVA F-test can in practice be somewhat violated as the test statistic is well known to be robust to mild deviations from normality (Knief, 2021) (Lix, 1996).  Though techniques such as log transformation may be adequate to achieve approximate normality, in more extreme cases involving smaller sample sizes and more extreme/heterogenous deviations from normality, ANOVA may not be appropriate.  See (Lix, 1996) for discussion of alternative tests.
+**A note on non-normal distributions and the ANOVA:** The F statistic is well-known to be robust to mild deviations from normality (Knief, 2021) (Lix, 1996), and in many cases a log transformation is considered adequate to achieve a sufficiently Normal distribution. However, in extreme cases involving small sample sizes and greater or heterogenous deviations from normality, ANOVA may not be appropriate. See (Lix, 1996) for discussion of alternative tests. ANOVA based tests are common practice and widely accepted for log-transformed proteomics, metabolomics, and lipidomics data. Some caution should be used with NMR-based data, and alternative tests are provided for RNAseq data.
 
 ***
 
