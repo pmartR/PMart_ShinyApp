@@ -6,7 +6,7 @@ On the left side are various filters with buttons to 'Add/Remove' those filters 
 
 - Molecule filter
 - Total count filter
-- Proteomics filter
+- Proteomics filter*
 - Coefficient of variation filter
 - iMd-ANOVA filter
 - RNA filter (library size)
@@ -15,6 +15,8 @@ On the left side are various filters with buttons to 'Add/Remove' those filters 
 - Custom filter
 
 So if the user selected the molecule and rMd filters, the app will first apply the molecule filter and then the rMd filter.  Filter options may differ between datatypes.  See the [pmartR package](https://github.com/pmartR/pmartR) for precise details about each filter.
+
+- *A note about proteomics filter order:  The proteomics filter has an option to remove redundant peptides as well as proteins with too few peptides mapping to them.  If both options are selected, the redundant peptides will be removed before determining the number of peptides mapping to each protein.  
 
 **Biomolecule Filters** filter the biomolecules (rows) of your data by criteria such as minimum number of samples with non-missing values.
 
