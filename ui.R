@@ -29,7 +29,8 @@ ui <- function(request) {
       windowTitle = "pmartR",
       id = "top_page", theme = "pmartR.css",
       tabPanel(
-        'intro_panel',
+        'Welcome',
+        value = "intro_panel",
         wellPanel(style='width:75%',
           includeMarkdown("www/welcome.md"),
           downloadButton("download_example_data", "Download example data"),
