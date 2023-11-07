@@ -2,22 +2,38 @@
 #'are not working with pepData.  We will still leave the tabs enabled if we have
 #'rolled up to proData, but for review only.
 observe({
+  #browser()
   emeta_exists <- isTruthy(revals$e_meta) | isTruthy(objects$omicsData$e_meta)
   is_pepdata <- inherits(objects$omicsData, "pepData") | inherits(objects$omicsData_pre_rollup, 'pepData')
   omicsdata_exists <- !is.null(objects$omicsData)
   
   #' First disable the peptide-specific tabs if we don't have e-meta or we are
-  #' not analyzing pepdata
+  #' not analyzing pepdata or we 
+  #' have not normalized/batch corrected the data
   cond = !emeta_exists | !is_pepdata
   
   cond_ref <- (is_pepdata && input$labeled_yn == "iso") || inherits(objects$omicsData, "nmrData")
   
   cond_seq <- inherits(objects$omicsData, "seqData") || is.null(objects$omicsData)
   
+  cond_norm <- FALSE
+  if(!is.null(attributes(objects$omicsData)$data_info$norm_info$is_normalized)){
+    cond_norm <- attributes(objects$omicsData)$data_info$norm_info$is_normalized
+    # set this to be FALSE again if we are working with ComBat 
+    if(!is.null(input$batch_correction_id) && input$batch_correction_id == "ComBat"){
+      cond_norm <- FALSE
+    }
+  }
+  cond_bc <- FALSE
+  if(!is.null(attributes(objects$omicsData)$data_info$batch_info$is_bc)){
+    cond_norm <- attributes(objects$omicsData)$data_info$batch_info$is_bc
+  }
+  cond_norm_bc <- cond_norm | cond_bc
+  
   toggleTooltip(
     session, 
     tooltip_text = ttext_[['TABDISABLE_NOT_PEP']], 
-    condition = !is_pepdata,
+    condition = (!is_pepdata & cond_norm),
     selector = ".nav li a[data-value=peptide_statistics_tab]"
   )
   
@@ -42,7 +58,7 @@ observe({
     selector = ".nav li a[data-value=normalization_tab]"
   )
   
-  toggleTab("peptide_statistics_tab", condition = is_pepdata)
+  toggleTab("peptide_statistics_tab", condition = is_pepdata & cond_norm)
   toggleTab("protein_rollup_tab", condition = !cond)
   toggleTab("reference_tab", condition = cond_ref)
   toggleTab("normalization_tab", condition = !cond_seq)
@@ -63,11 +79,11 @@ observe({
   toggleTooltip(
     session, 
     tooltip_text = tooltip_text, 
-    condition = cond2 | cond3,
+    condition = ((cond2 | cond3) & cond_norm),
     selector = ".nav li a[data-value=statistics_tab]"
   )
   
-  toggleTab("statistics_tab", condition = !cond2 & !cond3 & omicsdata_exists)
+  toggleTab("statistics_tab", condition = !cond2 & !cond3 & cond_norm & omicsdata_exists)
 })
 
 #'@details Disable all tabs until omicsData object exists

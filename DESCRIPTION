@@ -1,6 +1,6 @@
 Package: pmartR-shiny
 Title: Preprocessing and analysis of single-omics datasets.
-Version: 1.9.5
+Version: 0.0.0.1
 Authors@R: 
     person(given = "Daniel",
            family = "Claborne",
@@ -17,7 +17,6 @@ Depends:
   ggplot2,
   markdown,
   plotly,
-  pmartR,
   purrr,
   readr,
   renv,
@@ -26,7 +25,6 @@ Depends:
   rlang,
   shiny,
   shinyBS,
-  shinybusy,
   shinyWidgets,
   shinyalert,
   shinycssloaders,
@@ -34,7 +32,9 @@ Depends:
   stringr,
   yaml
 Remotes:
-  mapDataAccess
+  mapDataAccess,
+  pmartR
+  malbacR
 Suggests:
   shinytest2,
   testthat,
