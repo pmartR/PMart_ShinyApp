@@ -34,7 +34,8 @@ Depends:
   stringr,
   yaml
 Remotes:
-  mapDataAccess
+  mapDataAccess,
+  malbacR
 Suggests:
   shinytest2,
   testthat,
