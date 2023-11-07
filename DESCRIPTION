@@ -34,6 +34,7 @@ Depends:
 Remotes:
   mapDataAccess,
   pmartR
+  malbacR
 Suggests:
   shinytest2,
   testthat,

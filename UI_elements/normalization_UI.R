@@ -196,7 +196,10 @@ list(
 
   # go to rollup tab button only visible in peptide land
   output$goto_stats <- renderUI({
-    if (inherits(objects$omicsData, "pepData")) {
+    if (!is.null(input$batch_correction_id) && input$batch_correction_id == "ComBat"){
+      # empty we don't return anything
+    }
+    else if (inherits(objects$omicsData, "pepData")) {
       actionButton("goto_pepstats", "Continue to Peptide Statistics tab", style = "margin-top:5px;width:75%")
     }
     else {
