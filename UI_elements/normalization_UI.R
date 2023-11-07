@@ -196,18 +196,16 @@ list(
 
   # go to rollup tab button only visible in peptide land
   output$goto_stats <- renderUI({
-    if (inherits(objects$omicsData, "pepData")) {
-      div(
-        actionButton("goto_pepstats", "Continue to Peptide Statistics tab", style = "margin-top:5px;width:75%"),
-        br(),
-        actionButton("goto_rollup", "Continue to Protein Roll Up tab", style = "margin-top:5px;width:75%")
-      )
-    } else {
+    if (!is.null(input$batch_correction_id) && input$batch_correction_id == "ComBat"){
+      # empty we don't return anything
+    }
+    else if (inherits(objects$omicsData, "pepData")) {
+      actionButton("goto_pepstats", "Continue to Peptide Statistics tab", style = "margin-top:5px;width:75%")
+    }
+    else {
       actionButton("goto_statistics", "Continue to Statistics tab", style = "margin-top:5px;width:75%")
     }
   }),
-  
-  outputOptions(output, "goto_stats", suspendWhenHidden=F),
 
   # group tab warnings
   output$warnings_normalize <- renderUI({
