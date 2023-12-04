@@ -41,9 +41,10 @@ RUN --mount=type=secret,id=gitlab_pat export GITLAB_PAT="$(cat /run/secrets/gitl
 && R -e 'renv::restore()'
 
 # install commonly updated packages
-RUN --mount=type=secret,id=gitlab_pat export GITLAB_PAT="$(cat /run/secrets/gitlab_pat)" \
+RUN --mount=type=secret,id=access_tokens set -a \
+&& . /run/secrets/access_tokens && set +a \
 && R -e "renv::install('gitlab@code.emsl.pnl.gov::multiomics-analyses/mapdataaccess-lib@7225058a1563944d2f20b10655cb2b92ae23ed71')" \
-&& R -e "install.packages('BiocManager');options(repos=BiocManager::repositories(version = "3.13"));renv::install('pmartR/pmartR@5c58850a5db49265e253b91f39b93b37128b742f')"
+&& R -e "install.packages('BiocManager');options(repos=BiocManager::repositories(version = "3.13"));remotes::install_github('pmartR/pmartR@20fdd34bf972bc0313cefd242d822ff7273e06c8');install.packages('cli', repos=c('CRAN' = 'https://cloud.r-project.org'));renv::install('tidyr@1.3.0', repos=c('CRAN' = 'https://cloud.r-project.org'))"
 
 # Install python dependencies
 COPY requirements.txt .
