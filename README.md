@@ -58,10 +58,10 @@ The different parts of a shiny app (observers, reactive variables, UI elements) 
 
 We build a base container which has all the system libraries and R packages installed, and then build a container on top of it that simply copies the app source code and exposes the correct port.  There are two Dockerfiles, and two corresponding .dockerignore files.
 
-**To build the base container**, you must provide a gitlab PAT in order to install mapDataAccess and other private git repos.  Assume you have an account that has access to the private gitlab repos in pmart; now generate a personal access token:  https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html.  Put this token in a file next to the Dockerfile, say `.mysecret`  
+**To build the base container**, you must provide a gitlab PAT in order to install mapDataAccess and other private git repos.  Assume you have an account that has access to the private gitlab repos in pmart; now generate a personal access token:  https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html.  Put this token in a text file next to the Dockerfile, say `.mysecret` with contains the line GITLAB_PAT=&lt;your token&gt;.  Sometimes github will rate limit installation from repositories, but you can provite a github PAT (https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) to get around this:  Optionally, on another line in `.mysecret` put GITHUB_PAT=&lt;your token&gt;.
 
 Now, replacing &lt;tag&gt; with whatever version, run:  
-`docker build -f Dockerfile-base --secret id=gitlab_pat,src=.mysecret -t code-registry.emsl.pnl.gov/multiomics-analyses/pmart_standalone/base:<tag>` .
+`docker build -f Dockerfile-base --secret id=access_tokens,src=.mysecret -t code-registry.emsl.pnl.gov/multiomics-analyses/pmart_standalone/base:<tag>` .
 
 **To build the 'top' container**:  
 Make sure Dockerfile refers to the correct base container or specify the --build-arg base_tag=<your base image tag, i.e. 1.2> in the build command if you have updated any dependencies:  

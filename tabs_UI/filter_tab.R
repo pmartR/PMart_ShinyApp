@@ -63,7 +63,7 @@ filter_UI <- function() {
 
         # sample filters
         bsCollapsePanel(div(
-          "Sample Filters",
+          div(class = 'inline-wrapper-1', "Sample Filters", tipify(div(style="max-width:750px", blueexcl), ttext_[["SAMPLE_FILTER_CAUTION"]], options = list(container = "body"))),
           hidden(div(id = "ok_sample_filters", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
           ),
           value = "sample_filters",

@@ -15,7 +15,7 @@ The options for the way normalization is applied include:
 
 ## Manual
 
-Select your normalization scheme and hit 'Diagnostics for normalization selection'; the app will check if this normalization approach induces bias in your data.  When finished, a modal will appear displaying the results of the analysis.  If you are satisfied with the current settings for normalization, click 'Apply normalization'.
+Select your normalization scheme and hit 'Diagnostics for normalization selection'; the app will check if this normalization approach induces bias in your data.  When finished, a modal will appear displaying the results of the analysis.  If you are satisfied with the current settings for normalization, click 'Apply normalization'.  If you wish to try a different normalization approach, simply select a different subset and normalization function and click the ‘Diagnostics for normalization selection’ button to evaluate the new selection.
 
 ## SPANS
 

@@ -193,7 +193,8 @@ shinyServer(function(session, input, output) {
     content = function(fname) {
       files = file.path("./example_data", c(
         'example_data_metab',
-        'example_data_rnaseq'
+        'example_data_rnaseq',
+        'example_data_isobaricpep'
       ))
       zip(zipfile = fname, files = files, flags = "-r")
       if (file.exists(paste0(fname, ".zip"))) {
