@@ -5,7 +5,7 @@ download_UI <- function() {
     bsCollapse(
       id = "download_collapse", 
       multiple = TRUE, 
-      open = c("download_plots", "download_tables"),
+      open = c("download_plots", "download_tables", "generate_report"),
       bsCollapsePanel(div(
         "Choose Plots to Download",
         hidden(div(
@@ -78,6 +78,7 @@ download_UI <- function() {
       ),
       bsCollapsePanel(
         "Generate Report", 
+        value = "generate_report",
         textInput("ReportName", "Name report", "pmartR_Report"), 
         pickerInput("ReportType", "Report type", c("HTML", "PDF"), "HTML"), # TODO:  Make reports work with .pdf
         conditionalPanel("input.ReportType == 'PDF'", {

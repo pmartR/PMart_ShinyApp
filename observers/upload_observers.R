@@ -347,6 +347,7 @@ observeEvent(input$makeobject, {
                       Future processing will be performed on the uploaded data.</h4>'),
             hr(),
             actionButton("upload_dismiss", "Review results", width = "75%"),
+            br(),
             actionButton("goto_groups", "Continue to Group Samples tab", style = "margin:5px;width:75%")
           )
         ),

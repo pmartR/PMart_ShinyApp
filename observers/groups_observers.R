@@ -192,6 +192,7 @@ observeEvent(input$group_designation, {
       usebutton <- actionButton("goto_reference", "Continue to Reference tab", style = "margin:5px;width:75%")
     } else {
       usebutton <- div(actionButton("goto_qc", "Continue to Data Summary tab", style = "margin:5px;width:75%"),
+                       br(),
                        actionButton("goto_filter", "Continue to Filter tab", style = "margin:5px;width:75%"))
     }
 
@@ -206,6 +207,7 @@ observeEvent(input$group_designation, {
                       Future comparisons will be made across these groups.</h4>'),
             hr(),
             actionButton("groups_dismiss", "Review results", width = "75%"),
+            br(),
             usebutton
           )
         ),

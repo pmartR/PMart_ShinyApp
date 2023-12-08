@@ -1057,20 +1057,24 @@ observeEvent(input$apply_filters, {
     if(inherits(objects$omicsData, "nmrData")){
       buttons <- div(
         actionButton("filter_dismiss", "Stay on this tab", width = "75%"),
+        br(),
         actionButton("goto_norm", "Continue to Normalization tab (optional)", 
                      style = "margin-top:5px;width:75%"),
+        br(),
         actionButton("goto_stats_filter", "Continue to Statistics tab", 
                      style = "margin-top:5px;width:75%")
       )
     } else if(inherits(objects$omicsData, "seqData")){
       buttons <- div(
         actionButton("filter_dismiss", "Stay on this tab", width = "75%"),
+        br(),
         actionButton("goto_stats_filter", "Continue to Statistics tab", 
                      style = "margin-top:5px;width:75%")
       )
     } else {
       buttons <- div(
         actionButton("filter_dismiss", "Stay on this tab", width = "75%"),
+        br(),
         actionButton("goto_norm", "Continue to Normalization tab", style = "margin-top:5px;width:75%")
       )
     }

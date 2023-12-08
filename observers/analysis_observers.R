@@ -169,6 +169,7 @@ observeEvent(input$apply_imdanova, {
                       ),
                       hr(),
                       actionButton("stats_dismiss", "Review results", width = "75%"),
+                      br(),
                       actionButton("goto_downloads", "Continue to Download tab", width = "75%")
               )
             )
@@ -304,6 +305,7 @@ observeEvent(input$apply_seqstats, {
                      ),
                      hr(),
                      actionButton("stats_dismiss", "Review results", width = "75%"),
+                     br(),
                      actionButton("goto_downloads", "Continue to Download tab", width = "75%")
               )
             )

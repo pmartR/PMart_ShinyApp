@@ -9,6 +9,9 @@ success_modal <-
                       Future processing will be performed on the reference normalized data.</h4>'),
                hr(),
                actionButton("upload_dismiss", "Review results", width = "75%"),
+               br(),
+               actionButton("goto_qc", "Continue to Data Summary tab", style = "margin:5px;width:75%"),
+               br(),
                actionButton("goto_filter", "Continue to Filter tab", style = "margin:5px;width:75%")
         )
       ),
@@ -25,7 +28,9 @@ success_modal_no_input <-
                       You may proceed to the subsequent tabs.</h4>'),
              hr(),
              actionButton("ref_dismiss", "Review results", style = "margin:5px;width:75%"),
+             br(),
              actionButton("goto_qc", "Continue to Data Summary tab", style = "margin:5px;width:75%"),
+             br(),
              actionButton("goto_filter", "Continue to Filter tab", style = "margin:5px;width:75%")
       )
     ),
