@@ -312,7 +312,7 @@ observeEvent(c(input$apply_normalization, input$apply_normalization_modal), {
                   input$subset_fn, paste(unlist(ifelse(is.null(params), "None", params)), collapse = " | "), input$norm_fn
                 )),
                 hr(),
-                actionButton("normalization_dismiss", "Review results", width = "75%"),
+                actionButton("normalization_dismiss", "Review results", style = "margin:5px;width:75%"),
                 uiOutput("goto_stats")
                 )
             )

@@ -232,9 +232,9 @@ observeEvent(input$apply_rollup, {
                          )
                      ),
                      hr(),
-                     actionButton("rollup_dismiss", "Review results", width = "75%"),
-                     actionButton("rollup_goto_stats", "Continue to Statistics tab", width = "75%"),
-                     actionButton("rollup_goto_downloads", "Continue to Download tab", width = "75%")
+                     actionButton("rollup_dismiss", "Review results", style = "margin:5px;width:75%"),
+                     actionButton("rollup_goto_stats", "Continue to Statistics tab", style = "margin:5px;width:75%"),
+                     actionButton("rollup_goto_downloads", "Continue to Download tab", style = "margin:5px;width:75%")
               )
             )
           }

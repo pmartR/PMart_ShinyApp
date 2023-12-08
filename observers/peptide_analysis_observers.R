@@ -108,17 +108,17 @@ observeEvent(input$peptide_apply_imdanova, {
       
       if(is.null(objects$omicsData$e_meta)){
         buttons <- div(
-          actionButton("pepstats_dismiss", "Review results", width = "75%"),
+          actionButton("pepstats_dismiss", "Review results", style = "margin:5px;width:75%"),
           br(), 
-          actionButton("pep_goto_downloads", "Continue to Download tab", width = "75%")
+          actionButton("pep_goto_downloads", "Continue to Download tab", style = "margin:5px;width:75%")
         )
       } else {
         buttons <- div(
-          actionButton("pepstats_dismiss", "Review results", width = "75%"),
+          actionButton("pepstats_dismiss", "Review results", style = "margin:5px;width:75%"),
           br(), 
-          actionButton("goto_rollup", "Continue to Protein Roll Up tab", width = "75%"),
+          actionButton("goto_rollup", "Continue to Protein Roll Up tab", style = "margin:5px;width:75%"),
           br(), 
-          actionButton("pep_goto_downloads", "Continue to Download tab", width = "75%")
+          actionButton("pep_goto_downloads", "Continue to Download tab", style = "margin:5px;width:75%")
         )
       }
       

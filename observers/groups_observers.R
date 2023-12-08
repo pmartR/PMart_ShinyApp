@@ -206,7 +206,7 @@ observeEvent(input$group_designation, {
             HTML('<h4 style= "color:#1A5276">Your data has been successfully grouped.
                       Future comparisons will be made across these groups.</h4>'),
             hr(),
-            actionButton("groups_dismiss", "Review results", width = "75%"),
+            actionButton("groups_dismiss", "Review results", style = "margin:5px;width:75%"),
             br(),
             usebutton
           )

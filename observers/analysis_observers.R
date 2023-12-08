@@ -168,9 +168,9 @@ observeEvent(input$apply_imdanova, {
                         )
                       ),
                       hr(),
-                      actionButton("stats_dismiss", "Review results", width = "75%"),
+                      actionButton("stats_dismiss", "Review results", style = "margin:5px;width:75%"),
                       br(),
-                      actionButton("goto_downloads", "Continue to Download tab", width = "75%")
+                      actionButton("goto_downloads", "Continue to Download tab", style = "margin:5px;width:75%")
               )
             )
           },
@@ -304,9 +304,9 @@ observeEvent(input$apply_seqstats, {
                        )
                      ),
                      hr(),
-                     actionButton("stats_dismiss", "Review results", width = "75%"),
+                     actionButton("stats_dismiss", "Review results", style = "margin:5px;width:75%"),
                      br(),
-                     actionButton("goto_downloads", "Continue to Download tab", width = "75%")
+                     actionButton("goto_downloads", "Continue to Download tab", style = "margin:5px;width:75%")
               )
             )
           },
