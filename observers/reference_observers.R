@@ -8,7 +8,7 @@ success_modal <-
                HTML('<h4 style= "color:#1A5276">Your data has been successfully reference normalized. 
                       Future processing will be performed on the reference normalized data.</h4>'),
                hr(),
-               actionButton("upload_dismiss", "Review results", width = "75%"),
+               actionButton("upload_dismiss", "Review results", style = "margin:5px;width:75%"),
                br(),
                actionButton("goto_qc", "Continue to Data Summary tab", style = "margin:5px;width:75%"),
                br(),
