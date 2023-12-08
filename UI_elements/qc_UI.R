@@ -159,7 +159,7 @@ list(
     # ifelse chain for which type of plot
     if (input$which_qc_plot == "boxplots") {
       pargs <- list(
-        "omicsData" = objects$omicsData,
+        "x" = objects$omicsData,
         "order_by" = order_by,
         "color_by" = color_by,
         "use_VizSampNames" = use_VizSampNames,

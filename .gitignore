@@ -10,3 +10,6 @@ cfg/*
 !cfg/minio_config.yml
 !cfg/redis_config.yml
 www/preview.png
+www/**/*.html
+
+
