@@ -20,6 +20,7 @@ library(reshape2)
 
 # Pull app version from global variable
 MAP_ACTIVE <- ifelse(Sys.getenv("MAP_VERSION") == "1", TRUE, FALSE)
+MAP_URL <- ifelse(Sys.getenv("MAP_URL") == "", "https://map.emsl.pnnl.gov/app/map", Sys.getenv("MAP_URL"))
 
 # static objects
 FILTER_NAMES <- read.csv("./filter_names.csv", stringsAsFactors = F, check.names = F)

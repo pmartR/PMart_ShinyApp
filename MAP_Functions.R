@@ -204,7 +204,7 @@ list(
         ),
         actionButton(
           "exportMidConfirm",
-          "Export Data",
+          "Save and Export to MAP",
         ),
         modalButton("Exit")
       ),
@@ -281,13 +281,13 @@ list(
       )
       return(NULL)
     })
-    
+
     showModal(
       modalDialog(
         title = "Export Success!", 
         div(
           "Navigate back to the", 
-          tags$a("MAP home page", href = Parameters[Parameters$Parameter == "MAP_URL", "Local"], target="_blank"), 
+          tags$a("MAP home page", href = MAP_URL, target="_blank"), 
           "to use your data in another app."
         )
       )
