@@ -8,6 +8,7 @@ params:
   omicStats: NULL
   omicDiag: NULL
   pmart_inputs: NULL
+  output_format: NULL
 title: "`r params$titleName`"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 ---

@@ -80,7 +80,7 @@ download_UI <- function() {
         "Generate Report", 
         value = "generate_report",
         textInput("ReportName", "Name report", "pmartR_Report"), 
-        pickerInput("ReportType", "Report type", c("HTML", "PDF"), "HTML"), # TODO:  Make reports work with .pdf
+        uiOutput("report_type"),
         conditionalPanel("input.ReportType == 'PDF'", {
           HTML(messageBox("PDF reports do not include table previews. Please download all tables you wish to view."))
         }, style = "width: fit-content;"),

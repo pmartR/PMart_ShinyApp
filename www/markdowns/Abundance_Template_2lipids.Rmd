@@ -12,6 +12,7 @@ params:
   uploaded_omicData_2: NULL
   omicStats: NULL
   pmart_inputs: NULL
+  output_format: NULL
 title: "`r params$titleName`"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 ---

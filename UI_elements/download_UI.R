@@ -76,5 +76,16 @@ list(
   output$download_apply_style_UI <- renderUI({
     req(input$download_plot_table_rows_selected)
     return(style_UI("download"))
-  }) 
+  }),
+  
+  #' To control which reports can be generated, temporarily
+  #' TODO:  Make PDF work with all reports.
+  output$report_type <- renderUI({
+    if (isTruthy(inherits(objects$omicsData, "seqData") || two_lipids())) {
+      choices = c("HTML")
+    } else {
+      choices = c("HTML", "PDF")
+    }
+    return(pickerInput("ReportType", "Report type", choices, "HTML"))
+  })
 )
