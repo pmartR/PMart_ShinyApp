@@ -29,9 +29,19 @@ output$ReportDownload <- downloadHandler(
       
       ### OG files ###
       # Pull the original edata, emeta, and fdata 
-      edata <- if (!isTruthy(e_data())) NULL else e_data()
-      emeta <- if (!isTruthy(f_data())) NULL else f_data()
-      fdata <- if (!isTruthy(revals$e_meta)) NULL else revals$e_meta
+      # handle midpoint, which don't fill out all the stuff at the beginning of the app
+      if (MAP_ACTIVE) {
+        if ("Midpoint" %in% names(MapConnect)) {
+          edata <- MapConnect$Midpoint$Tracking$`Original Files`$Data$e_data
+          emeta <- MapConnect$Midpoint$Tracking$`Original Files`$Data$e_meta
+          fdata <- MapConnect$Midpoint$Tracking$`Original Files`$Data$f_data
+        }
+        # project omic files populate the reactives, and are handled by the next block:
+      } else {
+        edata <- if (!isTruthy(e_data())) NULL else e_data()
+        emeta <- if (!isTruthy(f_data())) NULL else f_data()
+        fdata <- if (!isTruthy(revals$e_meta)) NULL else revals$e_meta 
+      }
           
       ### Different rmd parameters per datatype ###
       
