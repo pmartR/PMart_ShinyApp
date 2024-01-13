@@ -249,6 +249,8 @@ shinyServer(function(session, input, output) {
   } else {
     hide(id = "loading-gray-overlay")
     
+    MapConnect <- NULL
+    
     cfg <- yaml::read_yaml(cfg_path)
     
     python_venv <- get_config_variable(cfg, "python_venv")
