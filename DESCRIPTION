@@ -17,6 +17,7 @@ Depends:
   ggplot2,
   markdown,
   plotly,
+  pmartR,
   purrr,
   readr,
   renv,
@@ -32,8 +33,7 @@ Depends:
   stringr,
   yaml
 Remotes:
-  mapDataAccess,
-  pmartR
+  mapDataAccess
 Suggests:
   shinytest2,
   testthat,
