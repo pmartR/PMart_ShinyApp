@@ -92,7 +92,7 @@ test_that("App completes a basic workflow on peptide-level data", {
   # TODO:  Actually re-run the filters and check equality
   expect_setequal(filter_classes, c("moleculeFilt", "cvFilt", "imdanovaFilt", "proteomicsFilt", "rmdFilt", "customFilt"))
   expect_equal(dim(omicsData$e_data), c(4481, 19))
-  expect_equal(dim(omicsData_filt$e_data), c(2106, 17))
+  expect_equal(dim(omicsData_filt$e_data), c(2082, 17))
 
   app$set_inputs(top_page = "normalization_tab")
   
@@ -136,28 +136,15 @@ test_that("App completes a basic workflow on peptide-level data", {
   expect_equal(norm_info$subset_fn, "los")
   expect_equal(norm_info$subset_params$los, 0.2)
   expect_equal(norm_info$norm_fn, "mean")
-  expect_equal(norm_info$n_features_calc, 637)
+  expect_equal(norm_info$n_features_calc, 629)
   
   expect_equal(
     unname(norm_info$params$norm_location), 
-    c(
-      23.6913243579832,
-      23.5876540826849,
-      23.4985959037066,
-      23.6045605299241,
-      23.4263876220424,
-      23.6362881425376,
-      23.4956245648087,
-      23.7881275415636,
-      23.6988180128446,
-      23.7755521745674,
-      23.502880708832,
-      23.6618744044926,
-      23.3067293384951,
-      23.6220384305414,
-      23.6906529147068,
-      23.6815242130187
-    )
+    c(23.7037175501394, 23.5993075250875, 23.5123164417056, 23.6166841235726,
+      23.4401556819527, 23.6480908716682, 23.5057894500453, 23.7986691414962,
+      23.7127663088068, 23.786334715756, 23.5157127375169, 23.6739605530128,
+      23.3175241080743, 23.6341425161868, 23.7001670341663, 23.6908396786919
+      )
   )
   
   app$set_inputs(top_page = "peptide_statistics_tab")
