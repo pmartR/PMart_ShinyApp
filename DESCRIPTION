@@ -1,6 +1,6 @@
 Package: pmartR-shiny
 Title: Preprocessing and analysis of single-omics datasets.
-Version: 1.9.4
+Version: 1.9.5
 Authors@R: 
     person(given = "Daniel",
            family = "Claborne",
