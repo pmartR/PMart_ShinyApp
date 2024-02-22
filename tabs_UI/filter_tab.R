@@ -1,5 +1,6 @@
 
 
+
 filter_UI <- function() {
   tabPanel("Filter",
     value = "filter_tab",
@@ -41,12 +42,15 @@ filter_UI <- function() {
           ),
           
           # proteomics filter
-          add_filter_UI(
-            filter_name = "profilt",
-            title = "Proteomics Filter",
-            tooltip_text = ttext_[["PROTEOMICS_FILTER_INFO"]],
-            numericInput("min_num_peps", "Minimum number of peptides mapped to each protein:", min = 1, value = 2, step = 1),
-            checkboxInput("degen_peps", "Remove Degenerate Peptides?", TRUE)
+          conditionalPanel(
+            "output$toggle_profilt",
+            add_filter_UI(
+              filter_name = "profilt",
+              title = "Proteomics Filter",
+              tooltip_text = ttext_[["PROTEOMICS_FILTER_INFO"]],
+              numericInput("min_num_peps", "Minimum number of peptides mapped to each protein:", min = 1, value = 2, step = 1),
+              checkboxInput("degen_peps", "Remove Degenerate Peptides?", TRUE)
+            )
           ),
           
           ## total count filter
@@ -128,7 +132,7 @@ filter_UI <- function() {
           hr(),
           uiOutput("edata_customfilt_pickers"), 
           hr(),
-          h4("Filter by biomolecule information:"),
+          tags$b("Filter by biomolecule information:"),
           uiOutput("emeta_customfilt_which_col"),
           uiOutput("emeta_customfilt_pickers"),
           hr(),
