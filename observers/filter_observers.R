@@ -1133,8 +1133,6 @@ observeEvent(input$apply_filters, {
       )
     )
   }
-
-  #### CUSTOM FILTER UNDER (mental) CONSTRUCTION #####
 })
 
 #'@details enable the apply button if applying filters would cause a reset of
@@ -1142,6 +1140,99 @@ observeEvent(input$apply_filters, {
 observeEvent(input$allow_reapply_filters, {
   shinyjs::enable("apply_filters")
 }, ignoreInit = T)
+
+### Filter Disabling 
+#' Filters are created using `add_filter_UI`, which wraps all elements in a div
+#' having css class `tooltip-wrapper` and id `sprintf("add_%s_ttip_control", filter_name)`
+#' We can use togglestate_add_tooltip, supposedly, to enable/disable based on some condition.
+
+#' @details Imd-ANOVA filter, disable if we don't have at least 3 samples per group
+#' ... disable functionality (min/max values on G-test/ANOVA)
+observeEvent(c(input[["min_nonmiss_gtest"]], input[["min_nonmiss_anova"]], objects$omicsData), {
+  req(grepl("^filter_tab$", input$top_page, perl = TRUE),
+      num_groups() > 1,
+      !inherits(objects$omicsData, "seqData"))
+  # check that gtest and anova minimum values are valid
+  # empty numericinput (NA) is ok as long as one of them is valid
+  tmpfilt <- tryCatch(
+    {
+      revals$warnings_filter$imdanovafilt_min_num <<- NULL
+      imdanova_filter(objects$omicsData)
+    },
+    error = function(e) {
+      msg = sprintf("An imd-anova filter cannot be created:  %s", e)
+      revals$warnings_filter$imdanovafilt_min_num <<- messageBox(type = "error", msg)
+      return(msg)
+    }
+  )
+
+  if (!inherits(tmpfilt, 'imdanovaFilt')) {
+    return(NULL)
+  }
+
+  gsizes <- unique(attributes(tmpfilt)$group_sizes$n_group)
+  minsize <- min(gsizes)
+  # get the next largest group, we assume there is at least one non-singleton group
+  if (minsize == 1) {
+    minsize <- sort(gsizes)[2]
+  }
+
+  # gtest must be less than minimum group size...
+  gtest_ok1 <- ifelse(is.na(input$min_nonmiss_gtest), TRUE,
+    input$min_nonmiss_gtest <= minsize
+  )
+  # ...and >= 3
+  gtest_ok2 <- ifelse(is.na(input$min_nonmiss_gtest), TRUE,
+    input$min_nonmiss_gtest >= 3
+  )
+
+  # anova must be less than minimum group size...
+  anova_ok1 <- ifelse(is.na(input$min_nonmiss_anova), TRUE,
+    input$min_nonmiss_anova <= minsize
+  )
+  # ... and >= 2
+  anova_ok2 <- ifelse(is.na(input$min_nonmiss_anova), TRUE,
+    input$min_nonmiss_anova >= 2
+  )
+
+  gtest_ok <- gtest_ok1 & gtest_ok2
+  anova_ok <- anova_ok1 & anova_ok2
+
+  # have to specify at least one min_nonmiss value
+  both_na <- is.na(input$min_nonmiss_gtest) & is.na(input$min_nonmiss_anova)
+  
+  # initial failure check for input parameters
+  fail_check <- any(!(gtest_ok & anova_ok), both_na)
+  
+  # In flow control because the other inputs need to be valid for this to run.
+  if(!fail_check) {
+    # It filters out at least one observation
+    min_nonmiss_gtest <- if (is.na(input$min_nonmiss_gtest)) NULL else input$min_nonmiss_gtest
+    min_nonmiss_anova <- if (is.na(input$min_nonmiss_anova)) NULL else input$min_nonmiss_anova
+    
+    imd_summ = summary(tmpfilt, min_nonmiss_anova, min_nonmiss_gtest)
+    none_filtered = is.null(imd_summ$num_filtered) | imd_summ$num_filtered == 0
+  } else{
+    # Let it fail for the other resons
+    none_filtered = FALSE
+  }
+  
+  fail_check <- any(fail_check, none_filtered)
+  
+  tooltip_text <- case_when(
+    !(gtest_ok & anova_ok) ~ sprintf(ttext_[["IMDANOVA_VALUES_OUT_OF_RANGE"]], minsize),
+    both_na ~ ttext_[["IMDANOVA_BOTH_NA"]],
+    none_filtered ~ ttext_[["IMDANOVA_NONE_FILTERED"]],
+    TRUE ~ ""
+  )
+
+  togglestate_add_tooltip(session, "add_imdanovafilt_ttip_control",
+    condition = !fail_check,
+    tooltip_text = tooltip_text,
+    position = "right"
+  )
+})
+
 
 ###
 

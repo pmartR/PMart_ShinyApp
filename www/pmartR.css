@@ -128,6 +128,12 @@
   visibility: visible;
 }
 
+/* Prevent tooltip from squishing text */
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
 /* end tooltips */
 
 .collapse_page .panel-heading{

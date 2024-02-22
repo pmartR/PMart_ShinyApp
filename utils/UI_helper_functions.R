@@ -16,6 +16,7 @@ add_filter_UI <- function(filter_name, title, tooltip_text, ..., add_btn_title =
           ),
           div(
             id = sprintf("add_%s_ttip_control", filter_name),
+            class = "tooltip-wrapper",
             actionButton(
               sprintf("add_%s", filter_name),
               label = div(class="flex-inline",
