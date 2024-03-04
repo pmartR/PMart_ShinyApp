@@ -44,6 +44,7 @@ protein_rollup_UI <- function() {
             "which_rollup",
             "Roll up method",
             c(
+              "Mean/median" = "rollup",
               "Reference" = "rrollup",
               "Z-score" = "zrollup",
               "Quantile" = "qrollup"
