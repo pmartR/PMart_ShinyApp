@@ -46,9 +46,12 @@ test_that("App completes a basic workflow on peptide-level data", {
   app$click("goto_qc")
 
   # QC tab
-  app$wait_for_value(input = "qc_order_by")
+  app$wait_for_idle()
   app$set_inputs(qc_order_by = "Condition1")
   app$set_inputs(qc_color_by = "Condition2")
+  app$click("qc_redraw_plot")
+  app$wait_for_idle()
+
   app$set_inputs(qc_xlab = "Sampname")
   app$set_inputs(qc_ylab = "log2abund")
   app$set_inputs(qc_title = "New Title")
@@ -114,7 +117,7 @@ test_that("App completes a basic workflow on peptide-level data", {
   app$click("execute_spans")
   
   # params panel opened by default
-  app$wait_for_idle(timeout = 50000)
+  app$wait_for_idle(timeout = 60000)
   app$wait_for_value(output = "spans_table")
   app$set_inputs(
     spans_table_rows_selected = 1,

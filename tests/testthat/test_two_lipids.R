@@ -35,13 +35,17 @@ test_that("{shinytest2} recording: pmart_standalone", {
     app$wait_for_value(input = "goto_qc")
     app$click("goto_qc")
     
-    app$wait_for_value(input = "qc_order_by")
+    app$wait_for_idle()
     app$set_inputs(qc_order_by = "Condition1")
     app$set_inputs(qc_color_by = "Condition2")
-    
+    app$click("qc_redraw_plot")
+    app$wait_for_idle()
+
     app$set_inputs(qc_order_by_2 = "Group")
     app$set_inputs(qc_color_by_2 = "Condition2")
-    
+    app$click("qc_redraw_plot")
+    app$wait_for_idle()
+
     app$set_inputs(qc_xlab = "Sampname")
     app$set_inputs(qc_ylab = "log2abund")
     app$set_inputs(qc_title = "New Title")

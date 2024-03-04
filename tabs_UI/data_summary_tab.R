@@ -53,7 +53,7 @@ data_summary_UI <- function() {
             conditionalPanel(
               "['boxplots', 'bar'].includes(input.which_qc_plot)",
               tagList(
-                div("Order By:", class='split-title'),
+                div("Order By:"),
                 fluidRow(
                   column(6, uiOutput("qc_order_by_UI")),
                   column(6, uiOutput("qc_order_by_2_UI"))
@@ -62,7 +62,7 @@ data_summary_UI <- function() {
             ),
             # color selection
             tagList(
-              div("Color By:", class = 'split-title'),
+              div("Color By:"),
               fluidRow(
                 column(6, uiOutput("qc_color_by_UI")),
                 column(6, uiOutput("qc_color_by_2_UI"))
@@ -72,7 +72,7 @@ data_summary_UI <- function() {
             conditionalPanel(
               "['pca'].includes(input.which_qc_plot)",
               tagList(
-                div("Shape By:", class='split-title'),
+                div("Shape By:"),
                 fluidRow(
                   column(6, uiOutput("qc_shape_by_UI")),
                   column(6, uiOutput("qc_shape_by_2_UI"))
@@ -87,6 +87,10 @@ data_summary_UI <- function() {
                   "Missing Values Colors",
                   choices = global_input_choices$MISSINGVAL_COLORS
               )
+            ),
+            actionButton(
+              "qc_redraw_plot", "Redraw Plot", 
+              icon = icon("refresh", lib = "glyphicon"), width = "50%"
             )
           )
         ), # parent collapse

@@ -82,7 +82,7 @@ test_that("{shinytest2} recording: pmart_standalone", {
   app$set_inputs("stats_select_method" = "glmpca")
   app$wait_for_idle()
   app$click("apply_dimreduction")
-  app$wait_for_idle()
+  app$wait_for_idle(timeout=60000)
   app$set_inputs("analysis_pca_color_by" = "Tissue")
   app$set_inputs("analysis_pca_shape_by" = "Group")
   app$click("pca_update_plot_content")

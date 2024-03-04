@@ -19,11 +19,13 @@ list(
     name_append = if (two_lipids()) sprintf(" (%s)", lipid_1_name()) else ""
     
     pickerInput("qc_order_by", NULL,
-      choices = c(
-        setNames("Select one", sprintf("Select one%s", name_append)), 
-        choices, "Group Levels" = "Group"),
+      choices = c(choices, "Group Levels" = "Group"),
       selected = all_inputs()$qc_order_by,
-      options = pickerOptions(dropupAuto = FALSE)
+      multiple = TRUE,
+      options = pickerOptions(
+        dropupAuto = FALSE, maxOptions = 1,
+        noneSelectedText = sprintf("Select one%s", name_append)
+      )
     )
     
   }),
@@ -35,9 +37,13 @@ list(
     name_append = if (two_lipids()) sprintf(" (%s)", lipid_2_name()) else ""
     
     pickerInput("qc_order_by_2", NULL,
-      choices = c(setNames("Select one", sprintf("Select one%s", name_append)),
-                  choices, "Group Levels" = "Group"),
-      selected = all_inputs()$qc_order_by_2
+      choices = c(choices, "Group Levels" = "Group"),
+      selected = all_inputs()$qc_order_by_2,
+      multiple = TRUE,
+      options = pickerOptions(
+        dropupAuto = FALSE, maxOptions = 1,
+        noneSelectedText = sprintf("Select one%s", name_append)  
+      )
     )
     
   }),
@@ -51,9 +57,13 @@ list(
     name_append = if (two_lipids()) sprintf(" (%s)", lipid_1_name()) else ""
     
     pickerInput("qc_color_by", NULL,
-      choices = c(setNames("Select one", sprintf("Select one%s", name_append)),
-                  choices, "Group Levels" = "Group"),
-      selected = all_inputs()$qc_color_by
+      choices = c(choices, "Group Levels" = "Group"),
+      selected = all_inputs()$qc_color_by,
+      multiple = TRUE,
+      options = pickerOptions(
+        dropupAuto = FALSE, maxOptions = 1,
+        noneSelectedText = sprintf("Select one%s", name_append)
+      )
     )
     
   }),
@@ -65,9 +75,13 @@ list(
     name_append = if (two_lipids()) sprintf(" (%s)", lipid_2_name()) else ""
     
     pickerInput("qc_color_by_2", NULL,
-      choices = c(setNames("Select one", sprintf("Select one%s", name_append)),
-                  choices, "Group Levels" = "Group"),
-      selected = all_inputs()$qc_color_by_2
+      choices = c(choices, "Group Levels" = "Group"),
+      selected = all_inputs()$qc_color_by_2,
+      multiple = TRUE,
+      options = pickerOptions(
+        dropupAuto = FALSE, maxOptions = 1, 
+        noneSelectedText = sprintf("Select one%s", name_append)
+      )
     )
     
   }),
@@ -79,8 +93,11 @@ list(
     noselect = if(two_lipids()) sprintf("Select one (%s)", lipid_1_name()) else "Select one"
     
     pickerInput("qc_shape_by", NULL,
-      choices = c(setNames("Select one", noselect), choices, "Group Levels" = "Group"),
-      selected = all_inputs()$qc_color_by
+      choices = c(choices, "Group Levels" = "Group"),
+      selected = all_inputs()$qc_shape_by,
+      multiple = TRUE,
+      options = pickerOptions(
+        dropupAuto = FALSE, maxOptions = 1, noneSelectedText = noselect)
     )
     
   }),
@@ -93,7 +110,10 @@ list(
     
     pickerInput("qc_shape_by_2", NULL,
       choices = c(setNames("Select one", noselect), choices, "Group Levels" = "Group"),
-      selected = all_inputs()$qc_color_by_2
+      selected = all_inputs()$qc_shape_by_2,
+      multiple = TRUE,
+      options = pickerOptions(
+        dropupAuto = FALSE, maxOptions = 1, noneSelectedText = noselect)
     )
     
   }),
@@ -146,93 +166,101 @@ list(
   output$omicsData_plot <- renderPlotly({
     req(!is.null(objects$omicsData))
     input$qc_apply_style_plot_1
-
-    # commonly used params
-    use_VizSampNames <- "VizSampNames" %in% colnames(objects$omicsData$f_data)
+    input$qc_redraw_plot
     
-    order_by <- if (isTRUE(input$qc_order_by == "Select one")) NULL else input$qc_order_by
-    color_by <- if (isTRUE(input$qc_color_by == "Select one")) NULL else input$qc_color_by
-    shape_by <- if (isTRUE(input$qc_shape_by == "Select one")) NULL else input$qc_shape_by
-    
-    transformation <- if(input$datatype == "seq") "lcpm" else NULL
-    
-    # ifelse chain for which type of plot
-    if (input$which_qc_plot == "boxplots") {
-      pargs <- list(
-        "x" = objects$omicsData,
-        "order_by" = order_by,
-        "color_by" = color_by,
-        "use_VizSampNames" = use_VizSampNames,
-        "bw_theme" = TRUE
-      )
+    isolate({
+      # commonly used params
+      use_VizSampNames <- "VizSampNames" %in% colnames(objects$omicsData$f_data)
       
-      if(!is.null(transformation)) pargs[['transformation']] <- transformation
-      
-      p <- do.call(plot, pargs)
-    }
-    else if(input$which_qc_plot == 'pca') {
-      .dimres <- dim_reduction(objects$omicsData)
-      p <- plot(.dimres, omicsData = objects$omicsData, color_by = color_by, shape_by = shape_by)
-    }
-    else {
-      p <- plot(missingval_result(objects$omicsData),
-        objects$omicsData,
-        order_by = order_by, color_by = color_by,
-        plot_type = input$which_qc_plot,
-        use_VizSampNames = use_VizSampNames,
-        palette = input$qc_colors,
-        bw_theme = TRUE
-      )
-    }
+      # leftover from when there was more logic here, leaving in case we want to reintroduce
+      order_by <- input$qc_order_by
+      color_by <- input$qc_color_by
+      shape_by <- input$qc_shape_by
 
-    p <- p + isolate(qc_plot_style()) + 
-      isolate(qc_xlab()) + isolate(qc_ylab()) + 
-      isolate(qc_title()) + qc_flip()
-    
-    p <- p %>% ggplotly()
-    plots$last_plot <- p
-    return(p)
+      transformation <- if(input$datatype == "seq") "lcpm" else NULL
+      
+      # ifelse chain for which type of plot
+      if (input$which_qc_plot == "boxplots") {
+        pargs <- list(
+          "x" = objects$omicsData,
+          "order_by" = order_by,
+          "color_by" = color_by,
+          "use_VizSampNames" = use_VizSampNames,
+          "bw_theme" = TRUE
+        )
+        
+        if(!is.null(transformation)) pargs[['transformation']] <- transformation
+        
+        p <- do.call(plot, pargs)
+      }
+      else if(input$which_qc_plot == 'pca') {
+        .dimres <- dim_reduction(objects$omicsData)
+        p <- plot(.dimres, omicsData = objects$omicsData, color_by = color_by, shape_by = shape_by)
+      }
+      else {
+        p <- plot(missingval_result(objects$omicsData),
+          objects$omicsData,
+          order_by = order_by, color_by = color_by,
+          plot_type = input$which_qc_plot,
+          use_VizSampNames = use_VizSampNames,
+          palette = input$qc_colors,
+          bw_theme = TRUE
+        )
+      }
+
+      p <- p + isolate(qc_plot_style()) + 
+        isolate(qc_xlab()) + isolate(qc_ylab()) + 
+        isolate(qc_title()) + qc_flip()
+      
+      p <- p %>% ggplotly()
+      plots$last_plot <- p
+      return(p)
+    })
   }),
 
   output$omicsData_plot_2 <- renderPlotly({
     req(!is.null(objects$omicsData_2))
     input$qc_apply_style_plot_2
+    input$qc_redraw_plot
 
-    # commonly used params
-    use_VizSampNames <- "VizSampNames" %in% colnames(objects$omicsData_2$f_data)
+    isolate({
+      # commonly used params
+      use_VizSampNames <- "VizSampNames" %in% colnames(objects$omicsData_2$f_data)
 
-    order_by <- if (isTRUE(input$qc_order_by_2 == "Select one")) NULL else input$qc_order_by_2
-    color_by <- if (isTRUE(input$qc_color_by_2 == "Select one")) NULL else input$qc_color_by_2
-    shape_by <- if (isTRUE(input$qc_shape_by_2 == "Select one")) NULL else input$qc_shape_by_2
+      # leftover from when there was more logic here, leaving in case we want to reintroduce
+      order_by <- input$qc_order_by_2
+      color_by <- input$qc_color_by_2
+      shape_by <- input$qc_shape_by_2
 
-    # ifelse chain for which type of plot
-    if (input$which_qc_plot == "boxplots") {
-      p <- plot(objects$omicsData_2,
-        order_by = order_by, color_by = color_by,
-        bw_theme = TRUE,
-        use_VizSampNames = use_VizSampNames
-      )
-    }
-    else if(input$which_qc_plot == 'pca') {
-      .dimres <- dim_reduction(objects$omicsData_2)
-      p <- plot(.dimres, omicsData = objects$omicsData, color_by = color_by, shape_by = shape_by)
-    }
-    else {
-      p <- plot(missingval_result(objects$omicsData_2),
-                objects$omicsData_2, 
-        plot_type = input$which_qc_plot,
-        use_VizSampNames = use_VizSampNames,
-        bw_theme = TRUE,
-        palette = input$qc_colors
-      )
-    }
-    
-    p <- p + isolate(qc_plot_style()) + 
-      isolate(qc_xlab()) + isolate(qc_ylab()) + 
-      isolate(qc_title()) + qc_flip()
-    p <- p  %>% ggplotly()
-    plots$last_plot_2 <- p
-    return(p)
+      # ifelse chain for which type of plot
+      if (input$which_qc_plot == "boxplots") {
+        p <- plot(objects$omicsData_2,
+          order_by = order_by, color_by = color_by,
+          bw_theme = TRUE,
+          use_VizSampNames = use_VizSampNames
+        )
+      }
+      else if(input$which_qc_plot == 'pca') {
+        .dimres <- dim_reduction(objects$omicsData_2)
+        p <- plot(.dimres, omicsData = objects$omicsData, color_by = color_by, shape_by = shape_by)
+      }
+      else {
+        p <- plot(missingval_result(objects$omicsData_2),
+                  objects$omicsData_2, 
+          plot_type = input$which_qc_plot,
+          use_VizSampNames = use_VizSampNames,
+          bw_theme = TRUE,
+          palette = input$qc_colors
+        )
+      }
+      
+      p <- p + isolate(qc_plot_style()) + 
+        isolate(qc_xlab()) + isolate(qc_ylab()) + 
+        isolate(qc_title()) + qc_flip()
+      p <- p  %>% ggplotly()
+      plots$last_plot_2 <- p
+      return(p)
+    })
   }),
 
   output$qc_plot_options <- renderUI({
