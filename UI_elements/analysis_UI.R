@@ -197,28 +197,41 @@ output$imdanova_pval_adjust_UI <- renderUI({
     selected = if(inherits(objects$omicsData, "seqData")) "BH" else 'none'
   )
   
-  anova_pickers = tagList(anova_picker_mc, anova_picker_fdr)
-  gtest_pickers = tagList(gtest_picker_mc, gtest_picker_fdr)
-
-  if (input$imdanova_test_method == "anova") {
+  # dont give multiple comparison adjustment option if there is only one comparison
+  n_comparisons = nrow(comp_df_holder$comp_df)
+  
+  if (isTruthy(n_comparisons > 1)) {
+    anova_pickers = tagList(anova_picker_mc, anova_picker_fdr)
+    gtest_pickers = tagList(gtest_picker_mc, gtest_picker_fdr) 
+  } else {
+    anova_pickers = tagList(anova_picker_fdr)
+    gtest_pickers = tagList(gtest_picker_fdr)
+  }
+  
+  if (input$peptide_imdanova_test_method == "anova") {
     return(anova_pickers)
   }
-  else if (input$imdanova_test_method == "gtest") {
+  else if (input$peptide_imdanova_test_method == "gtest") {
     return(gtest_pickers)
   } 
-  else if(input$imdanova_test_method == "combined") {
-    return(tagList(
-      div(class='inline-wrapper-1', 
-        tags$b("Multiple comparisons adjustment"),
-        tipify(blueq, ttext_[["WHAT_IS_MC"]])
-      ),
-      fluidSplitLayout(anova_picker_mc, gtest_picker_mc),
-      div(class='inline-wrapper-1', 
-        tags$b("FDR adjustment"),
-        tipify(blueq, ttext_[["WHAT_IS_FDR"]])
-      ),
+  else if(input$peptide_imdanova_test_method == "combined") {
+    mc_divs <- if (isTruthy(n_comparisons > 2)) {
+      list(
+        div(class = 'inline-wrapper-1',
+            tags$b("Multiple comparisons adjustment"),
+            tipify(blueq, ttext_[["WHAT_IS_MC"]])),
+        fluidSplitLayout(anova_picker_mc, gtest_picker_mc)
+      )
+    } else NULL
+    
+    fdr_divs = list(
+      div(class = 'inline-wrapper-1',
+          tags$b("FDR adjustment"),
+          tipify(blueq, ttext_[["WHAT_IS_FDR"]])), 
       fluidSplitLayout(anova_picker_fdr, gtest_picker_fdr)
-    ))
+    )
+    
+    return(do.call(tagList, c(mc_divs, fdr_divs)))
   }
 })
 
@@ -263,6 +276,32 @@ output$seqdata_pval_adjust_UI <- renderUI({
 output$statistics_tab_sidepanel <- renderUI({
   req(input$stats_select_method != NULLSELECT_)
   
+  n_groups <- length(unique(attr(objects$omicsData, 'group_DF')$Group))
+  
+  # If we only have one possible comparison, just default to that one and disable the other options.
+  if (n_groups == 2) {
+    choices = c(
+      "Only one comparison" = "all_pairwise",
+      "Control to test condition comparisons" = "control_to_test",
+      "Custom comparisons" = "custom"
+    )
+    
+    selected = "all_pairwise"
+    
+    choicesOpt = list("disabled" = c(FALSE, TRUE, TRUE))
+    
+  } else {
+    choices = c(
+      "All pairwise comparisons" = "all_pairwise",
+      "Control to test condition comparisons" = "control_to_test",
+      "Custom comparisons" = "custom"
+    )
+    
+    selected = character(0)
+    
+    choicesOpt = NULL
+  }
+  
   if (input$stats_select_method %in% c("imdanova")){
     bsCollapse(
       id = "imdanova-sidepanel-options", multiple = TRUE, 
@@ -279,13 +318,10 @@ output$statistics_tab_sidepanel <- renderUI({
         pickerInput(
           "comparison_method",
           "Select comparisons to use (singleton groups excluded):",
-          c(
-            "All pairwise comparisons",
-            "Control to test condition comparisons",
-            "Custom comparisons"
-          ),
-          selected = character(0),
+          choices = choices,
+          selected = selected,
           options = pickerOptions(maxOptions = 1),
+          choicesOpt = choicesOpt,
           multiple = TRUE
         ),
         
@@ -341,13 +377,10 @@ output$statistics_tab_sidepanel <- renderUI({
           pickerInput(
             "comparison_method",
             "Select comparisons to use (singleton groups excluded):",
-            c(
-              "All pairwise comparisons",
-              "Control to test condition comparisons",
-              "Custom comparisons"
-            ),
-            selected = character(0),
+            choices = choices,
+            selected = selected,
             options = pickerOptions(maxOptions = 1),
+            choicesOpt = choicesOpt,
             multiple = TRUE
           ),
           
@@ -503,9 +536,9 @@ output$statistics_tab_mainpanel <- renderUI({
 output$pairwise_comp_selector <- renderUI({
   req(input$comparison_method)
   
-  if (input$comparison_method == "All pairwise comparisons") {
+  if (input$comparison_method == "all_pairwise") {
     return()
-  } else if (input$comparison_method == "Control to test condition comparisons") {
+  } else if (input$comparison_method == "control_to_test") {
     groups <- objects$omicsData %>%
       pmartR:::get_group_table()
     groups <- groups[groups > 1] %>% names()

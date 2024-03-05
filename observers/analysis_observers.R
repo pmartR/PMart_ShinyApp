@@ -4,7 +4,7 @@ observe({
   req(input$comparison_method, objects$omicsData)
   req(!is.null(attr(objects$omicsData,"group_DF")))
   
-  if (input$comparison_method == "Control to test condition comparisons") {
+  if (input$comparison_method == "control_to_test") {
     control <- input$control_group
     noncontrol <- input$imdanova_non_control_groups
     
@@ -14,7 +14,7 @@ observe({
     if (nrow(combos) > 1) {
       combos <- as.matrix(combos[combos[, 1] == control, ], ncol = 2)
     }
-  } else if (input$comparison_method == "Custom comparisons") {
+  } else if (input$comparison_method == "custom") {
     combos <- input$custom_comps
     
     req(!is.null(combos))
