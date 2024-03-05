@@ -195,6 +195,15 @@ list(
       }
       else if(input$which_qc_plot == 'pca') {
         .dimres <- dim_reduction(objects$omicsData)
+        dimres_table <- .dimres
+        attr(dimres_table, 'class') <- c(attr(dimres_table, 'class'), 'data.frame')
+        objects$dimred_table_qc <- dimres_table
+        
+        showNotification(
+          "Your dimension reduction results from this page have been saved and can be downloaded on the Download tab", 
+          duration = 7,
+        )
+        
         p <- plot(.dimres, omicsData = objects$omicsData, color_by = color_by, shape_by = shape_by)
       }
       else {
@@ -242,6 +251,9 @@ list(
       }
       else if(input$which_qc_plot == 'pca') {
         .dimres <- dim_reduction(objects$omicsData_2)
+        dimres_table <- .dimres
+        attr(dimres_table, 'class') <- c(attr(dimres_table, 'class'), 'data.frame')
+        objects$dimred_table_qc_2 <- dimres_table
         p <- plot(.dimres, omicsData = objects$omicsData, color_by = color_by, shape_by = shape_by)
       }
       else {

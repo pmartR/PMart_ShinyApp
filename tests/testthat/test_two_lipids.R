@@ -103,7 +103,7 @@ test_that("{shinytest2} recording: pmart_standalone", {
     
     app$wait_for_idle()
     app$set_inputs(stats_select_method = "imdanova")
-    app$set_inputs(comparison_method = "All pairwise comparisons")
+    app$set_inputs(comparison_method = "all_pairwise")
     app$wait_for_idle()
     app$set_inputs(imdanova_test_method = "combined")
     app$wait_for_idle()

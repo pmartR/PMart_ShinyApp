@@ -359,6 +359,15 @@ observeEvent(input$apply_dimreduction, {
       plots$statistics_mainplot <- NULL
     }
   )
+
+  dimred_table <- objects$dimred_res
+  class(dimred_table) <- c(class(dimred_table), "data.frame")
+  objects$dimred_table <- dimred_table
+
+  showNotification(
+    "Your dimension reduction results from this page have been saved and can be downloaded on the Download tab", 
+    duration = 7,
+  )
 })
 
 #

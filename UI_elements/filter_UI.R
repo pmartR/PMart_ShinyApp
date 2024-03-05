@@ -508,14 +508,19 @@ output$rmdfilt_plot_type_UI <- renderUI({
   }
   else if (input$rmdfilt_plot_type == "outliers") {
     temp_rmd_filter1 <- rmd_filter(objects$omicsData, metrics = input$rmd_metrics)
+    choices1 <- temp_rmd_filter1 %>% 
+      dplyr::filter(pvalue < input$pvalue_threshold) %>% 
+      dplyr::pull(get_fdata_cname(objects$omicsData))
+
     if (two_lipids()) {
       req(!is.null(objects$omicsData_2))
       temp_rmd_filter2 <- rmd_filter(objects$omicsData_2, metrics = input$rmd_metrics)
-      choices1 <- objects$omicsData$f_data[which(temp_rmd_filter1$pvalue < input$pvalue_threshold), get_fdata_cname(objects$omicsData)]
-      choices2 <- objects$omicsData_2$f_data[which(temp_rmd_filter2$pvalue < input$pvalue_threshold), get_fdata_cname(objects$omicsData_2)]
+      choices2 <- temp_rmd_filter2 %>% 
+        dplyr::filter(pvalue < input$pvalue_threshold) %>% 
+        dplyr::pull(get_fdata_cname(objects$omicsData_2))
 
       tagList(
-        tags$b("Select samples to inspect:"),
+        tags$p("Select samples to inspect:"),
         fluidRow(
           column(6, pickerInput("rmd_sample", NULL, choices = choices1, multiple = FALSE)),
           column(6, pickerInput("rmd_sample_2", NULL, choices = choices2, multiple = FALSE))
@@ -523,7 +528,6 @@ output$rmdfilt_plot_type_UI <- renderUI({
       )
     }
     else {
-      choices1 <- objects$omicsData$f_data[which(temp_rmd_filter1$pvalue < input$pvalue_threshold), get_fdata_cname(objects$omicsData)]
       pickerInput("rmd_sample", "Select samples to inspect", choices = choices1, multiple = FALSE)
     }
   }

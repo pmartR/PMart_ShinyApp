@@ -48,7 +48,8 @@ protein_rollup_UI <- function() {
               "Reference" = "rrollup",
               "Z-score" = "zrollup",
               "Quantile" = "qrollup"
-            )
+            ),
+            selected = 'rrollup'
           ),
           radioGroupButtons(
             "which_combine_fn",

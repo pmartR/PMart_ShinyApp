@@ -50,7 +50,7 @@ test_that("{shinytest2} recording: pmart_standalone", {
   # Stats
   app$wait_for_idle()
   app$set_inputs(stats_select_method = "DESeq2")
-  app$set_inputs(comparison_method = "All pairwise comparisons")
+  app$set_inputs(comparison_method = "all_pairwise")
   
   app$click("apply_diagnostic")
   app$click("apply_seqstats")
@@ -60,7 +60,7 @@ test_that("{shinytest2} recording: pmart_standalone", {
   
   app$run_js(open_collapse("statistics_collapse_left", "stats-statistics-options"))
   app$set_inputs(stats_select_method = "voom")
-  app$set_inputs(comparison_method = "All pairwise comparisons")
+  app$set_inputs(comparison_method = "all_pairwise")
   app$click("apply_diagnostic")
   app$click("apply_seqstats")
   
@@ -69,7 +69,7 @@ test_that("{shinytest2} recording: pmart_standalone", {
 
   app$run_js(open_collapse("statistics_collapse_left", "stats-statistics-options"))
   app$set_inputs(stats_select_method = "edgeR")
-  app$set_inputs(comparison_method = "All pairwise comparisons")
+  app$set_inputs(comparison_method = "all_pairwise")
   
   app$click("apply_diagnostic")
   app$click("apply_seqstats")

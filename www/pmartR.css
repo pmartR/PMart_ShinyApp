@@ -300,3 +300,10 @@
 .message-error>i {
   color: white;
 }
+
+/*centers the div that wraps all notifications*/
+#shiny-notification-panel {
+  position:fixed;
+  bottom: calc(4%);
+  left: calc(48%);
+}

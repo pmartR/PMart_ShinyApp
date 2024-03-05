@@ -52,7 +52,7 @@ test_that("pmartR loads MAP midpoints", {
 
   app$wait_for_idle()
   
-  app$set_inputs(comparison_method = "All pairwise comparisons")
+  app$set_inputs(comparison_method = "all_pairwise")
 
   app$click("apply_diagnostic")
 
@@ -89,7 +89,7 @@ test_that("pmartR loads MAP midpoints", {
   
   app$wait_for_idle()
   
-  app$set_inputs(peptide_comparison_method = "All pairwise comparisons")
+  app$set_inputs(peptide_comparison_method = "all_pairwise")
   
   app$wait_for_idle()
   

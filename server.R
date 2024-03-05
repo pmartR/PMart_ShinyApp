@@ -21,7 +21,11 @@ shinyServer(function(session, input, output) {
     "Sample Information (f_data)" = list("objects", "omicsData", "f_data"),
     "Biomolecule Information (e_meta)" = list("objects", "omicsData", "e_meta"),
     "Statistics" = list("objects", "imdanova_res"),
-    "SeqData Statistics" = list("objects", "seqstats_res")
+    "Peptide Statistics" = list("objects", "peptide_imdanova_res"),
+    "SeqData Statistics" = list("objects", "seqstats_res"),
+    "Principal Components Table (Data Summary Tab)" = list("objects", "dimred_table_qc"),
+    "Principal Components Table (Data Summary Tab) dataset 2" = list("objects", "dimred_table_qc_2"),
+    "Principal Components Table (Analysis Tab)" = list("objects", "dimred_table")
   )
   
   if(getOption("shiny.testmode", FALSE)) {
@@ -35,7 +39,9 @@ shinyServer(function(session, input, output) {
     "Sample Information (f_data)" = list("objects", "omicsData", "f_data"),
     "Biomolecule Information (e_meta)" = list("objects", "omicsData", "e_meta"),
     "Protein Statistics" = list("objects", "imdanova_res"),
-    "Peptide Statistics" = list("objects", "peptide_imdanova_res")
+    "Peptide Statistics" = list("objects", "peptide_imdanova_res"),
+    "Principal Components Table (Data Summary Tab)" = list("objects", "dimred_table_qc"),
+    "Principal Components Table (Analysis Tab)" = list("objects", "dimred_table")
   )
   
   # misc reactive values
