@@ -90,7 +90,7 @@ makeobject <- function(use_iso = T){
   # transform data objects
   if (!is.null(objects$uploaded_omicsData) && 
       length(transform) > 0 &&
-      transform != "Select one") {
+      transform != "none") {
     if (attr(objects$uploaded_omicsData, "data_info")$data_scale != transform) {
       objects$omicsData <- objects$uploaded_omicsData <- tryCatch(
         {
@@ -107,7 +107,7 @@ makeobject <- function(use_iso = T){
   
   if (!is.null(objects$uploaded_omicsData_2) &&
       length(transform) > 0 && 
-      transform != "Select one") {
+      transform != "none") {
     if (attr(objects$uploaded_omicsData_2, "data_info")$data_scale != transform) {
       objects$omicsData_2 <- objects$uploaded_omicsData_2 <- tryCatch(
         {

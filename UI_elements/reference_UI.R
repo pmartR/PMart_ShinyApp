@@ -647,7 +647,7 @@ assign_ref_uploads <- function(tabname) {
       ) %>%
         edata_replace(na_replace, NA)
       
-      if(!("Select one" %in% c(data_scale, transform)) && data_scale != transform){
+      if(!("none" %in% c(data_scale, transform)) && data_scale != transform){
         temp <- edata_transform(temp, data_scale = transform)
       }
       

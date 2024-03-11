@@ -6,9 +6,9 @@ observeEvent(c(input$transform, objects$omicsData, objects$omicsData_2), {
   }
   else if (!is.null(objects$omicsData)) cond_scale <- (attr(objects$omicsData, "data_info")$data_scale == input$transform)
 
-  toggleState("apply_transform", condition = !cond_scale & !(input$transform == "Select one"))
+  toggleState("apply_transform", condition = !cond_scale & !(input$transform == "none"))
   revals$warnings_transform$scale_mismatch <- if (isTRUE(cond_scale)) messageBox(type = "warning", "Your data is already on the selected scale") else NULL
-  revals$warnings_transform$no_selection <- if (isTRUE(input$transform == "Select one")) messageBox(type = "warning", "Select a transformation to apply") else NULL
+  revals$warnings_transform$no_selection <- if (isTRUE(input$transform == "none")) messageBox(type = "warning", "Select a transformation to apply") else NULL
 })
 
 # flip x and y axes input labels when the graph is flipped, since xlab() actually modifies the vertical axes in this case.

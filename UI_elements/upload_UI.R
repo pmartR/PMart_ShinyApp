@@ -122,13 +122,17 @@ list(
 
   # transform to what scale?
   output$transform_UI <- renderUI({
-    
     req(input$datatype != "seq")
+    validate(need(input$data_scale, "Choose a data scale"))
     
     ## Disable for seqdata
-    choices <- list("Raw intensity" = "abundance", "Log base 2" = "log2", 
-                    "Log base 10" = "log10", "Natural log" = "log")
-    pickerInput("transform", "Transform data to:", choices = c("Select one", choices))
+    choices <- list("Log base 2" = "log2", "Log base 10" = "log10", "Natural log" = "log")
+    
+    if(input$data_scale != "abundance"){
+      choices <- c("No transformation" = "none", choices)
+    }
+
+    pickerInput("transform", "Transform data to:", choices = choices)
   }),
 
   # normalized or not?
