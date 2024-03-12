@@ -2,6 +2,12 @@
 ui <- function(request) {
   tagList(
     useShinyjs(),
+    add_busy_spinner(
+      spin = "fading-circle", 
+      position="bottom-left", 
+      color = "#9146b7",
+      margins = c(35,35)
+      ),
     shinyjs::extendShinyjs(
       script = "lib/shinyui.js",
       functions = c(

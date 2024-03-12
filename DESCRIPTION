@@ -26,6 +26,7 @@ Depends:
   rlang,
   shiny,
   shinyBS,
+  shinybusy,
   shinyWidgets,
   shinyalert,
   shinycssloaders,

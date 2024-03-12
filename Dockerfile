@@ -2,10 +2,9 @@
 
 # Change this when we bump versions, or if you have some test version of the
 # base container you can specify --build-arg base_tag=<yourtag> in docker run.
-ARG base_tag=latest
-
+ARG base_tag=code-registry.emsl.pnl.gov/multiomics-analyses/pmart_standalone/base:latest
 # Install latest version of rocker image
-FROM code-registry.emsl.pnl.gov/multiomics-analyses/pmart_standalone/base:$base_tag
+FROM $base_tag
 
 COPY . .
 
