@@ -767,6 +767,7 @@ output$execute_apply_filters_UI <- renderUI({
 output$toggle_profilt <- eventReactive(objects$omicsData, {
   return(inherits(objects$omicsData, "pepData") && !is.null(objects$omicsData$e_meta))
 })
+outputOptions(output, "toggle_profilt", suspendWhenHidden = FALSE)
 
 #
 output$warnings_filter <- renderUI({

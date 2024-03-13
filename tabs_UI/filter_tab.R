@@ -43,7 +43,7 @@ filter_UI <- function() {
           
           # proteomics filter
           conditionalPanel(
-            "output$toggle_profilt",
+            "output.toggle_profilt==true",
             add_filter_UI(
               filter_name = "profilt",
               title = "Proteomics Filter",
