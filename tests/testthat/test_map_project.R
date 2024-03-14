@@ -2,7 +2,7 @@ library(shinytest2)
 library(mapDataAccess)
 
 test_that("pmartR loads MAP projects", {
-  if (is.null(Sys.getenv("MAP_SHINYTEST")) || Sys.getenv("MAP_SHINYTEST") != 1)
+  if (is.null(Sys.getenv("MAP_SHINYTEST")) || !(Sys.getenv("MAP_SHINYTEST") > 0))
     skip("MAP testing not enabled. See README for info on how to enable it.")
   
   tryCatch(
@@ -36,12 +36,23 @@ test_that("pmartR loads MAP projects", {
       }
     )
   }
-  
-  Sys.setenv("SHINYTEST_LOAD_MAP_OBJECT" = map_data_ids[1])
+
+  # workaround to load data in minio
+  if (Sys.getenv("MAP_SHINYTEST") == "1") {
+    Sys.setenv("SHINYTEST_LOAD_MAP_OBJECT" = map_data_ids[1])
+  }
+
+  # pass the header parameter if we run in docker mode (2)
+  APP_PATH = switch(
+    Sys.getenv("MAP_SHINYTEST"),
+    "2" = sprintf("http://localhost:8300/?data=%s", map_data_ids[1]),
+    testthat::test_path("../..")
+  )
+
   set.seed(314159265)
-  app <- AppDriver$new(name = "pmart_standalone", variant = platform_variant(),
+  app <- AppDriver$new(APP_PATH, name = "pmart_standalone", variant = platform_variant(),
                        height = 1187, width = 1263, wait = FALSE,
-                       timeout = 15000)
+                       timeout = 15000, load_timeout = 20000)
   
   app$wait_for_idle(timeout = 60000)
   
