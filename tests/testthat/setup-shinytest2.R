@@ -9,7 +9,9 @@ open_collapse <- function(id, value) {
 testthat::local_edition(3)
 project_root <- file.path(testthat::test_path(), "../..")
 
-if (Sys.getenv("MAP_SHINYTEST") == 1) {
+# MAP_SHINYTEST == 1 runs the app locally, with minio, 
+# MAP_SHINYTEST == 2 runs the app container from docker-compose with minio
+if (Sys.getenv("MAP_SHINYTEST") > 0) {
   
   if (!requireNamespace("mapDataAccess")) {
     cat("mapDataAccess is not installed. Do you want to download it?\n")
@@ -53,11 +55,23 @@ if (Sys.getenv("MAP_SHINYTEST") == 1) {
       stop("\n  Error: minio container not installed.")
     }
     
-    system2("docker", "run -d -p 9000:9000 -p 9001:9001 --name minio minio/minio server /data  --console-address \":9001\"")
+    system2("docker", "compose pull minio")
   }
   
-  system2("docker", "start minio")
-  
+  if (Sys.getenv("MAP_SHINYTEST") == 1) {
+    system2("docker", "compose --profile minio up -d")
+    withr::defer({
+      system2("docker", "compose --profile minio down")
+    }, testthat::teardown_env())
+  } else if (Sys.getenv("MAP_SHINYTEST") == 2) {
+    system2("docker", "compose --profile 'testing' up -d")
+    withr::defer({
+      system2("docker", "compose --profile 'testing' down")
+    }, testthat::teardown_env())
+  } else {
+    stop ("Invalid MAP_SHINYTEST value.  Should be 1 to test the local app with minio, or 2 to test the container specified in docker-compose.yml with minio.")
+  }
+
   orig_envvar = Sys.getenv("MAP_VERSION")
   Sys.setenv("MAP_VERSION"=1)
   on.exit({Sys.setenv("MAP_VERSION" = orig_envvar)})
@@ -199,3 +213,7 @@ write_plotly_svg <- function(p, file, title = "") {
   writeLines(svg_txt, file)
 }
 
+# for running apps asynchronously
+tmp_run_app <- function(appDir) {
+  shiny::runApp(appDir = appDir, host = '127.0.0.1', port = 8300, launch.browser = FALSE, test.mode=TRUE)
+}

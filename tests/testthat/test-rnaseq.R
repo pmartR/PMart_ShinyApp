@@ -1,8 +1,14 @@
 library(shinytest2)
 
+APP_PATH = switch(
+  Sys.getenv("MAP_SHINYTEST"),
+  "2" = "http://localhost:8301",
+  testthat::test_path("../..")
+)
+
 test_that("{shinytest2} recording: pmart_standalone", {
   # app <- AppDriver$new("http://127.0.0.1:3858", name = "pmart_standalone", height = 1187, width = 1263) 
-  app <- AppDriver$new(name = "pmart_standalone", variant = platform_variant(), height = 1187, width = 1263, seed = 71444, load_timeout = 20000)
+  app <- AppDriver$new(APP_PATH, name = "pmart_standalone", variant = platform_variant(), height = 1187, width = 1263, seed = 71444, load_timeout = 20000)
   app$set_inputs(top_page = "upload_data_tab")
   app$wait_for_idle(timeout = 60000)
   
