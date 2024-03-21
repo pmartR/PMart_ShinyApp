@@ -36,10 +36,28 @@ Once all dependencies are installed, make sure calling `.libPaths()` displays th
 #### 2.  Using docker:
 
 Either build the container as described in the development section, or pull it from gitlab:
-`docker pull code-registry.emsl.pnl.gov/multiomics-analyses/pmart_standalone:<tag>`
 
-Then run the docker container:  `docker run -v /absolute/path/to/cfg/minio_config.yml:/srv/shiny-server/cfg/minio_config.yml -p 8300:8300 code-registry.emsl.pnl.gov/multiomics-analyses/pmart_standalone:<tag>`  
+```bash
+# docker pull
+docker pull code-registry.emsl.pnl.gov/multiomics-analyses/pmart_standalone:<version>`
+
+# docker compose
+TOP_VERSION=<version> docker compose pull
+```
+
+Then run the docker container:
+```bash
+# manually
+docker run -v /absolute/path/to/cfg/minio_config.yml:/srv/shiny-server/cfg/minio_config.yml -p 8300:8300 code-registry.emsl.pnl.gov/multiomics-analyses/pmart_standalone:<version>
+
+# docker compose
+TOP_VERSION=<version> docker compose up
+
+# make
+make run TOP_VERSION=<version>
+```
 ... and navigate to https://127.0.0.1:8300
+
 
 ***
 
@@ -60,25 +78,58 @@ We build a base container which has all the system libraries and R packages inst
 
 **To build the base container**, you must provide a gitlab PAT in order to install mapDataAccess and other private git repos.  Assume you have an account that has access to the private gitlab repos in pmart; now generate a personal access token:  https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html.  Put this token in a text file next to the Dockerfile, say `.mysecret` with contains the line GITLAB_PAT=&lt;your token&gt;.  Sometimes github will rate limit installation from repositories, but you can provite a github PAT (https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) to get around this:  Optionally, on another line in `.mysecret` put GITHUB_PAT=&lt;your token&gt;.
 
-Now, replacing &lt;tag&gt; with whatever version, run:  
-`docker build -f Dockerfile-base --secret id=access_tokens,src=.mysecret -t code-registry.emsl.pnl.gov/multiomics-analyses/pmart_standalone/base:<tag>` .
+Now, replacing &lt;version&gt; with whatever version (e.g. 1.0.0), build the container:
+
+```bash
+# manually
+docker build -f Dockerfile-base --secret id=access_tokens,src=.mysecret -t code-registry.emsl.pnl.gov/multiomics-analyses/pmart_standalone/base:<version> .
+
+# using make
+make build_base BASE_VERSION=<version> SECRET_PATH=.mysecret
+```
 
 **To build the 'top' container**:  
-Make sure Dockerfile refers to the correct base container or specify the --build-arg base_tag=<your base image tag, i.e. 1.2> in the build command if you have updated any dependencies:  
-`docker build --build-arg base_tag=<your base image tag> -t code-registry.emsl.pnl.gov/multiomics-analyses/pmart_standalone:<tag> .`
+Make sure Dockerfile refers to the correct base container or specify the `--build-arg base_tag=<your base image tag>;` (e.g. code-registry.emsl.pnl.gov/multiomics-analyses/pmart_standalone:1.0.0) in the build command or the correction TOP_VERSION using `make` if you have updated any dependencies:  
 
-If all is well, push new containers to the registry:  `docker push <container_name>:<tag>`
+```bash
+# manually
+docker build --build-arg base_tag=<your base image tag> -t code-registry.emsl.pnl.gov/multiomics-analyses/pmart_standalone:<version> .
+
+# using make
+make build_top BASE_VERSION=<base version> TOP_VERSION=<top version>
+```
+
+If all is well, push new containers to the registry:  `docker push <container_name>:<version>` or using make:
+
+```bash
+# top container
+make push_top TOP_VERSION=<top version>
+
+# base container
+make push_base BASE_VERSION=<base version>
+
+# both
+make push TOP_VERSION=<top version> BASE_VERSION=<base version>
+```
 
 #### **3. Dependencies**
 
 We use [renv](https://rstudio.github.io/renv/articles/renv.html) to track dependencies.  The renv.lock file contains a list of dependencies and various details about them.  (NOTE:  Currently two dependencies (pmartR and mapDataAccess-lib) that are under active development alongside the app are not tracked in the lockfile, but in `Dockerfile-base`, you will have to install these manually).  We use renv to manage the details about dependencies, but try keep track of them manually in DESCRIPTION as well.  This gives us the option of explicity telling renv to include a package when calling `renv::snapshot()`.  When updating the lockfile, we will do the following:
 
-1.  Set renv to only install sub-dependencies in the "Depends" and "Imports" field of installed packages. `renv::settings$package.dependency.fields("Depends", "Imports")`.  This should get recorded in ./renv/settings.dcf so you only have to do it once.
+1.  Set renv to only install sub-dependencies in the "Depends" and "Imports" field of installed packages. `renv::settings$package.dependency.fields("Depends", "Imports")`.  This should get recorded in ./renv/settings.json so you only have to do it once.
 2.  Snapshot only packages mentioned in the project (including in the DESCRIPTION file), as well as any packages mentioned in their "Depends" and "Imports" field by calling `renv::snapshot(type="implicit")`
 
 #### **4. Running tests**
 
-An easy way to run tests is to run `shinytest2::test_app()`. However, the MAP tests will not run by default. To run the MAP tests, set `Sys.setenv("MAP_SHINYTEST" = 1)` before running `shinytest2::test_app()`. The first run will walk through the installation of the environment required for MAP testing.
+An easy way to run tests is to run `shinytest2::test_app()`. However, the MAP tests will not run by default. To run the MAP tests from the local project but pulling project and midpoint files from minio, set `Sys.setenv("MAP_SHINYTEST" = 1)` before running `shinytest2::test_app()`. The first run will walk through the installation of the environment required for MAP testing.
+
+`Sys.setenv("MAP_SHINYTEST" = 2)` followed by `shinytest2::test_app()` will run the tests using the tests using the containerized app.  The containerized app is spun up using the `docker-compose.yml` file in the project root and run the `latest` version by default.  Setting the environment variable `TOP_VERSION` can change which container version is tested.
+
+```bash
+# Using make
+make MAP_SHINYTEST=1 TOP_VERSION=1.0.0 test
+```
+
 
 #### **5. Misc**
 

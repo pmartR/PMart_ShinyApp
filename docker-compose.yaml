@@ -13,7 +13,7 @@ x-app: &x-app
         context: .
         dockerfile: Dockerfile
         args:
-            BASE_TAG: "code-registry.emsl.pnl.gov/multiomics-analyses/pmart_standalone/base:${BASE_VERSION:-latest}"
+            base_tag: "code-registry.emsl.pnl.gov/multiomics-analyses/pmart_standalone/base:${BASE_VERSION:-latest}"
 
 x-test-app: &x-test-app
     <<: *x-app
