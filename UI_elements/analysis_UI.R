@@ -208,13 +208,13 @@ output$imdanova_pval_adjust_UI <- renderUI({
     gtest_pickers = tagList(gtest_picker_fdr)
   }
   
-  if (input$peptide_imdanova_test_method == "anova") {
+  if (input$imdanova_test_method == "anova") {
     return(anova_pickers)
   }
-  else if (input$peptide_imdanova_test_method == "gtest") {
+  else if (input$imdanova_test_method == "gtest") {
     return(gtest_pickers)
   } 
-  else if(input$peptide_imdanova_test_method == "combined") {
+  else if(input$imdanova_test_method == "combined") {
     mc_divs <- if (isTruthy(n_comparisons > 2)) {
       list(
         div(class = 'inline-wrapper-1',

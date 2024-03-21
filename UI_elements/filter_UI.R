@@ -432,7 +432,7 @@ output$rmd_metrics_out <- renderUI({
   ok_meterics <- ok_meterics[map_lgl(map_list, function(metric) var(filter[metric]) != 0)]
   metric_filt <- !(metric_set %in% ok_meterics)
 
-  if(class(objects$omicsData) %in% c("lipidData", "metabData")){
+  if(inherits(objects$omicsData, c("lipidData", "metabData"))){
     selected <-  c("MAD", "Kurtosis", "Skewness", "Correlation")
     selected <- selected[selected %in% c("MAD", "Kurtosis", "Skewness", "Correlation", "Proportion_Missing")[!metric_filt]]
   }
@@ -468,7 +468,7 @@ output$rmd_metrics_out <- renderUI({
 output$rmd_propmis_warn_icon <- renderUI({
   req(!is.null(objects$omicsData), input$rmd_metrics)
   if(
-    class(objects$omicsData) %in% c("lipidData", "metabData") &
+    inherits(objects$omicsData, c("lipidData", "metabData")) &
     "Proportion_Missing" %in% input$rmd_metrics
     ){
     return(tipify(
