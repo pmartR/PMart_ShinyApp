@@ -112,6 +112,9 @@ normalization_UI <- function() {
         class = "tooltip-wrapper",
         bsButton("apply_bc_method", "Apply batch correction", style = "primary")
       ),
+      disabled(bsButton("reset_normalization", 
+                        "Remove normalization", 
+                        style = "primary")),
       hidden(
         div(
           "Analyzing, please wait...",
@@ -119,10 +122,6 @@ normalization_UI <- function() {
           style = "color:deepskyblue;font-weight:bold;margin-bottom:5px"
         )
       ),
-      disabled(bsButton("reset_normalization", 
-                        "Remove normalization", 
-                        style = "primary"))
-      ,
       uiOutput("warnings_normalize")
     ),
     column(
