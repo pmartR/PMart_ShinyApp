@@ -10,6 +10,11 @@ BASE_IMAGE_TAG="${APP_REGISTRY}/base:${BASE_VERSION}"
 IMAGE_TAG="${APP_REGISTRY}:${TOP_VERSION}"
 MAP_SHINYTEST=2
 PROFILE=local
+DO_BUILD=false
+
+ifeq ($(DO_BUILD), true)
+  BUILD_TARGET=build_top
+endif
 
 .PHONY: test
 test: 
@@ -34,8 +39,8 @@ build_top:
 build: build_base build_top
 
 .PHONY: run
-run:
-	docker compose --profile ${PROFILE} up --build
+run: ${BUILD_TARGET}
+	docker compose --profile ${PROFILE} up
 
 .PHONY: login
 login:
