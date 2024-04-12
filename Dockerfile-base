@@ -3,7 +3,9 @@
 # Install latest version of rocker image
 FROM docker.io/rocker/shiny:4.2.3@sha256:420073894c8bdde15e684e0ece65cceac2a7cc51cc301ee5bd88824ee5d06785
 
-# Load general use libraries
+# Install system libraries (PLEASE ANNOTATE WITH REASON FOR INCLUSION)
+# automake:  needed for installation of R package fs
+# cmake:  needed for installation of R packages lme4, nloptr, mvdalab 
 RUN apt-get update && apt-get install -y \
     sudo \
     pandoc \
@@ -18,14 +20,15 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     libcurl3-gnutls \
 	vim python3-venv \
-	automake
+	automake \
+    cmake
 
 USER root 
 WORKDIR /srv/shiny-server/
 
 # pre-install renv
 ENV RENV_VERSION 1.0.3
-RUN R -e "install.packages('remotes', repos = c(CRAN = 'https://cloud.r-project.org'))"
+RUN R -e "install.packages('remotes', repos = c(CRAN = 'https://cloud.r-project.org'));install.packages('BiocManager')"
 RUN R -e "options('repos'=c(CRAN = 'https://cloud.r-project.org'));remotes::install_version('renv', version = '${RENV_VERSION}')"
 
 # Need to set linker flags to install pmartR in linux environment
@@ -38,13 +41,17 @@ COPY renv.lock .
 
 # install all packages listed in renv.lock
 RUN --mount=type=secret,id=gitlab_pat export GITLAB_PAT="$(cat /run/secrets/gitlab_pat)" \
-&& R -e 'renv::restore()'
+&& R -e "options(repos=c('CRAN' = 'https://cloud.r-project.org', BiocManager::repositories()));renv::restore()"
 
 # install commonly updated packages
 RUN --mount=type=secret,id=access_tokens set -a \
 && . /run/secrets/access_tokens && set +a \
 && R -e "renv::install('gitlab@code.emsl.pnl.gov::multiomics-analyses/mapdataaccess-lib@7225058a1563944d2f20b10655cb2b92ae23ed71')" \
 && R -e "install.packages('BiocManager');options(repos=c('CRAN' = 'https://cloud.r-project.org', BiocManager::repositories()));remotes::install_version('pmartR', version='2.5.0', dependencies=TRUE);"
+
+RUN --mount=type=secret,id=access_tokens set -a \
+&& . /run/secrets/access_tokens && set +a \
+&& R -e "options(repos=c('CRAN' = 'https://cloud.r-project.org', BiocManager::repositories()));remotes::install_github('pmartR/malbacR', dependencies=TRUE)"
 
 # Install python dependencies
 COPY requirements.txt .

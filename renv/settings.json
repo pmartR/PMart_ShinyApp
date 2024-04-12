@@ -3,10 +3,13 @@
   "external.libraries": [],
   "ignored.packages": [
     "pmartR",
+    "malbacR",
     "mapDataAccess",
     "shinytest2",
     "testthat",
-    "vdiffr"
+    "vdiffr",
+    "pmartRdata",
+    "trelliscopejs"
   ],
   "package.dependency.fields": [
     "Depends",
