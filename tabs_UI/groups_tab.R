@@ -65,23 +65,23 @@ groups_UI <- function() {
                 uiOutput("pairing_denom_col")
               )
             )
-          )
-        ),
-        bsCollapsePanel(
-          div(
-            "Specify Batch Information",
-            tipify(
-              span(style = "color:rgb(0,191,255)", icon("question-sign", lib = "glyphicon")), 
-              title = ttext_[["BATCH_ID_INFO"]]
-            ),
-            hidden(div(id = "ok_fdata_batch_idcols", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
           ),
-          value = "batch_columns",
-          fluidRow(
-            column(
-              6,
-              uiOutput("batch_id"),
-              uiOutput("batch_correction_id")
+          bsCollapsePanel(
+            div(
+              "Specify Batch Information",
+              tipify(
+                span(style = "color:rgb(0,191,255)", icon("question-sign", lib = "glyphicon")), 
+                title = ttext_[["BATCH_ID_INFO"]]
+              ),
+              hidden(div(id = "ok_fdata_batch_idcols", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
+            ),
+            value = "batch_columns",
+            fluidRow(
+              column(
+                6,
+                uiOutput("batch_id"),
+                uiOutput("batch_correction_id")
+              )
             )
           )
         ),# parent collapse
