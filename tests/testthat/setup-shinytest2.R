@@ -105,7 +105,7 @@ if (Sys.getenv("MAP_SHINYTEST") > 0) {
     cat("  2. Select another venv directory\n")
     cat("  3. Install a new Python venv\n\n")
     cat("[Select option] ")
-    option <- readline()
+    option <- if(interactive()) readline() else "1"
     if (!is.null(python_venv) && strtoi(option) == 1) {
       Sys.setenv("MAP_PYTHON_VENV"=python_venv)
     } else if (strtoi(option) == 2) {

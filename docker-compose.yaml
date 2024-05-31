@@ -42,6 +42,8 @@ services:
         profiles: ["testing"]
         container_name: pmart-local
         <<: *x-test-app
+        ports:
+            - "8301:2800"
         environment:
             - MAP_VERSION=0
     minio:
