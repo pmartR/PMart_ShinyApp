@@ -35,7 +35,9 @@ build: build_base build_top
 
 .PHONY: run
 run:
-	docker compose --profile ${PROFILE} up --build
+	export TOP_VERSION=${TOP_VERSION} && \
+	export BASE_VERSION=${BASE_VERSION} && \
+	docker compose --profile ${PROFILE} up
 
 .PHONY: login
 login:
