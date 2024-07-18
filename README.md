@@ -38,6 +38,10 @@ Once all dependencies are installed, make sure calling `.libPaths()` displays th
 Either build the container as described in the development section, or pull it from gitlab:
 
 ```bash
+
+# Login 
+docker login https://code-registry.emsl.pnl.gov
+
 # docker pull
 docker pull code-registry.emsl.pnl.gov/multiomics-analyses/pmart_standalone:<version>`
 
@@ -81,6 +85,10 @@ We build a base container which has all the system libraries and R packages inst
 Now, replacing &lt;version&gt; with whatever version (e.g. 1.0.0), build the container:
 
 ```bash
+
+# Login 
+docker login https://code-registry.emsl.pnl.gov
+
 # manually
 docker build -f Dockerfile-base --secret id=access_tokens,src=.mysecret -t code-registry.emsl.pnl.gov/multiomics-analyses/pmart_standalone/base:<version> .
 
