@@ -1146,6 +1146,21 @@ observeEvent(input$allow_reapply_filters, {
 #' having css class `tooltip-wrapper` and id `sprintf("add_%s_ttip_control", filter_name)`
 #' We can use togglestate_add_tooltip, supposedly, to enable/disable based on some condition.
 
+#' @details Disable the rmd_filter if the number of metrics chosen is too large relative to the number of samples.  This throws a warning in pmartR, but can throw a non-informative error lower down in the robust pca code we are using.
+observeEvent(input$rmd_metrics, {
+  req(grepl("^filter_tab$", input$top_page, perl = TRUE), !is.null(objects$omicsData))
+  
+  # this is the same logic that throws a warning in pmartR, we use it to completely disallow rmd_filter.
+  nsamps_too_low <- dim(objects$omicsData$f_data)[1] < 2 * length(input$rmd_metrics)
+  
+  togglestate_add_tooltip(session, "add_rmdfilt_ttip_control",
+    condition = !nsamps_too_low,
+    tooltip_text = ttext_[["RMD_TOO_MANY_METRICS"]],
+    position = "right"
+  )
+
+})
+
 #' @details Imd-ANOVA filter, disable if we don't have at least 3 samples per group
 #' ... disable functionality (min/max values on G-test/ANOVA)
 observeEvent(c(input[["min_nonmiss_gtest"]], input[["min_nonmiss_anova"]], objects$omicsData), {
