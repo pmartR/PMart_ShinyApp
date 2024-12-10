@@ -407,14 +407,22 @@ output$rmd_metrics_out <- renderUI({
   req(!is.null(objects$omicsData))
   
   ## Error throwing work around
-  map_list <- c("MAD", "Kurtosis", "Skewness", "Corr", "Proportion_Missing")
   metric_set <- unlist(global_input_choices[['RMD_FILTER_CHOICES']])
   metric_set2 <- combn(metric_set, 2, simplify = F)
   
-  res_check <- map(metric_set2, function(metric){
+  res_check <- map(metric_set2, function(metric) {
     tryCatch({
-      rmd_filter(objects$omicsData, 
+      tmpfilt <- rmd_filter(objects$omicsData, 
                   metrics = metric)
+      
+      zero_var = list()
+      
+      for (var in attr(tmpfilt, "metrics")){
+        zero_var[[var]] <- var(tmpfilt[[var]]) == 0
+      }
+      
+      return (zero_var)
+      
     }, error = function(e){
       print(e)
       return(NULL)
@@ -422,15 +430,23 @@ output$rmd_metrics_out <- renderUI({
 
   })
   
-  pairs <- unlist(metric_set2[map_lgl(res_check, is.null)])
-  disable_metric <- unique(pairs[duplicated(pairs)])
+  error_pairs <- unlist(metric_set2[map_lgl(res_check, is.null)])
+  disable_metric <- unique(error_pairs[duplicated(error_pairs)])
   
-  ok_meterics <- metric_set[!(metric_set %in% disable_metric)]
-  map_list <- map_list[!(metric_set %in% disable_metric)]
+  # Here we are checking for variables that didn't error out, but that have zero variance.
+  # Currently this isn't doing much, as the only one that is likely to have zero variance 
+  # is Proportion_Missing, however it will also throw an error and be disabled previously
+  # so kinda redundant.  Keeping this block since it doesn't seem to break things and will
+  # still catch the unlikely scenarios of e.g. equal variance for correlation.
+  non_null_idx <- !map_lgl(res_check, is.null)
+  non_null_pairs <- res_check[non_null_idx]
+  metrics_non_null <- metric_set2[non_null_idx] 
+  compare_df <- data.frame(zero_var = unlist(non_null_pairs), metrics = unlist(metrics_non_null))
+  zero_var_metrics <- compare_df %>% dplyr::filter(zero_var == TRUE) %>% dplyr::pull(metrics) %>% unique()
   
-  filter <- rmd_filter(objects$omicsData, metrics = ok_meterics)
-  ok_meterics <- ok_meterics[map_lgl(map_list, function(metric) var(filter[metric]) != 0)]
-  metric_filt <- !(metric_set %in% ok_meterics)
+  disable_metric <- union(disable_metric, zero_var_metrics)
+  ok_metrics <- metric_set[!(metric_set %in% disable_metric)]
+  metric_filt <- !(metric_set %in% ok_metrics)
 
   if(inherits(objects$omicsData, c("lipidData", "metabData"))){
     selected <-  c("MAD", "Kurtosis", "Skewness", "Correlation")
