@@ -1,5 +1,4 @@
 ## Functionality that was added for MAP 
-## Last Updated: Feb 8th, 2022
 
 list(
   
@@ -37,6 +36,20 @@ list(
         
         # Update MAP Connect object (used in upload_UI.R tab)
         project <- pullData
+        
+        # cleanse all data.table impurities
+        if (inherits(project$Data$e_data, "data.table")) {
+          project$Data$e_data <- as.data.frame(project$Data$e_data)
+        }
+        
+        if (inherits(project$Data$f_data, "data.table")) {
+          project$Data$f_data <- as.data.frame(project$Data$f_data)
+        }
+        
+        if (inherits(project$Data$e_meta, "data.table")) {
+          project$Data$e_meta <- as.data.frame(project$Data$e_meta)
+        }
+        
         MapConnect$Project <- project
         
         # Convert from David's project annotations to Daniel's shorthand
@@ -79,6 +92,19 @@ list(
         
         # If the object isn't a project, then it's a midpoint
         MidPointFile <- pullData
+        
+        # cleanse all data.table impurities
+        if (inherits(MidPointFile$Tracking$`Original Files`$Data$e_data, "data.table")) {
+          MidPointFile$Tracking$`Original Files`$Data$e_data <- as.data.frame(MidPointFile$Tracking$`Original Files`$Data$e_data)
+        }
+        
+        if (inherits(MidPointFile$Tracking$`Original Files`$Data$f_data, "data.table")) {
+          MidPointFile$Tracking$`Original Files`$Data$f_data <- as.data.frame(MidPointFile$Tracking$`Original Files`$Data$f_data)
+        }
+        
+        if (inherits(MidPointFile$Tracking$`Original Files`$Data$e_meta, "data.table")) {
+          MidPointFile$Tracking$`Original Files`$Data$e_meta <- as.data.frame(MidPointFile$Tracking$`Original Files`$Data$e_meta)
+        }
         
         # Create a loading screen
         html(
