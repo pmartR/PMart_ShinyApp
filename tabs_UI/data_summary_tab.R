@@ -76,7 +76,9 @@ data_summary_UI <- function() {
                 fluidRow(
                   column(6, uiOutput("qc_shape_by_UI")),
                   column(6, uiOutput("qc_shape_by_2_UI"))
-                )
+                ),
+                div("Set random seed:"),
+                fluidRow(column(6, numericInput("set_seed_qc", label = NULL, min = 0, value = 2025)))
               )
             ),
             conditionalPanel(
