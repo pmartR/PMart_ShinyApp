@@ -155,6 +155,28 @@ list(
     plots$bpquant
   }),
   
+  ## Rollup option
+  
+  output[["which_combine_fn_UI"]] <- renderUI({
+    
+    choices <- if(is.null(input$which_rollup) && input$which_rollup == "rollup"){
+      
+      ## Requires most recent pmart upload
+      c("Median" = "median", "Mean" = "mean", "Sum" = "sum")
+    } else {
+      c("Median" = "median", "Mean" = "mean")
+    }
+    
+    selected <- if(is.null(input$which_combine_fn)) NULL else isolate(input$which_combine_fn)
+    
+    radioGroupButtons(
+      "which_combine_fn",
+      "Center By:",
+      choices,
+      selected = selected
+    )
+  }),
+  
   ##  Rollup plot
   
   output[["rollup_plot_UI"]] <- renderUI({
