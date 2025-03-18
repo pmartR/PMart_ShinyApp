@@ -159,7 +159,7 @@ list(
   
   output[["which_combine_fn_UI"]] <- renderUI({
     
-    choices <- if(is.null(input$which_rollup) && input$which_rollup == "rollup"){
+    choices <- if(!is.null(input$which_rollup) && input$which_rollup == "rollup"){
       
       ## Requires most recent pmart upload
       c("Median" = "median", "Mean" = "mean", "Sum" = "sum")
