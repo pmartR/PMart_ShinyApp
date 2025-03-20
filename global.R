@@ -79,27 +79,27 @@ ttext_ <- list(
 
 #'@details info text NOT displayed in tooltips.  Usually in warnings UI elements
 infotext_ <- list(
-  LOG_TRANSFORM_ZEROS = "You have selected to log transform abundance values, 
+  LOG_TRANSFORM_ZEROS = "You have selected to log transform abundance values,
   and %s to indicate missing values.  However there are zeros in your data
   which would cause some values to be transformed to -infinity.  Either specify
   that zeros indicate missing values or replace them with NA's or the missing value
   indicator.",
   DATA_NOT_LOG = "Your data is not on the log scale and was not transformed to the log scale, some downstream methods may be disabled, consider recreating your data with a log-transform specified or that your data is already on the log scale.",
-  "RESET_FILTERS_WARNING" = "Re-applying filters will delete any statistics you 
-  have computed.  If your data was normalized in the normalize tab, you will 
+  "RESET_FILTERS_WARNING" = "Re-applying filters will delete any statistics you
+  have computed.  If your data was normalized in the normalize tab, you will
   have to re-normalize it.  Rolled up protein data will revert to the peptide
   level.",
   GROUPS_IN_FDATA = "The column 'Group' was found in your sample identification file, but is reserved for PMart.  It has been rename to '%s' (lower case g)",
   REFNORM_COLUMN_INFO_1 = "In the first image below, you would select 'TMT_Plex_Number' as the reference group column (1st dropdown), 'Treatment_Group' as the column containing the indicator for reference samples (2nd dropdown), and 'ReferencePool' as the value indicating reference samples (last dropdown).  ",
   REFNORM_COLUMN_INFO_2 = "In the second example, you would select 'TMT_Plex_Number' as the reference group column (1st dropdown), 'Is_Reference_Pool' as the column containing the indicator for reference samples (2nd dropdown), and 'Yes' as the value indicating reference samples (last dropdown).  ",
   STATS_OBJECTS_COMBINED = "Your objects have been combined into a single dataset.  If navigating to previous tabs, the first object shown in plots is now the combined data."
-) 
+)
 
 global_input_choices = list(
-  RMD_FILTER_CHOICES = list("Median Absolute Distance"="MAD", 
-                              "Kurtosis", 
-                              "Skewness", 
-                              "Correlation", 
+  RMD_FILTER_CHOICES = list("Median Absolute Distance"="MAD",
+                              "Kurtosis",
+                              "Skewness",
+                              "Correlation",
                               "Proportion Missing" = "Proportion_Missing"),
   MISSINGVAL_COLORS = c(
     "YlOrRd", "YlOrBr", "YlGnBu", "YlGn", "Reds", "RdPu", "Purples", "PuRd", "PuBuGn", "PuBu", "OrRd", "Oranges", "Greys",
@@ -112,8 +112,8 @@ global_input_choices = list(
 GROUPS_ME_IDS <- c(
   "fdata_id_col",
   "gcol1",
-  "gcol2", 
-  "cvcol1", 
+  "gcol2",
+  "cvcol1",
   "cvcol2",
   "pair_id_col",
   "pair_group_col",
