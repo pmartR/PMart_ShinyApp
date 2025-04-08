@@ -1,11 +1,11 @@
 list(
   output$edata_UI <- renderUI({
-    label1 = HTML("<input type = 'text' id = 'lipid_1_name' placeholder = 'Positive' style = 'border-style:solid;border-width:1px;'/>")
-    label2 = HTML("<input type = 'text' id = 'lipid_2_name' placeholder = 'Negative' style = 'border-style:solid;border-width:1px;'/>")
+    label1 = HTML("<input type = 'text' id = 'omic_1_name' placeholder = 'Positive' style = 'border-style:solid;border-width:1px;'/>")
+    label2 = HTML("<input type = 'text' id = 'omic_2_name' placeholder = 'Negative' style = 'border-style:solid;border-width:1px;'/>")
     
-    if (two_lipids()) {
+    if (two_lipids() || two_metab()) {
       tagList(
-        HTML("<p style = 'font-weight:bold'>Upload CSV Data Files for Positive and Negative Lipids</p>"),
+        HTML("<p style = 'font-weight:bold'>Upload CSV Data Files for Positive and Negative Ionizations</p>"),
         splitLayout(
           cellArgs = list(style = "overflow-x:hidden"),
           div(
@@ -66,7 +66,7 @@ list(
 
   # mass id column identifiers
   output$id_col <- renderUI({
-    if (two_lipids()) {
+    if (two_lipids() || two_metab()) {
       choices_1 <- colnames(e_data())
       choices_2 <- colnames(e_data_2())
       tagList(
@@ -221,7 +221,7 @@ list(
       
     }
 
-    if (two_lipids()) {
+    if (two_lipids() || two_metab()) {
       tagList(
         HTML("<p style = 'font-weight:bold'>Upload CSV Biomolecule Information Files for Positive and Negative Lipids</p>"),
         splitLayout(
@@ -296,14 +296,14 @@ list(
 
   # ...boxplots...
   output$upload_boxplots <- renderUI({
-    if (two_lipids()) {
+    if (two_lipids() || two_metab()) {
       d1 <- div(id = "upload_boxplots_1",
                 style = "border-style:solid;border-width:1px;",
                 withSpinner(plotlyOutput("omicsData_upload_boxplot")))
       d2 <- div(id = "upload_boxplots_2",
                 style = "border-style:solid;border-width:1px;",
                 withSpinner(plotlyOutput("omicsData_2_upload_boxplot")))
-      lipid_tabset_plots(d1, d2, input$lipid_1_name, input$lipid_2_name)
+      lipid_tabset_plots(d1, d2, input$omic_1_name, input$omic_2_name)
     }
     else {
       div(id = "upload_boxplots_1", 
@@ -318,11 +318,11 @@ list(
     wellPanel(
       tagList(
         tags$b("Data Summary"),
-        if (two_lipids()) {
+        if (two_lipids() || two_metab()) {
           req(!is.null(revals$upload_summary_2))
           splitLayout(
-            div(id = "upload_summary_1", tagList(lipid_1_name(), DTOutput("omicsData_upload_summary"))),
-            div(id = "upload_summary_2", tagList(lipid_2_name(), DTOutput("omicsData_upload_summary_2")))
+            div(id = "upload_summary_1", tagList(omic_1_name(), DTOutput("omicsData_upload_summary"))),
+            div(id = "upload_summary_2", tagList(omic_2_name(), DTOutput("omicsData_upload_summary_2")))
           )
         }
         else {
@@ -344,8 +344,8 @@ list(
       radioGroupButtons(
         "which_table", 
         choices = c(
-          setNames(1, ifelse(isTruthy(input$lipid_1_name), input$lipid_1_name, "Positive")), 
-          setNames(2, ifelse(isTruthy(input$lipid_2_name), input$lipid_2_name, "Negative"))
+          setNames(1, ifelse(isTruthy(input$omic_1_name), input$omic_1_name, "Positive")), 
+          setNames(2, ifelse(isTruthy(input$omic_2_name), input$omic_2_name, "Negative"))
         )
       )
     )
@@ -354,7 +354,7 @@ list(
   # e_data display
   output$head_edata <- DT::renderDT(
     {
-      if (two_lipids() & isTRUE(input$which_table == 2)) {
+      if ((two_lipids() || two_metab()) & isTRUE(input$which_table == 2)) {
         tmp <- e_data_2()
       }
       else {
@@ -370,7 +370,7 @@ list(
   # e_meta display
   output$head_emeta <- DT::renderDT(
     {
-      if (two_lipids() & isTRUE(input$which_table == 2)) {
+      if ((two_lipids() || two_metab()) & isTRUE(input$which_table == 2)) {
         req(!is.null(revals$e_meta_2))
         tmp <- revals$e_meta
       }

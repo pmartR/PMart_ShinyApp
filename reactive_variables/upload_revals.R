@@ -40,7 +40,7 @@ e_data_2 <- reactive({
 
 # indicator to check whether there are zeros in the data
 e_data_has_zeros <- reactive({
-  if(two_lipids()){
+  if(two_lipids() || two_metab()){
     any(e_data() == 0, na.rm = T) | any(e_data_2() == 0, na.rm = T) 
   }
   else{
@@ -103,9 +103,14 @@ two_lipids <- reactive({
     !is.null(input$twolipids_yn) && isTRUE(input$twolipids_yn == "TRUE")
 })
 
+two_metab <- reactive({
+  !is.null(input$datatype) && input$datatype == "metab" && 
+    !is.null(input$twometab_yn) && isTRUE(input$twometab_yn == "TRUE")
+})
+
 # are the sample names of the two lipid objects the same?
 lipids_samps_eq <- reactive({
-  req(two_lipids())
+  req(two_lipids() || two_metab())
   req(!is.null(input$id_col) & !is.null(input$id_col_2))
   
   sampnames_1 <- colnames(e_data())[-which(colnames(e_data()) %in% input$id_col)]
@@ -117,8 +122,8 @@ lipids_samps_eq <- reactive({
 })
 
 # are the edata_id columns of the two lipid objects unique?
-lipids_edata_unq <- reactive({
-  req(two_lipids())
+omics_edata_unq <- reactive({
+  req(two_lipids() || two_metab())
   req(!is.null(input$id_col) & !is.null(input$id_col_2))
   
   ids_1 <- e_data()[,which(colnames(e_data()) %in% input$id_col)]

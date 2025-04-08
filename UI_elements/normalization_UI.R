@@ -123,7 +123,7 @@ list(
         ui1 <- withSpinner(plotlyOutput("norm_modal_ba_plots"))
         ui2 <- withSpinner(plotlyOutput("norm_modal_ba_plots_2"))
 
-        lipid_tabset_plots(ui1, ui2, input$lipid_1_name, input$lipid_2_name)
+        lipid_tabset_plots(ui1, ui2, input$omic_1_name, input$omic_2_name)
       }
       else {
         withSpinner(plotlyOutput("norm_modal_ba_plots"))
@@ -153,7 +153,7 @@ list(
             withSpinner(plotlyOutput("norm_modal_scale_boxplot_2"))
         )
 
-        lipid_tabset_plots(ui1, ui2, input$lipid_1_name, input$lipid_2_name)
+        lipid_tabset_plots(ui1, ui2, input$omic_1_name, input$omic_2_name)
       }
       else {
         plots$last_plot <- subplot(plots_show, nrows = ifelse(length(plots_show) > 1, 2, 1))
@@ -185,7 +185,7 @@ list(
     if (!is.null(objects$omicsData_2)) {
       ui1 <- withSpinner(plotlyOutput("normalized_boxplots"))
       ui2 <- withSpinner(plotlyOutput("normalized_boxplots_2"))
-      lipid_tabset_plots(ui1, ui2, input$lipid_1_name, input$lipid_2_name)
+      lipid_tabset_plots(ui1, ui2, input$omic_1_name, input$omic_2_name)
     }
     else {
       withSpinner(plotlyOutput("normalized_boxplots"))

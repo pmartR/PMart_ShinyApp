@@ -280,7 +280,7 @@ observeEvent(c(input$apply_normalization, input$apply_normalization_modal), {
         attr(.tmp_obj_2, "group_DF")[,get_fdata_cname(.tmp_obj_2)] <- .tmp_obj_2$f_data[group_sample_idx, get_fdata_cname(.tmp_obj)]
         attr(.tmp_obj_2, "cnames")$fdata_cname <- colnames(attr(.tmp_obj_2, "group_DF"))[1] <- get_fdata_cname(.tmp_obj)
         
-        .tmp_obj <- pmartR::combine_lipidData(
+        .tmp_obj <- pmartR::combine_omicsData(
           .tmp_obj,
           .tmp_obj_2,
           retain_groups = TRUE,
@@ -411,8 +411,8 @@ observeEvent(input$inspect_norm, {
       }
     )
 
-    extra_text <- sprintf(" (%s)", lipid_1_name())
-    
+    extra_text <- sprintf(" (%s)", omic_1_name())
+  
     n_features_msg_2 <- tags$b(tags$h4(paste0(
       "Number of features used in normalization calculations: ",
       res_2$n_features,  " (", round(res_2$prop_features) *100, "%)"
@@ -422,7 +422,7 @@ observeEvent(input$inspect_norm, {
       tags$b(tags$h4(
         sprintf(
           "P-value from Kruskal-Wallis test on location parameters (%s):  %s",
-          lipid_2_name(),
+          omic_2_name(),
           round(res_2$p_location, 3)
         )
       ))
@@ -431,7 +431,7 @@ observeEvent(input$inspect_norm, {
         tags$b(tags$h4(
           sprintf(
             "P-value from Kruskal-Wallis test on scale parameters (%s):  %s",
-            lipid_2_name(),
+            omic_2_name(),
             round(res_2$p_scale, 3)
           )
         ))
@@ -509,7 +509,7 @@ observeEvent(input$inspect_norm, {
       proceed_msg <- NULL
     }
 
-    combine_msg <- if (two_lipids()) {
+    combine_msg <- if (two_lipids() || two_metab()) {
       HTML(messageBox(type = 'info', "After normalization, both datasets will be combined into a single object for subsequent tabs.  Navigating to previous tabs will display the combined data for the first object."))
     } else NULL
 

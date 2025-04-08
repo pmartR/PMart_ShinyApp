@@ -4,7 +4,7 @@ makeobject <- function(use_iso = T){
   req(e_data(), f_data_upload())
   
   ## two lipid inputs
-  if (two_lipids()) {
+  if (two_lipids() || two_metab()) {
     req(e_data_2(), f_data_upload_2())
     edata2 <- e_data_2()
     edata_cname2 <- input$id_col_2
@@ -15,7 +15,13 @@ makeobject <- function(use_iso = T){
   
   ## inputs
   selection <- input$datatype
-  metab_type <- input$metab_type
+  
+  metab_type <- switch(input$metab_type,
+                       metab1 = "metab",
+                       metab2 = "metab",
+                       nmr = "nmr"
+                       )
+  
   pep_type <- input$labeled_yn
   edata <- e_data()
   edata_cname <- input$id_col
@@ -65,7 +71,7 @@ makeobject <- function(use_iso = T){
   )
   
   # create second object for lipid data
-  if (two_lipids()) {
+  if (two_lipids() || two_metab()) {
     objects$uploaded_omicsData_2 <- objects$omicsData_2 <- tryCatch(
       {
         object_fn(
@@ -134,7 +140,7 @@ observeEvent(input$datatype, {
 # close edata upload panel and open column id panel when they successfully upload data
 observeEvent(c(input$file_edata, input$file_edata_2), {
   Sys.sleep(0.7)
-  if (two_lipids()) {
+  if (two_lipids() || two_metab()) {
     cond <- !is.null(input$file_edata) & !is.null(input$file_edata_2)
   }
   else {
@@ -198,7 +204,7 @@ observe({
   # two emeta files uploaded
   # all 4 files contain the id column
   
-  if (two_lipids()) {
+  if (two_lipids() || two_metab()) {
     req(!is.null(input$id_col) & !is.null(input$id_col_2))
     cond_files <- (!is.null(input$file_emeta) & !is.null(input$file_emeta_2))
     cond_idcol_edata <- all(
@@ -291,7 +297,7 @@ observe({
     revals$warnings_upload$edata_not_unique <- NULL
   })
   
-  req(two_lipids())
+  req(two_lipids() || two_metab())
   req(!is.null(input$id_col) & !is.null(input$id_col_2))
   
   # if(!lipids_samps_eq()) {
@@ -303,13 +309,13 @@ observe({
   #   revals$boolean$upload$lipids_sampnames_setequal <- lipids_samps_eq()
   # })
   
-  if(!lipids_edata_unq()) {
+  if(!omics_edata_unq()) {
     isolate({
       revals$warnings_upload$edata_not_unique <- messageBox(type = "error", "There were duplicate entries in the identifier columns of your lipid datasets.")
     })
   }
   isolate({
-    revals$boolean$upload$lipids_ids_unique <- lipids_edata_unq()
+    revals$boolean$upload$lipids_ids_unique <- omics_edata_unq()
   })
 })
 
@@ -319,12 +325,12 @@ observeEvent(input$makeobject, {
   makeobject(use_iso = F)
 
   # store warning message if data did not successfully create
-  if(is.null(objects$omicsData) | (two_lipids() & is.null(objects$omicsData_2))){
+  if(is.null(objects$omicsData) | ((two_lipids() | two_metab()) & is.null(objects$omicsData_2))){
     revals$warnings_upload$failed_object <- messageBox(type = "warning", "Something went wrong processing your objects$omicsData object(s), please verify all fields are correct")
   } else revals$warnings_upload$failed_object <- NULL
   
-  cond_one_obj <- !two_lipids() & !is.null(objects$omicsData)
-  cond_two_obj <- two_lipids() & !is.null(objects$omicsData_2)
+  cond_one_obj <- (!two_lipids() && !two_metab()) & !is.null(objects$omicsData)
+  cond_two_obj <- (two_lipids() || two_metab()) & !is.null(objects$omicsData_2)
   
   if (cond_one_obj | cond_two_obj) { 
 
@@ -358,7 +364,7 @@ observeEvent(input$makeobject, {
     updateCollapse(session, "upload_preview_collapse", open = "summary_boxplots")
     updateCollapse(session, "upload_collapse_left", close = c("columnids", "meta_collapse"))
     revals$upload_summary <- summary(objects$omicsData)
-    revals$upload_summary_2 <- if (two_lipids()) summary(objects$omicsData_2) else NULL
+    revals$upload_summary_2 <- if (two_lipids() || two_metab()) summary(objects$omicsData_2) else NULL
   }
   else {
     revals$upload_summary <- NULL
@@ -370,7 +376,7 @@ observeEvent(input$makeobject, {
 observe({
   cond_file2exists <- !is.null(e_data_2()) | !is.null(revals$e_meta_2)
 
-  toggleElement("toggle_table", condition = two_lipids() & cond_file2exists)
+  toggleElement("toggle_table", condition = (two_lipids() || two_metab()) & cond_file2exists)
 })
 
 #'@details store emeta info in an intermediate container that can be NULLED

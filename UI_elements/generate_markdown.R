@@ -53,7 +53,7 @@ output$ReportDownload <- downloadHandler(
           omicDiag = objects$diagnostic_res
         )
       ## two lipid data
-      } else if (two_lipids()) {
+      } else if (two_lipids() || two_metab()) {
         template <- "Abundance_Template_2lipids.Rmd"
         
         edata <- objects$uploaded_omicsData$e_data

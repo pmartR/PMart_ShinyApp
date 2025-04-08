@@ -286,10 +286,10 @@ output$filter_review <- renderUI({
       n_edata_2_div,
       n_fdata_2_div,
       hr(),
-      h3(tags$b(sprintf("Filters to be applied to %s:  ", lipid_1_name()))),
+      h3(tags$b(sprintf("Filters to be applied to %s:  ", omic_1_name()))),
       hr(),
       divs[obj1_inds],
-      h3(tags$b(sprintf("Filters to be applied to %s:  ", lipid_2_name()))),
+      h3(tags$b(sprintf("Filters to be applied to %s:  ", omic_2_name()))),
       hr(),
       divs[obj2_inds]
     )
@@ -345,7 +345,7 @@ output$filter_dynamic_mainplot <- renderUI({
     ui1 = withSpinner(plotlyOutput("filter_mainplot"))
     ui2 = withSpinner(plotlyOutput("filter_mainplot_2"))
 
-    lipid_tabset_plots(ui1, ui2, input$lipid_1_name, input$lipid_2_name)
+    lipid_tabset_plots(ui1, ui2, input$omic_1_name, input$omic_2_name)
   }
 })
 
@@ -356,7 +356,7 @@ output$fdata_customfilt <- renderUI({
   if (!(isTRUE(input$fdata_customfilt_regex == "") | is.null(input$fdata_customfilt_regex))) {
     fdata_IDS <- fdata_IDS[grepl(input$fdata_customfilt_regex, fdata_IDS)]
   }
-  if (two_lipids()) {
+  if (two_lipids() || two_metab()) {
     req(!is.null(objects$omicsData_2))
     fdata_IDS_2 <- objects$omicsData_2$f_data %>% purrr::pluck(get_fdata_cname(objects$omicsData_2))
     if (!(isTRUE(input$fdata_customfilt_regex_2 == "") | is.null(input$fdata_customfilt_regex_2))) {
@@ -369,7 +369,7 @@ output$fdata_customfilt <- renderUI({
         div(
           pickerInput(
             "fdata_customfilt_choices",
-            sprintf("Filter samples (%s)", lipid_1_name()),
+            sprintf("Filter samples (%s)", omic_1_name()),
             choices = fdata_IDS,
             multiple = TRUE,
             options = list(`live-search` = TRUE, `actions-box` = TRUE)
@@ -381,7 +381,7 @@ output$fdata_customfilt <- renderUI({
         div(
           pickerInput(
             "fdata_customfilt_choices_2",
-            sprintf("Filter samples (%s)", lipid_2_name()),
+            sprintf("Filter samples (%s)", omic_2_name()),
             choices = fdata_IDS_2,
             multiple = TRUE,
             options = list(`live-search` = TRUE, `actions-box` = TRUE)
@@ -504,7 +504,7 @@ output$rmdfilt_plot_type_UI <- renderUI({
     NULL
   }
   else if (input$rmdfilt_plot_type == "subset") {
-    if (two_lipids()) {
+    if (two_lipids() || two_metab()) {
       req(!is.null(objects$omicsData_2))
       choices1 <- objects$omicsData$f_data[, get_fdata_cname(objects$omicsData)]
       choices2 <- objects$omicsData_2$f_data[, get_fdata_cname(objects$omicsData_2)]
@@ -528,7 +528,7 @@ output$rmdfilt_plot_type_UI <- renderUI({
       dplyr::filter(pvalue < input$pvalue_threshold) %>% 
       dplyr::pull(get_fdata_cname(objects$omicsData))
 
-    if (two_lipids()) {
+    if (two_lipids() || two_metab()) {
       req(!is.null(objects$omicsData_2))
       temp_rmd_filter2 <- rmd_filter(objects$omicsData_2, metrics = input$rmd_metrics)
       choices2 <- temp_rmd_filter2 %>% 
@@ -555,7 +555,7 @@ output$edata_customfilt_pickers<- renderUI({
   req(!is.null(objects$omicsData))
   mols1 = objects$omicsData$e_data[,get_edata_cname(objects$omicsData)]
   
-  if(two_lipids()){
+  if(two_lipids() || two_metab()){
     validate(need(!is.null(objects$omicsData_2), "No second object"))
     mols2 = objects$omicsData_2$e_data[,get_edata_cname(objects$omicsData_2)]
     
@@ -565,7 +565,7 @@ output$edata_customfilt_pickers<- renderUI({
         column(6,
             pickerInput(
               "edata_customfilt_remove_mols_1",
-              sprintf("(%s)", lipid_1_name()),
+              sprintf("(%s)", omic_1_name()),
               choices = mols1,
               multiple = T,
               options = list(`live-search` = TRUE, `actions-box` = TRUE)
@@ -574,7 +574,7 @@ output$edata_customfilt_pickers<- renderUI({
         column(6, 
             pickerInput(
               "edata_customfilt_remove_mols_2",
-              sprintf("(%s)", lipid_2_name()),
+              sprintf("(%s)", omic_2_name()),
               choices = mols2,
               multiple = T,
               options = list(`live-search` = TRUE, `actions-box` = TRUE)
@@ -600,7 +600,7 @@ output$emeta_customfilt_which_col <- renderUI({
   
   choices1 = colnames(objects$omicsData$e_meta)
   
-  if(two_lipids()) {
+  if(two_lipids() || two_metab()) {
     validate(need(!is.null(objects$omicsData_2), "No second object"))
     choices2 = colnames(objects$omicsData_2$e_meta)
     
@@ -609,12 +609,12 @@ output$emeta_customfilt_which_col <- renderUI({
       fluidSplitLayout(
         pickerInput(
           "emeta_customfilt_which_col_1",
-          sprintf("(%s)", lipid_1_name()),
+          sprintf("(%s)", omic_1_name()),
           choices = choices1
         ),
         pickerInput(
           "emeta_customfilt_which_col_2",
-          sprintf("(%s)", lipid_2_name()),
+          sprintf("(%s)", omic_2_name()),
           choices = choices2
         )
       )
@@ -647,7 +647,7 @@ output$emeta_customfilt_pickers<- renderUI({
   choices1 <- objects$omicsData$e_meta %>% 
     purrr::pluck(input$emeta_customfilt_which_col_1) %>% unique() %>% sort()
   
-  if(two_lipids()){
+  if(two_lipids() || two_metab()){
     validate(
       need(!is.null(objects$omicsData_2$e_meta), "No biomolecule information for second data object."),
       need(input$emeta_customfilt_which_col_2, "Select second identifier.")
@@ -660,14 +660,14 @@ output$emeta_customfilt_pickers<- renderUI({
       fluidSplitLayout(
         pickerInput(
           "emeta_customfilt_which_values_1",
-          sprintf("(%s)", lipid_1_name()),
+          sprintf("(%s)", omic_1_name()),
           choices = choices1,
           multiple = T,
           options = list(`live-search` = TRUE, `actions-box` = TRUE)
         ),
         pickerInput(
           "emeta_customfilt_which_values_2",
-          sprintf("(%s)", lipid_1_name()),
+          sprintf("(%s)", omic_1_name()),
           choices = choices2,
           multiple = T,
           options = list(`live-search` = TRUE, `actions-box` = TRUE)
@@ -725,10 +725,10 @@ output$filter_plot_options <- renderUI({
 # apply filter plot style options
 output$filter_apply_style <- renderUI({
   apply_style_UI("filter",
-                  two_lipids(),
+                  two_lipids() || two_metab(),
                   inherits(plots$filter_mainplot, "list"),
-                  lipid_1_name = lipid_1_name(),
-                  lipid_2_name = lipid_2_name())
+                  omic_1_name = omic_1_name(),
+                  omic_2_name = omic_2_name())
 })
 
 # summary tables
@@ -738,11 +738,11 @@ output$filter_summary_2 <- renderDT(revals$filter_summary_2, rownames = T, optio
 output$filter_data_summary <- renderUI({
   req(!is.null(revals$filter_summary), cancelOutput = TRUE)
   wellPanel(
-    if (two_lipids()) {
+    if (two_lipids() || two_metab()) {
       req(!is.null(revals$filter_summary_2), cancelOutput = TRUE)
       splitLayout(
-        tagList(lipid_1_name(), DTOutput("filter_summary")),
-        tagList(lipid_2_name(), DTOutput("filter_summary_2"))
+        tagList(omic_1_name(), DTOutput("filter_summary")),
+        tagList(omic_2_name(), DTOutput("filter_summary_2"))
       )
     }
     else {

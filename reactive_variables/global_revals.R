@@ -33,10 +33,10 @@ global_norm_1 <- reactive({
   )
 })
 
-lipid_1_name <- reactive({
-  ifelse(isTruthy(input$lipid_1_name), input$lipid_1_name, "Positive")
+omic_1_name <- reactive({
+  ifelse(isTruthy(input$omic_1_name), input$omic_1_name, "Positive")
 })
 
-lipid_2_name <- reactive({
-  ifelse(isTruthy(input$lipid_2_name), input$lipid_2_name, "Negative")
+omic_2_name <- reactive({
+  ifelse(isTruthy(input$omic_2_name), input$omic_2_name, "Negative")
 })

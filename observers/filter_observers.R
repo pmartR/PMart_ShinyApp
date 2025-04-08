@@ -161,7 +161,7 @@ apply_filt <- function(){
       }
       
       # align samples for both datasets - TODO:  Check that samples are the same
-      if (two_lipids()) {
+      if (two_lipids() || two_metab()) {
         samps_remaining_1 <- tmp$f_data[,get_fdata_cname(objects$omicsData)]
         samps_remaining_2 <- tmp2$f_data[,get_fdata_cname(objects$omicsData_2)]
         
@@ -1035,8 +1035,8 @@ observeEvent(input$apply_filters, {
 
     # text summarizing the effect of filters...
 
-    cond_text1 <- if (is.null(objects$omicsData_2)) "" else sprintf("%s:  ", lipid_1_name())
-    cond_text2 <- if (is.null(objects$omicsData_2)) "" else sprintf("%s:  ", lipid_2_name())
+    cond_text1 <- if (is.null(objects$omicsData_2)) "" else sprintf("%s:  ", omic_1_name())
+    cond_text2 <- if (is.null(objects$omicsData_2)) "" else sprintf("%s:  ", omic_2_name())
 
     filters1 <- FILTER_NAMES %>% # filter_names is a global variable defined in global.R
       filter(attribute %in% map_chr(attributes(objects$omicsData)$filters, 1)) %>%
@@ -1089,7 +1089,7 @@ observeEvent(input$apply_filters, {
       ) %>%
       pluck("text")
 
-    non_applied_filters_2 <- if(two_lipids()) {
+    non_applied_filters_2 <- if(two_lipids() || two_metab()) {
       FILTER_NAMES %>% # 
         filter(
           attribute %in% map_chr(objects$filters, ~class(.x)[1]),

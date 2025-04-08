@@ -80,7 +80,11 @@ list(
           DataType <- pullData$Project$DataType
           if (pullData$Project$DataType == "Metabolomics-NMR") {
             updateRadioGroupButtons(session, "metab_type", selected = "nmr")
-          } else {updateRadioGroupButtons(session, "metab_type", selected = "metab")}
+          } else if(pullData$Project$DataType == "Metabolomics-LC/MS"){
+            updateRadioGroupButtons(session, "metab_type", selected = "metab1")
+          } else {
+            updateRadioGroupButtons(session, "metab_type", selected = "metab2")
+          }
         }
         
         # If isobaric, check that this is labeled peptide data 

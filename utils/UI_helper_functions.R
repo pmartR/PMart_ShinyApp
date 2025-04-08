@@ -204,8 +204,8 @@ apply_style_UI <-
            two_lipids_title = "Update plots style for dataset:",
            one_plot_title = "Update plot style",
            two_plot_title = "Update plots style for the:",
-           lipid_1_name = "Positive",
-           lipid_2_name = "Negative",
+           omic_1_name = "Positive",
+           omic_2_name = "Negative",
            ...) {
     
   if (flip_button) {
@@ -224,8 +224,8 @@ apply_style_UI <-
     tagList(
       tags$b(two_lipids_title),
       div(
-        bsButton(paste0(pagename, "_apply_style_plot_1"), lipid_1_name),
-        bsButton(paste0(pagename, "_apply_style_plot_2"), lipid_2_name),
+        bsButton(paste0(pagename, "_apply_style_plot_1"), omic_1_name),
+        bsButton(paste0(pagename, "_apply_style_plot_2"), omic_2_name),
         fbtn,
         ...
       )

@@ -81,7 +81,7 @@ list(
   #' To control which reports can be generated, temporarily
   #' TODO:  Make PDF work with all reports.
   output$report_type <- renderUI({
-    if (isTruthy(inherits(objects$omicsData, "seqData") || two_lipids())) {
+    if (isTruthy(inherits(objects$omicsData, "seqData") || two_lipids() || two_metab())) {
       choices = c("HTML")
     } else {
       choices = c("HTML", "PDF")
