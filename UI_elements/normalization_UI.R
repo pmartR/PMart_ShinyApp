@@ -33,16 +33,21 @@ list(
   }),
 
   # table output of spansres object
-  output$spans_table <- renderDT(
-    objects$spans_res,
-    options = list(scrollX = TRUE),
+  output$spans_table <- renderDT({
+    df <- objects$spans_res
+    df$percent_mols_used <- round(df$mols_used_in_norm/nrow(objects$omicsData$e_data)*100)
+    
+    df[c(3,1:2, 5, 7, 4)]
+    
+    },
+    options = list(scrollX = TRUE, pageLength = 5),
     selection = "single"
   ),
 
   # spans score plot
   output$spans_plot <- renderPlotly({
     req(!is.null(objects$spans_res))
-    p <- plot(objects$spans_res, interactive = T)
+    p <- plot(objects$spans_res, interactive = T, Npep_bar = T)
     plots$last_plot <- p
     return(p)
   }),
@@ -123,8 +128,8 @@ list(
       else {
         withSpinner(plotlyOutput("norm_modal_ba_plots"))
       }
-    }
-    else if (input$norm_modal_plot_select == "fac") {
+      
+    } else if (input$norm_modal_plot_select == "fac") {
       plots_show <- list()
       plots_show[[1]] <- plots$loc_boxplot
       plots_show[[2]] <-  plots$scale_boxplot

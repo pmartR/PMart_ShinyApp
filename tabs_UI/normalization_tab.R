@@ -110,11 +110,11 @@ normalization_UI <- function() {
         bsCollapsePanel("SPANS Results",
           value = "spans_mainpanel",
           column(
-            6,
+            12,
             withSpinner(plotlyOutput("spans_plot"))
           ),
           column(
-            6,
+            12,
             div(
               withSpinner(DTOutput("spans_table"))
             )
