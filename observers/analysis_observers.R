@@ -346,6 +346,7 @@ observeEvent(input$apply_dimreduction, {
     
   tryCatch(
     {
+      set.seed(input$set_seed_analysis)
       objects$dimred_res <- dim_reduction(objects$omicsData)
     },
     error = function(e) {

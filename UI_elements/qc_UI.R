@@ -194,6 +194,9 @@ list(
         p <- do.call(plot, pargs)
       }
       else if(input$which_qc_plot == 'pca') {
+        
+        set.seed(input$set_seed_qc)
+        
         .dimres <- dim_reduction(objects$omicsData)
         dimres_table <- .dimres
         attr(dimres_table, 'class') <- c(attr(dimres_table, 'class'), 'data.frame')
@@ -250,6 +253,9 @@ list(
         )
       }
       else if(input$which_qc_plot == 'pca') {
+        
+        set.seed(input$set_seed_qc)
+        
         .dimres <- dim_reduction(objects$omicsData_2)
         dimres_table <- .dimres
         attr(dimres_table, 'class') <- c(attr(dimres_table, 'class'), 'data.frame')
