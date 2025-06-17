@@ -48,11 +48,22 @@ list(
     
   }),
   #
+  
+  output$scatter_groups_UI <- renderUI({
+    req(input$which_qc_plot == "scatter")
+    
+    radioGroupButtons("scatter_groups", 
+                      "Compute group means?", 
+                      choices = c("Yes", "No"))
+  }),
 
   # dropdowns specifying what color to order boxplots by
   output$qc_color_by_UI <- renderUI({
     req(!is.null(objects$omicsData))
-    choices <- colnames(objects$omicsData$f_data %>% dplyr::select(-one_of(attributes(objects$omicsData)$cnames$fdata_cname)))
+    req(input$which_qc_plot != "scatter")
+    
+    choices <- colnames(objects$omicsData$f_data %>% 
+                          dplyr::select(-one_of(attributes(objects$omicsData)$cnames$fdata_cname)))
 
     name_append = if (two_lipids() || two_metab()) sprintf(" (%s)", omic_1_name()) else ""
     
@@ -70,6 +81,7 @@ list(
 
   output$qc_color_by_2_UI <- renderUI({
     req(!is.null(objects$omicsData_2))
+    req(input$which_qc_plot != "scatter")
     choices <- colnames(objects$omicsData_2$f_data %>% dplyr::select(-one_of(attributes(objects$omicsData_2)$cnames$fdata_cname)))
 
     name_append = if (two_lipids() || two_metab()) sprintf(" (%s)", omic_2_name()) else ""
@@ -192,8 +204,8 @@ list(
         if(!is.null(transformation)) pargs[['transformation']] <- transformation
         
         p <- do.call(plot, pargs)
-      }
-      else if(input$which_qc_plot == 'pca') {
+        
+      } else if(input$which_qc_plot == 'pca') {
         
         set.seed(input$set_seed_qc)
         
@@ -208,8 +220,18 @@ list(
         )
         
         p <- plot(.dimres, omicsData = objects$omicsData, color_by = color_by, shape_by = shape_by)
-      }
-      else {
+      
+      } else if(input$which_qc_plot == 'scatter'){
+        
+        p <- plot(missingval_result(objects$omicsData),
+                  objects$omicsData,
+                  groups = input$scatter_groups == "Yes",
+                  plot_type = input$which_qc_plot,
+                  use_VizSampNames = use_VizSampNames,
+                  bw_theme = TRUE
+        )
+        
+      } else {
         p <- plot(missingval_result(objects$omicsData),
           objects$omicsData,
           order_by = order_by, color_by = color_by,
@@ -225,6 +247,12 @@ list(
         isolate(qc_title()) + qc_flip()
       
       p <- p %>% ggplotly()
+      
+      if(input$which_qc_plot == 'scatter'){
+        p[['x']][['layout']][['annotations']][[2]][['x']] <- -0.05
+        p[['x']][['layout']][['annotations']][[1]][['y']] <- -0.17
+      }
+      
       plots$last_plot <- p
       return(p)
     })
