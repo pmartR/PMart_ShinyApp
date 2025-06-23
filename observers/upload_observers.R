@@ -16,12 +16,6 @@ makeobject <- function(use_iso = T){
   ## inputs
   selection <- input$datatype
   
-  metab_type <- switch(input$metab_type,
-                       metab1 = "metab",
-                       metab2 = "metab",
-                       nmr = "nmr"
-                       )
-  
   pep_type <- input$labeled_yn
   edata <- e_data()
   edata_cname <- input$id_col
@@ -45,7 +39,18 @@ makeobject <- function(use_iso = T){
                   "metab" = "as.metabData", "nmr" = "as.nmrData",
                   "seq" = "as.seqData")
   
-  if(selection == "metab") selection <- metab_type
+  if(selection == "metab") {
+    req(input$metab_type)
+    
+    metab_type <- switch(
+      input$metab_type,
+      metab1 = "metab",
+      metab2 = "metab",
+      nmr = "nmr"
+    )
+    selection <- metab_type
+  }
+  
   if(selection == "pep" && use_iso) selection <- pep_type
   
   object_fn <- get(fn_list[[selection]])
