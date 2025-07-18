@@ -53,16 +53,24 @@ upload_UI <- function() {
             )
           ),
           
-          conditionalPanel("input.metab_type == 'metab1'", 
-               radioGroupButtons("twometab_yn", "Separate files for positive and negative ionization?",
-                                 choices = c("Yes" = "TRUE", "No" = "FALSE"), selected = "FALSE"
-               )
+          conditionalPanel("input.metab_type == 'metab1'",
+              div(
+                id = "twometab_yn_ttip_control",
+                class = "tooltip-wrapper",
+                radioGroupButtons("twometab_yn", "Separate files for positive and negative ionization?",
+                                  choices = c("Yes" = "TRUE", "No" = "FALSE"), selected = "FALSE"
+                ) 
+              )
           ),
           
           conditionalPanel(
             "input.datatype=='lip'",
-            radioGroupButtons("twolipids_yn", "Separate files for positive and negative ionization?",
-              choices = c("Yes" = "TRUE", "No" = "FALSE")
+            div(
+              id = "twolipids_yn_ttip_control",
+              class = "tooltip-wrapper",
+              radioGroupButtons("twolipids_yn", "Separate files for positive and negative ionization?",
+                choices = c("Yes" = "TRUE", "No" = "FALSE"), selected = "FALSE"
+              )
             )
           ),
            

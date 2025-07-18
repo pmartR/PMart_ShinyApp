@@ -389,12 +389,26 @@ observeEvent(input$file_emeta, {
   revals$e_meta_info <- input$file_emeta
 }, priority = 10)
 
+###################################
+## FEATURE FLAGS FOR MAP/NOT MAP ##
+###################################
 
 if (MAP_ACTIVE) {
   observe({
     Sys.sleep(3)
     if (is.null(MapConnect$Project) == FALSE) {
       revals$e_meta <- MapConnect$Project$Data$e_meta
+    }
+  })
+  
+  #'@details Disable two-object selection for uploaded data.
+  #'NOTE:  Even if we allowed two objects, this should be disabled anyway, as the user should not be able to change the specification of what they uploaded.
+  observe({
+    req(input$datatype)
+    if (input$datatype == "lip") {
+      toggleState(id="twolipids_yn_ttip_control", condition = !MAP_ACTIVE)
+    } else if (input$datatype == "metab1") {
+      toggleState("twometab_yn_ttip_control", condition = !MAP_ACTIVE)
     }
   })
 }
@@ -417,6 +431,8 @@ if (MAP_ACTIVE == FALSE) {
     }
   })
 }
+
+###################################
 
 observe({
   if(!isTruthy(as.logical(input$emeta_yn))) {
