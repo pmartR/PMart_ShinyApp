@@ -39,6 +39,10 @@ run:
 	export BASE_VERSION=${BASE_VERSION} && \
 	docker compose --profile ${PROFILE} up
 
+.PHONY: stop
+stop:
+	docker compose --profile ${PROFILE} down
+	
 .PHONY: login
 login:
 	docker login code-registry.emsl.pnl.gov
