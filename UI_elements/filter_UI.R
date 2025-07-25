@@ -46,7 +46,7 @@ output$cv_threshold_UI <- renderUI({
     )
   )
 })
-
+  
 #'@details Input for molecule_filter inside a reactive UI so that 
 #' the box can be checked or not depending on what batch correction is selected
 output$molfilt_group_UI <- renderUI({
