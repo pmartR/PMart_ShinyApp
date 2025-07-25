@@ -256,13 +256,6 @@ list(
     
   }),
   
-  # output$inspect_norm_disabled_UI <- renderUI({
-  #   req(objects$omicsData)
-  #   disable_logic = FALSE
-  #   if(input$batch_correction_id == "EigenMS"){disable_logic = TRUE}
-  #   bsButton("inspect_norm", "Diagnostics for normalization selection",style = "primary",disabled = disable_logic)
-  # }),
-  
   output$batch_plots <- renderPlotly({
     p <- subplot(plots$batch_plot_pre,plots$batch_plot_post, shareY = T, titleX = T, titleY = T)
     # plots$last_plot <- p
@@ -273,42 +266,6 @@ list(
   output$batch_plots_mainplot <- renderUI({
       withSpinner(plotlyOutput("batch_plots"))
   }),
-  
-  # output$apply_bc_method_UI <- renderUI({
-  #   req(objects$omicsData)
-  #   # # assume that this will be disabled and people won't be using batch correction
-  #   # disable_logic = TRUE
-  #   # # however if we have batch correction that is not null and molecule filter was added we set button to be enabled
-  #   # if(!is.null(input$batch_correction_id) && input$batch_correction_id != "None" && input$add_molfilt %% 2 != 0){disable_logic = FALSE}
-  #   # # if batch correction has already been ran we disable it again
-  #   # if(attributes(objects$omicsData)$data_info$batch_info$is_bc){disable_logic = TRUE}
-  #   # # we also disable the button if combat has been selected but the data has not been normalized yet
-  #   # if(attributes(objects$omicsData)$data_info$norm_info$is_norm == FALSE && input$batch_correction_id == "ComBat"){disable_logic = TRUE}
-  #   div(
-  #     id = "apply_bc_method_tooltip",
-  #     class = "tooltip-wrapper",
-  #     bsButton("apply_bc_method", "Apply batch correction", style = "primary")
-  #   )
-  # }),
-  
-  # output$inspect_norm_UI <- renderUI({
-  #   req(objects$omicsData)
-  #   div(
-  #     id = "inspect_norm_tooltip",
-  #     class = "tooltip-wrapper",
-  #     bsButton("inspect_norm","Diagnostics for normalization selection",style = "primary"),
-  #     style = "width: 100%;"
-  #   )
-  # }),
-  
-  # output$apply_normalization_UI <- renderUI({
-  #   req(objects$omicsData)
-  #   div(
-  #     id = "apply_normalization_tooltip",
-  #     class = "tooltip-wrapper",
-  #     bsButton("apply_normalization", "Apply normalization", style = "primary")
-  #   )
-  # }),
   
   # plot normalized data after modal dismiss
   output$batch_boxplots <- renderPlotly({
