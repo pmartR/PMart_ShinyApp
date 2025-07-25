@@ -100,49 +100,10 @@ normalization_UI <- function() {
       ),
       disabled(bsButton("reset_normalization", 
                         "Remove normalization", 
-                        style = "primary")),
-      bsCollapse(
-        id = "batch_correction_sidebar", 
-        open = "batch_correction_options",
-        bsCollapsePanel(
-          div("Batch Correction", 
-              hidden(div(
-                id = "ok_batch_correction", 
-                style = "color:orange;float:right", 
-                icon("ok", lib = "glyphicon")
-              ))
-          ),
-          value = "batch_correction_options",
-          bsCollapse(
-            id = "batch_submenu",
-            bsCollapsePanel("Choose Batch Correction Method",
-                            value = "choose_bc_params",
-                            #
-                            pickerInput("batch_fn", "Batch Correction Methods",
-                                        choices = c(
-                                          "None" = "none",
-                                          "EigenMS" = "eigenms",
-                                          "ComBat" = "combat"
-                                        )
-                            ),
-                            hr(),
-                            bsButton("inspect_batch_correction",
-                                     "Review and Apply Batch Correction",
-                                     style = "primary"),
-                            hidden(
-                              div(
-                                "Analyzing, please wait...",
-                                id = "analyze_batch_busy", class = "fadein-out",
-                                style = "color:deepskyblue;font-weight:bold;margin-bottom:5px"
-                              )
-                            )
-            )
-          ),
-          hr()
-        )
-      ),
-      disabled(bsButton("reset_batch_correction", 
-                        "Remove batch correction", 
+                        style = "primary"))
+      ,
+      disabled(bsButton("apply_batch",
+                        "Apply Batch Correction",
                         style = "primary")),
       uiOutput("warnings_normalize")
     ),
@@ -166,7 +127,10 @@ normalization_UI <- function() {
         bsCollapsePanel("Normalized Data Plots",
           value = "normdata_mainpanel",
           uiOutput("normalized_boxplots_cond")
-        )
+        ),
+        bsCollapsePanel("Normalized Data Plots (Batch Correction)",
+                        value = "batchdata_mainpanel",
+                        uiOutput("batch_boxplots_cond"))
       )
     )
   )

@@ -168,6 +168,13 @@ list(
   # plot normalized data after modal dismiss
   output$normalized_boxplots <- renderPlotly({
     req(pluck(attributes(objects$omicsData), "data_info", "norm_info", "is_normalized") == TRUE)
+    # req has attribute to cancel output, look for batch effect being applied
+    # cancel out being true in that instance will stay as is
+    # if they come in with batch corrected data, could lead to wonky behavior
+    # if batch corrected disable normalization tab
+    # need button for has been batch corrected and give pop up
+    
+    # messageBox() to keep things aesthetically pleasing
     p <- plot(objects$omicsData, bw_theme = TRUE, color_by = "Group", order_by = "Group", use_VizSampNames = "VizSampNames" %in% colnames(objects$omicsData$f_data), interactive = T)
     plots$last_plot <- p
     p
