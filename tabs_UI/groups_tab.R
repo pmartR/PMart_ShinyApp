@@ -44,7 +44,6 @@ groups_UI <- function() {
             uiOutput("group_col2"),
             uiOutput("cv_col1"),
             uiOutput("cv_col2"),
-            uiOutput("batch_id"),
             uiOutput("pairing_col_1"),
             uiOutput("covariates_type_picker_UI_wrapper")
           ),
@@ -67,7 +66,25 @@ groups_UI <- function() {
               )
             )
           )
-        ), # parent collapse
+        ),
+        bsCollapsePanel(
+          div(
+            "Specify Batch Information",
+            tipify(
+              span(style = "color:rgb(0,191,255)", icon("question-sign", lib = "glyphicon")), 
+              title = ttext_[["BATCH_ID_INFO"]]
+            ),
+            hidden(div(id = "ok_fdata_batch_idcols", style = "color:orange;float:right", icon("ok", lib = "glyphicon")))
+          ),
+          value = "batch_columns",
+          fluidRow(
+            column(
+              6,
+              uiOutput("batch_id"),
+              uiOutput("batch_correction_id")
+            )
+          )
+        ),# parent collapse
         disabled(bsButton("group_designation", "Apply grouping", style = "primary")),
         disabled(bsButton("group_reset", "Reset grouping", style = "primary")),
         br(),

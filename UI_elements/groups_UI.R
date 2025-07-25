@@ -323,20 +323,6 @@ list(
     )
   }),
   
-  # ...batch ID
-  output$batch_id <- renderUI({
-    req(!is.null(f_data()))
-    pickerInput("batch_id", "Select Batch ID",
-                choices = c(
-                  "None",
-                  setdiff(
-                    colnames(f_data()),
-                    sapply(setdiff(GROUPS_ME_IDS,"batch_id"),function(x) input[[x]])
-                  )
-                ),
-                selected = input$batch_id)
-  }),
-  
   # ...pairs
   output$pairing_id_col <- renderUI({
     req(!is.null(f_data()))
@@ -381,6 +367,31 @@ list(
                 options = pickerOptions(dropupAuto = FALSE)
     )
   }),
+  
+  # ...batch correction
+  output$batch_id <- renderUI({
+    req(!is.null(f_data()))
+    pickerInput("batch_id","Select Batch ID column",
+                choices = c(
+                  "None",
+                  setdiff(colnames(f_data()),
+                          sapply(setdiff(GROUPS_ME_IDS, "pair_id_col"), function(x) input[[x]])
+                          )
+                ),
+                selected = input$batch_id,
+                options = pickerOptions(dropupAuto = FALSE)
+                )
+  }),
+  
+  output$batch_correction_id <- renderUI({
+    req(!is.null(f_data()))
+    pickerInput("batch_correction_id","Select Batch Correction Method",
+                choices = c("None","ComBat","EigenMS"),
+                selected = input$batch_correction_id,
+                options = pickerOptions(dropupAuto = FALSE))
+  }),
+  
+  
 
   #'@details If covariates are selected, then for each covariate, make a 
   #'radioGroupButton to specify whether that covariate is continuous or discrete.

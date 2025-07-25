@@ -3,7 +3,6 @@ enableBookmarking(store = "server")
 library(readr)
 library(shiny)
 library(shinyBS)
-library(shinybusy)
 library(shinyWidgets)
 library(stringr)
 library(DT)
@@ -27,7 +26,6 @@ require("edgeR")
 
 # Pull app version from global variable
 MAP_ACTIVE <- ifelse(Sys.getenv("MAP_VERSION") == "1", TRUE, FALSE)
-MAP_URL <- ifelse(Sys.getenv("MAP_URL") == "", "https://map.emsl.pnnl.gov/app/map", Sys.getenv("MAP_URL"))
 
 # static objects
 FILTER_NAMES <- read.csv("./filter_names.csv", stringsAsFactors = F, check.names = F)
@@ -44,30 +42,22 @@ ttext_ <- list(
   COVARIATE_TYPE_INFO = "Suppose your covariate has values [1,1,2,2,3,3].  By default, it is treated as a factor variable, but you may want to specify it is numeric.",
   CV_FILTER_INFO = "Remove biomolecules based on minimum value of coefficient of variation, calculated per-group as the standard deviation divided by the mean, and then pooled across groups per Ahmed (1995).",
   DOWNLOAD_OPTS_DISABLED = "Currently selected parameters are the same as the ones currently stored for this plot",
-  EXPLAIN_QC_BOXPLOTS = "Boxplots of abundance values for each sample.  Orderable/colorable by group or other sample information",
-  EXPLAIN_QC_BARPLOTS = "Barplots of missing values for each sample.  Orderable/colorable by group or other sample information",
-  EXPLAIN_QC_SCATTERPLOTS = "Scatterplots of biomolecules and their level of missingness against their median abundance.",
-  EXPLAIN_QC_PCA = "Principal components analysis of abundance values.  Probabilistic Principle Components Analysis is used, which does not require imputation of missing values. The R^2 value on the axes labels correspond to the percent variance of all the data explained by the corresponding principal component.  Colorable by group or other sample information",
-  IMDANOVA_FILTER_INFO = "Remove biomolecules that do not have a minimum number of non-missing values in each group to do statistical comparisons.",
-  IMDANOVA_BOTH_NA = "Must choose at least one minimum observed threshold (gtest or anova)",
-  IMDANOVA_NONE_FILTERED = "The chosen minimum values for the iMd filter do not remove any biomolecules, please revise.",
-  IMDANOVA_VALUES_OUT_OF_RANGE = "The specified minimum number of observations per group must be less than or equal to the minimum group size: %s.  Minimum g-test must be >= 3.  Minimum ANOVA must be >=2.",
   IMD_INTERACTIVE_MANY_POINTS = "If your data has many biomolecules, creating an interactive plot may take a while.",
   MAIN_EFFECTS_INFO = "Main effects are the variables of interest, those values across which you want to make comparisons.  Covariates are those values that are not of experimental interest, but must be controlled for in the statistics.",
   MIDPOINT_EXPORT_DISABLED = "Either your omicsData has not been created, or you have not finished the Normalization tab (or Statistics tab for seqData)",
   MISSING_DATA_REPLACE = "The value specified here will be replaced by NA in the data file.  If missing values are already NA in your data or the missing values are zeros in your abundance data, then you do not have to specify this field.",
   MOLECULE_FILTER_INFO = "Remove biomolecules that do not have at least some number of nonmissing values. Filter by group to remove biomolecules that do not have enough observed values within each group. Filter by batch to remove biomolecules that do not have enough observed values within each batch.",
   PAIRING_INFO = "If your samples are paired, three pieces of information are needed:  The column specifying which pairs of samples go together, the column specifying which group or side of the pairing each sample is in, and which group is to be subtracted from the other.",
-  PROTEOMICS_FILTER_INFO = "Remove proteins (and consequently peptides) that do not have a minimum number of peptides mapping to them.  Optionally, also remove peptides that map to more than one protein (redundant peptides).  If redundant peptides are removed, they will be removed before determining whether proteins have the minimum peptide count.",
+  BATCH_ID_INFO = "If your samples have been ran in batches, you may consider running batch correction to remove non-biological differences caused by running samples in multiple batches. To do so, please select the column specifying which samples belong to which batch.",
+  PROTEOMICS_FILTER_INFO = "Remove proteins (and consequently peptides) that do not have a minimum number of peptides mapping to them.  Optionally, also remove peptides that map to more than one protein.",
   REF_GROUP_INFO = "Reference normalization expects samples to belong to one of several several sets of samples (e.g. plexes or plates), each having a single &quot;reference&quot; sample (e.g. a sample on the plex that is a pool of the study samples on that same plex).  Indicate the columns in the sample information file that specify these sets of samples.",
   REF_SAMP_INDICATOR_COL_INFO = "Select which column in the sample information file indicates whether or not a sample is the reference sample for its corresponding sample set. For example, this column might contain only 1s and 0s, with 1s indicating a reference sample, and would have only a single 1 for each sample set (e.g. plex or plate).",
   REF_SAMP_INDICATOR_SYMBOL_INFO = "Select which value indicates a reference sample.  In the column you selected as indicating reference samples, what value in that column indicates a reference sample.  For example, you might specify that &quot;1&quot; represents a reference sample.",
   RMD_CUSTOM_FILTER_INFO = "If you want to filter out one or more samples based on inspection of the rMd metrics and not a p-value cutoff, note their names and use a custom sample filter from the sample filters section to remove them.",
   RMD_FILTER_INFO = "Identify and filter outlier samples based on their robust Mahalanobis distance, calculated based on up to 5 metrics described in Webb-Robertson et al. (2011)",
   RMD_PROP_MISSING_WARNING = "We advise against using proportion missing as a metric in lipidomics/metabolomics data, as they often have a very low proportion missing.",
-  RMD_TOO_MANY_METRICS = "The number of RMD metrics chosen cannot be greater than the twice the number of samples.",
-  RNA_FILT_LIB_INFO = "Filter samples based on a minimum specified library size, defined as the sum of gene counts in a sample.  The RNA-seq filters are provided in case there are any samples that exhibit egregious behavior that have not already been removed. These filters are not designed for the quality control of the identification portion of the bioinformatics pipeline.",
-  RNA_FILT_MIN_NONZERO_INFO = "Filter samples based on a specified minimum number of nonzero gene counts.  The RNA-seq filters are provided in case there are any samples that exhibit egregious behavior that have not already been removed. These filters are not designed for the quality control of the identification portion of the bioinformatics pipeline.",
+  RNA_FILT_LIB_INFO = "Filter samples based on a minimum specified library size, defined as the sum of gene counts in a sample.",
+  RNA_FILT_MIN_NONZERO_INFO = "Filter samples based on a specified minimum number of nonzero gene counts",
   ROLLUP_DISABLE_INFO = "Your data has already been rolled up to the protein level, if you would like to revert to the peptide level, go back to the filter page and re-apply your filters (you may need to re-do other steps that happened after the filter tab.)",
   SEQDATA_PVAL_ADJUST = "Adjust p-values to control for multiple tests resulting from many biomolecules (as oppose to multiple comparisons within a single biomolecule).",
   TABDISABLE_NOT_PEP = "Tab disabled because either you are not analyzing peptide data or your object does not exist.",
@@ -77,12 +67,11 @@ ttext_ <- list(
   TOTAL_COUNT_FILT_INFO = "RNA-seq filter which removes transcripts that have total count across all samples less than a specified threshold.",
   REFERENCE_DISABLED_ROW = "Disabled entries contain missing values in some samples. These might be due to NAs generated in log transformation or replacement of values less than or equal to zero.",
   REFERENCE_DISABLED_COL = "Disabled entries are non-numeric.",
-  SAMPLE_FILTER_CAUTION = "Removal of sample outliers should be done with caution, and ideally removal should be informed by input from the experimental scientist and/or supporting evidence from more filters than just the rMd Filter",
   TABDISABLE_PEP_NOT_ROLLED_UP = "This tab is used to perform statistics on peptide data rolled up to the protein level.  Roll up your peptide data in the Protein Roll Up tab before using this tab.  To perform stats on the peptide-level data, go to the Peptide Statistics tab.",
   TABDISABLE_PEP_NO_EMETA = "Tab disabled because you uploaded peptide data with no biomolecule information file.  Peptide-level statistics are still available.",
   WHAT_IS_MC = "This option defines p-value adjustment for multiple comparisons within a single biomolecule.  For example, if you have three groups A, B, and C and you want to test comparisons A vs B, A vs C, and B vs C, you will run adjustment on the resulting three p-values for all biomolecules.",
   WHAT_IS_FDR = "This option defines p-value adjustment for multiple tests arising from many biomolecules.  For example, if you have 100 biomolecules and some number of comparisons, you will run adjustment on the resulting 100 p-values for each comparison."
-)
+) 
 
 #'@details info text NOT displayed in tooltips.  Usually in warnings UI elements
 infotext_ <- list(
