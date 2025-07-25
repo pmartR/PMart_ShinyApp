@@ -14,7 +14,7 @@ output$cv_threshold_UI <- renderUI({
   
   numericInput("cv_threshold", title, min = 1, max = max_cv, value = round(max_cv*0.9, 2), step = 1)
 })
-
+  
 #'@details Input for molecule_filter inside a reactive UI so that 
 #' the box can be checked or not depending on what batch correction is selected
 output$molfilt_group_UI <- renderUI({
