@@ -401,15 +401,10 @@ if (MAP_ACTIVE) {
     }
   })
   
-  #'@details Disable two-object selection for uploaded data.
-  #'NOTE:  Even if we allowed two objects, this should be disabled anyway, as the user should not be able to change the specification of what they uploaded.
+  #'@details disable ALL top-level data selection, this should all be determined by the imported MAP object:
   observe({
-    req(input$datatype)
-    if (input$datatype == "lip") {
-      toggleState(id="twolipids_yn_ttip_control", condition = !MAP_ACTIVE)
-    } else if (input$datatype == "metab1") {
-      toggleState("twometab_yn_ttip_control", condition = !MAP_ACTIVE)
-    }
+    req(input$top_page == "upload_data_tab")
+    disable(selector = ".panel[value='datselect']")
   })
 }
 
