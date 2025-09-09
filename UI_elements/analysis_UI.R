@@ -451,7 +451,10 @@ output$statistics_tab_sidepanel <- renderUI({
             icon("ok", lib = "glyphicon")
           ),
           value = "dimred-select-settings",
-          div(class = "grey_text", "No options for this method currently"),
+          
+          numericInput("set_seed_analysis", label = "Set random seed:", min = 0, value = 2025),
+          
+          # div(class = "grey_text", "No options for this method currently"),
           br(),
           bsButton("apply_dimreduction", "Apply dimension reduction", style = "primary"),
           br(), br(),

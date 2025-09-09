@@ -31,8 +31,11 @@ Visualizations of each step are available to save and download, along with proce
 PMart accepts a single dataset from the following data types. In all cases, PMart expects quantitated data where there is a single  measurement for a given biomolecule; any biomolecules detected with multiple signals must be collapsed into a single row of the expression data for upload.
 
 * **Metabolomics**
-    * GC-MS
     * NMR
+    * GC-MS
+    * LC-MS
+      * Single ionization
+      * Both negative and positive ionizations
 * **Lipidomics**
     * LC-MS 
       * Single ionization

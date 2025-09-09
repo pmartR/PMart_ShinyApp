@@ -16,7 +16,7 @@ list(
     req(!is.null(objects$omicsData))
     choices <- colnames(objects$omicsData$f_data %>% dplyr::select(-one_of(attributes(objects$omicsData)$cnames$fdata_cname)))
     
-    name_append = if (two_lipids()) sprintf(" (%s)", lipid_1_name()) else ""
+    name_append = if (two_lipids() || two_metab()) sprintf(" (%s)", omic_1_name()) else ""
     
     pickerInput("qc_order_by", NULL,
       choices = c(choices, "Group Levels" = "Group"),
@@ -34,7 +34,7 @@ list(
     req(!is.null(objects$omicsData_2))
     choices <- colnames(objects$omicsData_2$f_data %>% dplyr::select(-one_of(attributes(objects$omicsData_2)$cnames$fdata_cname)))
 
-    name_append = if (two_lipids()) sprintf(" (%s)", lipid_2_name()) else ""
+    name_append = if (two_lipids() || two_metab()) sprintf(" (%s)", omic_2_name()) else ""
     
     pickerInput("qc_order_by_2", NULL,
       choices = c(choices, "Group Levels" = "Group"),
@@ -48,13 +48,24 @@ list(
     
   }),
   #
+  
+  output$scatter_groups_UI <- renderUI({
+    req(input$which_qc_plot == "scatter")
+    
+    radioGroupButtons("scatter_groups", 
+                      "Compute group means?", 
+                      choices = c("Yes", "No"))
+  }),
 
   # dropdowns specifying what color to order boxplots by
   output$qc_color_by_UI <- renderUI({
     req(!is.null(objects$omicsData))
-    choices <- colnames(objects$omicsData$f_data %>% dplyr::select(-one_of(attributes(objects$omicsData)$cnames$fdata_cname)))
+    req(input$which_qc_plot != "scatter")
+    
+    choices <- colnames(objects$omicsData$f_data %>% 
+                          dplyr::select(-one_of(attributes(objects$omicsData)$cnames$fdata_cname)))
 
-    name_append = if (two_lipids()) sprintf(" (%s)", lipid_1_name()) else ""
+    name_append = if (two_lipids() || two_metab()) sprintf(" (%s)", omic_1_name()) else ""
     
     pickerInput("qc_color_by", NULL,
       choices = c(choices, "Group Levels" = "Group"),
@@ -70,9 +81,10 @@ list(
 
   output$qc_color_by_2_UI <- renderUI({
     req(!is.null(objects$omicsData_2))
+    req(input$which_qc_plot != "scatter")
     choices <- colnames(objects$omicsData_2$f_data %>% dplyr::select(-one_of(attributes(objects$omicsData_2)$cnames$fdata_cname)))
 
-    name_append = if (two_lipids()) sprintf(" (%s)", lipid_2_name()) else ""
+    name_append = if (two_lipids() || two_metab()) sprintf(" (%s)", omic_2_name()) else ""
     
     pickerInput("qc_color_by_2", NULL,
       choices = c(choices, "Group Levels" = "Group"),
@@ -90,7 +102,7 @@ list(
     req(!is.null(objects$omicsData))
     choices <- colnames(objects$omicsData$f_data %>% dplyr::select(-one_of(attributes(objects$omicsData)$cnames$fdata_cname)))
     
-    noselect = if(two_lipids()) sprintf("Select one (%s)", lipid_1_name()) else "Select one"
+    noselect = if(two_lipids() || two_metab()) sprintf("Select one (%s)", omic_1_name()) else "Select one"
     
     pickerInput("qc_shape_by", NULL,
       choices = c(choices, "Group Levels" = "Group"),
@@ -106,7 +118,7 @@ list(
     req(!is.null(objects$omicsData_2))
     choices <- colnames(objects$omicsData_2$f_data %>% dplyr::select(-one_of(attributes(objects$omicsData_2)$cnames$fdata_cname)))
 
-    noselect = sprintf("Select one (%s)", lipid_2_name())
+    noselect = sprintf("Select one (%s)", omic_2_name())
     
     pickerInput("qc_shape_by_2", NULL,
       choices = c(setNames("Select one", noselect), choices, "Group Levels" = "Group"),
@@ -122,7 +134,7 @@ list(
 
   # qc tab plot panel
   output$qc_plots <- renderUI({
-    if (two_lipids()) {
+    if (two_lipids() || two_metab()) {
       d1 = div(id = "qc_plots_1", 
             style = "border-style:solid;border-width:1px;", 
             withSpinner(plotlyOutput("omicsData_plot"))
@@ -131,7 +143,7 @@ list(
             style = "border-style:solid;border-width:1px;",
             withSpinner(plotlyOutput("omicsData_plot_2"))
             )
-      lipid_tabset_plots(d1, d2, input$lipid_1_name, input$lipid_2_name)
+      lipid_tabset_plots(d1, d2, input$omic_1_name, input$omic_2_name)
     }
     else {
       div(id = "qc_plots_1", 
@@ -148,11 +160,11 @@ list(
   output$qc_data_summary <- renderUI({
     req(!is.null(revals$groups_summary), cancelOutput = TRUE)
     wellPanel(
-      if (two_lipids()) {
+      if (two_lipids() || two_metab()) {
         req(!is.null(revals$groups_summary_2), cancelOutput = TRUE)
         splitLayout(
-          tagList(tags$h4(lipid_1_name()), DTOutput("qc_summary")),
-          tagList(tags$h4(lipid_2_name()),  DTOutput("qc_summary_2"))
+          tagList(tags$h4(omic_1_name()), DTOutput("qc_summary")),
+          tagList(tags$h4(omic_2_name()),  DTOutput("qc_summary_2"))
         )
       }
       else {
@@ -192,8 +204,11 @@ list(
         if(!is.null(transformation)) pargs[['transformation']] <- transformation
         
         p <- do.call(plot, pargs)
-      }
-      else if(input$which_qc_plot == 'pca') {
+        
+      } else if(input$which_qc_plot == 'pca') {
+        
+        set.seed(input$set_seed_qc)
+        
         .dimres <- dim_reduction(objects$omicsData)
         dimres_table <- .dimres
         attr(dimres_table, 'class') <- c(attr(dimres_table, 'class'), 'data.frame')
@@ -205,8 +220,18 @@ list(
         )
         
         p <- plot(.dimres, omicsData = objects$omicsData, color_by = color_by, shape_by = shape_by)
-      }
-      else {
+      
+      } else if(input$which_qc_plot == 'scatter'){
+        
+        p <- plot(missingval_result(objects$omicsData),
+                  objects$omicsData,
+                  groups = input$scatter_groups == "Yes",
+                  plot_type = input$which_qc_plot,
+                  use_VizSampNames = use_VizSampNames,
+                  bw_theme = TRUE
+        )
+        
+      } else {
         p <- plot(missingval_result(objects$omicsData),
           objects$omicsData,
           order_by = order_by, color_by = color_by,
@@ -222,6 +247,12 @@ list(
         isolate(qc_title()) + qc_flip()
       
       p <- p %>% ggplotly()
+      
+      if(input$which_qc_plot == 'scatter'){
+        p[['x']][['layout']][['annotations']][[2]][['x']] <- -0.05
+        p[['x']][['layout']][['annotations']][[1]][['y']] <- -0.17
+      }
+      
       plots$last_plot <- p
       return(p)
     })
@@ -250,6 +281,9 @@ list(
         )
       }
       else if(input$which_qc_plot == 'pca') {
+        
+        set.seed(input$set_seed_qc)
+        
         .dimres <- dim_reduction(objects$omicsData_2)
         dimres_table <- .dimres
         attr(dimres_table, 'class') <- c(attr(dimres_table, 'class'), 'data.frame')
@@ -281,7 +315,10 @@ list(
 
   # apply filter plot style options
   output$qc_apply_style <- renderUI({
-    apply_style_UI("qc", two_lipids(), two_lipids(), TRUE, lipid_1_name = lipid_1_name(), lipid_2_name = lipid_2_name())
+    apply_style_UI("qc", 
+                   two_lipids() || two_metab(), 
+                   two_lipids() || two_metab(), 
+                   TRUE, omic_1_name = omic_1_name(), omic_2_name = omic_2_name())
   }),
 
   output$warnings_transform <- renderUI({

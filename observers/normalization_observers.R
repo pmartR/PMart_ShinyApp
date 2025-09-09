@@ -280,7 +280,7 @@ observeEvent(c(input$apply_normalization, input$apply_normalization_modal), {
         attr(.tmp_obj_2, "group_DF")[,get_fdata_cname(.tmp_obj_2)] <- .tmp_obj_2$f_data[group_sample_idx, get_fdata_cname(.tmp_obj)]
         attr(.tmp_obj_2, "cnames")$fdata_cname <- colnames(attr(.tmp_obj_2, "group_DF"))[1] <- get_fdata_cname(.tmp_obj)
         
-        .tmp_obj <- pmartR::combine_lipidData(
+        .tmp_obj <- pmartR::combine_omicsData(
           .tmp_obj,
           .tmp_obj_2,
           retain_groups = TRUE,
@@ -411,13 +411,18 @@ observeEvent(input$inspect_norm, {
       }
     )
 
-    extra_text <- sprintf(" (%s)", lipid_1_name())
+    extra_text <- sprintf(" (%s)", omic_1_name())
+  
+    n_features_msg_2 <- tags$b(tags$h4(paste0(
+      "Number of features used in normalization calculations: ",
+      res_2$n_features,  " (", round(res_2$prop_features) *100, "%)"
+    )))
 
     location_msg_2 <-
       tags$b(tags$h4(
         sprintf(
           "P-value from Kruskal-Wallis test on location parameters (%s):  %s",
-          lipid_2_name(),
+          omic_2_name(),
           round(res_2$p_location, 3)
         )
       ))
@@ -426,7 +431,7 @@ observeEvent(input$inspect_norm, {
         tags$b(tags$h4(
           sprintf(
             "P-value from Kruskal-Wallis test on scale parameters (%s):  %s",
-            lipid_2_name(),
+            omic_2_name(),
             round(res_2$p_scale, 3)
           )
         ))
@@ -434,12 +439,13 @@ observeEvent(input$inspect_norm, {
       NULL
   }
   else {
-    location_msg_2 <- scale_msg_2 <- NULL
+    location_msg_2 <- scale_msg_2 <- n_features_msg_2 <- NULL
     res_2 <- NULL
     extra_text <- ""
   }
 
   if (!is.null(res_1)) {
+    
     # store plots
     plots$loc_boxplot <- res_1$loc_boxplot
     plots$scale_boxplot <- res_1$scale_boxplot
@@ -448,23 +454,62 @@ observeEvent(input$inspect_norm, {
     plots$norm_modal_ba_plots <- res_1$norm_modal_ba_plots
     plots$norm_modal_ba_plots_2 <- res_2$norm_modal_ba_plots
 
-    # tags displaying p-values
+    # tags displaying p-values and n_features
     location_msg <- tags$b(tags$h4(sprintf("P-value from Kruskal-Wallis test on location parameters%s:  %s", extra_text, round(res_1$p_location, 3))))
-    scale_msg <- if (!is.null(res_1$p_scale)) tags$b(tags$h4(sprintf("P-value from Kruskal-Wallis test on scale parameters%s:  %s", extra_text, round(res_1$p_scale, 3)))) else NULL
-
+    scale_msg <- if (!is.null(res_1$p_scale)) 
+      tags$b(tags$h4(
+        sprintf("P-value from Kruskal-Wallis test on scale parameters%s:  %s", 
+                extra_text, round(res_1$p_scale, 3))
+        )
+        ) else NULL
+    n_features_msg <- tags$b(tags$h4(paste0(
+      "Number of features used in normalization calculations: ",
+      res_1$n_features,  " (", round(res_1$prop_features *100), "%)"
+      )))
+    
+    
     text <- ifelse(get_data_norm(objects$omicsData), "Update", "Apply")
     
-    # conditional message/button name depending on if we have a low p-value
-    if (any(c(res_1$p_location, res_1$p_scale, res_2$p_location, res_2$p_scale) < 0.05)) {
-      proceed_msg <- tagList(tags$b(style = "color:red", "Low p-values suggest your normalization factors are related to a variable of interest.  This may skew your results, consider choosing another method."), hr())
+    # conditional message/button name depending on if we have a low p-value or low n features used in norm
+    cond1 <- any(c(res_1$p_location, res_1$p_scale, res_2$p_location, res_2$p_scale) < 0.05)
+    cond2 <- res_1$prop_features < .1
+    
+    cond1_msg <- paste0("Low p-values suggest your normalization factors are ",
+                        "related to a variable of interest.")
+    
+    cond2_msg <- paste0("Less than 10% of all features are used in the selected ",
+                        "subset method.")
+    
+    closer <- "This may skew your results, consider choosing another method."
+    
+    if (cond1 && cond2) {
+      
+      proceed_msg <- tagList(tags$b(style = "color:red", 
+                                    paste(cond1_msg, 
+                                          "Additionally,", 
+                                          tolower(cond2_msg),
+                                          closer
+                                          )
+                                    ), hr())
+      
       button_name <- paste(text, " normalization anyway", collapse ="")
+    } else if (cond1){
+      
+      proceed_msg <- tagList(tags$b(style = "color:red", paste(cond1_msg, closer)), hr())
+      button_name <- paste(text, " normalization anyway", collapse ="")
+      
+    } else if (cond2) {
+      
+      proceed_msg <- tagList(tags$b(style = "color:red", paste(cond2_msg, closer)), hr())
+      button_name <- paste(text, " normalization anyway", collapse ="")
+      
     }
     else {
       button_name <- paste(text, " normalization", collapse = "")
       proceed_msg <- NULL
     }
 
-    combine_msg <- if (two_lipids()) {
+    combine_msg <- if (two_lipids() || two_metab()) {
       HTML(messageBox(type = 'info', "After normalization, both datasets will be combined into a single object for subsequent tabs.  Navigating to previous tabs will display the combined data for the first object."))
     } else NULL
 
@@ -473,8 +518,10 @@ observeEvent(input$inspect_norm, {
       modalDialog(
         location_msg,
         scale_msg,
+        n_features_msg,
         location_msg_2,
         scale_msg_2,
+        n_features_msg_2,
         hr(),
         proceed_msg,
         radioGroupButtons("norm_modal_plot_select", "Show me plots of:",

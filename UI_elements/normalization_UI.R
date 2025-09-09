@@ -33,16 +33,21 @@ list(
   }),
 
   # table output of spansres object
-  output$spans_table <- renderDT(
-    objects$spans_res,
-    options = list(scrollX = TRUE),
+  output$spans_table <- renderDT({
+    df <- objects$spans_res
+    df$percent_mols_used <- round(df$mols_used_in_norm/nrow(objects$omicsData$e_data)*100)
+    
+    df[c(3,1:2, 5, 7, 4)]
+    
+    },
+    options = list(scrollX = TRUE, pageLength = 5),
     selection = "single"
   ),
 
   # spans score plot
   output$spans_plot <- renderPlotly({
     req(!is.null(objects$spans_res))
-    p <- plot(objects$spans_res, interactive = T)
+    p <- plot(objects$spans_res, interactive = T, Npep_bar = T)
     plots$last_plot <- p
     return(p)
   }),
@@ -118,13 +123,13 @@ list(
         ui1 <- withSpinner(plotlyOutput("norm_modal_ba_plots"))
         ui2 <- withSpinner(plotlyOutput("norm_modal_ba_plots_2"))
 
-        lipid_tabset_plots(ui1, ui2, input$lipid_1_name, input$lipid_2_name)
+        lipid_tabset_plots(ui1, ui2, input$omic_1_name, input$omic_2_name)
       }
       else {
         withSpinner(plotlyOutput("norm_modal_ba_plots"))
       }
-    }
-    else if (input$norm_modal_plot_select == "fac") {
+      
+    } else if (input$norm_modal_plot_select == "fac") {
       plots_show <- list()
       plots_show[[1]] <- plots$loc_boxplot
       plots_show[[2]] <-  plots$scale_boxplot
@@ -148,7 +153,7 @@ list(
             withSpinner(plotlyOutput("norm_modal_scale_boxplot_2"))
         )
 
-        lipid_tabset_plots(ui1, ui2, input$lipid_1_name, input$lipid_2_name)
+        lipid_tabset_plots(ui1, ui2, input$omic_1_name, input$omic_2_name)
       }
       else {
         plots$last_plot <- subplot(plots_show, nrows = ifelse(length(plots_show) > 1, 2, 1))
@@ -180,7 +185,7 @@ list(
     if (!is.null(objects$omicsData_2)) {
       ui1 <- withSpinner(plotlyOutput("normalized_boxplots"))
       ui2 <- withSpinner(plotlyOutput("normalized_boxplots_2"))
-      lipid_tabset_plots(ui1, ui2, input$lipid_1_name, input$lipid_2_name)
+      lipid_tabset_plots(ui1, ui2, input$omic_1_name, input$omic_2_name)
     }
     else {
       withSpinner(plotlyOutput("normalized_boxplots"))

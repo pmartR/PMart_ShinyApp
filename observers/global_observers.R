@@ -25,8 +25,8 @@ observeEvent(input$saveplot, {
   if (!is.null(plots$last_plot)) {
     # store the plot in a named element of the plots$allplots reactive list
     # store the name of that element in a table as well
-    plot_name <- if(!isTruthy(lipid_1_name())) {
-      sprintf("Plot %s, %s:%s", input$saveplot, lipid_1_name(), input$top_page)
+    plot_name <- if(!isTruthy(omic_1_name())) {
+      sprintf("Plot %s, %s:%s", input$saveplot, omic_1_name(), input$top_page)
     } else {
       sprintf("Plot %s:%s", input$saveplot, input$top_page)
     }
@@ -40,7 +40,7 @@ observeEvent(input$saveplot, {
   }
   
   if (!is.null(plots$last_plot_2)) {
-    plot_name_2 <- sprintf("Plot %s, %s:%s", input$saveplot, lipid_2_name(), input$top_page)
+    plot_name_2 <- sprintf("Plot %s, %s:%s", input$saveplot, omic_2_name(), input$top_page)
     plots$allplots[[plot_name_2]] <- plots$last_plot_2
     plots$plot_save_options[[plot_name_2]] <- list(type = "HTML Widget", width = 800, height = 400, scale = 1)
     plots$plot_table[nrow(plots$plot_table) + 1, ] <- c(plot_name_2, dt_checkmark)

@@ -94,8 +94,8 @@ observeEvent(input$apply_imdanova, {
         input$imdanova_pval_adjust_g_fdr
       } else "none"
       
-      if (two_lipids() && !isTRUE(attributes(.tmp)[['data_info']][['is_combined']])) {
-        .tmp_imd <- pmartR::combine_lipidData(
+      if ((two_lipids() || two_metab()) && !isTRUE(attributes(.tmp)[['data_info']][['is_combined']])) {
+        .tmp_imd <- pmartR::combine_omicsData(
           .tmp,
           objects$omicsData_2,
           retain_groups = TRUE,
@@ -346,6 +346,7 @@ observeEvent(input$apply_dimreduction, {
     
   tryCatch(
     {
+      set.seed(input$set_seed_analysis)
       objects$dimred_res <- dim_reduction(objects$omicsData)
     },
     error = function(e) {

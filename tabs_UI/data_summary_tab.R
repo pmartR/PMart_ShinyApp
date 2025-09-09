@@ -60,14 +60,24 @@ data_summary_UI <- function() {
                 )
               )    
             ),
+            # Group mean selection
+            conditionalPanel(
+              "['scatter'].includes(input.which_qc_plot)",
+            tagList(
+              fluidRow(
+                column(12, uiOutput("scatter_groups_UI"))
+              )
+            )),
             # color selection
+            conditionalPanel(
+              "input.which_qc_plot != 'scatter'",
             tagList(
               div("Color By:"),
               fluidRow(
                 column(6, uiOutput("qc_color_by_UI")),
                 column(6, uiOutput("qc_color_by_2_UI"))
               )
-            ),
+            )),
             # shape selection
             conditionalPanel(
               "['pca'].includes(input.which_qc_plot)",
@@ -76,11 +86,13 @@ data_summary_UI <- function() {
                 fluidRow(
                   column(6, uiOutput("qc_shape_by_UI")),
                   column(6, uiOutput("qc_shape_by_2_UI"))
-                )
+                ),
+                div("Set random seed:"),
+                fluidRow(column(6, numericInput("set_seed_qc", label = NULL, min = 0, value = 2025)))
               )
             ),
             conditionalPanel(
-              "['bar', 'scatter'].includes(input.which_qc_plot)",
+              "['bar'].includes(input.which_qc_plot)",
                 id = "js_qc_colors",
                 pickerInput(
                   "qc_colors",

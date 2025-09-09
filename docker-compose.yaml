@@ -1,5 +1,4 @@
 #
-version: "3" 
 
 x-app: &x-app
     image: "code-registry.emsl.pnl.gov/multiomics-analyses/pmart_standalone:${TOP_VERSION:-latest}"
@@ -26,7 +25,14 @@ x-test-app: &x-test-app
 services:
     app-base:
         profiles: ["local"]
+        image: "code-registry.emsl.pnl.gov/multiomics-analyses/pmart_standalone/base:${BASE_VERSION:-latest}"
         container_name: pmart-local
+        volumes:
+          - "./:/srv/shiny-server/"
+          - "/dev/null:/srv/shiny-server/.Rprofile"
+        environment:
+          - SHINY_DEBUG=${SHINY_DEBUG:-1}
+          - MAP_VERSION=${MAP_VERSION:-1}
         <<: *x-app
     pmart-minio:
         profiles: ["minio"]
@@ -47,7 +53,7 @@ services:
         environment:
             - MAP_VERSION=0
     minio:
-        profiles: ["minio", "testing"]
+        profiles: ["minio", "testing", "local"]
         image: minio/minio
         container_name: minio-map
         ports:

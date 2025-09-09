@@ -82,5 +82,13 @@ inspect_norm <- function(omicsData, subset_fn, norm_fn, params, backtransform) {
   # norm_modal_ba_plots <- list(p)
   norm_modal_ba_plots <- p
 
-  return(list(p_location = p_location, p_scale = p_scale, loc_boxplot = loc_boxplot, scale_boxplot = scale_boxplot, norm_modal_ba_plots = norm_modal_ba_plots))
+  return(list(
+    p_location = p_location, 
+    p_scale = p_scale, 
+    loc_boxplot = loc_boxplot, 
+    scale_boxplot = scale_boxplot, 
+    norm_modal_ba_plots = norm_modal_ba_plots,
+    n_features = norm_object$n_features_calc,
+    prop_features = norm_object$prop_features_calc
+    ))
 }

@@ -43,7 +43,7 @@ list(
     
     matching_col <- colnames(f_data())[which(matching_col_n == max(matching_col_n))[1]]
     
-    if (two_lipids()) {
+    if (two_lipids() || two_metab()) {
       matching_col_n2 <- map_int(1:ncol(f_data()), function(col) {
         sum(f_data()[[col]] %in% colnames(objects$omicsData_2$e_data))
       })
@@ -51,7 +51,7 @@ list(
       matching_col2 <- colnames(f_data())[which(matching_col_n2 == max(matching_col_n2))[1]]
       
       return(tagList(
-        splitLayout(cellArgs = list(style = "text-align:center"), lipid_1_name(), lipid_2_name()),
+        splitLayout(cellArgs = list(style = "text-align:center"), omic_1_name(), omic_2_name()),
         br(style = "padding:2px"),
         HTML(
           "<p style = 'font-weight:bold'>Which columns in these files specify the respective sample names?</p>"
@@ -138,14 +138,14 @@ list(
 
   # then conditionally display one or two plots
   output$group_barplots <- renderUI({
-    if (two_lipids()) {
+    if (two_lipids() || two_metab()) {
       d1 = div(id = "sample_barplots_1",
                style = "border-style:solid;border-width:1px;",
                withSpinner(plotlyOutput("group_barplots_1")))
       d2 = div(id = "sample_barplots_2",
                style = "border-style:solid;border-width:1px;",
                withSpinner(plotlyOutput("group_barplots_2")))
-      lipid_tabset_plots(d1, d2, input$lipid_1_name, input$lipid_2_name)
+      lipid_tabset_plots(d1, d2, input$omic_1_name, input$omic_2_name)
     }
     else {
       div(id = "sample_barplots_1", 
@@ -240,11 +240,11 @@ list(
     wellPanel(
       tagList(
         tags$b("Grouped Data Summary"),
-        if (two_lipids()) {
+        if (two_lipids() || two_metab()) {
           req(!is.null(revals$groups_summary_2), cancelOutput = TRUE)
           splitLayout(
-            div(id = "groups_summary_1", tagList(lipid_1_name(), DTOutput("omicsData_groups_summary"))),
-            div(id = "groups_summary_2", tagList(lipid_2_name(), DTOutput("omicsData_groups_summary_2")))
+            div(id = "groups_summary_1", tagList(omic_1_name(), DTOutput("omicsData_groups_summary"))),
+            div(id = "groups_summary_2", tagList(omic_2_name(), DTOutput("omicsData_groups_summary_2")))
           )
         }
         else {

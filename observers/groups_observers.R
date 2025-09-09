@@ -63,7 +63,7 @@ makegroup <- function(){
   ## call group_designation, and apply custom sampnames if specified.
   
   ## Check two lipids requirements and process second object first ...
-  if (two_lipids()) {
+  if (two_lipids() || two_metab()) {
     req(!is.null(objects$omicsData_2))
 
     # rearrange sample names to match the first object
@@ -142,7 +142,7 @@ makegroup <- function(){
   
   objects$omicsData <- .tmp_obj
   
-  if(two_lipids()){
+  if(two_lipids() || two_metab()){
     objects$omicsData_2 <- .tmp_obj_2 
   }
 }
@@ -216,7 +216,7 @@ observeEvent(input$group_designation, {
     )
 
     revals$groups_summary <- summary(objects$omicsData)
-    revals$groups_summary_2 <- if (two_lipids()) summary(objects$omicsData_2) else NULL
+    revals$groups_summary_2 <- if (two_lipids() || two_metab()) summary(objects$omicsData_2) else NULL
   }
   else {
     revals$warnings_groups$failed_groupdes <- messageBox(type = "warning", "Something went wrong grouping your objects$omicsData object(s), please verify all fields are correct")
@@ -286,7 +286,7 @@ observe({
     intersect(f_data()[[fdata_idcol]], sample_names_1)
   )) == 0
   
-  if (two_lipids()) {
+  if (two_lipids() || two_metab()) {
     req(objects$omicsData_2)
     
     fdata_idcol_2 <- if (length(input$fdata_id_col_2) == 0) "__NULLSELECT__" else input$fdata_id_col_2

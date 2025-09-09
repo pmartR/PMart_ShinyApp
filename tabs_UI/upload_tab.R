@@ -31,6 +31,9 @@ upload_UI <- function() {
 
             bsButton("upload_to_datareqs", "See data requirements", icon = blueq),
           ),
+          
+          br(),
+          
           conditionalPanel(
             "input.datatype=='pep'",
             radioGroupButtons("labeled_yn", "Is this labeled peptide data?",
@@ -40,15 +43,34 @@ upload_UI <- function() {
           
           conditionalPanel(
             "input.datatype=='metab'", 
+            
               radioGroupButtons("metab_type", "Which type of instrumentation?",
-                                choices = c("LC/MS or GC/MS" = "metab", "NMR" = "nmr"), selected = "FALSE"
+                                choices = c(
+                                  "LC/MS" = "metab1", 
+                                  "GC/MS" = "metab2",
+                                  "NMR" = "nmr"
+                                  ), selected = "FALSE"
             )
+          ),
+          
+          conditionalPanel("input.metab_type == 'metab1'",
+              div(
+                id = "twometab_yn_ttip_control",
+                class = "tooltip-wrapper",
+                radioGroupButtons("twometab_yn", "Separate files for positive and negative ionization?",
+                                  choices = c("Yes" = "TRUE", "No" = "FALSE"), selected = "FALSE"
+                ) 
+              )
           ),
           
           conditionalPanel(
             "input.datatype=='lip'",
-            radioGroupButtons("twolipids_yn", "Separate files for positive and negative ionization?",
-              choices = c("Yes" = "TRUE", "No" = "FALSE")
+            div(
+              id = "twolipids_yn_ttip_control",
+              class = "tooltip-wrapper",
+              radioGroupButtons("twolipids_yn", "Separate files for positive and negative ionization?",
+                choices = c("Yes" = "TRUE", "No" = "FALSE"), selected = "FALSE"
+              )
             )
           ),
            
