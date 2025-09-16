@@ -1,5 +1,7 @@
 # pmartR-shiny
 
+Please cite: https://pubs.acs.org/doi/full/10.1021/acs.jproteome.3c00512
+
 Shiny GUI implementation of the pmartR R package.
 
 This project implements a shiny-GUI for the analysis of a single \`omics dataset
