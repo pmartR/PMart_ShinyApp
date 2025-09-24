@@ -86,8 +86,8 @@ output$imdanova_plot_type_UI <- renderUI({
   
   choices = switch(
     attr(objects$imdanova_res, "statistical_test"),
-    "combined" = c("Bar" = "bar", "Volcano" = "volcano", "Counts Heatmap" = "gheatmap"),
-    "anova" = c("Bar" = "bar", "Volcano" = "volcano"),
+    "combined" = c("Bar" = "bar", "Volcano" = "volcano", "Counts Heatmap" = "gheatmap", "Log-FC Histogram" = "histogram"),
+    "anova" = c("Bar" = "bar", "Volcano" = "volcano", "Log-FC Histogram" = "histogram"),
     "gtest" = c("Bar" = "bar", "Counts Heatmap" = "gheatmap"),
     "__INVALID__"
   )
@@ -780,12 +780,16 @@ output$statistics_plot_options <- renderUI({
         numericInput("imd_plot_fc_thresh", "Fold-change Threshold", value = NULL),
       ),
       conditionalPanel(
-        "['volcano', 'gheatmap'].includes(input.imdanova_plot_type) || ['volcano', 'gheatmap'].includes(input.seqdata_plot_type)",
+        "['volcano', 'gheatmap', 'histogram'].includes(input.imdanova_plot_type) || ['volcano'].includes(input.seqdata_plot_type)",
         radioGroupButtons(
           "stats_interactive_yn",
           choices = c("Static" = F, "Interactive" = T),
           selected = F
         )
+      ),
+      conditionalPanel(
+        "['histogram', 'gheatmap'].includes(input.imdanova_plot_type)",
+        column(12, checkboxInput("imd_plot_show_sig", "Show only significant values", value = TRUE)),
       )
     ),
     conditionalPanel(
@@ -794,7 +798,7 @@ output$statistics_plot_options <- renderUI({
       inline_cpickers(cpicker_args), # UI helper
     ),
     conditionalPanel(
-      "['gheatmap'].includes(input.imdanova_plot_type) || ['gheatmap'].includes(input.seqdata_plot_type)",
+      "['gheatmap'].includes(input.imdanova_plot_type)",
       tags$b(h5("Low/High count colors")),
       inline_cpickers(high_low_args), # UI helper
     ),

@@ -17,6 +17,11 @@ library(plotly)
 library(shinyalert)
 library(reshape2)
 
+require("DESeq2")
+require("edgeR")
+
+
+
 ######## GLOBAL VALUES ##########
 
 # Pull app version from global variable

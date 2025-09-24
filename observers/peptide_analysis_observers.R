@@ -242,6 +242,11 @@ observeEvent(
     
     revals$warnings_peptide_statistics$bad_imdanova_plot <- NULL
     
+    show_sig <- if(!is.null(input$peptide_imdanova_plot_type) &&
+                   input$peptide_imdanova_plot_type %in% c('histogram', 'gheatmap')){
+      input$imd_plot_show_sig
+    }  else TRUE
+    
     tryCatch({
       plots$peptide_statistics_mainplot <-
         plot(
@@ -253,7 +258,8 @@ observeEvent(
           bw_theme = TRUE,
           stacked = FALSE,
           color_low = color_low,
-          color_high = color_high
+          color_high = color_high,
+          show_sig = show_sig
         )
       updateCollapse(session, "peptide_statistics_collapse_main", open = "peptide_statistics_plots")
     },

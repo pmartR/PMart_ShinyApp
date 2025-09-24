@@ -20,8 +20,8 @@ output$peptide_imdanova_plot_type_UI <- renderUI({
   
   choices = switch(
     attr(objects$peptide_imdanova_res, "statistical_test"),
-    "combined" = c("Bar" = "bar", "Volcano" = "volcano", "Counts Heatmap" = "gheatmap"),
-    "anova" = c("Bar" = "bar", "Volcano" = "volcano"),
+    "combined" = c("Bar" = "bar", "Volcano" = "volcano", "Counts Heatmap" = "gheatmap", "Log-FC Histogram" = "histogram"),
+    "anova" = c("Bar" = "bar", "Volcano" = "volcano", "Log-FC Histogram" = "histogram"),
     "gtest" = c("Bar" = "bar", "Counts Heatmap" = "gheatmap"),
     "__INVALID__"
   )
@@ -435,12 +435,18 @@ output$peptide_statistics_plot_options <- renderUI({
       ),
       br(),
       conditionalPanel(
-        "['volcano', 'gheatmap'].includes(input.peptide_imdanova_plot_type)",
+        "['volcano', 'gheatmap', 'histogram'].includes(input.peptide_imdanova_plot_type)",
         radioGroupButtons(
           "peptide_stats_interactive_yn",
           choices = c("Static" = F, "Interactive" = T),
           selected = F
         )
+      ),
+      br(),
+      conditionalPanel(
+        "['histogram', 'gheatmap'].includes(input.peptide_imdanova_plot_type)",
+        column(12,
+            checkboxInput("peptide_imd_plot_show_sig", "Show only significant values", value = TRUE)),
       )
     ),
     conditionalPanel(

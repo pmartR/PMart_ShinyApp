@@ -1,5 +1,6 @@
 # absolute pain to have to do this for two lipid objects
 inspect_norm <- function(omicsData, subset_fn, norm_fn, params, backtransform) {
+  
   # align groups in group_DF with column names in e_data (otherwise kruskal-wallis test is sad)
   group_df <- attr(omicsData, "group_DF")
   reorder <- match(colnames(omicsData$e_data)[-which(colnames(omicsData$e_data) == get_edata_cname(omicsData))], as.character(group_df[, get_fdata_cname(omicsData)]))
@@ -12,13 +13,13 @@ inspect_norm <- function(omicsData, subset_fn, norm_fn, params, backtransform) {
   # p value and dataframe of normalization factors for location
   p_location <- pmartR:::kw_rcpp(matrix(params$location, nrow = 1), group = as.character(group))
   loc_params <- stack(params$location) %>%
-    rename("VAL__" = values) # very possible someone has the column name 'values' in their data, so rename
+    dplyr::rename("VAL__" = values) # very possible someone has the column name 'values' in their data, so rename
 
   # p value and dataframe of normalization factors for scale, if there are scale parameters
   if (!is.null(params$scale)) {
     p_scale <- pmartR:::kw_rcpp(matrix(params$scale, nrow = 1), group = as.character(group))
     scale_params <- stack(params$scale) %>%
-      rename("VAL__" = values)
+      dplyr::rename("VAL__" = values)
   }
   else {
     p_scale <- NULL
