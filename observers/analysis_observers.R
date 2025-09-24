@@ -453,6 +453,12 @@ observeEvent(
     
     revals$warnings_statistics$bad_imdanova_plot <- NULL
     
+    show_sig <- if(!is.null(input$imdanova_plot_type) && 
+                   input$imdanova_plot_type %in% c('histogram', 'gheatmap') &&
+                   !is.null(input$imd_plot_show_sig)){
+      input$imd_plot_show_sig
+    }  else TRUE
+    
     tryCatch({
       plots$statistics_mainplot <- plot(
         objects$imdanova_res,
@@ -463,7 +469,8 @@ observeEvent(
         fc_threshold = input$imd_plot_fc_thresh,
         interactive = interactive,
         color_low = color_low,
-        color_high = color_high
+        color_high = color_high,
+        show_sig = show_sig
       )
       updateCollapse(session, "statistics_collapse_main", open = "statistics_plots")
     },

@@ -388,7 +388,8 @@ observeEvent(input$inspect_norm, {
   # inspect_norm() returns a 4 element list of p_location, p_scale, loc_boxplot, scale_boxplot, norm_modal_ba_plots
   res_1 <- tryCatch(
     {
-      inspect_norm(objects$omicsData, subset_fn = input$subset_fn, norm_fn = input$norm_fn, params = params, backtransform = input$backtransform == "TRUE")
+      inspect_norm(objects$omicsData, subset_fn = input$subset_fn, 
+                   norm_fn = input$norm_fn, params = params, backtransform = input$backtransform == "TRUE")
     },
     error = function(e) {
       msg <- paste0("Something went wrong inspecting your omicsData object.  <br> System error:  ", e)

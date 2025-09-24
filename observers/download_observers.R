@@ -79,12 +79,14 @@ observeEvent(input$makezipfile, {
   total_files <- length(c(plots_marked_for_death, tables_marked_for_death))
 
   withProgress(message = "Writing files: ", {
-    # Kaleido bug workaround
-    reticulate::py_run_string("import sys")
-    
-    scope <- kaleido()
     
     if (length(plots_marked_for_death) > 0) {
+      
+      # Kaleido bug workaround
+      reticulate::py_run_string("import sys")
+      
+      scope <- kaleido()
+      
       for (i in plots_marked_for_death) {
         plot_name <- plots$plot_table[i, 1]
         
@@ -122,8 +124,9 @@ observeEvent(input$makezipfile, {
         fs <- c(fs, fname) 
         incProgress(1 / total_files, detail = sprintf("%s done..", plot_name))
       }
+      
+      rm(scope); gc()
     }
-    rm(scope); gc()
     
     # do.call('pluck', c(list(get('omicsData_postmortem')),list('e_data')))
     if (length(tables_marked_for_death) > 0) {
