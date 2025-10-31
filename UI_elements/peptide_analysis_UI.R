@@ -321,6 +321,7 @@ output$peptide_pairwise_comp_display <- renderDT(
   },
   options = list(
     dom = "t", scrollX = TRUE,
+    pageLength = 999,
     preDrawCallback = JS("function() { Shiny.unbindAll(this.api().table().node()); }"),
     drawCallback = JS("function() { Shiny.bindAll(this.api().table().node()); } ")
   ),
