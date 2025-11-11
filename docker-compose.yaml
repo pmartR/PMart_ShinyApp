@@ -6,6 +6,7 @@ x-app: &x-app
         - "./cfg/minio_config.yml:/srv/shiny-server/cfg/minio_config.yml"
     ports:
         - "8300:2800"
+        - "8301:3838"
     environment:
         - MAP_VERSION=0
     build: &x-app-build

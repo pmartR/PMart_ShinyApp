@@ -138,7 +138,7 @@ output$filter_review <- renderUI({
     # rmd filter
     else if (grepl("rmdfilt", names(objects$filters)[i])) {
       .to_rmv = summary(objects$filters[[i]], pvalue_threshold = input$pvalue_threshold)$filtered_samples
-      .cond = is.null(.to_rmv) || .to_rmv == "NULL" # second condition is a bug in pmartR summary()
+      .cond = is.null(.to_rmv) || any(.to_rmv == "NULL") # second condition is a bug in pmartR summary()
       divs[[i]] <- tagList(
         tags$b("rMd Filter:"),
         tags$p(sprintf("p-value threshold: %s", input$pvalue_threshold)),

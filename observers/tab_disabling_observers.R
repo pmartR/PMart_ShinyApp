@@ -26,9 +26,8 @@ observe({
   }
   cond_bc <- FALSE
   if(!is.null(attributes(objects$omicsData)$data_info$batch_info$is_bc)){
-    cond_norm <- attributes(objects$omicsData)$data_info$batch_info$is_bc
+    cond_norm <- attributes(objects$omicsData)$data_info$batch_info$is_bc | cond_norm
   }
-  cond_norm_bc <- cond_norm | cond_bc
   
   toggleTooltip(
     session, 

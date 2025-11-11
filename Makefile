@@ -72,3 +72,47 @@ push_top: login
 
 .PHONY: push
 push: push_base push_top
+
+.PHONY: help
+help:
+	@echo "Makefile targets for pmart_standalone"
+	@echo
+	@echo "Usage: make <target> [VARIABLE=value]"
+	@echo
+	@echo "Targets:"
+	@echo "  test         - Run package tests (uses Rscript)"
+	@echo "  build_base   - Build base Docker image (uses BASE_DOCKER_FILE, BASE_IMAGE_TAG)"
+	@echo "  build_top    - Build top Docker image (uses DOCKER_FILE, BASE_IMAGE_TAG, IMAGE_TAG)"
+	@echo "  build        - Run build_base and build_top"
+	@echo "  run          - Run docker compose (uses PROFILE, TOP_VERSION, BASE_VERSION)"
+	@echo "  stop         - Stop docker compose (uses PROFILE)"
+	@echo "  login        - Login to registry code-registry.emsl.pnl.gov"
+	@echo "  push_base    - Push base image (uses BASE_IMAGE_TAG, TAG_LATEST)"
+	@echo "  push_top     - Push top image (uses IMAGE_TAG, TAG_LATEST)"
+	@echo "  push         - push_base and push_top"
+	@echo
+	@echo "Environment variables / Makefile variables (with defaults):"
+	@echo "  BASE_DOCKER_FILE = $(BASE_DOCKER_FILE)"
+	@echo "  DOCKER_FILE      = $(DOCKER_FILE)"
+	@echo "  BASE_VERSION     = $(BASE_VERSION)"
+	@echo "  TOP_VERSION      = $(TOP_VERSION)"
+	@echo "  TAG_LATEST       = $(TAG_LATEST)"
+	@echo "  MAP_SHINYTEST    = $(MAP_SHINYTEST)"
+	@echo "  SECRET_PATH      = $(SECRET_PATH)"
+	@echo "  APP_REGISTRY     = $(APP_REGISTRY)"
+	@echo "  BASE_IMAGE_TAG   = $(BASE_IMAGE_TAG)"
+	@echo "  IMAGE_TAG        = $(IMAGE_TAG)"
+	@echo "  PROFILE          = $(PROFILE)"
+	@echo "  DO_BUILD         = $(DO_BUILD)"
+	@echo
+	@echo "Examples:"
+	@echo "  make build                            # build both images"
+	@echo "  make build_base BASE_VERSION=1.2.3    # build base with different version"
+	@echo "  make run PROFILE=local                # run compose with local profile"
+	@echo
+	@echo "Secrets:"
+	@echo "  build_base and build_top expect secrets mounted for credentialed remotes:"
+	@echo "    --mount=type=secret,id=gitlab_pat"
+	@echo "    --mount=type=secret,id=access_tokens"
+	@echo
+	@true
