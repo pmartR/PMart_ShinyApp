@@ -276,14 +276,14 @@
     },
     "digest": {
       "Package": "digest",
-      "Version": "0.6.37",
+      "Version": "0.6.38",
       "Source": "Repository",
-      "Repository": "CRAN",
+      "Repository": "RSPM",
       "Requirements": [
         "R",
         "utils"
       ],
-      "Hash": "33698c4b3127fc9f506654607fb73676"
+      "Hash": "fd94af6a089e5de79dd7074877e5ad3f"
     },
     "dplyr": {
       "Package": "dplyr",
@@ -987,7 +987,7 @@
     },
     "shiny": {
       "Package": "shiny",
-      "Version": "1.11.1",
+      "Version": "1.10.0",
       "Source": "Repository",
       "Repository": "RSPM",
       "Requirements": [
@@ -995,8 +995,8 @@
         "R6",
         "bslib",
         "cachem",
-        "cli",
         "commonmark",
+        "crayon",
         "fastmap",
         "fontawesome",
         "glue",
@@ -1016,7 +1016,7 @@
         "withr",
         "xtable"
       ],
-      "Hash": "1c1a2437351984ff592639ae28cda09e"
+      "Hash": "4b4477baa9a939c5577e5ddb4bf01f28"
     },
     "shinyBS": {
       "Package": "shinyBS",

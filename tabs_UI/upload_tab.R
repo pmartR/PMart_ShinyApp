@@ -88,7 +88,7 @@ upload_UI <- function() {
           value = "columnids",
           hidden(div(
             id = "js_id_col",
-            uiOutput("id_col")
+            uiOutput("id_col_out")
           )),
           
           hidden(div(

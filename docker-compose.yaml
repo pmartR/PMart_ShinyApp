@@ -25,22 +25,26 @@ x-test-app: &x-test-app
 
 services:
     app-base:
-        profiles: ["local"]
+        profiles: ["dev"]
         image: "code-registry.emsl.pnl.gov/multiomics-analyses/pmart_standalone/base:${BASE_VERSION:-latest}"
-        container_name: pmart-local
+        container_name: pmart-local-dev
         volumes:
           - "./:/srv/shiny-server/"
           - "/dev/null:/srv/shiny-server/.Rprofile"
         environment:
           - SHINY_DEBUG=${SHINY_DEBUG:-1}
-          - MAP_VERSION=${MAP_VERSION:-1}
+          - MAP_VERSION=${MAP_VERSION:-0}
         <<: *x-app
-    pmart-minio:
-        profiles: ["minio"]
-        container_name: pmart-map
-        <<: *x-app
+    app-container:
+        profiles: ["dev"]
+        container_name: pmart-built
+        ports:
+            - "8302:2800"
+            - "8303:3838"
         environment:
-            - MAP_VERSION=1
+            - SHINY_DEBUG=${SHINY_DEBUG:-1}
+            - MAP_VERSION=${MAP_VERSION:-0}
+        <<: *x-app
     pmart-test-minio:
         profiles: ["testing"]
         container_name: pmart-map
@@ -54,7 +58,7 @@ services:
         environment:
             - MAP_VERSION=0
     minio:
-        profiles: ["minio", "testing", "local"]
+        profiles: ["minio", "testing", "dev"]
         image: minio/minio
         container_name: minio-map
         ports:

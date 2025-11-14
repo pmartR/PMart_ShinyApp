@@ -9,7 +9,7 @@ APP_REGISTRY="code-registry.emsl.pnl.gov/multiomics-analyses/pmart_standalone"
 BASE_IMAGE_TAG="${APP_REGISTRY}/base:${BASE_VERSION}"
 IMAGE_TAG="${APP_REGISTRY}:${TOP_VERSION}"
 MAP_SHINYTEST=2
-PROFILE=local
+PROFILE=dev
 DO_BUILD=false
 
 ifeq ($(DO_BUILD), true)
@@ -81,18 +81,18 @@ help:
 	@echo
 	@echo "Targets:"
 	@echo "  test         - Run package tests (uses Rscript)"
-	@echo "  build_base   - Build base Docker image (uses BASE_DOCKER_FILE, BASE_IMAGE_TAG)"
-	@echo "  build_top    - Build top Docker image (uses DOCKER_FILE, BASE_IMAGE_TAG, IMAGE_TAG)"
+	@echo "  build_base   - Build base Docker image (uses BASE_DOCKER_FILE, BASE_VERSION)"
+	@echo "  build_top    - Build top Docker image (uses DOCKER_FILE, BASE_VERSION, TOP_VERSION)"
 	@echo "  build        - Run build_base and build_top"
 	@echo "  run          - Run docker compose (uses PROFILE, TOP_VERSION, BASE_VERSION)"
 	@echo "  stop         - Stop docker compose (uses PROFILE)"
 	@echo "  login        - Login to registry code-registry.emsl.pnl.gov"
-	@echo "  push_base    - Push base image (uses BASE_IMAGE_TAG, TAG_LATEST)"
-	@echo "  push_top     - Push top image (uses IMAGE_TAG, TAG_LATEST)"
+	@echo "  push_base    - Push base image (uses BASE_VERSION, TAG_LATEST)"
+	@echo "  push_top     - Push top image (uses TOP_VERSION, TAG_LATEST)"
 	@echo "  push         - push_base and push_top"
 	@echo
 	@echo "Environment variables / Makefile variables (with defaults):"
-	@echo "  BASE_DOCKER_FILE = $(BASE_DOCKER_FILE)"
+	@echo "  BASE_DOCKER_FILE = $(BASE_DOCKER_FILE)" 
 	@echo "  DOCKER_FILE      = $(DOCKER_FILE)"
 	@echo "  BASE_VERSION     = $(BASE_VERSION)"
 	@echo "  TOP_VERSION      = $(TOP_VERSION)"
@@ -108,7 +108,7 @@ help:
 	@echo "Examples:"
 	@echo "  make build                            # build both images"
 	@echo "  make build_base BASE_VERSION=1.2.3    # build base with different version"
-	@echo "  make run PROFILE=local                # run compose with local profile"
+	@echo "  make run PROFILE=dev                  # run compose with dev profile"
 	@echo
 	@echo "Secrets:"
 	@echo "  build_base and build_top expect secrets mounted for credentialed remotes:"
