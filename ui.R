@@ -92,15 +92,16 @@ ui <- function(request) {
     div(
       style = "position:absolute;top:3px;right:16px;z-index:1100;",
       div(
-        class = "inline-wrapper-1", 
-        bsButton("viewplots", uiOutput("n_saved_plots"), style = "info"),
+        class = "inline-wrapper-1",
+        style = "display:flex;flex-direction:column;",
+        bsButton("viewplots", uiOutput("n_saved_plots"), style = "info", block = TRUE),
         hidden(div(id = "js_saveplot", style = "vertical-align:top",
-          bsButton("saveplot", "Save last plot", style = "info")
+          bsButton("saveplot", "Save last plot", style = "info", block = TRUE)
         )),
         # Add UI if MAP is enabled
         if (MAP_ACTIVE) {
           div(id = "js_midpoint", style = "vertical-align:top", class="tooltip-wrapper",
-              bsButton("exportMid", "Save and export progress", style = "success")
+              bsButton("exportMid", "Save and export progress", style = "success", block = TRUE)
           )
         } else NULL
       )
