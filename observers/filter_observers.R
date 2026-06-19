@@ -45,17 +45,20 @@ apply_filt <- function(){
       # if(e$message == "None of the samples will be removed with the current thresholds.")
       # imd filter
       if (!is.null(objects$filters$imdanovafilt)) {
+        mng <- if(is.na(input$min_nonmiss_gtest)) NULL else input$min_nonmiss_gtest
+        mna <- if(is.na(input$min_nonmiss_anova)) NULL else input$min_nonmiss_anova
+
         tmp <- applyFilt(objects$filters$imdanovafilt, 
                          tmp, 
-                         min_nonmiss_anova = input$min_nonmiss_anova, 
-                         min_nonmiss_gtest = input$min_nonmiss_gtest
+                         min_nonmiss_anova = mna, 
+                         min_nonmiss_gtest = mng
                          )
         if (!is.null(objects$filters$imdanovafilt_2) & 
             !is.null(tmp2)) {
           tmp2 <- applyFilt(objects$filters$imdanovafilt_2, 
                             tmp2, 
-                            min_nonmiss_anova = input$min_nonmiss_anova, 
-                            min_nonmiss_gtest = input$min_nonmiss_gtest)
+                            min_nonmiss_anova = mna, 
+                            min_nonmiss_gtest = mng)
         }
       }
       
@@ -1163,7 +1166,7 @@ observeEvent(input$rmd_metrics, {
 
 #' @details Imd-ANOVA filter, disable if we don't have at least 3 samples per group
 #' ... disable functionality (min/max values on G-test/ANOVA)
-observeEvent(c(input[["min_nonmiss_gtest"]], input[["min_nonmiss_anova"]], objects$omicsData), {
+observeEvent(c(input[["min_nonmiss_gtest"]], input[["min_nonmiss_anova"]], objects$omicsData, objects$filters, input$top_page), {
   req(grepl("^filter_tab$", input$top_page, perl = TRUE),
       num_groups() > 1,
       !inherits(objects$omicsData, "seqData"))
@@ -1185,11 +1188,30 @@ observeEvent(c(input[["min_nonmiss_gtest"]], input[["min_nonmiss_anova"]], objec
     return(NULL)
   }
 
-  gsizes <- unique(attributes(tmpfilt)$group_sizes$n_group)
-  minsize <- min(gsizes)
-  # get the next largest group, we assume there is at least one non-singleton group
-  if (minsize == 1) {
-    minsize <- sort(gsizes)[2]
+  # Use differenced pairs when filtering paired data
+  if (!is.null(
+    attr(attr(attr(tmpfilt, "omicsData"), "group_DF"), "pair_id")
+  )) {
+    tmpfilt <- tryCatch(
+      {
+        revals$warnings_filter$imdanovafilt_min_num <<- NULL
+        diff_omicsData <- as.diffData(attr(tmpfilt, "omicsData"))
+        imdanova_filter(diff_omicsData)
+      },
+      error = function(e) {
+        msg = sprintf("An imd-anova filter cannot be created:  %s", e)
+        revals$warnings_filter$imdanovafilt_min_num <<- messageBox(type = "error", msg)
+        return(msg)
+      }
+    )
+  }
+
+  nonsingleton_groups <- attributes(tmpfilt)$nonsingleton_groups
+  gsizes <- attributes(tmpfilt)$group_sizes
+  if (length(nonsingleton_groups) == 0) {
+    minsize <- 0
+  } else {
+    minsize <- min(gsizes$n_group[gsizes$Group %in% nonsingleton_groups])
   }
 
   # gtest must be less than minimum group size...
@@ -1233,8 +1255,24 @@ observeEvent(c(input[["min_nonmiss_gtest"]], input[["min_nonmiss_anova"]], objec
   }
   
   fail_check <- any(fail_check, none_filtered)
-  
+
+  # Disable G-test when only ANOVA is possible  
+  toggleTooltip(session, id = "min_nonmiss_gtest",
+    condition = minsize < 3,
+    tooltip_text = sprintf(ttext_[["IMDANOVA_NONSINGLETON_MISSING"]], minsize),
+    position = "bottom"
+  )
+  if (minsize < 3) {
+    shinyjs::disable("min_nonmiss_gtest")
+    if (!is.na(input$min_nonmiss_gtest)) {
+      updateNumericInput(session, "min_nonmiss_gtest", value = NA)
+    }
+  } else {
+    shinyjs::enable("min_nonmiss_gtest")
+  }
+
   tooltip_text <- case_when(
+    length(nonsingleton_groups) == 0 ~ ttext_[["IMDANOVA_NONSINGLETON_MISSING"]],
     !(gtest_ok & anova_ok) ~ sprintf(ttext_[["IMDANOVA_VALUES_OUT_OF_RANGE"]], minsize),
     both_na ~ ttext_[["IMDANOVA_BOTH_NA"]],
     none_filtered ~ ttext_[["IMDANOVA_NONE_FILTERED"]],

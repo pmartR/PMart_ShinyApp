@@ -190,7 +190,7 @@ output$filter_review <- renderUI({
       
       mng <- if(is.na(input$min_nonmiss_gtest)) NULL else input$min_nonmiss_gtest
       mna <- if(is.na(input$min_nonmiss_anova)) NULL else input$min_nonmiss_anova
-      
+
       foo <- summary(objects$filters[[i]], 
                       min_nonmiss_anova = mna, 
                       min_nonmiss_gtest = mng
@@ -198,7 +198,7 @@ output$filter_review <- renderUI({
       divs[[i]] <- tagList(
         tags$b("iMd-ANOVA Filter:"),
         tags$p(
-          "Minimum observed (G-test, ANOVA):", sprintf("(%s, %s)", input$min_nonmiss_anova, input$min_nonmiss_gtest),
+          "Minimum observed (ANOVA, G-test):", sprintf("(%s, %s)", input$min_nonmiss_anova, input$min_nonmiss_gtest),
           "| Biomolecules removed: ", foo$num_filtered
         ),
         hr()
