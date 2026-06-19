@@ -35,7 +35,7 @@ filter_UI <- function() {
           # imd-anova filter options
           add_filter_UI(
             filter_name = "imdanovafilt",
-            title = "IMD-ANOVA Filter",
+            title = "iMd-ANOVA Filter",
             tooltip_text = ttext_[["IMDANOVA_FILTER_INFO"]],
             numericInput("min_nonmiss_anova", "Minimum number observed to perform ANOVA", min = 1, value = 2, step = 1),
             numericInput("min_nonmiss_gtest", "Minimum number observed to perform G-test", min = 1, value = 3, step = 1)

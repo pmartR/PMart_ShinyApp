@@ -16,7 +16,7 @@ list(
     
     string_list <- c(
       "Specified group size(s) insufficent for isoform detection.",
-      "Peptide-level ANOVA or combined IMD-ANOVA (G-test only is insufficient) has not been run.",
+      "Peptide-level ANOVA or combined iMd-ANOVA (G-test only is insufficient) has not been run.",
       "Insufficent number of comparisons used in IMD/ANOVA.",
       "ANOVA-only statistics were run and not all molecules had > 3 nonmissing observations in all groups, either filter down to relevant molecules or re-run statistics with a different method"
     )
@@ -29,7 +29,7 @@ list(
         
         tags$ul(
           tags$li("At least one main effect specified with at 3+ groups OR two main effects specified with 2+ groups"),
-          tags$li("ANOVA or combined IMD-ANOVA (G-test only is insufficient) statistics have been computed on the peptide level"),
+          tags$li("ANOVA or combined iMd-ANOVA (G-test only is insufficient) statistics have been computed on the peptide level"),
           tags$li("3+ unique pairwise comparisons specified for IMD/ANOVA statistics"),
           tags$li("If only ANOVA has been run, all groups must have > 3 nonmissing observations across all peptides")
         ),
