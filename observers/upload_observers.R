@@ -143,12 +143,15 @@ observeEvent(input$datatype, {
 })
 
 # close edata upload panel and open column id panel when they successfully upload data
-observeEvent(c(input$file_edata, input$file_edata_2), {
-  Sys.sleep(0.7)
-  if (two_lipids() || two_metab()) {
+observe({
+  if (MAP_ACTIVE) {
+    cond <- !is.null(MapConnect$Project)
+    if (two_lipids() || two_metab()) {
+      cond <- cond && !is.null(MapConnect$Project2)
+    }
+  } else if (two_lipids() || two_metab()) {
     cond <- !is.null(input$file_edata) & !is.null(input$file_edata_2)
-  }
-  else {
+  } else {
     cond <- !is.null(input$file_edata)
   }
 
@@ -172,6 +175,16 @@ observeEvent(input$done_idcols, {
   updateCollapse(session, "upload_collapse_left", close = "columnids", open = "meta_collapse")
   shinyjs::show("ok_columnids")
 })
+
+# In MAP dual-dataset preload, Project2 can arrive shortly after the first click.
+# Re-open metadata panel automatically once ready so a second click is not needed.
+observeEvent(MapConnect$Project2, {
+  req(MAP_ACTIVE)
+  req(!is.null(MapConnect$Project2))
+  req(!is.null(input$done_idcols) && input$done_idcols > 0)
+  req(input$top_page == "upload_data_tab")
+  updateCollapse(session, "upload_collapse_left", close = "columnids", open = "meta_collapse")
+}, ignoreNULL = TRUE)
 
 #'@details disable if they try to log transform data with zeros.  Store an
 #'indicator that is TRUE if all is well.
@@ -205,13 +218,24 @@ observe({
 #' If it is, then collapse the sidebar, show a checkmark, and activate the create
 #' omicsData button.
 observe({
+  force_no_emeta <- MAP_ACTIVE &&
+    isTruthy(Sys.getenv("SHINYTEST_LOAD_MAP_OBJECT")) &&
+    !is.null(MapConnect$Project) &&
+    (is.null(MapConnect$Project$Data$e_meta) || !isTruthy(MapConnect$Project$Data$e_meta_filename))
+
+  emeta_not_required <- isTRUE(force_no_emeta) || !isTruthy(as.logical(input$emeta_yn))
+
   # 2 file lipid conditions:
   # two emeta files uploaded
   # all 4 files contain the id column
   
   if (two_lipids() || two_metab()) {
     req(!is.null(input$id_col) & !is.null(input$id_col_2))
-    cond_files <- (!is.null(input$file_emeta) & !is.null(input$file_emeta_2))
+    cond_files <- if (MAP_ACTIVE) {
+      !is.null(MapConnect$Project) & !is.null(MapConnect$Project2)
+    } else {
+      !is.null(input$file_emeta) & !is.null(input$file_emeta_2)
+    }
     cond_idcol_edata <- all(
       input$id_col %in% colnames(e_data()),
       input$id_col_2 %in% colnames(e_data_2())
@@ -219,16 +243,19 @@ observe({
     cond_idcol_emeta <- all(
       isTRUE(input$id_col %in% colnames(revals$e_meta)) | is.null(revals$e_meta),
       isTRUE(input$id_col %in% colnames(revals$e_meta_2)) | is.null(revals$e_meta_2)
-    ) | !isTruthy(input$emeta_yn)
+    ) | emeta_not_required
     cond_nasymbol <- !is.null(input$na_symbol)
-    cond_shared_ids <-
+    cond_shared_ids <- if (is.null(revals$e_meta) || is.null(revals$e_meta_2)) {
+      MAP_ACTIVE
+    } else {
       all(e_data()[[input$id_col]] %in% revals$e_meta[[input$id_col]]) &
-      all(e_data_2()[[input$id_col_2]] %in% revals$e_meta_2[[input$id_col_2]])
+        all(e_data_2()[[input$id_col_2]] %in% revals$e_meta_2[[input$id_col_2]])
+    }
     cond <-
       all(cond_idcol_edata,
           cond_idcol_emeta,
           cond_nasymbol,
-          cond_shared_ids) | isTruthy(!as.logical(input$emeta_yn))
+          cond_shared_ids) | emeta_not_required
   }
   # peptide with protein id col conditions:
   # emeta is uploaded
@@ -245,7 +272,7 @@ observe({
     cond_idcol_emeta <- isTRUE(input$id_col %in% colnames(revals$e_meta)) | is.null(revals$e_meta)
     cond_nasymbol <- !is.null(input$na_symbol)
     cond_shared_ids <- if (!is.null(revals$e_meta)) all(e_data()[[input$id_col]] %in% revals$e_meta[[input$id_col]]) else TRUE
-    cond_emeta <- all(cond_files, cond_shared_ids, cond_idcol_emeta, cond_procol) | isTruthy(!as.logical(input$emeta_yn))
+    cond_emeta <- all(cond_files, cond_shared_ids, cond_idcol_emeta, cond_procol) | emeta_not_required
     
     cond <- all(cond_idcol_edata, cond_nasymbol, cond_emeta)
   }
@@ -259,7 +286,7 @@ observe({
     cond_idcol_emeta <- isTRUE(input$id_col %in% colnames(revals$e_meta)) | is.null(revals$e_meta)
     cond_nasymbol <- !is.null(input$na_symbol)
     cond_shared_ids <- all(e_data()[[input$id_col]] %in% revals$e_meta[[input$id_col]]) | (MAP_ACTIVE & is.null(revals$e_meta))
-    cond_emeta <- all(cond_files, cond_shared_ids, cond_idcol_emeta) | isTruthy(!as.logical(input$emeta_yn))
+    cond_emeta <- all(cond_files, cond_shared_ids, cond_idcol_emeta) | emeta_not_required
     
     cond <- all(cond_idcol_edata, cond_nasymbol, cond_emeta)
   }
@@ -269,7 +296,7 @@ observe({
   revals$warnings_upload$bad_identifier <-
     if (any(!cond_idcol_edata,!cond_idcol_emeta,!cond_shared_ids) &
         cond_files &
-        isTruthy(as.logical(input$emeta_yn))) {
+        !emeta_not_required) {
       messageBox(type = "error", "One or more of your identifier columns are not found in or have inconsistent values across the e_data and e_meta files.")
     } else NULL
   
@@ -394,12 +421,15 @@ observeEvent(input$file_emeta, {
 ###################################
 
 if (MAP_ACTIVE) {
-  observe({
-    Sys.sleep(3)
-    if (is.null(MapConnect$Project) == FALSE) {
-      revals$e_meta <- MapConnect$Project$Data$e_meta
-    }
-  })
+  observeEvent(MapConnect$Project, {
+    req(!is.null(MapConnect$Project))
+    revals$e_meta <- MapConnect$Project$Data$e_meta
+  }, ignoreNULL = TRUE)
+  
+  observeEvent(MapConnect$Project2, {
+    req(!is.null(MapConnect$Project2))
+    revals$e_meta_2 <- MapConnect$Project2$Data$e_meta
+  }, ignoreNULL = TRUE)
   
   #'@details disable ALL top-level data selection, this should all be determined by the imported MAP object:
   observe({

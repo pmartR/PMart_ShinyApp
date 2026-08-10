@@ -2,9 +2,8 @@ e_data <- reactive({
   
   # This function has a MAP version
   if (MAP_ACTIVE) {
-    
-    # Error handling: Need edata
-    req(input$file_edata)
+    req(!is.null(MapConnect$Project))
+    req(!is.null(MapConnect$Project$Data$e_data))
     
     # Disable input widget
     disable(id = "file_edata")
@@ -28,6 +27,15 @@ e_data <- reactive({
 })
 
 e_data_2 <- reactive({
+  
+  # MAP version: pull from second project object when present
+  if (MAP_ACTIVE) {
+    req(!is.null(MapConnect$Project2))
+    req(!is.null(MapConnect$Project2$Data$e_data))
+    disable(id = "file_edata_2")
+    return(MapConnect$Project2$Data$e_data)
+  }
+  
   # Error handling: Need file_edata path
   req(input$file_edata_2$datapath)
 
@@ -99,13 +107,29 @@ f_data_upload_2 <- reactive({
 })
 
 two_lipids <- reactive({
-  !is.null(input$datatype) && input$datatype == "lip" && 
+  map_dual_lipids <- FALSE
+  if (MAP_ACTIVE && !is.null(MapConnect$Project) && !is.null(MapConnect$Project2)) {
+    dtype <- if (!is.null(MapConnect$Project$Project$DataType)) MapConnect$Project$Project$DataType else ""
+    map_dual_lipids <- isTRUE(grepl("Lipidomics", dtype))
+  }
+
+  manual_dual_lipids <- !is.null(input$datatype) && input$datatype == "lip" &&
     !is.null(input$twolipids_yn) && isTRUE(input$twolipids_yn == "TRUE")
+
+  map_dual_lipids || manual_dual_lipids
 })
 
 two_metab <- reactive({
-  !is.null(input$datatype) && input$datatype == "metab" && 
+  map_dual_metab <- FALSE
+  if (MAP_ACTIVE && !is.null(MapConnect$Project) && !is.null(MapConnect$Project2)) {
+    dtype <- if (!is.null(MapConnect$Project$Project$DataType)) MapConnect$Project$Project$DataType else ""
+    map_dual_metab <- isTRUE(grepl("Metabolomics", dtype))
+  }
+
+  manual_dual_metab <- !is.null(input$datatype) && input$datatype == "metab" &&
     !is.null(input$twometab_yn) && isTRUE(input$twometab_yn == "TRUE")
+
+  map_dual_metab || manual_dual_metab
 })
 
 # are the sample names of the two lipid objects the same?

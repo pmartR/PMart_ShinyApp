@@ -35,6 +35,24 @@ You can optionally put the following command in your .RProfile to automatically 
 
 Once all dependencies are installed, make sure calling `.libPaths()` displays the renv environment, then call `shiny::runApp()`.
 
+#### 1b. Using run_local.sh (local MAP-style launch)
+
+The script `./run_local.sh` is a helper for local MAP-style testing. It:
+
+- Verifies local minio is reachable (and attempts to start it via docker compose if available)
+- Verifies mapDataAccess is installed
+- Verifies a Python venv for minio access exists (from `cfg/minio_config_local.yml`) and bootstraps it if needed
+- Supports `--list` to print available minio object UUIDs
+- Supports `--single UUID` to preload one MAP object UUID
+- Supports `--dual-lipids "UUID1&UUID2"` to preload two lipid UUIDs (dual mode is lipid-only)
+
+Important for two-lipid testing:
+
+- The UUIDs passed to `--single`/`--dual-lipids` must already exist in minio (use `./run_local.sh --list` to confirm)
+- Example lipid test data files are in `example_data/`: `test_lipid_pos_edata.csv`, `test_lipid_neg_edata.csv`, and `test_lipid_fdata.csv`
+
+These CSVs must be uploaded to minio first (via MAP upload flow or mapDataAccess) before they can be referenced by UUID in `--dual-lipids`.
+
 #### 2.  Using docker:
 
 Either build the container as described in the development section, or pull it from gitlab:

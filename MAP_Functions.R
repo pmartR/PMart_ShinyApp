@@ -8,24 +8,90 @@ list(
   observeEvent(input$`__startup__`, {
     
     if (isTruthy(Sys.getenv("SHINYTEST_LOAD_MAP_OBJECT"))) {
-      query <- list(data = Sys.getenv("SHINYTEST_LOAD_MAP_OBJECT"))
+      # Support dual-UUID testing: set env var to "UUID1&UUID2" to simulate ?data=UUID1&UUID2
+      raw_env   <- Sys.getenv("SHINYTEST_LOAD_MAP_OBJECT")
+      env_parts <- strsplit(raw_env, "&", fixed = TRUE)[[1]]
+      if (length(env_parts) == 2L) {
+        query <- setNames(list(env_parts[1], ""), c("data", env_parts[2]))
+      } else {
+        query <- list(data = raw_env)
+      }
     } else {
       # Parse the query string at the url header
       query <- parseQueryString(session$clientData$url_search)
     }
     
-    # Set a conditional test. We only care if the "data" parameter exists. 
-    cond <- length(query) != 0 && "data" %in% names(query) 
+    # Set a conditional test. We only care if the "data" parameter exists.
+    cond <- length(query) != 0 && "data" %in% names(query)
+    
+    # Detect dual-UUID lipidomics case: ?data=UUID1&UUID2
+    # parseQueryString turns the second UUID into a key with an empty string value.
+    extra_keys <- if (cond) {
+      names(query)[names(query) != "data" & vapply(query, function(v) nchar(trimws(v)) == 0L, logical(1))]
+    } else {
+      character(0)
+    }
+    is_dual_lipid <- cond && length(extra_keys) == 1L
     
     # If true, open the project data and put each piece where it belongs 
     if (cond) {
       
-      # Get the data that was uploaded, and determine whether it is a project object,
-      # or a midpoint object.
-      pullData <- get_data(MapConnect$MapConnect, query$data)
-      
-      # If project in the names, then it's a project object
-      if (class(pullData) == "project omic") {
+      if (is_dual_lipid) {
+        
+        # --- Dual-UUID lipidomics path ---
+        # Each project is stored separately so the existing two-lipid pipeline
+        # (separate QC/filter/norm for each, combined via pmartR::combine_omicsData
+        # at normalization) works unchanged.
+        uuid1 <- query$data
+        uuid2 <- extra_keys[1]
+        
+        html(
+          "loading-gray-overlay",
+          "<div class='fadein-out busy relative-centered' style='font-size:xx-large'>Loading Lipidomics data...</div>"
+        )
+        
+        result <- tryCatch({
+          p1 <- get_data(MapConnect$MapConnect, uuid1)
+          p2 <- get_data(MapConnect$MapConnect, uuid2)
+          
+          # Cleanse data.table impurities from both projects
+          for (field in c("e_data", "f_data", "e_meta")) {
+            if (!is.null(p1$Data[[field]]) && inherits(p1$Data[[field]], "data.table"))
+              p1$Data[[field]] <- as.data.frame(p1$Data[[field]])
+            if (!is.null(p2$Data[[field]]) && inherits(p2$Data[[field]], "data.table"))
+              p2$Data[[field]] <- as.data.frame(p2$Data[[field]])
+          }
+          
+          list(p1 = p1, p2 = p2)
+        }, error = function(e) {
+          sendSweetAlert(
+            session,
+            "Failed to load lipidomics datasets",
+            as.character(e$message),
+            "error"
+          )
+          NULL
+        })
+        
+        if (!is.null(result)) {
+          MapConnect$Project  <- result$p1
+          MapConnect$Project2 <- result$p2
+          updateTabsetPanel(session, inputId = "top_page", selected = "upload_data_tab")
+          updatePickerInput(session, "datatype", selected = "lip")
+          disable(id = "datatype")
+          updateRadioGroupButtons(session, "twolipids_yn", selected = "TRUE")
+          disable(id = "twolipids_yn")
+        }
+        
+      } else {
+        
+        # --- Existing single-dataset path ---
+        # Get the data that was uploaded, and determine whether it is a project object,
+        # or a midpoint object.
+        pullData <- get_data(MapConnect$MapConnect, query$data)
+        
+        # If project in the names, then it's a project object
+        if (class(pullData) == "project omic") {
         
         # Create a loading screen
         html(
@@ -175,12 +241,13 @@ list(
         
       }
       
+      } # end else (single-dataset path)
     
     }
     
     # Exit loading screen
     on.exit({
-      Sys.sleep(2)
+      Sys.sleep(0.25)
       hide("loading-gray-overlay")
     })
     

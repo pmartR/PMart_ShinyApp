@@ -3,37 +3,58 @@ list(
     label1 = HTML("<input type = 'text' id = 'omic_1_name' placeholder = 'Positive' style = 'border-style:solid;border-width:1px;'/>")
     label2 = HTML("<input type = 'text' id = 'omic_2_name' placeholder = 'Negative' style = 'border-style:solid;border-width:1px;'/>")
     
-    if (two_lipids() || two_metab()) {
-      tagList(
-        HTML("<p style = 'font-weight:bold'>Upload CSV Data Files for Positive and Negative Ionizations</p>"),
-        splitLayout(
-          cellArgs = list(style = "overflow-x:hidden"),
-          div(
-            id = "js_file_edata",
-            fileInput("file_edata",
-              label = label1,
-              multiple = FALSE,
-              accept = c(
-                "text/csv",
-                "text/comma-separated-values,text/plain",
-                ".csv"
+    if ((two_lipids() || two_metab()) || (MAP_ACTIVE && !is.null(MapConnect$Project2))) {
+      
+      if (MAP_ACTIVE && !is.null(MapConnect$Project2)) {
+        # MAP dual-lipid: show loaded filenames as read-only text inputs
+        fname1 <- MapConnect$Project$Data$e_data_filename  %>% strsplit("/") %>% unlist() %>% tail(1)
+        fname2 <- MapConnect$Project2$Data$e_data_filename %>% strsplit("/") %>% unlist() %>% tail(1)
+        tagList(
+          HTML("<p style = 'font-weight:bold'>Loaded Lipidomics Datasets from MAP</p>"),
+          splitLayout(
+            cellArgs = list(style = "overflow-x:hidden"),
+            disabled(div(
+              id = "js_file_edata",
+              textInput("file_edata", label = label1, value = fname1)
+            )),
+            disabled(div(
+              id = "js_file_edata_2",
+              textInput("file_edata_2", label = label2, value = fname2)
+            ))
+          )
+        )
+      } else {
+        tagList(
+          HTML("<p style = 'font-weight:bold'>Upload CSV Data Files for Positive and Negative Ionizations</p>"),
+          splitLayout(
+            cellArgs = list(style = "overflow-x:hidden"),
+            div(
+              id = "js_file_edata",
+              fileInput("file_edata",
+                label = label1,
+                multiple = FALSE,
+                accept = c(
+                  "text/csv",
+                  "text/comma-separated-values,text/plain",
+                  ".csv"
+                )
               )
-            )
-          ),
-          div(
-            id = "js_file_edata_2",
-            fileInput("file_edata_2",
-              label = label2,
-              multiple = FALSE,
-              accept = c(
-                "text/csv",
-                "text/comma-separated-values,text/plain",
-                ".csv"
+            ),
+            div(
+              id = "js_file_edata_2",
+              fileInput("file_edata_2",
+                label = label2,
+                multiple = FALSE,
+                accept = c(
+                  "text/csv",
+                  "text/comma-separated-values,text/plain",
+                  ".csv"
+                )
               )
             )
           )
         )
-      )
+      }
     }
     else {
       
@@ -66,7 +87,8 @@ list(
 
   # mass id column identifiers
   output$id_col <- renderUI({
-    if (two_lipids() || two_metab()) {
+    if ((two_lipids() || two_metab()) || (MAP_ACTIVE && !is.null(MapConnect$Project2))) {
+      req(!is.null(e_data()), !is.null(e_data_2()))
       choices_1 <- colnames(e_data())
       choices_2 <- colnames(e_data_2())
       tagList(
@@ -148,10 +170,23 @@ list(
   # do they have an emeta file to upload?
   output$emeta_yn_UI <- renderUI({
     req(input$datatype, input$datatype != "none")
-    radioGroupButtons("emeta_yn",
+    force_no_emeta <- MAP_ACTIVE &&
+      isTruthy(Sys.getenv("SHINYTEST_LOAD_MAP_OBJECT")) &&
+      !is.null(MapConnect$Project) &&
+      (is.null(MapConnect$Project$Data$e_meta) || !isTruthy(MapConnect$Project$Data$e_meta_filename))
+
+    if (isTRUE(force_no_emeta)) {
+      return(NULL)
+    }
+
+    emeta_yn_input <- radioGroupButtons(
+      "emeta_yn",
       "Do you have a file containing extra biomolecule information?",
-      choices = c("Yes" = T, "No" = F)
+      choices = c("Yes" = T, "No" = F),
+      selected = NULL
     )
+
+    emeta_yn_input
   }),
 
   # select which column contains protein ID
@@ -179,7 +214,13 @@ list(
   
   # pro question in emeta upload sub-panel
   output$emeta_pro_UI <- renderUI({
-    req(!is.null(input$file_emeta) && input$emeta_yn == "TRUE" && input$datatype == 'pep')
+    force_no_emeta <- MAP_ACTIVE &&
+      isTruthy(Sys.getenv("SHINYTEST_LOAD_MAP_OBJECT")) &&
+      !is.null(MapConnect$Project) &&
+      (is.null(MapConnect$Project$Data$e_meta) || !isTruthy(MapConnect$Project$Data$e_meta_filename))
+
+    req(!force_no_emeta)
+    req(!is.null(input$file_emeta) && !is.null(input$emeta_yn) && input$emeta_yn == "TRUE" && input$datatype == 'pep')
     radioGroupButtons(
       "proteins_yn",
       "Does your biomolecule information file contain peptide to protein mappings?",
@@ -221,43 +262,74 @@ list(
       
     }
 
-    if (two_lipids() || two_metab()) {
-      tagList(
-        HTML("<p style = 'font-weight:bold'>Upload CSV Biomolecule Information Files for Positive and Negative Lipids</p>"),
-        splitLayout(
-          cellArgs = list(style = "overflow-x:hidden"),
-          div(
-            id = "js_file_emeta",
-            fileInput("file_emeta",
-              label = NULL,
-              multiple = FALSE,
-              accept = c(
-                "text/csv",
-                "text/comma-separated-values,text/plain",
-                ".csv"
+    if ((two_lipids() || two_metab()) || (MAP_ACTIVE && !is.null(MapConnect$Project2))) {
+      
+      if (MAP_ACTIVE && !is.null(MapConnect$Project2)) {
+        # MAP dual-lipid: show loaded filenames as read-only text inputs
+        fname_emeta1 <- MapConnect$Project$Data$e_meta_filename
+        fname_emeta1 <- if (!isTruthy(fname_emeta1)) "No biomolecule file (dataset 1)" else
+          fname_emeta1 %>% strsplit("/") %>% unlist() %>% tail(1)
+        fname_emeta2 <- MapConnect$Project2$Data$e_meta_filename
+        fname_emeta2 <- if (!isTruthy(fname_emeta2)) "No biomolecule file (dataset 2)" else
+          fname_emeta2 %>% strsplit("/") %>% unlist() %>% tail(1)
+        tagList(
+          HTML("<p style = 'font-weight:bold'>Loaded Biomolecule Information from MAP</p>"),
+          splitLayout(
+            cellArgs = list(style = "overflow-x:hidden"),
+            disabled(div(
+              id = "js_file_emeta",
+              textInput("file_emeta", label = NULL, value = fname_emeta1)
+            )),
+            disabled(div(
+              id = "js_file_emeta_2",
+              textInput("file_emeta_2", label = NULL, value = fname_emeta2)
+            ))
+          )
+        )
+      } else {
+        tagList(
+          HTML("<p style = 'font-weight:bold'>Upload CSV Biomolecule Information Files for Positive and Negative Lipids</p>"),
+          splitLayout(
+            cellArgs = list(style = "overflow-x:hidden"),
+            div(
+              id = "js_file_emeta",
+              fileInput("file_emeta",
+                label = NULL,
+                multiple = FALSE,
+                accept = c(
+                  "text/csv",
+                  "text/comma-separated-values,text/plain",
+                  ".csv"
+                )
               )
-            )
-          ),
-          div(
-            id = "js_file_emeta_2",
-            fileInput("file_emeta_2",
-              label = NULL,
-              multiple = FALSE,
-              accept = c(
-                "text/csv",
-                "text/comma-separated-values,text/plain",
-                ".csv"
+            ),
+            div(
+              id = "js_file_emeta_2",
+              fileInput("file_emeta_2",
+                label = NULL,
+                multiple = FALSE,
+                accept = c(
+                  "text/csv",
+                  "text/comma-separated-values,text/plain",
+                  ".csv"
+                )
               )
             )
           )
         )
-      )
+      }
     }
-    else if (isTRUE(as.logical(input$emeta_yn))) {
+    else if (!is.null(input$emeta_yn) && isTRUE(as.logical(input$emeta_yn))) {
       title_upload_div
     }
     else {
-      hidden(title_upload_div)
+      # In MAP preload mode, keep a visible status/filename field instead of an empty panel
+      # while reactive inputs (like emeta_yn/two-lipid toggles) are still settling.
+      if (MAP_ACTIVE) {
+        title_upload_div
+      } else {
+        hidden(title_upload_div)
+      }
     }
   }),
 
@@ -361,7 +433,10 @@ list(
         tmp <- e_data()
       }
 
-      tmp <- tmp %>% mutate_each(as.character)
+      factor_cols <- vapply(tmp, is.factor, logical(1))
+      if (any(factor_cols)) {
+        tmp[factor_cols] <- lapply(tmp[factor_cols], as.character)
+      }
       tmp
     },
     options = list(scrollX = TRUE)
@@ -379,7 +454,10 @@ list(
         tmp <- revals$e_meta
       }
 
-      tmp <- tmp %>% mutate_each(as.character)
+      factor_cols <- vapply(tmp, is.factor, logical(1))
+      if (any(factor_cols)) {
+        tmp[factor_cols] <- lapply(tmp[factor_cols], as.character)
+      }
       tmp
     },
     options = list(scrollX = TRUE)
@@ -387,9 +465,16 @@ list(
 
   # head_emeta wrapper to remove whitespace
   output$head_emeta_wrapper <- renderUI({
-    req(isTruthy(as.logical(input$emeta_yn)) | input$datatype == "pep")
+    req(!is.null(input$emeta_yn) && isTruthy(as.logical(input$emeta_yn)) | input$datatype == "pep")
     DTOutput("head_emeta")
-  })
+  }),
+
+  # Keep these outputs live even while hidden in collapse panels so MAP-preloaded
+  # content is populated the first time the user opens the biomolecule section.
+  outputOptions(output, "emeta_UI", suspendWhenHidden = FALSE),
+  outputOptions(output, "emeta_pro_UI", suspendWhenHidden = FALSE),
+  outputOptions(output, "promap_UI", suspendWhenHidden = FALSE),
+  outputOptions(output, "id_col", suspendWhenHidden = FALSE)
   
   
 )

@@ -34,6 +34,7 @@ list(
 
   # table output of spansres object
   output$spans_table <- renderDT({
+    req(!is.null(objects$spans_res))
     df <- objects$spans_res
     df$percent_mols_used <- round(df$mols_used_in_norm/nrow(objects$omicsData$e_data)*100)
     
