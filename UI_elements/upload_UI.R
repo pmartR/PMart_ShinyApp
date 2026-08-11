@@ -173,8 +173,7 @@ list(
   output$emeta_yn_UI <- renderUI({
     #req(input$datatype, input$datatype != "none")
     if (MAP_ACTIVE){
-      force_no_emeta <- isTruthy(Sys.getenv("SHINYTEST_LOAD_MAP_OBJECT")) &&
-        !is.null(MapConnect$Project) &&
+      force_no_emeta <- !is.null(MapConnect$Project) &&
         (is.null(MapConnect$Project$Data$e_meta) || !isTruthy(MapConnect$Project$Data$e_meta_filename))
 
       if (isTRUE(force_no_emeta)) {
@@ -218,7 +217,6 @@ list(
   # pro question in emeta upload sub-panel
   output$emeta_pro_UI <- renderUI({
     force_no_emeta <- MAP_ACTIVE &&
-      isTruthy(Sys.getenv("SHINYTEST_LOAD_MAP_OBJECT")) &&
       !is.null(MapConnect$Project) &&
       (is.null(MapConnect$Project$Data$e_meta) || !isTruthy(MapConnect$Project$Data$e_meta_filename))
 

@@ -96,6 +96,19 @@ export MAP_CONFIG="${MAP_CONFIG:-${SCRIPT_DIR}/cfg/minio_config_local.yml}"
 PYTHON_VENV="$(grep -E '^python_venv:' "$MAP_CONFIG" | awk '{print $2}' | tr -d '"' | tr -d "'")"
 PYTHON_VENV="${PYTHON_VENV:-${SCRIPT_DIR}/venv}"
 
+set_python_venv_in_config() {
+  local new_path="$1"
+  if ! grep -q "^python_venv:" "$MAP_CONFIG"; then
+    echo "python_venv: ${new_path}" >> "$MAP_CONFIG"
+  else
+    if sed --version >/dev/null 2>&1; then
+      sed -i "s|^python_venv:.*|python_venv: ${new_path}|" "$MAP_CONFIG"
+    else
+      sed -i '' "s|^python_venv:.*|python_venv: ${new_path}|" "$MAP_CONFIG"
+    fi
+  fi
+}
+
 # Resolve relative paths from the repo root, and avoid unusable root-level defaults.
 if [[ "$PYTHON_VENV" != /* ]]; then
   PYTHON_VENV="${SCRIPT_DIR}/${PYTHON_VENV#./}"
@@ -103,6 +116,17 @@ fi
 if [[ "$PYTHON_VENV" == "/" || "$PYTHON_VENV" == "/venv" ]]; then
   warn "python_venv in $MAP_CONFIG points to an unsafe path ($PYTHON_VENV); using ${SCRIPT_DIR}/venv instead."
   PYTHON_VENV="${SCRIPT_DIR}/venv"
+fi
+
+# If the configured location cannot be created/written, fall back to a local venv.
+PYTHON_VENV_PARENT="$(dirname "$PYTHON_VENV")"
+if ! mkdir -p "$PYTHON_VENV_PARENT" 2>/dev/null; then
+  warn "Configured python_venv parent is not writable: ${PYTHON_VENV_PARENT}"
+  PYTHON_VENV="${SCRIPT_DIR}/venv"
+  PYTHON_VENV_PARENT="$(dirname "$PYTHON_VENV")"
+  mkdir -p "$PYTHON_VENV_PARENT" || fail "Failed to create fallback venv parent: ${PYTHON_VENV_PARENT}"
+  set_python_venv_in_config "$PYTHON_VENV"
+  info "Updated python_venv in $MAP_CONFIG to writable fallback: $PYTHON_VENV"
 fi
 
 # ---------------------------------------------------------------------------
@@ -193,15 +217,7 @@ else
   ok "Python venv created: $PYTHON_VENV"
 
   # Update minio_config_local.yml to point to the newly created venv
-  if ! grep -q "^python_venv:" "$MAP_CONFIG"; then
-    echo "python_venv: ${PYTHON_VENV}" >> "$MAP_CONFIG"
-  else
-    if sed --version >/dev/null 2>&1; then
-      sed -i "s|^python_venv:.*|python_venv: ${PYTHON_VENV}|" "$MAP_CONFIG"
-    else
-      sed -i '' "s|^python_venv:.*|python_venv: ${PYTHON_VENV}|" "$MAP_CONFIG"
-    fi
-  fi
+  set_python_venv_in_config "$PYTHON_VENV"
   info "Updated python_venv in $MAP_CONFIG"
 fi
 

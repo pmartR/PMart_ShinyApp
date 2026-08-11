@@ -209,7 +209,6 @@ observe({
 #' omicsData button.
 observe({
   force_no_emeta <- MAP_ACTIVE &&
-    isTruthy(Sys.getenv("SHINYTEST_LOAD_MAP_OBJECT")) &&
     !is.null(MapConnect$Project) &&
     (is.null(MapConnect$Project$Data$e_meta) || !isTruthy(MapConnect$Project$Data$e_meta_filename))
 
