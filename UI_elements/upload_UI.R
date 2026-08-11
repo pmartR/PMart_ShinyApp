@@ -178,6 +178,7 @@ list(
         (is.null(MapConnect$Project$Data$e_meta) || !isTruthy(MapConnect$Project$Data$e_meta_filename))
 
       if (isTRUE(force_no_emeta)) {
+        return(NULL)
       }
     }
 
