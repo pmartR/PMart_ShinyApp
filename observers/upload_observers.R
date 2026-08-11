@@ -404,7 +404,7 @@ observe({
 #'@details store emeta info in an intermediate container that can be NULLED
 observeEvent(input$file_emeta, {
   revals$e_meta_info <- input$file_emeta
-}#, priority = 10
+}, priority = 10
 )
 
 ###################################
