@@ -176,16 +176,6 @@ observeEvent(input$done_idcols, {
   shinyjs::show("ok_columnids")
 })
 
-# In MAP dual-dataset preload, Project2 can arrive shortly after the first click.
-# Re-open metadata panel automatically once ready so a second click is not needed.
-observeEvent(MapConnect$Project2, {
-  req(MAP_ACTIVE)
-  req(!is.null(MapConnect$Project2))
-  req(!is.null(input$done_idcols) && input$done_idcols > 0)
-  req(input$top_page == "upload_data_tab")
-  updateCollapse(session, "upload_collapse_left", close = "columnids", open = "meta_collapse")
-}, ignoreNULL = TRUE)
-
 #'@details disable if they try to log transform data with zeros.  Store an
 #'indicator that is TRUE if all is well.
 observe({
@@ -237,12 +227,12 @@ observe({
       !is.null(input$file_emeta) & !is.null(input$file_emeta_2)
     }
     cond_idcol_edata <- all(
-      input$id_col %in% colnames(e_data()),
-      input$id_col_2 %in% colnames(e_data_2())
+      input$id_col %in% names(e_data()),
+      input$id_col_2 %in% names(e_data_2())
     )
     cond_idcol_emeta <- all(
-      isTRUE(input$id_col %in% colnames(revals$e_meta)) | is.null(revals$e_meta),
-      isTRUE(input$id_col %in% colnames(revals$e_meta_2)) | is.null(revals$e_meta_2)
+      isTRUE(input$id_col %in% names(revals$e_meta)) | is.null(revals$e_meta),
+      isTRUE(input$id_col %in% names(revals$e_meta_2)) | is.null(revals$e_meta_2)
     ) | emeta_not_required
     cond_nasymbol <- !is.null(input$na_symbol)
     cond_shared_ids <- if (is.null(revals$e_meta) || is.null(revals$e_meta_2)) {
@@ -267,9 +257,9 @@ observe({
     # req(!is.null(input$protein_column)) ## Doesn't load if cond_shared_ids is false
     cond_files <- !is.null(input$file_emeta)
     cond_procol <- !is.null(input$protein_column) && 
-      input$protein_column %in% colnames(revals$e_meta)[-which(colnames(revals$e_meta) == input$id_col)]
-    cond_idcol_edata <- isTRUE(input$id_col %in% colnames(e_data()))
-    cond_idcol_emeta <- isTRUE(input$id_col %in% colnames(revals$e_meta)) | is.null(revals$e_meta)
+      input$protein_column %in% names(revals$e_meta)[-which(names(revals$e_meta) == input$id_col)]
+    cond_idcol_edata <- isTRUE(input$id_col %in% names(e_data()))
+    cond_idcol_emeta <- isTRUE(input$id_col %in% names(revals$e_meta)) | is.null(revals$e_meta)
     cond_nasymbol <- !is.null(input$na_symbol)
     cond_shared_ids <- if (!is.null(revals$e_meta)) all(e_data()[[input$id_col]] %in% revals$e_meta[[input$id_col]]) else TRUE
     cond_emeta <- all(cond_files, cond_shared_ids, cond_idcol_emeta, cond_procol) | emeta_not_required
@@ -282,8 +272,8 @@ observe({
   else {
     req(!is.null(input$id_col))
     cond_files <- !is.null(input$file_emeta)
-    cond_idcol_edata <- isTRUE(input$id_col %in% colnames(e_data()))
-    cond_idcol_emeta <- isTRUE(input$id_col %in% colnames(revals$e_meta)) | is.null(revals$e_meta)
+    cond_idcol_edata <- isTRUE(input$id_col %in% names(e_data()))
+    cond_idcol_emeta <- isTRUE(input$id_col %in% names(revals$e_meta)) | is.null(revals$e_meta)
     cond_nasymbol <- !is.null(input$na_symbol)
     cond_shared_ids <- all(e_data()[[input$id_col]] %in% revals$e_meta[[input$id_col]]) | (MAP_ACTIVE & is.null(revals$e_meta))
     cond_emeta <- all(cond_files, cond_shared_ids, cond_idcol_emeta) | emeta_not_required
@@ -414,13 +404,23 @@ observe({
 #'@details store emeta info in an intermediate container that can be NULLED
 observeEvent(input$file_emeta, {
   revals$e_meta_info <- input$file_emeta
-}, priority = 10)
+}#, priority = 10
+)
 
 ###################################
 ## FEATURE FLAGS FOR MAP/NOT MAP ##
 ###################################
 
 if (MAP_ACTIVE) {
+  # In MAP dual-dataset preload, Project2 can arrive shortly after the first click.
+  # Re-open metadata panel automatically once ready so a second click is not needed.
+  observeEvent(MapConnect$Project2, {
+    req(!is.null(MapConnect$Project2))
+    req(!is.null(input$done_idcols) && input$done_idcols > 0)
+    req(input$top_page == "upload_data_tab")
+    updateCollapse(session, "upload_collapse_left", close = "columnids", open = "meta_collapse")
+  }, ignoreNULL = TRUE)
+
   observeEvent(MapConnect$Project, {
     req(!is.null(MapConnect$Project))
     revals$e_meta <- MapConnect$Project$Data$e_meta
@@ -459,19 +459,21 @@ if (MAP_ACTIVE == FALSE) {
 
 ###################################
 
-observe({
-  if(!isTruthy(as.logical(input$emeta_yn))) {
-    revals$e_meta_2 <- NULL
-    shinyjs::reset("file_emeta_2")
-  }
-  else if (is.null(input$file_emeta_2$datapath)) {
-    revals$e_meta_2 <- NULL
-  }
-  else {
-    filename <- input$file_emeta_2$datapath
-    revals$e_meta_2 <- read.csv(filename, stringsAsFactors = FALSE, check.names = F)
-  }
-})
+if (MAP_ACTIVE == FALSE) {
+  observe({
+    if(!isTruthy(as.logical(input$emeta_yn))) {
+      revals$e_meta_2 <- NULL
+      shinyjs::reset("file_emeta_2")
+    }
+    else if (is.null(input$file_emeta_2$datapath)) {
+      revals$e_meta_2 <- NULL
+    }
+    else {
+      filename <- input$file_emeta_2$datapath
+      revals$e_meta_2 <- read.csv(filename, stringsAsFactors = FALSE, check.names = F)
+    }
+  })
+}
 ##
 
 #'@details navigate to the data requirements sub-tab

@@ -87,6 +87,8 @@ list(
 
   # mass id column identifiers
   output$id_col <- renderUI({
+
+    req(e_data())
     if ((two_lipids() || two_metab()) || (MAP_ACTIVE && !is.null(MapConnect$Project2))) {
       req(!is.null(e_data()), !is.null(e_data_2()))
       choices_1 <- colnames(e_data())
@@ -169,14 +171,14 @@ list(
 
   # do they have an emeta file to upload?
   output$emeta_yn_UI <- renderUI({
-    req(input$datatype, input$datatype != "none")
-    force_no_emeta <- MAP_ACTIVE &&
-      isTruthy(Sys.getenv("SHINYTEST_LOAD_MAP_OBJECT")) &&
-      !is.null(MapConnect$Project) &&
-      (is.null(MapConnect$Project$Data$e_meta) || !isTruthy(MapConnect$Project$Data$e_meta_filename))
+    #req(input$datatype, input$datatype != "none")
+    if (MAP_ACTIVE){
+      force_no_emeta <- isTruthy(Sys.getenv("SHINYTEST_LOAD_MAP_OBJECT")) &&
+        !is.null(MapConnect$Project) &&
+        (is.null(MapConnect$Project$Data$e_meta) || !isTruthy(MapConnect$Project$Data$e_meta_filename))
 
-    if (isTRUE(force_no_emeta)) {
-      return(NULL)
+      if (isTRUE(force_no_emeta)) {
+      }
     }
 
     emeta_yn_input <- radioGroupButtons(
@@ -426,12 +428,15 @@ list(
   # e_data display
   output$head_edata <- DT::renderDT(
     {
+
       if ((two_lipids() || two_metab()) & isTRUE(input$which_table == 2)) {
         tmp <- e_data_2()
       }
       else {
         tmp <- e_data()
       }
+
+      req(tmp)
 
       factor_cols <- vapply(tmp, is.factor, logical(1))
       if (any(factor_cols)) {
@@ -447,12 +452,14 @@ list(
     {
       if ((two_lipids() || two_metab()) & isTRUE(input$which_table == 2)) {
         req(!is.null(revals$e_meta_2))
-        tmp <- revals$e_meta
+        tmp <- revals$e_meta_2
       }
       else {
         req(!is.null(revals$e_meta))
         tmp <- revals$e_meta
       }
+
+      req(tmp)
 
       factor_cols <- vapply(tmp, is.factor, logical(1))
       if (any(factor_cols)) {
