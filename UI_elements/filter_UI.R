@@ -2,17 +2,28 @@
 #'maximum CV can be displayed depending on the data.
 output$cv_threshold_UI <- renderUI({
   req(objects$omicsData)
-  tmp_cvfilt <- cv_filter(objects$omicsData)
-  max_cv = max(tmp_cvfilt$CV, na.rm=T)
+  cv_status <- cv_filter_status(objects$omicsData)
+  if (!cv_status$available) return(helpText(cv_status$message))
+
+  cv_values <- cv_status$filter$CV[is.finite(cv_status$filter$CV)]
+
+  max_cv = max(cv_values)
+  cv_note <- cv_status$note
   
   if(!is.null(objects$omicsData_2)) {
-    tmp_cvfilt <- cv_filter(objects$omicsData_2)
-    max_cv <- min(max_cv, max(tmp_cvfilt$CV, na.rm=T))
+    cv_status <- cv_filter_status(objects$omicsData_2)
+    if (!cv_status$available) return(helpText(cv_status$message))
+    cv_values <- cv_status$filter$CV[is.finite(cv_status$filter$CV)]
+    max_cv <- min(max_cv, max(cv_values))
+    if (is.null(cv_note)) cv_note <- cv_status$note
   }
   
   title = sprintf("Maximum CV (between 1 and %s)", round(max_cv, 2))
   
-  numericInput("cv_threshold", title, min = 1, max = max_cv, value = round(max_cv*0.9, 2), step = 1)
+  tagList(
+    numericInput("cv_threshold", title, min = 1, max = max_cv, value = round(max_cv*0.9, 2), step = 1),
+    if (!is.null(cv_note)) helpText(cv_note)
+  )
 })
 
 # Summary of current filters and parameters
