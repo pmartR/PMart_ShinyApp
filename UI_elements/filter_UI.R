@@ -2,27 +2,48 @@
 #'maximum CV can be displayed depending on the data.
 output$cv_threshold_UI <- renderUI({
   req(objects$omicsData)
-  cv_status <- cv_filter_status(objects$omicsData)
-  if (!cv_status$available) return(helpText(cv_status$message))
+  all_singletons <- cv_filter_all_singletons(objects$omicsData)
+  if (!is.null(objects$omicsData_2)) {
+    all_singletons <- all_singletons || cv_filter_all_singletons(objects$omicsData_2)
+  }
+  use_groups <- if (all_singletons || is.null(input$cvfilt_use_groups)) {
+    !all_singletons
+  } else {
+    isTRUE(as.logical(input$cvfilt_use_groups))
+  }
 
-  cv_values <- cv_status$filter$CV[is.finite(cv_status$filter$CV)]
-
+  cv_filter_1 <- cv_filter(
+    objects$omicsData,
+    use_groups = cv_filter_use_groups(objects$omicsData, use_groups)
+  )
+  cv_values <- cv_filter_1$CV[is.finite(cv_filter_1$CV)]
   max_cv = max(cv_values)
-  cv_note <- cv_status$note
   
   if(!is.null(objects$omicsData_2)) {
-    cv_status <- cv_filter_status(objects$omicsData_2)
-    if (!cv_status$available) return(helpText(cv_status$message))
-    cv_values <- cv_status$filter$CV[is.finite(cv_status$filter$CV)]
+    cv_filter_2 <- cv_filter(
+      objects$omicsData_2,
+      use_groups = cv_filter_use_groups(objects$omicsData_2, use_groups)
+    )
+    cv_values <- cv_filter_2$CV[is.finite(cv_filter_2$CV)]
     max_cv <- min(max_cv, max(cv_values))
-    if (is.null(cv_note)) cv_note <- cv_status$note
   }
   
   title = sprintf("Maximum CV (between 1 and %s)", round(max_cv, 2))
   
   tagList(
     numericInput("cv_threshold", title, min = 1, max = max_cv, value = round(max_cv*0.9, 2), step = 1),
-    if (!is.null(cv_note)) helpText(cv_note)
+    radioGroupButtons(
+      inputId = "cvfilt_use_groups",
+      label = tagList(
+        "Use groups to calculate CV?",
+        if (all_singletons) {
+          tipify(blue_info, title = ttext_[["CV_USE_GROUPS_SINGLETON"]])
+        }
+      ),
+      choices = c("Yes" = TRUE, "No" = FALSE),
+      selected = use_groups,
+      disabled = all_singletons
+    )
   )
 })
 

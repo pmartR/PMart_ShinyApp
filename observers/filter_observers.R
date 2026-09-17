@@ -237,17 +237,9 @@ observe({
   ## CV Filter
   cvfilt_exists <- !is.null(objects$filters$cvfilt) & (!is.null(objects$filters$cvfilt_2) | is.null(objects$omicsData_2))
 
-  cv_filter_available <- FALSE
-  if (!is.null(objects$omicsData)) {
-    cv_filter_available <- cv_filter_status(objects$omicsData)$available
-  }
-  if (cv_filter_available && !is.null(objects$omicsData_2)) {
-    cv_filter_available <- cv_filter_status(objects$omicsData_2)$available
-  }
-
   toggle("cvfilt_exists", condition = !is.null(objects$filters$cvfilt) & (!is.null(objects$filters$cvfilt_2) | is.null(objects$omicsData_2)), anim = TRUE)
-  toggleState("add_cvfilt", condition = cv_filter_available || cvfilt_exists)
-  toggleCssClass("add_cvfilt", "grey_text", condition = !cv_filter_available && !cvfilt_exists)
+  toggleState("add_cvfilt", condition = TRUE)
+  toggleCssClass("add_cvfilt", "grey_text", condition = cvfilt_exists)
   toggleState("cv_threshold", condition = !cvfilt_exists)
   toggleCssClass("cv_threshold", "grey_text", condition = cvfilt_exists)
   
@@ -319,6 +311,23 @@ observe({
   }
 })
 
+observeEvent(c(objects$omicsData, objects$omicsData_2, input$cvfilt_use_groups), {
+  req(objects$omicsData)
+  all_singletons <- cv_filter_all_singletons(objects$omicsData)
+  if (!is.null(objects$omicsData_2)) {
+    all_singletons <- all_singletons || cv_filter_all_singletons(objects$omicsData_2)
+  }
+
+  if (all_singletons && !identical(input$cvfilt_use_groups, FALSE)) {
+    updateRadioGroupButtons(session, "cvfilt_use_groups", selected = FALSE)
+  }
+  if (all_singletons) {
+    disable(selector = "#cvfilt_use_groups button")
+  } else {
+    enable(selector = "#cvfilt_use_groups button")
+  }
+}, priority = 10)
+
 # create molfilt objects
 observeEvent(input$add_molfilt, {
   molfilt_exists <- !is.null(objects$filters$molfilt) & (!is.null(objects$filters$molfilt_2) | is.null(objects$omicsData_2))
@@ -362,9 +371,10 @@ observeEvent(input$add_cvfilt, {
     objects$filters$cvfilt <- tryCatch(
       {
         revals$warnings_filter$cv_filter1 <<- NULL
-        cv_status <- cv_filter_status(objects$omicsData)
-        if (!cv_status$available) stop(cv_status$message)
-        tmp_cvfilt <- cv_status$filter
+        tmp_cvfilt <- cv_filter(
+          objects$omicsData,
+          use_groups = cv_filter_use_groups(objects$omicsData, input$cvfilt_use_groups)
+        )
         test_filt_conditions <- summary(
           tmp_cvfilt,
           cv_threshold = input$cv_threshold
@@ -381,9 +391,10 @@ observeEvent(input$add_cvfilt, {
       objects$filters$cvfilt_2 <- tryCatch(
         {
           revals$warnings_filter$cv_filter2 <<- NULL
-          cv_status <- cv_filter_status(objects$omicsData_2)
-          if (!cv_status$available) stop(cv_status$message)
-          tmp_cvfilt <- cv_status$filter
+          tmp_cvfilt <- cv_filter(
+            objects$omicsData_2,
+            use_groups = cv_filter_use_groups(objects$omicsData_2, input$cvfilt_use_groups)
+          )
           test_filt_conditions <- summary(
             tmp_cvfilt,
             cv_threshold = input$cv_threshold
@@ -880,7 +891,10 @@ observeEvent(c(input$plot_cvfilt, input$cv_threshold),
     
     plots$filter_mainplot <- tryCatch(
       {
-        p <- plot(cv_filter_status(objects$omicsData)$filter,
+        p <- plot(cv_filter(
+             objects$omicsData,
+             use_groups = cv_filter_use_groups(objects$omicsData, input$cvfilt_use_groups)
+           ),
              cv_threshold = input$cv_threshold,
              bw_theme = TRUE)
         title_info <- paste(str_extract_all(as.character(p$labels$title)[3], "[0-9]+")[[1]], collapse = ".")
@@ -898,7 +912,10 @@ observeEvent(c(input$plot_cvfilt, input$cv_threshold),
     if (!is.null(objects$omicsData_2)) {
       plots$filter_mainplot_2 <- tryCatch(
         {
-          p <- plot(cv_filter_status(objects$omicsData_2)$filter,
+          p <- plot(cv_filter(
+                    objects$omicsData_2,
+                    use_groups = cv_filter_use_groups(objects$omicsData_2, input$cvfilt_use_groups)
+                  ),
                     cv_threshold = input$cv_threshold,
                     bw_theme = TRUE)
           title_info <- paste(str_extract_all(as.character(p$labels$title)[3], "[0-9]+")[[1]], collapse = ".")

@@ -42,6 +42,7 @@ ttext_ <- list(
   ABUNDANCE_NAS_TO_ZEROS = "NAs will be automatically transformed to zeros in transcript count data.",
   COVARIATE_TYPE_INFO = "Suppose your covariate has values [1,1,2,2,3,3].  By default, it is treated as a factor variable, but you may want to specify it is numeric.",
   CV_FILTER_INFO = "Remove biomolecules based on minimum value of coefficient of variation, calculated per-group as the standard deviation divided by the mean, and then pooled across groups per Ahmed (1995).",
+  CV_USE_GROUPS_SINGLETON = "Grouped CV calculation is unavailable because all groups contain a single sample.",
   DOWNLOAD_OPTS_DISABLED = "Currently selected parameters are the same as the ones currently stored for this plot",
   EXPLAIN_QC_BOXPLOTS = "Boxplots of abundance values for each sample.  Orderable/colorable by group or other sample information",
   EXPLAIN_QC_BARPLOTS = "Barplots of missing values for each sample.  Orderable/colorable by group or other sample information",
