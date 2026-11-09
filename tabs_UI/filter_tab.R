@@ -21,7 +21,15 @@ filter_UI <- function() {
             filter_name = "molfilt",
             title = "Molecule Filter",
             tooltip_text = ttext_[["MOLECULE_FILTER_INFO"]],
-            numericInput("mol_min_num", "Minimum number observed", min = 1, value = 2, step = 1)
+            numericInput("mol_min_num", "Minimum number observed", min = 1, value = 2, step = 1),
+            uiOutput("molfilt_group_UI"),
+            uiOutput("molfilt_batch_UI"),
+            full_width_content = div(
+              style = "width: 100%;",
+              uiOutput("molfilt_batch_correction_UI")
+            )
+            #checkboxInput("molfilt_usegroups", "Filter by Group", FALSE),
+            #checkboxInput("molfilt_usebatch", "Filter by Batch", FALSE)
           ),
           
           # cv filter options
@@ -145,8 +153,11 @@ filter_UI <- function() {
           )
         )
       ), # parent collapse
-      bsButton("review_filters", "Review and apply filters", style = "primary"),
-      bsButton("reset_filters", "Unselect all filters", style = "primary"),
+      div(
+        class='inline-wrapper-1',
+        uiOutput("review_filter_disabled_UI"),
+        bsButton("reset_filters", "Unselect all filters", style = "primary")
+      ),
       uiOutput("warnings_filter"),
       uiOutput("filter_data_summary", style="margin-top:3px")
     ), # column 4

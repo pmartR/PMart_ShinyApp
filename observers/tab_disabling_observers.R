@@ -7,17 +7,30 @@ observe({
   omicsdata_exists <- !is.null(objects$omicsData)
   
   #' First disable the peptide-specific tabs if we don't have e-meta or we are
-  #' not analyzing pepdata
+  #' not analyzing pepdata or we 
+  #' have not normalized/batch corrected the data
   cond = !emeta_exists | !is_pepdata
   
   cond_ref <- (is_pepdata && input$labeled_yn == "iso") || inherits(objects$omicsData, "nmrData")
   
-  cond_seq <- inherits(objects$omicsData, "seqData") || is.null(objects$omicsData)
+  cond_norm <- FALSE
+  if(!is.null(attributes(objects$omicsData)$data_info$norm_info$is_normalized)){
+    cond_norm <- attributes(objects$omicsData)$data_info$norm_info$is_normalized
+    # set this to be FALSE again if we are working with ComBat 
+    if(!is.null(input$batch_correction_id) && input$batch_correction_id == "ComBat"){
+      cond_norm <- FALSE
+    }
+  }
+  cond_bc <- FALSE
+  if(!is.null(attributes(objects$omicsData)$data_info$batch_info$is_bc)){
+    cond_bc <- attributes(objects$omicsData)$data_info$batch_info$is_bc
+  }
+  cond_norm_bc <- cond_norm | cond_bc
   
   toggleTooltip(
     session, 
     tooltip_text = ttext_[['TABDISABLE_NOT_PEP']], 
-    condition = !is_pepdata,
+    condition = (!is_pepdata & cond_norm),
     selector = ".nav li a[data-value=peptide_statistics_tab]"
   )
   
@@ -35,17 +48,9 @@ observe({
     selector = ".nav li a[data-value=reference_tab]"
   )
   
-  toggleTooltip(
-    session, 
-    tooltip_text = ttext_[['TABDISABLE_SEQDATA']], 
-    condition = cond_seq,
-    selector = ".nav li a[data-value=normalization_tab]"
-  )
-  
-  toggleTab("peptide_statistics_tab", condition = is_pepdata)
+  toggleTab("peptide_statistics_tab", condition = is_pepdata & cond_norm)
   toggleTab("protein_rollup_tab", condition = !cond)
   toggleTab("reference_tab", condition = cond_ref)
-  toggleTab("normalization_tab", condition = !cond_seq)
   
 
   #' Disable regular statistics if there is not e_meta, since we expect this tab
@@ -63,11 +68,11 @@ observe({
   toggleTooltip(
     session, 
     tooltip_text = tooltip_text, 
-    condition = cond2 | cond3,
+    condition = ((cond2 | cond3) & cond_norm),
     selector = ".nav li a[data-value=statistics_tab]"
   )
   
-  toggleTab("statistics_tab", condition = !cond2 & !cond3 & omicsdata_exists)
+  toggleTab("statistics_tab", condition = !cond2 & !cond3 & cond_norm & omicsdata_exists)
 })
 
 #'@details Disable all tabs until omicsData object exists
@@ -84,7 +89,8 @@ observe({
       "upload_and_datareqs",
       "reference_tab",
       "protein_rollup_tab",
-      "peptide_statistics_tab"
+      "peptide_statistics_tab",
+      "normalization_tab"
     )
   )
   
@@ -100,3 +106,37 @@ observe({
   } 
   
 }, priority = 10)
+
+#'@details Disable normalization until the data type and required batch filter
+#'are available. Only re-evaluated when grouping (group_designation) or
+#'apply_filters completes successfully, which bump the revision counters.
+observeEvent(c(revals$grouping_revision, revals$filter_revision), {
+  cond_seq <- inherits(objects$omicsData, "seqData") || is.null(objects$omicsData)
+  batch_method <- input$batch_correction_id
+  needs_batch_filter <- isTRUE(batch_method %in% c("ComBat", "EigenMS"))
+
+  batch_filter_applied <- TRUE
+  if (needs_batch_filter) {
+    batch_filter_applied <- isTRUE(revals$filters_applied) &&
+      isTRUE(revals$batch_filter_ready)
+  }
+
+  tooltip_text <- if (cond_seq) {
+    ttext_[['TABDISABLE_SEQDATA']]
+  } else if (needs_batch_filter) {
+    sprintf(
+      ttext_[['TABDISABLE_BATCH_FILTER']],
+      batch_method,
+      if (batch_method == "ComBat") "Filter by Batch" else "Filter by Group"
+    )
+  }
+
+  toggleTooltip(
+    session,
+    tooltip_text = tooltip_text,
+    condition = cond_seq || !batch_filter_applied,
+    selector = ".nav li a[data-value=normalization_tab]"
+  )
+
+  toggleTab("normalization_tab", condition = !cond_seq && batch_filter_applied)
+})

@@ -1,4 +1,4 @@
-options(shiny.maxRequestSize = 250 * 1024^2, ch.dir = TRUE, DT.TOJSON_ARGS = list(na = "string"))
+options(shiny.maxRequestSize = 250 * 1024^2, ch.dir = TRUE, DT.TOJSON_ARGS = list(na = "string"),  shiny.fullstacktrace = TRUE)
 
 # internal function: throws error message if variable is not found and can_be_empty==FALSE
 get_config_variable <- function(cfg, varname, can_be_empty=FALSE) {
@@ -50,7 +50,8 @@ shinyServer(function(session, input, output) {
     e_meta = NULL, e_meta_2 = NULL, emeta_info = NULL,
     cvcol1 = NULL, cvcol2 = NULL, gcol1 = NULL, gcol2 = NULL,
     cvcol1_2 = NULL, cvcol2_2 = NULL, gcol1_2 = NULL, gcol2_2 = NULL,
-    filter_vis = NULL
+    filter_vis = NULL, grouping_revision = 0L, filter_revision = 0L,
+    filters_applied = FALSE, batch_filter_ready = FALSE
   )
 
   # data objects, other things like filter objects will be stored here

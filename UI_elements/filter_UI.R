@@ -46,6 +46,68 @@ output$cv_threshold_UI <- renderUI({
     )
   )
 })
+  
+#'@details Input for molecule_filter inside a reactive UI so that 
+#' the box can be checked or not depending on what batch correction is selected
+output$molfilt_group_UI <- renderUI({
+  req(objects$omicsData)
+  filter_logic = FALSE
+  if(!is.null(input$batch_correction_id) && input$batch_correction_id == "EigenMS"){filter_logic = TRUE}
+  checkboxInput("molfilt_usegroups", "Filter by Group", value = filter_logic)
+})
+
+output$molfilt_batch_UI <- renderUI({
+  req(objects$omicsData)
+  filter_logic = FALSE
+  if(!is.null(input$batch_correction_id) && input$batch_correction_id == "ComBat"){filter_logic = TRUE}
+  batch_filter <- checkboxInput(
+    "molfilt_usebatch",
+    "Filter by Batch",
+    value = filter_logic
+  )
+  if (is.null(input$batch_id) || identical(input$batch_id, "None")) {
+    tipify(
+      div(disabled(batch_filter), class = "tooltip-wrapper"),
+      title = "A batch column must be specified on the 'Group Samples' tab."
+    )
+  } else {
+    batch_filter
+  }
+})
+
+output$molfilt_batch_correction_UI <- renderUI({
+  req(objects$omicsData)
+  batch_correction <- input$batch_correction_id
+  
+  if (is.null(batch_correction)) return(NULL)
+
+  required_filter <- switch(batch_correction,
+    ComBat = "Filter by Batch",
+    EigenMS = "Filter by Group",
+    NULL
+  )
+
+  if (is.null(required_filter)) return(NULL)
+
+  HTML(messageBox(
+    sprintf(ttext_[["BATCH_CORRECTION_FILTER_INFO"]], batch_correction, required_filter),
+    type = "warning",
+    closeButton = FALSE
+  ))
+})
+
+output$review_filter_disabled_UI <- renderUI({
+  req(objects$omicsData)
+  #disable_logic = FALSE
+  # odd/even not == 0
+  #if(!is.null(input$batch_correction_id) && input$batch_correction_id == "ComBat" & (input$add_molfilt %% 2 == 0|input$molfilt_usebatch == FALSE)){disable_logic = TRUE}
+  #if(!is.null(input$batch_correction_id) && input$batch_correction_id == "EigenMS" & (input$add_molfilt %% 2 == 0|input$molfilt_usegroups == FALSE)){disable_logic = TRUE}
+  div(
+    id = "review_filters_tooltip",
+    class= "tooltip-wrapper",
+    bsButton("review_filters", "Review and apply filters", style = "primary")
+  )
+})
 
 # Summary of current filters and parameters
 output$filter_review <- renderUI({

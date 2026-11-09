@@ -86,7 +86,7 @@ list(
   }),
 
   # mass id column identifiers
-  output$id_col <- renderUI({
+  output$id_col_UI <- renderUI({
 
     req(e_data())
     if ((two_lipids() || two_metab()) || (MAP_ACTIVE && !is.null(MapConnect$Project2))) {
@@ -137,7 +137,7 @@ list(
       conditionalPanel(
         cond,
         tipify(
-          blueexcl,
+          div(style = "color:deepskyblue", blueexcl),
           title = gsub("\n", " ", text)
         )
       )
@@ -480,7 +480,7 @@ list(
   outputOptions(output, "emeta_UI", suspendWhenHidden = FALSE),
   outputOptions(output, "emeta_pro_UI", suspendWhenHidden = FALSE),
   outputOptions(output, "promap_UI", suspendWhenHidden = FALSE),
-  outputOptions(output, "id_col", suspendWhenHidden = FALSE)
+  outputOptions(output, "id_col_UI", suspendWhenHidden = FALSE)
   
   
 )

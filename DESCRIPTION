@@ -15,6 +15,7 @@ Depends:
   DT,
   dplyr,
   ggplot2,
+  malbacR,
   markdown,
   plotly,
   pmartR,
@@ -34,7 +35,8 @@ Depends:
   stringr,
   yaml
 Remotes:
-  mapDataAccess
+  mapDataAccess,
+  github::pmartR/malbacR
 Suggests:
   shinytest2,
   testthat,

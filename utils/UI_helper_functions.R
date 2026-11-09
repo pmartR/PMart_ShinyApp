@@ -1,5 +1,5 @@
 #' @details helper function to add filter UI for a new filter
-add_filter_UI <- function(filter_name, title, tooltip_text, ..., add_btn_title = "Add/Remove", trailing_hr = T, colsize_l = 6, colsize_r = 6) {
+add_filter_UI <- function(filter_name, title, tooltip_text, ..., add_btn_title = "Add/Remove", trailing_hr = T, colsize_l = 6, colsize_r = 6, full_width_content = NULL) {
   div(
     id = sprintf("%s_ftab_UI", filter_name),
     tagList(
@@ -32,7 +32,8 @@ add_filter_UI <- function(filter_name, title, tooltip_text, ..., add_btn_title =
           colsize_r,
           ...
         )
-      )
+      ),
+      full_width_content
     ),
     
     if(trailing_hr) hr() else NULL

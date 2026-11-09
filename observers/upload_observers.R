@@ -2,6 +2,7 @@
 makeobject <- function(use_iso = T){
   
   req(e_data(), f_data_upload())
+  objects$omicsData_prebatch <- objects$omicsData_2_prebatch <- NULL
   
   ## two lipid inputs
   if (two_lipids() || two_metab()) {

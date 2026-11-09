@@ -1,6 +1,31 @@
+uploaded_data_is_normalized <- function() {
+  isTRUE(attr(objects$uploaded_omicsData, "data_info")$norm_info$is_normalized)
+}
+
+# show batch-correction plots only when batch correction has been applied
+observeEvent(c(
+  input$top_page,
+  attributes(objects$omicsData)$data_info$batch_info$is_bc,
+  attributes(objects$omicsData_2)$data_info$batch_info$is_bc
+), {
+  has_batch_correction <- isTRUE(attributes(objects$omicsData)$data_info$batch_info$is_bc) ||
+    isTRUE(attributes(objects$omicsData_2)$data_info$batch_info$is_bc)
+  toggle(selector = 'div[value="batchdata_mainpanel"]', condition = has_batch_correction)
+}, ignoreInit = FALSE)
+
 # toggle display of spans panel if they are in pep/pro land and have chosen to use spans
 observeEvent(c(input$top_page, input$spans_or_manual), {
   req(input$top_page == "normalization_tab" && !is.null(objects$omicsData))
+  #browser()
+
+  uploaded_is_normalized <- uploaded_data_is_normalized()
+  toggle("normalization_sidebar", condition = !uploaded_is_normalized)
+  revals$warnings_normalize$already_normalized <- if (uploaded_is_normalized) {
+    messageBox(type = "info", "The uploaded data was marked as already normalized. Further normalization is disabled.")
+  } else {
+    NULL
+  }
+  if (uploaded_is_normalized) return()
 
   is_peppro <- inherits(objects$omicsData, c("pepData", "proData"))
   using_spans <- input$spans_or_manual == "spans" & is_peppro
@@ -8,14 +33,14 @@ observeEvent(c(input$top_page, input$spans_or_manual), {
   # show appropriate buttons/panels depending on whether spans is being (or can be) used
   toggle("spans_or_manual", anim = T, condition = is_peppro)
   toggle(selector = 'div[value="use_spans"]', condition = using_spans)
-  toggle("inspect_norm", condition = !using_spans)
+  toggle("inspect_norm_tooltip", condition = !using_spans)
   toggle("use_selected_spans", condition = using_spans)
-  toggle("apply_normalization", condition = using_spans)
+  toggle("apply_normalization_tooltip", condition = using_spans)
   
   if(get_data_norm(objects$omicsData)){
-    updateButton(session,"apply_normalization", label = "Update normalization")
+    updateButton(session,"apply_normalization_tooltip", label = "Update normalization")
   } else {
-    updateButton(session,"apply_normalization", label = "Apply normalization")
+    updateButton(session,"apply_normalization_tooltip", label = "Apply normalization")
   }
 
   if (using_spans) {
@@ -79,7 +104,7 @@ observe({
   rip <- strsplit(input$spans_rip, ";")[[1]] %>% as.numeric()
 
   # ppp_rip will be the sequential pairs from ppp and rip.  If one is longer, the 'extra elements will not be combined'
-  inds <- 1:min(length(ppp), length(rip))
+  inds <- seq_len(min(length(ppp), length(rip)))
   ppp_rip <- lapply(inds, function(i) c(ppp[i], rip[i])) %>% purrr::map(as.numeric)
 
   params <- list("los" = los, "ppp" = ppp, "rip" = rip, "ppp_rip" = ppp_rip)
@@ -134,6 +159,7 @@ observeEvent(objects$spans_res, {
 # If params are not specified, revals$spans_params will be null and spans_procedure will run with default values.
 observeEvent(input$execute_spans, {
   req(inherits(objects$omicsData, c("pepData", "proData")))
+  req(!uploaded_data_is_normalized())
 
   revals$warnings_normalize$bad_spans <- NULL
 
@@ -220,6 +246,7 @@ observeEvent(input$subset_fn, {
 # apply normalize_global with current params to objects$omicsData
 observeEvent(c(input$apply_normalization, input$apply_normalization_modal), {
   req(input$top_page == "normalization_tab", any(c(input$apply_normalization, input$apply_normalization_modal) > 0))
+  req(!uploaded_data_is_normalized())
   ####
   removeModal()
 
@@ -312,7 +339,8 @@ observeEvent(c(input$apply_normalization, input$apply_normalization_modal), {
                   input$subset_fn, paste(unlist(ifelse(is.null(params), "None", params)), collapse = " | "), input$norm_fn
                 )),
                 hr(),
-                actionButton("normalization_dismiss", "Review results", style = "margin:5px;width:75%"),
+                uiOutput("normalization_dismiss_UI"),
+                #actionButton("normalization_dismiss", "Review results", width = "75%"),
                 uiOutput("goto_stats")
                 )
             )
@@ -349,6 +377,7 @@ observeEvent(input$reset_normalization, {
 
 # dismiss and move to next tabs
 observeEvent(input$normalization_dismiss, removeModal())
+observeEvent(input$batch_dismiss, removeModal())
 observeEvent(input$goto_statistics, {
   updateTabsetPanel(session, "top_page", selected = "statistics_tab")
   removeModal()
@@ -362,13 +391,14 @@ observeEvent(input$goto_pepstats, {
 # make various plots summarizing the proposed normalization method
 observeEvent(input$inspect_norm, {
   req(!is.null(objects$omicsData))
+  req(!uploaded_data_is_normalized())
 
   # disable button while working...
   disable("inspect_norm")
-  show("analyze_norm_busy")
+  show("analyze_batch_busy")
   on.exit({
     enable("inspect_norm")
-    hide("analyze_norm_busy")
+    hide("analyze_batch_busy")
   })
   
   # initialize parameters
@@ -542,3 +572,133 @@ observeEvent(input$inspect_norm, {
     )
   }
 })
+
+observeEvent(input$apply_bc_method,{
+  req(input$top_page == "normalization_tab")
+  req(!is.null(objects$omicsData))
+  req(!is.null(input$batch_correction_id))
+
+  # disable button while working...
+  disable("apply_bc_method")
+  show("analyze_batch_busy")
+  on.exit({
+    hide("analyze_batch_busy")
+  })
+  
+  tryCatch({
+    # __SHINYTEST__
+    .omicsData_prebatch <- objects$omicsData
+    .omicsData_2_prebatch <- objects$omicsData_2
+    if(isTRUE(getOption("shiny.testmode"))) {
+      exportTestValues(
+        omicsData_prebatch = .omicsData_prebatch 
+      ) 
+    }
+    
+    apply_batch_correction <- function(omics_data) {
+      switch(
+        input$batch_correction_id,
+        ComBat = malbacR::bc_combat(omics_data),
+        EigenMS = malbacR::bc_eigenMS(omics_data),
+        stop("Unsupported batch correction method")
+      )
+    }
+
+    .tmp_obj <- apply_batch_correction(.omicsData_prebatch)
+
+    .tmp_obj_2 <- if (!is.null(.omicsData_2_prebatch)) {
+      apply_batch_correction(.omicsData_2_prebatch)
+    } else {
+      NULL
+    }
+  
+    # __SHINYTEST__
+    exportTestValues(
+      omicsData_batch = .tmp_obj
+    )
+    
+    objects$omicsData_prebatch <- .omicsData_prebatch
+    objects$omicsData_2_prebatch <- .omicsData_2_prebatch
+    objects$omicsData <- .tmp_obj
+    objects$omicsData_2 <- .tmp_obj_2
+    #updateCollapse(session, "normalization_sidebar", close = "batch_correction_sidebar")
+    
+    # success modal if all is well
+    showModal(
+      modalDialog(
+        {
+          fluidRow(
+            column(10,
+                   align = "center", offset = 1,
+                   tags$h4(sprintf(
+                     "Your data has been corrected for batch effects")),
+                   hr(),
+                   actionButton("batch_dismiss", "Review results", width = "75%"),
+                   uiOutput("goto_stats")
+            )
+          )
+        },
+        footer = NULL
+      )
+    )
+    
+    # be nice and open the plot panel for them
+    updateCollapse(session, "normalization_mainpanel", open = "batchdata_mainpanel")
+    updateCollapse(session, "normalization_mainpanel", close = "normdata_mainpanel")
+    
+    # 
+    # enable("reset_batch_correction")
+    },
+    error = function(e) {
+      msg <- paste0("Something went wrong when applying batch correction to your data.  <br> System error:  ", e)
+      message(msg)
+        enable("apply_bc_method")
+      revals$warnings_normalize$bad_norm_obj1 <<- messageBox(type = "error", msg)
+      }
+    )
+})
+
+observeEvent(c(input$top_page, attributes(objects$omicsData)$data_info$norm_info$is_normalized),{
+  req(objects$omicsData)
+  req(input$top_page == "normalization_tab")
+  
+  #browser()
+  
+  enable_logic = TRUE
+  if(!is.null(input$batch_correction_id) && input$batch_correction_id == "EigenMS"){enable_logic = FALSE}
+  #disable("inspect_norm")
+  #disable("apply_normalization")
+  togglestate_add_tooltip(session,"inspect_norm_tooltip",enable_logic,ttext_[["EIGENMS_NORM_DISABLED"]])
+  togglestate_add_tooltip(session,"apply_normalization_tooltip",enable_logic,ttext_[["EIGENMS_NORM_DISABLED"]])
+  
+}, priority = -10)
+
+observeEvent(c(
+  revals$grouping_revision,
+  input$top_page,
+  input$batch_correction_id,
+  objects$filters$molfilt,
+  input$molfilt_usebatch,
+  input$molfilt_usegroups,
+  attributes(objects$omicsData)$data_info$norm_info$is_normalized,
+  attributes(objects$omicsData)$data_info$batch_info$is_bc
+),{
+  
+  req(objects$omicsData)
+  req(input$top_page == "normalization_tab")
+  # assume that this will be disabled and people won't be using batch correction
+  enable_logic = FALSE
+  batch_method <- input$batch_correction_id
+  has_molecule_filter <- !is.null(objects$filters$molfilt)
+  is_batch_corrected <- isTRUE(attributes(objects$omicsData)$data_info$batch_info$is_bc)
+  is_normalized <- isTRUE(attributes(objects$omicsData)$data_info$norm_info$is_normalized)
+
+  # however if we have batch correction that is not null and molecule filter was added we set button to be enabled
+  if(!is.null(batch_method) && batch_method != "None" && has_molecule_filter){enable_logic = TRUE}
+  # if batch correction has already been ran we disable it again
+  if(is_batch_corrected){enable_logic = FALSE}
+  # we also disable the button if combat has been selected but the data has not been normalized yet
+  if(!is_normalized && identical(batch_method, "ComBat")){enable_logic = FALSE}
+
+  togglestate_add_tooltip(session,"apply_bc_method_tooltip",enable_logic,ttext_[["APPLY_BC_METHOD_DISABLED"]])
+},priority = 10)

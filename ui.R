@@ -9,7 +9,10 @@ ui <- function(request) {
       margins = c(35,35)
       ),
     shinyjs::extendShinyjs(
-      script = "lib/shinyui.js",
+      script = sprintf(
+        "lib/shinyui.js?v=%s",
+        as.numeric(file.info("www/lib/shinyui.js")$mtime)
+      ),
       functions = c(
         "isTabdisabled", # For testing purposes
         "isIconhidden", # For testing purposes

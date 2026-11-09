@@ -147,6 +147,8 @@ if (Sys.getenv("MAP_SHINYTEST") > 0) {
   cfg_path = if (!is.null(Sys.getenv("MAP_CONFIG")) &&
                  Sys.getenv("MAP_CONFIG") != "") {
     Sys.getenv("MAP_CONFIG")
+  } else if (file.exists(file.path(project_root, "cfg", "minio_config_local.yml"))) {
+    file.path(project_root, "cfg", "minio_config_local.yml")
   } else {
     "cfg/minio_config.yml"
   }
@@ -158,6 +160,11 @@ if (Sys.getenv("MAP_SHINYTEST") > 0) {
       python_venv <- cfg$python_venv
     }
   })
+
+  if (is.null(python_venv) || python_venv %in% c("/", "/venv") ||
+      !dir.exists(python_venv)) {
+    python_venv <- file.path(project_root, "venv")
+  }
   
   conda_envs <- tryCatch(
     {

@@ -51,7 +51,7 @@ protein_rollup_UI <- function() {
             ),
             selected = 'rrollup'
           ),
-         uiOutput("which_combine_fn_UI"),
+          uiOutput("which_combine_fn_UI"),
           hidden(numericInput("qrollup_thresh", "Quantile cutoff", min = 0, max = 1, value = 0, step = 0.01)),
           uiOutput("bpquant_apply_icon_UI"),
           hr(),

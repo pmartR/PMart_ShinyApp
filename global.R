@@ -3,7 +3,6 @@ enableBookmarking(store = "server")
 library(readr)
 library(shiny)
 library(shinyBS)
-library(shinybusy)
 library(shinyWidgets)
 library(stringr)
 library(DT)
@@ -13,9 +12,11 @@ library(purrr)
 library(shinyjs)
 library(colourpicker)
 library(shinycssloaders)
+library(shinybusy)
 library(plotly)
 library(shinyalert)
 library(reshape2)
+library(malbacR)
 
 require("DESeq2")
 require("edgeR")
@@ -26,7 +27,6 @@ require("edgeR")
 
 # Pull app version from global variable
 MAP_ACTIVE <- ifelse(Sys.getenv("MAP_VERSION") == "1", TRUE, FALSE)
-MAP_URL <- ifelse(Sys.getenv("MAP_URL") == "", "https://map.emsl.pnnl.gov/app/map", Sys.getenv("MAP_URL"))
 
 # static objects
 FILTER_NAMES <- read.csv("./filter_names.csv", stringsAsFactors = F, check.names = F)
@@ -57,9 +57,11 @@ ttext_ <- list(
   MAIN_EFFECTS_INFO = "Main effects are the variables of interest, those values across which you want to make comparisons.  Covariates are those values that are not of experimental interest, but must be controlled for in the statistics.",
   MIDPOINT_EXPORT_DISABLED = "Either your omicsData has not been created, or you have not finished the Normalization tab (or Statistics tab for seqData)",
   MISSING_DATA_REPLACE = "The value specified here will be replaced by NA in the data file.  If missing values are already NA in your data or the missing values are zeros in your abundance data, then you do not have to specify this field.",
-  MOLECULE_FILTER_INFO = "Remove biomolecules that do not have at least some number of nonmissing values",
+  MOLECULE_FILTER_INFO = "Remove biomolecules that do not have at least some number of nonmissing values. Filter by group to remove biomolecules that do not have enough observed values within each group. Filter by batch to remove biomolecules that do not have enough observed values within each batch.",
   PAIRING_INFO = "If your samples are paired, three pieces of information are needed:  The column specifying which pairs of samples go together, the column specifying which group or side of the pairing each sample is in, and which group is to be subtracted from the other.",
-  PROTEOMICS_FILTER_INFO = "Remove proteins (and consequently peptides) that do not have a minimum number of peptides mapping to them.  Optionally, also remove peptides that map to more than one protein (redundant peptides).  If redundant peptides are removed, they will be removed before determining whether proteins have the minimum peptide count.",
+  BATCH_ID_INFO = "If your samples have been ran in batches, you may consider running batch correction to remove non-biological differences caused by running samples in multiple batches. To do so, please select the column specifying which samples belong to which batch.",
+  BATCH_CORRECTION_FILTER_INFO = "The molecule filter is required for %s batch correction. Add the molecule filter with '%s' selected.",
+  PROTEOMICS_FILTER_INFO = "Remove proteins (and consequently peptides) that do not have a minimum number of peptides mapping to them.  Optionally, also remove peptides that map to more than one protein.",
   REF_GROUP_INFO = "Reference normalization expects samples to belong to one of several several sets of samples (e.g. plexes or plates), each having a single &quot;reference&quot; sample (e.g. a sample on the plex that is a pool of the study samples on that same plex).  Indicate the columns in the sample information file that specify these sets of samples.",
   REF_SAMP_INDICATOR_COL_INFO = "Select which column in the sample information file indicates whether or not a sample is the reference sample for its corresponding sample set. For example, this column might contain only 1s and 0s, with 1s indicating a reference sample, and would have only a single 1 for each sample set (e.g. plex or plate).",
   REF_SAMP_INDICATOR_SYMBOL_INFO = "Select which value indicates a reference sample.  In the column you selected as indicating reference samples, what value in that column indicates a reference sample.  For example, you might specify that &quot;1&quot; represents a reference sample.",
@@ -67,14 +69,15 @@ ttext_ <- list(
   RMD_FILTER_INFO = "Identify and filter outlier samples based on their robust Mahalanobis distance, calculated based on up to 5 metrics described in Webb-Robertson et al. (2011)",
   RMD_PROP_MISSING_WARNING = "We advise against using proportion missing as a metric in lipidomics/metabolomics data, as they often have a very low proportion missing.",
   RMD_TOO_MANY_METRICS = "The number of RMD metrics chosen cannot be greater than the twice the number of samples.",
-  RNA_FILT_LIB_INFO = "Filter samples based on a minimum specified library size, defined as the sum of gene counts in a sample.  The RNA-seq filters are provided in case there are any samples that exhibit egregious behavior that have not already been removed. These filters are not designed for the quality control of the identification portion of the bioinformatics pipeline.",
-  RNA_FILT_MIN_NONZERO_INFO = "Filter samples based on a specified minimum number of nonzero gene counts.  The RNA-seq filters are provided in case there are any samples that exhibit egregious behavior that have not already been removed. These filters are not designed for the quality control of the identification portion of the bioinformatics pipeline.",
+  RNA_FILT_LIB_INFO = "Filter samples based on a minimum specified library size, defined as the sum of gene counts in a sample.",
+  RNA_FILT_MIN_NONZERO_INFO = "Filter samples based on a specified minimum number of nonzero gene counts",
   ROLLUP_DISABLE_INFO = "Your data has already been rolled up to the protein level, if you would like to revert to the peptide level, go back to the filter page and re-apply your filters (you may need to re-do other steps that happened after the filter tab.)",
   SEQDATA_PVAL_ADJUST = "Adjust p-values to control for multiple tests resulting from many biomolecules (as oppose to multiple comparisons within a single biomolecule).",
   TABDISABLE_NOT_PEP = "Tab disabled because either you are not analyzing peptide data or your object does not exist.",
   TABDISABLE_NOT_PEP_NO_EMETA = "Tab disabled because either you are not analyzing peptide data, you did not include a biomolecule information file, or your object does not exist",
   TABDISABLE_NOT_REF = "Tab disabled because reference normalization is only available for NMR data or labeled peptide data",
   TABDISABLE_SEQDATA = "Tab disabled because normalization is not supported for transcript data, or your object does not exist.",
+  TABDISABLE_BATCH_FILTER = "Normalization is disabled until %s has an applied molecule filter using '%s'.",
   TOTAL_COUNT_FILT_INFO = "RNA-seq filter which removes transcripts that have total count across all samples less than a specified threshold.",
   REFERENCE_DISABLED_ROW = "Disabled entries contain missing values in some samples. These might be due to NAs generated in log transformation or replacement of values less than or equal to zero.",
   REFERENCE_DISABLED_COL = "Disabled entries are non-numeric.",
@@ -82,32 +85,36 @@ ttext_ <- list(
   TABDISABLE_PEP_NOT_ROLLED_UP = "This tab is used to perform statistics on peptide data rolled up to the protein level.  Roll up your peptide data in the Protein Roll Up tab before using this tab.  To perform stats on the peptide-level data, go to the Peptide Statistics tab.",
   TABDISABLE_PEP_NO_EMETA = "Tab disabled because you uploaded peptide data with no biomolecule information file.  Peptide-level statistics are still available.",
   WHAT_IS_MC = "This option defines p-value adjustment for multiple comparisons within a single biomolecule.  For example, if you have three groups A, B, and C and you want to test comparisons A vs B, A vs C, and B vs C, you will run adjustment on the resulting three p-values for all biomolecules.",
-  WHAT_IS_FDR = "This option defines p-value adjustment for multiple tests arising from many biomolecules.  For example, if you have 100 biomolecules and some number of comparisons, you will run adjustment on the resulting 100 p-values for each comparison."
-)
+  WHAT_IS_FDR = "This option defines p-value adjustment for multiple tests arising from many biomolecules.  For example, if you have 100 biomolecules and some number of comparisons, you will run adjustment on the resulting 100 p-values for each comparison.",
+  REVIEW_FILTERS_DISABLED = "Review and Apply Filters disabled due to your selection of batch correction method. ComBat requires that a molecule filter filtered by batch applied to proceed. EigenMS requires that a molecule filter filtered by groups applied to proceed.",
+  APPLY_BC_METHOD_DISABLED = "Apply Batch Correction disabled. This means that batch correction has either already been applied or a pre-processing step required for batch correction has not been applied. If using ComBat, please normalize the data prior to running batch correction. If running EigenMS, please doublecheck previous steps have been applied correctly.",
+  EIGENMS_NORM_DISABLED = "When using EigenMS for batch correction, no separate normalization step is required."
+) 
 
 #'@details info text NOT displayed in tooltips.  Usually in warnings UI elements
 infotext_ <- list(
-  LOG_TRANSFORM_ZEROS = "You have selected to log transform abundance values, 
+  LOG_TRANSFORM_ZEROS = "You have selected to log transform abundance values,
   and %s to indicate missing values.  However there are zeros in your data
   which would cause some values to be transformed to -infinity.  Either specify
   that zeros indicate missing values or replace them with NA's or the missing value
   indicator.",
   DATA_NOT_LOG = "Your data is not on the log scale and was not transformed to the log scale, some downstream methods may be disabled, consider recreating your data with a log-transform specified or that your data is already on the log scale.",
-  "RESET_FILTERS_WARNING" = "Re-applying filters will delete any statistics you 
-  have computed.  If your data was normalized in the normalize tab, you will 
+  "RESET_FILTERS_WARNING" = "Re-applying filters will delete any statistics you
+  have computed.  If your data was normalized in the normalize tab, you will
   have to re-normalize it.  Rolled up protein data will revert to the peptide
   level.",
   GROUPS_IN_FDATA = "The column 'Group' was found in your sample identification file, but is reserved for PMart.  It has been rename to '%s' (lower case g)",
+  REFNORM_INTRO = "The examples below show how to select the columns needed for reference normalization.",
   REFNORM_COLUMN_INFO_1 = "In the first image below, you would select 'TMT_Plex_Number' as the reference group column (1st dropdown), 'Treatment_Group' as the column containing the indicator for reference samples (2nd dropdown), and 'ReferencePool' as the value indicating reference samples (last dropdown).  ",
   REFNORM_COLUMN_INFO_2 = "In the second example, you would select 'TMT_Plex_Number' as the reference group column (1st dropdown), 'Is_Reference_Pool' as the column containing the indicator for reference samples (2nd dropdown), and 'Yes' as the value indicating reference samples (last dropdown).  ",
   STATS_OBJECTS_COMBINED = "Your objects have been combined into a single dataset.  If navigating to previous tabs, the first object shown in plots is now the combined data."
-) 
+)
 
 global_input_choices = list(
-  RMD_FILTER_CHOICES = list("Median Absolute Distance"="MAD", 
-                              "Kurtosis", 
-                              "Skewness", 
-                              "Correlation", 
+  RMD_FILTER_CHOICES = list("Median Absolute Distance"="MAD",
+                              "Kurtosis",
+                              "Skewness",
+                              "Correlation",
                               "Proportion Missing" = "Proportion_Missing"),
   MISSINGVAL_COLORS = c(
     "YlOrRd", "YlOrBr", "YlGnBu", "YlGn", "Reds", "RdPu", "Purples", "PuRd", "PuBuGn", "PuBu", "OrRd", "Oranges", "Greys",
@@ -120,8 +127,8 @@ global_input_choices = list(
 GROUPS_ME_IDS <- c(
   "fdata_id_col",
   "gcol1",
-  "gcol2", 
-  "cvcol1", 
+  "gcol2",
+  "cvcol1",
   "cvcol2",
   "pair_id_col",
   "pair_group_col",

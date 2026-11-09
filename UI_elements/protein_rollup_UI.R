@@ -15,9 +15,9 @@ list(
     bpquant_conds <- unlist(bpquant_valid()[c("cond1", "cond2", "cond3", "cond4")])
     
     string_list <- c(
-      "Specified group size(s) insufficent for isoform detection.",
+      "Specified group size(s) insufficient for isoform detection.",
       "Peptide-level ANOVA or combined iMd-ANOVA (G-test only is insufficient) has not been run.",
-      "Insufficent number of comparisons used in IMD/ANOVA.",
+      "Insufficient number of comparisons used in IMD/ANOVA.",
       "ANOVA-only statistics were run and not all molecules had > 3 nonmissing observations in all groups, either filter down to relevant molecules or re-run statistics with a different method"
     )
     
@@ -72,7 +72,7 @@ list(
   }),
   
   
-  ## BPQUANT use oin rollup
+  ## BPQUANT use in rollup
   
   # Icon manipulations
   output[["bpquant_apply_icon_UI"]] <- renderUI({
@@ -153,6 +153,25 @@ list(
     req(!is.null(objects$omicsData), cancelOutput = TRUE)
     plots$last_plot <- plots$bpquant
     plots$bpquant
+  }),
+
+  ## Rollup option
+
+  output[["which_combine_fn_UI"]] <- renderUI({
+    choices <- if(!is.null(input$which_rollup) && input$which_rollup == "rollup") {
+      c("Median" = "median", "Mean" = "mean", "Sum" = "sum")
+    } else {
+      c("Median" = "median", "Mean" = "mean")
+    }
+
+    selected <- if(is.null(input$which_combine_fn)) NULL else isolate(input$which_combine_fn)
+
+    radioGroupButtons(
+      "which_combine_fn",
+      "Center By:",
+      choices,
+      selected = selected
+    )
   }),
   
   ## Rollup option

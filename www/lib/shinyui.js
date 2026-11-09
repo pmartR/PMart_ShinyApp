@@ -1,3 +1,42 @@
+(function() {
+  function fixTooltipTarget() {
+    if (typeof shinyBS === 'undefined' ||
+        typeof shinyBS.getTooltipTarget !== 'function' ||
+        typeof shinyBS.addTooltip !== 'function') {
+      return;
+    }
+
+    if (!shinyBS.getTooltipTarget.__pmartRFixed) {
+      var getTooltipTarget = shinyBS.getTooltipTarget;
+      var getTooltipTargetWithFallback = function(id) {
+        var target = getTooltipTarget(id);
+        return target.length ? target : $('#' + id);
+      };
+
+      getTooltipTargetWithFallback.__pmartRFixed = true;
+      shinyBS.getTooltipTarget = getTooltipTargetWithFallback;
+    }
+
+    if (!shinyBS.addTooltip.__pmartRFixed) {
+      var addTooltip = shinyBS.addTooltip;
+      var addTooltipWithTitle = function(id, type, opts) {
+        var target = shinyBS.getTooltipTarget(id);
+        if (target.length && opts && opts.title) {
+          target.attr('title', opts.title);
+        }
+        return addTooltip(id, type, opts);
+      };
+
+      addTooltipWithTitle.__pmartRFixed = true;
+      shinyBS.addTooltip = addTooltipWithTitle;
+    }
+  }
+
+  $(document).ready(fixTooltipTarget);
+  $(document).on('shiny:connected', fixTooltipTarget);
+  fixTooltipTarget();
+}());
+
 shinyjs.isTabdisabled = function(el) {
     var tab = $('.nav li a[data-value=' + el + ']');
     var outstring = 'jscatch_disabled_' + el;
